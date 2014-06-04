@@ -24,6 +24,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -32,6 +33,8 @@ import java.util.List;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileNameExtensionFilter;
+
+import DataBase.DataBase;
 
 import com.jaamsim.input.Input.ParseContext;
 import com.jaamsim.ui.ExceptionBox;
@@ -673,6 +676,11 @@ public class InputAgent {
             File temp = chooser.getSelectedFile();
     		InputAgent.setLoadFile(gui, temp);
         }
+	}
+
+	public static void loadDB(GUIFrame guiFrame) throws SQLException {
+		LogBox.logLine("Loading...");
+		DataBase.test();
 	}
 
 	public static void save(GUIFrame gui) {
@@ -1415,8 +1423,5 @@ public class InputAgent {
 		}
 	}
 
-	public static void loadDB(GUIFrame guiFrame) {
-		LogBox.logLine("Loading...");
-		DataBase.test();
-	}
+
 }

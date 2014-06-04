@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path=""/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="resources/jar/gluegen-rt-natives-linux-amd64.jar"/>
 	<classpathentry kind="lib" path="resources/jar/gluegen-rt-natives-linux-i586.jar"/>
 	<classpathentry kind="lib" path="resources/jar/gluegen-rt-natives-macosx-universal.jar"/>
@@ -16,5 +15,6 @@
 	<classpathentry kind="lib" path="resources/jar/jogl-all.jar"/>
 	<classpathentry kind="lib" path="resources/jar/postgresql-9.3-1101.jdbc4.jar"/>
 	<classpathentry kind="lib" path="resources/jar/postgresql-9.3-1101.jdbc41.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="output" path=""/>
 </classpath>
