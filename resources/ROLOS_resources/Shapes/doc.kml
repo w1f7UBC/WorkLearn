@@ -1,0 +1,58 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<kml xmlns='http://earth.google.com/kml/2.1'>
+<Folder>
+    <name>warehouse_model</name>
+    <description><![CDATA[Created with <a href="http://sketchup.google.com/">Google 3D Warehouse 1.0</a>]]></description>
+    <DocumentSource>SketchUp</DocumentSource>
+<visibility>1</visibility>
+<LookAt>
+<heading>228.294</heading>
+<tilt>68.1037</tilt>
+<latitude>49.21698227038456</latitude>
+<longitude>-123.0999876722756</longitude>
+<range>28.80014313961767</range>
+<altitude>6.894610836200869</altitude>
+</LookAt>
+<Folder>
+<name>Tour</name>
+<Placemark>
+<name><![CDATA[Camera]]></name>
+<visibility>1</visibility>
+<LookAt>
+<heading>228.294</heading>
+<tilt>68.1037</tilt>
+<latitude>49.21698227038456</latitude>
+<longitude>-123.0999876722756</longitude>
+<range>28.80014313961767</range>
+<altitude>6.894610836200869</altitude>
+</LookAt>
+</Placemark>
+</Folder>
+  <Placemark>
+    <name>Model</name>
+    <description><![CDATA[]]></description>
+    <Style id='default'>
+    </Style>
+    <Model>
+        <altitudeMode>absolute</altitudeMode>
+        <Location>
+            <longitude>-123.099998474121</longitude>
+            <latitude>49.216999053955</latitude>
+            <altitude>-0.000000000000</altitude>
+        </Location>
+        <Orientation>
+            <heading>-0.000000000000</heading>
+            <tilt>0</tilt>
+            <roll>0</roll>
+        </Orientation>
+        <Scale>
+            <x>1.0</x>
+            <y>1.0</y>
+            <z>1.0</z>
+        </Scale>
+        <Link>
+            <href>models/warehouse_model.dae</href>
+        </Link>
+    </Model>
+  </Placemark></Folder>
+</kml>
