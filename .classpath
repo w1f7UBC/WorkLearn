@@ -2,6 +2,17 @@
 <classpath>
 	<classpathentry kind="src" path=""/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/JOGL2"/>
+	<classpathentry kind="lib" path="resources/jar/gluegen-rt-natives-linux-amd64.jar"/>
+	<classpathentry kind="lib" path="resources/jar/gluegen-rt-natives-linux-i586.jar"/>
+	<classpathentry kind="lib" path="resources/jar/gluegen-rt-natives-macosx-universal.jar"/>
+	<classpathentry kind="lib" path="resources/jar/gluegen-rt-natives-windows-amd64.jar"/>
+	<classpathentry kind="lib" path="resources/jar/gluegen-rt-natives-windows-i586.jar"/>
+	<classpathentry kind="lib" path="resources/jar/gluegen-rt.jar"/>
+	<classpathentry kind="lib" path="resources/jar/jogl-all-natives-linux-amd64.jar"/>
+	<classpathentry kind="lib" path="resources/jar/jogl-all-natives-linux-i586.jar"/>
+	<classpathentry kind="lib" path="resources/jar/jogl-all-natives-macosx-universal.jar"/>
+	<classpathentry kind="lib" path="resources/jar/jogl-all-natives-windows-amd64.jar"/>
+	<classpathentry kind="lib" path="resources/jar/jogl-all-natives-windows-i586.jar"/>
+	<classpathentry kind="lib" path="resources/jar/jogl-all.jar"/>
 	<classpathentry kind="output" path=""/>
 </classpath>
