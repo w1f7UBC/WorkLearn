@@ -1414,4 +1414,9 @@ public class InputAgent {
 			return false;
 		}
 	}
+
+	public static void loadDB(GUIFrame guiFrame) {
+		LogBox.logLine("Loading...");
+		DataBase.test();
+	}
 }
