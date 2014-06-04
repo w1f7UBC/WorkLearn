@@ -16,11 +16,16 @@ import com.sandwell.JavaSimulation3D.DisplayEntity;
 
 
 
-public class DataBase extends Input{
+public class DataBase<T> extends Input<T>{
 
-	public DataBase(String key, String cat, Object def) {
+	 public DataBase(String key, String cat, T def) {
 		super(key, cat, def);
 		// TODO Auto-generated constructor stub
+	}
+
+
+	{
+
 	}
 
 
@@ -35,7 +40,7 @@ public class DataBase extends Input{
 	catch(ClassNotFoundException e){
 		System.out.print("Driver error");
 	}
-	
+
 	}
 	public static void Connection() throws SQLException{
 		props.setProperty("user","sde");
@@ -61,15 +66,17 @@ public class DataBase extends Input{
 	    	   String dm = "DisplayModel"+"{"+rs.getString(5)+"}";
 	 	       Entity ent1 = InputAgent.defineEntity(DisplayEntity.class, Name, rs.next());
 	 	       String cat ="Graphics";
-	 	       ArrayList<String> kw;
-	 	/*       kw.add(ad);
+	 	 /*      ArrayList<String> kw = new ArrayList<String>() ;
+
+	 	       ParseContext pc= new ParseContext();
+	 	       kw.add(ad);
 	 	       kw.add(position);
 	 	       kw.add(allignment);
-	 	       kw.add(dm); */
-	 	     //  KeywordIndex kwi(kw);;
-	  //  	   Input<?> in = NO_VALUE ; 
+	 	       kw.add(dm);
+	 	      KeywordIndex kwi= new KeywordIndex(kw,0,0,pc);
+	 	        InputAgent.apply(ent1, kwi); */
 	    			   //Input.Input("DisplayModel",cat,rs.getString(5));
-	    	 //  Input("DisplayModel",cat,rs.getString(5));
+	 	        //  Input("DisplayModel",cat,rs.getString(5));
 	    	  // ent1.updateForInput(in);
 	 	      ent1.copyInputs(ent1);
 	 //	       InputAgent.apply(ent1,kw);
@@ -82,9 +89,9 @@ public class DataBase extends Input{
 	    	}
 	    	rs.close();
 	    	st.close();
-	 } 
-	    
-	    
+	 }
+
+
     public static void test() throws SQLException{
     	try{
     		Connection();
