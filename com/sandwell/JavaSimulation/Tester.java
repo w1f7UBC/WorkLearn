@@ -57,20 +57,6 @@ public class Tester {
 	}
 
 	/**
-	 * Implements a string parsing method to test for an integer value using the
-	 * Audition semantics for integer formatting.
-	 */
-	public static boolean isInteger( String testInteger ) {
-		try {
-			Integer.parseInt( testInteger );
-			return true;
-		}
-		catch( NumberFormatException e ) {
-			return false;
-		}
-	}
-
-	/**
 	 * Implements a string parsing method to test for a date value using the
 	 * Audition semantics for date formatting.
 	 */
@@ -189,24 +175,6 @@ public class Tester {
 		return Math.round(time * Simulation.getSimTimeFactor());
 	}
 
-	public static String toTimeString( double timeValue ) {
-		String hour = Integer.toString( (int)Math.floor( timeValue ) );
-		hour = hour.trim();
-
-		//while( hour.length() < 2 ) {
-		//hour = "0" + hour;
-		//}
-
-		String minute = Integer.toString( (int)(Math.round( (timeValue - Math.floor( timeValue )) * 60.0 ) % 60.0) );
-		minute = minute.trim();
-
-		while( minute.length() < 2 ) {
-			minute = "0" + minute;
-		}
-
-		return hour + ":" + minute;
-	}
-
 	/********************************************************************************
 	 * METHODS FOR INPUT SYNTAX CHECK: parse values
 	 ********************************************************************************/
@@ -261,42 +229,6 @@ public class Tester {
 		}
 	}
 
-	/**
-	 *
-	 */
-	public static DoubleVector parseDoubleVector( StringVector vec ) {
-		DoubleVector doubleVec = new DoubleVector( 1, 1 );
-
-		try {
-			for ( int i = 0; i < vec.size(); i++ ) {
-				doubleVec.add( Tester.parseDouble( vec.get( i ) ) );
-			}
-		}
-		catch ( NumberFormatException e ) {
-			throw new InputErrorException( "The values must be numbers." );
-		}
-
-		return doubleVec;
-	}
-
-	/**
-	 *
-	 */
-	public static DoubleVector parseDouble( StringVector vec ) {
-		DoubleVector doubleVec = new DoubleVector( 1, 1 );
-
-		try {
-			for ( int i = 0; i < vec.size(); i++ ) {
-				doubleVec.add( Tester.parseDouble( vec.get( i ) ) );
-			}
-		}
-		catch ( NumberFormatException e ) {
-			throw new InputErrorException( "The values must be numbers." );
-		}
-
-		return doubleVec;
-	}
-
 	/********************************************************************************
 	 * METHODS FOR INPUT SYNTAX CHECK: check range of values in a DoubleVector
 	 ********************************************************************************/
@@ -338,7 +270,7 @@ public class Tester {
 		}
 	}
 
-	public static double max( double... values ) {
+public static double max( double... values ) {
 
 		double max = Double.NEGATIVE_INFINITY;
 

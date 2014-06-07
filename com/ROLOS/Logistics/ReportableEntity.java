@@ -216,7 +216,7 @@ public static class StateRecord {
 		minCycleDur = Double.POSITIVE_INFINITY;
 		totalCompletedCycleTime = 0.0d;
 		try{
-			((ModelEntity)this).clearInternalProperties();
+			
 		} catch(ClassCastException e){}
 	}
 

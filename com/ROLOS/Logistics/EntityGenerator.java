@@ -5,11 +5,11 @@ import java.util.ArrayList;
 import com.ROLOS.DMAgents.TrafficController;
 import com.jaamsim.events.ReflectionTarget;
 import com.jaamsim.input.InputAgent;
+import com.jaamsim.input.ValueInput;
 import com.jaamsim.math.Vec3d;
-import com.sandwell.JavaSimulation.DoubleInput;
+import com.jaamsim.units.TimeUnit;
 import com.sandwell.JavaSimulation.Entity;
 import com.sandwell.JavaSimulation.ErrorException;
-
 import com.sandwell.JavaSimulation.IntegerInput;
 import com.jaamsim.input.Keyword;
 
@@ -37,7 +37,7 @@ public class EntityGenerator extends DiscreteHandlingLinkedEntity {
 	
 	@Keyword(description = "Generation interval for discrete entities (bulk materials will not use this as their production is continuous).", example = "ShipGenerator1 GenerationIAT { 5 h }"
 			+ "Default value is 0")
-	private final DoubleInput generationIAT;
+	private final ValueInput generationIAT;
 	/*
 	 * @Keyword(description =
 	 * "Probability Distribution for generation interval for discrete entities (bulk materials will not use have this as their production is continuous)."
@@ -62,9 +62,9 @@ public class EntityGenerator extends DiscreteHandlingLinkedEntity {
 		generationRate.setValidRange(0, Integer.MAX_VALUE);
 		this.addInput(generationRate);
 		
-		generationIAT = new DoubleInput("GenerationIAT", "Key Inputs", 0.0d);
+		generationIAT = new ValueInput("GenerationIAT", "Key Inputs", 0.0d);
 		generationIAT.setValidRange(0.0d, Double.POSITIVE_INFINITY);
-		generationIAT.setUnits("h");
+		generationIAT.setUnitType(TimeUnit.class);
 		this.addInput(generationIAT);
 
 	}

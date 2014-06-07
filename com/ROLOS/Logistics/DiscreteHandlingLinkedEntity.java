@@ -158,20 +158,6 @@ public class DiscreteHandlingLinkedEntity extends LinkedEntity {
 	// BREAKDOWN AND MAINTENANCE METHODS
 	//////////////////////////////////////////////////////////////////////////////////////
 	
-	// sets availability of entity for breakdown and maintenance should refactor when maintenance and breakdowns are incorporated 
-	@Override
-	public boolean isAvailable() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-	
-	// sets availability of entity for breakdown and maintenance should refactor when maintenance and breakdowns are incorporated 
-	@Override
-	public boolean areAllEntitiesAvailable() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-	
 
 	//////////////////////////////////////////////////////////////////////////////////////
 	// ADDER METHODS

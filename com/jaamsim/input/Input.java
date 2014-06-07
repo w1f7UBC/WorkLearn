@@ -21,20 +21,18 @@ import java.util.regex.Pattern;
 import com.jaamsim.Samples.SampleConstant;
 import com.jaamsim.Samples.SampleProvider;
 import com.jaamsim.math.Color4d;
-import com.jaamsim.math.Vec3d;
 import com.jaamsim.units.DimensionlessUnit;
 import com.jaamsim.units.TimeUnit;
 import com.jaamsim.units.Unit;
 import com.jaamsim.units.UserSpecifiedUnit;
 import com.sandwell.JavaSimulation.BooleanVector;
 import com.sandwell.JavaSimulation.ColourInput;
-import com.sandwell.JavaSimulation.DoubleListInput;
 import com.sandwell.JavaSimulation.DoubleVector;
 import com.sandwell.JavaSimulation.Entity;
-import com.sandwell.JavaSimulation.EntityListInput;
 import com.sandwell.JavaSimulation.Group;
 import com.sandwell.JavaSimulation.InputErrorException;
 import com.sandwell.JavaSimulation.IntegerVector;
+import com.sandwell.JavaSimulation.ListInput;
 import com.sandwell.JavaSimulation.ObjectType;
 import com.sandwell.JavaSimulation.StringVector;
 import com.sandwell.JavaSimulation.Tester;
@@ -177,8 +175,8 @@ public abstract class Input<T> {
 
 	public void parse(KeywordIndex kw) throws InputErrorException {
 		StringVector data = new StringVector(kw.numArgs());
-		for (int i = kw.start + 2; i < kw.end; i++) {
-			data.add(kw.input.get(i));
+		for (int i = 0; i < kw.numArgs(); i++) {
+			data.add(kw.getArg(i));
 		}
 
 		parse(data);
@@ -272,16 +270,16 @@ public abstract class Input<T> {
 			throw new InputErrorException(INP_ERR_RANGECOUNT, min, max, input.toString());
 	}
 
-	public static void assertCountEven( StringVector input )
+	public static void assertCountEven(KeywordIndex kw)
 	throws InputErrorException {
-		if ( ( input.size() % 2 ) != 0 )
-			throw new InputErrorException(INP_ERR_EVENCOUNT, input.toString());
+		if ((kw.numArgs() % 2) != 0)
+			throw new InputErrorException(INP_ERR_EVENCOUNT, kw.argString());
 	}
 
-	public static void assertCountOdd( StringVector input )
+	public static void assertCountOdd(KeywordIndex kw)
 	throws InputErrorException {
-		if ( ( input.size() % 2 ) == 0 )
-			throw new InputErrorException(INP_ERR_ODDCOUNT, input.toString());
+		if ((kw.numArgs() % 2) == 0)
+			throw new InputErrorException(INP_ERR_ODDCOUNT, kw.argString());
 	}
 
 	public static <T extends Entity> void assertNotPresent(ArrayList<? super T> list, T ent)
@@ -411,14 +409,14 @@ public abstract class Input<T> {
 		return temp;
 	}
 
-	public static ArrayList<Color4d> parseColorVector(StringVector input)
+	public static ArrayList<Color4d> parseColorVector(KeywordIndex kw)
 	throws InputErrorException {
-		ArrayList<Color4d> temp = new ArrayList<Color4d>(input.size());
+		ArrayList<KeywordIndex> subArgs = kw.getSubArgs();
+		ArrayList<Color4d> temp = new ArrayList<Color4d>(subArgs.size());
 
-		ArrayList<StringVector> splitData = InputAgent.splitStringVectorByBraces(input);
-		for (int i = 0; i < splitData.size(); i++) {
+		for (int i = 0; i < subArgs.size(); i++) {
 			try {
-				Color4d element = Input.parseColour(splitData.get(i));
+				Color4d element = Input.parseColour(subArgs.get(i));
 				temp.add(element);
 			} catch (InputErrorException e) {
 				throw new InputErrorException(INP_ERR_ELEMENT, i, e.getMessage());
@@ -475,6 +473,21 @@ public abstract class Input<T> {
 		for (int i = 0; i < input.size(); i++) {
 			try {
 				int element = Input.parseInteger(input.get(i), minValue, maxValue);
+				temp.add(element);
+			} catch (InputErrorException e) {
+				throw new InputErrorException(INP_ERR_ELEMENT, i, e.getMessage());
+			}
+		}
+		return temp;
+	}
+
+	public static IntegerVector parseIntegerVector(KeywordIndex kw, int minValue, int maxValue)
+	throws InputErrorException {
+		IntegerVector temp = new IntegerVector(kw.numArgs());
+
+		for (int i = 0; i <kw.numArgs(); i++) {
+			try {
+				int element = Input.parseInteger(kw.getArg(i), minValue, maxValue);
 				temp.add(element);
 			} catch (InputErrorException e) {
 				throw new InputErrorException(INP_ERR_ELEMENT, i, e.getMessage());
@@ -696,26 +709,6 @@ public abstract class Input<T> {
 		return ret;
 	}
 
-	public static DoubleVector parseTimeVector(StringVector input, double minValue, double maxValue)
-	throws InputErrorException {
-		return parseTimeVector(input, minValue, maxValue, 1.0d);
-	}
-
-	public static DoubleVector parseTimeVector(StringVector input, double minValue, double maxValue, double factor)
-	throws InputErrorException {
-		DoubleVector temp = new DoubleVector(input.size());
-
-		for (int i = 0; i < input.size(); i++) {
-			try {
-				double element = Input.parseTime(input.get(i), minValue, maxValue, factor);
-				temp.add(element);
-			} catch (InputErrorException e) {
-				throw new InputErrorException(INP_ERR_ELEMENT, i, e.getMessage());
-			}
-		}
-		return temp;
-	}
-
 	public static double parseDouble(String data)
 	throws InputErrorException {
 		return Input.parseDouble(data, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
@@ -806,6 +799,50 @@ public abstract class Input<T> {
 	/**
 	 * Convert the given StringVector to a DoubleVector and apply the given conversion factor
 	 */
+	public static DoubleVector parseDoubles(KeywordIndex kw, double minValue, double maxValue, Class<? extends Unit> unitType)
+	throws InputErrorException {
+		if (unitType == UserSpecifiedUnit.class)
+			throw new InputErrorException(INP_ERR_UNITUNSPECIFIED);
+
+		double factor = 1.0d;
+		int numDoubles = kw.numArgs();
+
+		// If not a Dimensionless value, a unit is mandatory
+		if (unitType != DimensionlessUnit.class) {
+			Entity ent = Entity.getNamedEntity(kw.getArg(kw.numArgs() - 1));
+			if (ent == null)
+				throw new InputErrorException(INP_ERR_NOUNITFOUND, kw.getArg(kw.numArgs() - 1), unitType.getSimpleName());
+
+			Unit unit = Input.castEntity(ent, unitType);
+			if (unit == null)
+				throw new InputErrorException(INP_ERR_ENTCLASS, unitType.getSimpleName(), ent.getInputName(), ent.getClass().getSimpleName());
+
+			factor = unit.getConversionFactorToSI();
+			numDoubles = kw.numArgs() - 1;
+		}
+
+		DoubleVector temp = new DoubleVector(numDoubles);
+		for (int i = 0; i < numDoubles; i++) {
+			try {
+				// Allow a special syntax for time-based inputs
+				if (unitType == TimeUnit.class) {
+					double element = Input.parseSeconds(kw.getArg(i), minValue, maxValue, factor);
+					temp.add(element);
+				}
+				else {
+					double element = Input.parseDouble(kw.getArg(i), minValue, maxValue, factor);
+					temp.add(element);
+				}
+			} catch (InputErrorException e) {
+				throw new InputErrorException(INP_ERR_ELEMENT, i, e.getMessage());
+			}
+		}
+		return temp;
+	}
+
+	/**
+	 * Convert the given StringVector to a DoubleVector and apply the given conversion factor
+	 */
 	public static DoubleVector parseDoubles(StringVector input, double minValue, double maxValue, Class<? extends Unit> unitType)
 	throws InputErrorException {
 		if (unitType == UserSpecifiedUnit.class)
@@ -886,45 +923,31 @@ public abstract class Input<T> {
 		return Input.parseDoubleVector( numericData, minValue, maxValue, conversionFactor);
 	}
 
-	public static Vec3d parseVec3d(StringVector input)
-	throws InputErrorException {
-		return Input.parseVec3d(input, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
-	}
-
-	public static Vec3d parseVec3d(StringVector input, double min, double max)
-	throws InputErrorException {
-		Input.assertCountRange(input, 1, 3);
-		DoubleVector temp = Input.parseDoubleVector(input, min, max);
-
-		Vec3d ret = new Vec3d();
-
-		ret.x = temp.get(0);
-		if (temp.size() > 1)
-			ret.y = temp.get(1);
-
-		if (temp.size() > 2)
-			ret.z = temp.get(2);
-
-		return ret;
-	}
-
 	public static String parseString(String input, ArrayList<String> validList)
 	throws InputErrorException {
+		return parseString(input, validList, false);
+	}
+
+	public static String parseString(String input, ArrayList<String> validList, boolean caseSensitive)
+	throws InputErrorException {
 		for (String valid : validList) {
-			if (valid.equalsIgnoreCase(input))
+			if (caseSensitive && valid.equals(input))
+				return valid;
+
+			if (!caseSensitive && valid.equalsIgnoreCase(input))
 				return valid;
 		}
 
 		throw new InputErrorException(INP_ERR_BADCHOICE, validList.toString(), input);
 	}
 
-	public static ArrayList<String> parseStringVector(StringVector input, ArrayList<String> validList)
+	public static ArrayList<String> parseStrings(KeywordIndex kw, ArrayList<String> validList, boolean caseSensitive)
 	throws InputErrorException {
-		ArrayList<String> temp = new ArrayList<String>(input.size());
+		ArrayList<String> temp = new ArrayList<String>(kw.numArgs());
 
-		for (int i = 0; i < input.size(); i++) {
+		for (int i = 0; i < kw.numArgs(); i++) {
 			try {
-				String element = Input.parseString(input.get(i), validList);
+				String element = Input.parseString(kw.getArg(i), validList);
 				temp.add(element);
 			} catch (InputErrorException e) {
 				throw new InputErrorException(INP_ERR_ELEMENT, i, e.getMessage());
@@ -1080,14 +1103,14 @@ public abstract class Input<T> {
 	}
 
 
-	public static <T extends Entity> ArrayList<ArrayList<T>> parseListOfEntityLists(StringVector input, Class<T> aClass, boolean unique)
+	public static <T extends Entity> ArrayList<ArrayList<T>> parseListOfEntityLists(KeywordIndex kw, Class<T> aClass, boolean unique)
 	throws InputErrorException {
-		ArrayList<ArrayList<T>> temp = new ArrayList<ArrayList<T>>( input.size() );
+		ArrayList<KeywordIndex> subArgs = kw.getSubArgs();
+		ArrayList<ArrayList<T>> temp = new ArrayList<ArrayList<T>>(subArgs.size());
 
-		ArrayList<StringVector> splitData = InputAgent.splitStringVectorByBraces(input);
-		for (int i = 0; i < splitData.size(); i++) {
+		for (int i = 0; i < subArgs.size(); i++) {
 			try {
-				ArrayList<T> element = Input.parseEntityList(splitData.get(i), aClass, unique);
+				ArrayList<T> element = Input.parseEntityList(subArgs.get(i), aClass, unique);
 				temp.add(element);
 			} catch (InputErrorException e) {
 				throw new InputErrorException(INP_ERR_ELEMENT, i, e.getMessage());
@@ -1096,15 +1119,15 @@ public abstract class Input<T> {
 		return temp;
 	}
 
-	public static Color4d parseColour( StringVector input ) {
+	public static Color4d parseColour(KeywordIndex kw) {
 
-		Input.assertCount(input, 1, 3);
+		Input.assertCount(kw, 1, 3);
 
 		// Color names
-		if( input.size() == 1 ) {
-			Color4d colAtt = ColourInput.getColorWithName(input.get(0).toLowerCase());
+		if (kw.numArgs() == 1) {
+			Color4d colAtt = ColourInput.getColorWithName(kw.getArg(0).toLowerCase());
 			if( colAtt == null ) {
-				throw new InputErrorException( "Color " + input.get( 0 ) + " not found" );
+				throw new InputErrorException( "Color " + kw.getArg( 0 ) + " not found" );
 			}
 			else {
 				return colAtt;
@@ -1113,7 +1136,7 @@ public abstract class Input<T> {
 
 		// RGB
 		else {
-			DoubleVector dbuf = Input.parseDoubleVector(input, 0.0d, 255.0d);
+			DoubleVector dbuf = Input.parseDoubles(kw, 0.0d, 255.0d, DimensionlessUnit.class);
 			double r = dbuf.get(0);
 			double g = dbuf.get(1);
 			double b = dbuf.get(2);
@@ -1138,34 +1161,34 @@ public abstract class Input<T> {
 			}
 		}
 	}
-	public static void validateIndexedLists(ArrayList<?> keys, BooleanVector values, String keyName, String valueName)
+
+	public static void validateIndexedLists(ListInput<?> keys, ListInput<?> vals)
 	throws InputErrorException {
 		// If no values set, no validation to be done
-		if (values == null)
+		if (vals.getValue() == null)
 			return;
 
 		// values are set but indexed list has not
-		if (keys == null)
-			throw new InputErrorException(INP_VAL_LISTSET, valueName, keyName);
+		if (keys.getValue() == null)
+			throw new InputErrorException(INP_VAL_LISTSET, keys.getKeyword(), vals.getKeyword());
 
 		// Both are set, but of differing size
-		if (keys.size() != values.size())
-			throw new InputErrorException(INP_VAL_LISTSIZE, keyName, valueName);
+		if (keys.getListSize() != vals.getListSize())
+			throw new InputErrorException(INP_VAL_LISTSIZE, keys.getKeyword(), vals.getKeyword());
 	}
 
-	public static void validateIndexedLists(ArrayList<?> keys, IntegerVector values, String keyName, String valueName)
+	public static void validateInputSize(ListInput<?> list1, ListInput<?> list2)
 	throws InputErrorException {
-		// If no values set, no validation to be done
-		if (values == null)
-			return;
+		// One list is set but not the other
+		if (list1.getValue() != null && list2.getValue() == null)
+			throw new InputErrorException(INP_VAL_LISTSIZE, list1.getKeyword(), list2.getKeyword());
 
-		// values are set but indexed list has not
-		if (keys == null)
-			throw new InputErrorException(INP_VAL_LISTSET, valueName, keyName);
+		if (list1.getValue() == null && list2.getValue() != null)
+			throw new InputErrorException(INP_VAL_LISTSIZE, list1.getKeyword(), list2.getKeyword());
 
 		// Both are set, but of differing size
-		if (keys.size() != values.size())
-			throw new InputErrorException(INP_VAL_LISTSIZE, keyName, valueName);
+		if (list1.getListSize() != list2.getListSize())
+			throw new InputErrorException(INP_VAL_LISTSIZE, list1.getKeyword(), list2.getKeyword() );
 	}
 
 	public static void validateIndexedLists(ArrayList<?> keys, DoubleVector values, String keyName, String valueName)
@@ -1181,159 +1204,6 @@ public abstract class Input<T> {
 		// Both are set, but of differing size
 		if (keys.size() != values.size())
 			throw new InputErrorException(INP_VAL_LISTSIZE, keyName, valueName);
-	}
-
-	public static void validateIndexedLists(DoubleVector keys, DoubleVector values, String keyName, String valueName)
-	throws InputErrorException {
-		// If no values set, no validation to be done
-		if (values == null)
-			return;
-
-		// values are set but indexed list has not
-		if (keys == null)
-			throw new InputErrorException(INP_VAL_LISTSET, valueName, keyName);
-
-		// Both are set, but of differing size
-		if (keys.size() != values.size())
-			throw new InputErrorException(INP_VAL_LISTSIZE, keyName, valueName);
-	}
-
-	public static void validateIndexedLists(DoubleVector keys, IntegerVector values, String keyName, String valueName)
-	throws InputErrorException {
-		// If no values set, no validation to be done
-		if (values == null)
-			return;
-
-		// values are set but indexed list has not
-		if (keys == null)
-			throw new InputErrorException(INP_VAL_LISTSET, valueName, keyName);
-
-		// Both are set, but of differing size
-		if (keys.size() != values.size())
-			throw new InputErrorException(INP_VAL_LISTSIZE, keyName, valueName);
-	}
-
-	public static void validateIndexedLists(DoubleVector keys, BooleanVector values, String keyName, String valueName)
-	throws InputErrorException {
-		// If no values set, no validation to be done
-		if (values == null)
-			return;
-
-		// values are set but indexed list has not
-		if (keys == null)
-			throw new InputErrorException(INP_VAL_LISTSET, valueName, keyName);
-
-		// Both are set, but of differing size
-		if (keys.size() != values.size())
-			throw new InputErrorException(INP_VAL_LISTSIZE, keyName, valueName);
-	}
-
-	public static void validateIndexedLists(IntegerVector keys, IntegerVector values, String keyName, String valueName)
-	throws InputErrorException {
-		// If no values set, no validation to be done
-		if (values == null)
-			return;
-
-		// values are set but indexed list has not
-		if (keys == null)
-			throw new InputErrorException(INP_VAL_LISTSET, valueName, keyName);
-
-		// Both are set, but of differing size
-		if (keys.size() != values.size())
-			throw new InputErrorException(INP_VAL_LISTSIZE, keyName, valueName);
-	}
-
-	public static void validateIndexedLists(IntegerVector keys, DoubleVector values, String keyName, String valueName)
-	throws InputErrorException {
-		// If no values set, no validation to be done
-		if (values == null || values.size() == 0 )
-			return;
-
-		// values are set but indexed list has not
-		if (keys == null || keys.size() == 0 )
-			throw new InputErrorException(INP_VAL_LISTSET, valueName, keyName);
-
-		// Both are set, but of differing size
-		if (keys.size() != values.size())
-			throw new InputErrorException(INP_VAL_LISTSIZE, keyName, valueName);
-	}
-
-	public static void validateIndexedLists(DoubleVector keys, ArrayList<Color4d> values, String keyName, String valueName)
-	throws InputErrorException {
-		// If no values set, no validation to be done
-		if (values == null)
-			return;
-
-		// values are set but indexed list has not
-		if (keys == null)
-			throw new InputErrorException(INP_VAL_LISTSET, valueName, keyName);
-
-		// Both are set, but of differing size
-		if (keys.size() != values.size())
-			throw new InputErrorException(INP_VAL_LISTSIZE, keyName, valueName);
-	}
-
-	public static void validateIndexedLists(ArrayList<?> keys, ArrayList<?> values, String keyName, String valueName)
-	throws InputErrorException {
-		// If no values set, no validation to be done
-		if (values == null)
-			return;
-
-		// values are set but indexed list has not
-		if (keys == null)
-			throw new InputErrorException(INP_VAL_LISTSET, valueName, keyName);
-
-		// Both are set, but of differing size
-		if (keys.size() != values.size())
-			throw new InputErrorException(INP_VAL_LISTSIZE, keyName, valueName);
-	}
-
-	public static void validateInputSize(DoubleListInput list1, DoubleListInput list2)
-	throws InputErrorException {
-
-		// One list is set but not the other
-		if( list1.getValue() != null && list2.getValue() == null )
-			throw new InputErrorException(INP_VAL_LISTSIZE, list1.getKeyword(), list2.getKeyword() );
-
-		if( list1.getValue() == null && list2.getValue() != null )
-			throw new InputErrorException(INP_VAL_LISTSIZE, list1.getKeyword(), list2.getKeyword() );
-
-		// Both are set, but of differing size
-		if (list1.getValue().size() != list2.getValue().size())
-			throw new InputErrorException(INP_VAL_LISTSIZE, list1.getKeyword(), list2.getKeyword() );
-
-	}
-
-	public static void validateInputSize(ValueListInput list1, DoubleListInput list2)
-	throws InputErrorException {
-
-		// One list is set but not the other
-		if( list1.getValue() != null && list2.getValue() == null )
-			throw new InputErrorException(INP_VAL_LISTSIZE, list1.getKeyword(), list2.getKeyword() );
-
-		if( list1.getValue() == null && list2.getValue() != null )
-			throw new InputErrorException(INP_VAL_LISTSIZE, list1.getKeyword(), list2.getKeyword() );
-
-		// Both are set, but of differing size
-		if (list1.getValue().size() != list2.getValue().size())
-			throw new InputErrorException(INP_VAL_LISTSIZE, list1.getKeyword(), list2.getKeyword() );
-
-	}
-
-	public static <T extends Entity> void validateInputSize(DoubleListInput list1, EntityListInput<T> list2)
-	throws InputErrorException {
-
-		// One list is set but not the other
-		if( list1.getValue() != null && list2.getValue() == null )
-			throw new InputErrorException(INP_VAL_LISTSIZE, list1.getKeyword(), list2.getKeyword() );
-
-		if( list1.getValue() == null && list2.getValue() != null )
-			throw new InputErrorException(INP_VAL_LISTSIZE, list1.getKeyword(), list2.getKeyword() );
-
-		// Both are set, but of differing size
-		if (list1.getValue().size() != list2.getValue().size())
-			throw new InputErrorException(INP_VAL_LISTSIZE, list1.getKeyword(), list2.getKeyword() );
-
 	}
 
 	/*
@@ -1353,10 +1223,6 @@ public abstract class Input<T> {
 		catch(InputErrorException ex) {
 			throw new InputErrorException(String.format("Could not find a unit named: %s", str));
 		}
-	}
-
-	public boolean isInfinity(String str) {
-		return (str.equals(POSITIVE_INFINITY) || str.equals(NEGATIVE_INFINITY));
 	}
 
 	public String getDefaultStringForKeyInputs(String unitString) {

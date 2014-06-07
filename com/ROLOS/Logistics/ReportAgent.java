@@ -19,7 +19,8 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 
 import com.jaamsim.input.InputAgent;
-import com.sandwell.JavaSimulation.DoubleListInput;
+import com.jaamsim.input.ValueListInput;
+import com.jaamsim.units.TimeUnit;
 import com.sandwell.JavaSimulation.DoubleVector;
 import com.sandwell.JavaSimulation.Entity;
 import com.sandwell.JavaSimulation.Group;
@@ -32,7 +33,7 @@ import com.ROLOS.Logistics.ReportableEntity;
 
 public class ReportAgent extends DisplayEntity {
 
-	private final DoubleListInput reportIntervals;
+	private final ValueListInput reportIntervals;
 	private static final IntegerInput reportPrecision;
 
 	private static final ArrayList<FileEntity> allReportFiles;
@@ -81,9 +82,9 @@ public class ReportAgent extends DisplayEntity {
 	
 	{
 		
-		reportIntervals = new DoubleListInput("ReportIntervals", "Key Inputs", new DoubleVector(0));
+		reportIntervals = new ValueListInput("ReportIntervals", "Key Inputs", new DoubleVector(0));
 		reportIntervals.setValidRange(0.0d, Double.POSITIVE_INFINITY);
-		reportIntervals.setUnits("s");
+		reportIntervals.setUnitType(TimeUnit.class);
 		this.addInput(reportIntervals);
 		
 		this.addInput(reportPrecision);
@@ -293,7 +294,7 @@ public class ReportAgent extends DisplayEntity {
 	 * Print the utilization statistics for individual group members and as a total to the given file
 	 * @param grp a group of entities can be passed on
 	 */
-	public static void printUtilizationOn(String title, ArrayList<? extends ModelEntity> grp, FileEntity anOut) {
+	public static void printUtilizationOn(String title, ArrayList<? extends LogisticsEntity> grp, FileEntity anOut) {
 		// If there are no elements in the group, do nothing
 		if (grp.size() == 0)
 			return;
@@ -320,7 +321,7 @@ public class ReportAgent extends DisplayEntity {
 		// Loop through each member of the group
 		int count = 0;
 		for (int i = 0; i < grp.size(); i++) {
-			ModelEntity ent = grp.get(i);
+			LogisticsEntity ent = grp.get(i);
 			if (!ent.isActive())
 				continue;
 

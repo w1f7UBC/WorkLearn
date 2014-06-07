@@ -1,6 +1,6 @@
 /*
  * JaamSim Discrete Event Simulation
- * Copyright (C) 2011 Ausenco Engineering Canada Inc.
+ * Copyright (C) 2014 Ausenco Engineering Canada Inc.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,20 +12,20 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package com.sandwell.JavaSimulation;
+package com.jaamsim.Thresholds;
 
-import com.jaamsim.input.Input;
-import com.jaamsim.input.KeywordIndex;
-
-public class StringInput extends Input<String> {
-
-	public StringInput(String key, String cat, String def) {
-		super(key, cat, def);
-	}
+/**
+ * SignalThreshold is a type of Threshold that is controlled directly by
+ * another object. At present, it is required only for EntitySignal.
+ * @author Harry
+ *
+ */
+public class SignalThreshold extends Threshold {
 
 	@Override
-	public void parse(KeywordIndex kw) throws InputErrorException {
-		Input.assertCount(kw, 1);
-		value = kw.getArg(0);
+	public void startUp() {
+		super.startUp();
+		this.setOpen(false);
 	}
+
 }

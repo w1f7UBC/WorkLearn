@@ -149,18 +149,13 @@ public class TimeSeriesThreshold extends Threshold {
 	private final ProcessTarget doOpenClose = new DoOpenCloseTarget(this, "doOpenClose");
 
 	public void doOpenClose() {
-		this.update();
 		double wait;
 		if( this.isClosedAtTime( getCurrentTime() ) ) {
-			closed = true;
-			if( traceFlag ) this.trace( "Closed" );
-			this.scheduleChangedCallback();
+			setOpen(false);
 			wait = this.calcClosedTimeFromTime( getCurrentTime() );
 		}
 		else {
-			closed = false;
-			if( traceFlag ) this.trace( "Open" );
-			this.scheduleChangedCallback();
+			setOpen(true);
 			wait = this.calcOpenTimeFromTime( getCurrentTime() );
 		}
 

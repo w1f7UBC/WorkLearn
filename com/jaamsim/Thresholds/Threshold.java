@@ -16,10 +16,12 @@ package com.jaamsim.Thresholds;
 
 import java.util.ArrayList;
 
+import com.jaamsim.events.EventHandle;
 import com.jaamsim.events.ProcessTarget;
 import com.jaamsim.input.Keyword;
 import com.jaamsim.input.Output;
 import com.jaamsim.math.Color4d;
+import com.jaamsim.ui.FrameBox;
 import com.jaamsim.units.DimensionlessUnit;
 import com.sandwell.JavaSimulation.BooleanInput;
 import com.sandwell.JavaSimulation.ColourInput;
@@ -48,11 +50,11 @@ public class Threshold extends DisplayEntity {
 
 	private final ArrayList<ThresholdUser> userList;
 
-	protected boolean closed;
+	private boolean open;
 
-	protected double simTimeOfLastUpdate; // Simulation time in seconds of last update
-	protected double openSimTime; // Number of seconds open
-	protected double closedSimTime; // Number of seconds closed
+	private long lastTickUpdate;
+	private long openTicks;
+	private long closedTicks;
 
 	{
 		openColour = new ColourInput( "OpenColour", "Graphics", ColourInput.GREEN );
@@ -78,7 +80,10 @@ public class Threshold extends DisplayEntity {
 	public void earlyInit() {
 		super.earlyInit();
 		userUpdate.users.clear();
-		closed = false;
+		open = true;
+		lastTickUpdate = getSimTicks();
+		openTicks = 0;
+		closedTicks = 0;
 
 		userList.clear();
 		for (Entity each : Entity.getAll()) {
@@ -96,6 +101,7 @@ public class Threshold extends DisplayEntity {
 		this.clearStatistics();
 	}
 
+	private static final EventHandle updateHandle = new EventHandle();
 	private static final DoThresholdChanged userUpdate = new DoThresholdChanged();
 	private static class DoThresholdChanged extends ProcessTarget {
 		public final ArrayList<ThresholdUser> users = new ArrayList<ThresholdUser>();
@@ -116,23 +122,12 @@ public class Threshold extends DisplayEntity {
 		}
 	}
 
-	protected void scheduleChangedCallback() {
-		for (ThresholdUser user : userList) {
-			if (!userUpdate.users.contains(user))
-				userUpdate.users.add(user);
-		}
-		if (!userUpdate.users.isEmpty())
-			this.scheduleSingleProcess(userUpdate, 2);
-	}
-
-	protected void thresholdChangedCallback() {
-		for (ThresholdUser user : userList) {
-			user.thresholdChanged();
-		}
+	public boolean isOpen() {
+		return open;
 	}
 
 	public boolean isClosed() {
-		return closed;
+		return !open;
 	}
 
 	@Override
@@ -141,18 +136,16 @@ public class Threshold extends DisplayEntity {
 
 		// Determine the colour for the square
 		Color4d col;
-		if( closed )
-			col = closedColour.getValue();
-		else
+		if (open) {
 			col = openColour.getValue();
-
-		if (closed) {
-			setTagVisibility(DisplayModelCompat.TAG_CONTENTS, showWhenClosed.getValue());
-			setTagVisibility(DisplayModelCompat.TAG_OUTLINES, showWhenClosed.getValue());
-		}
-		else {
 			setTagVisibility(DisplayModelCompat.TAG_CONTENTS, showWhenOpen.getValue());
 			setTagVisibility(DisplayModelCompat.TAG_OUTLINES, showWhenOpen.getValue());
+		}
+		else {
+			col = closedColour.getValue();
+			setTagVisibility(DisplayModelCompat.TAG_CONTENTS, showWhenClosed.getValue());
+			setTagVisibility(DisplayModelCompat.TAG_OUTLINES, showWhenClosed.getValue());
+
 		}
 
 		setTagColour( DisplayModelCompat.TAG_CONTENTS, col );
@@ -164,18 +157,32 @@ public class Threshold extends DisplayEntity {
     // ********************************************************************************
 
 	public void clearStatistics() {
-		openSimTime = 0.0;
-		closedSimTime = 0.0;
-		simTimeOfLastUpdate = getSimTime();
+		openTicks = 0;
+		closedTicks = 0;
+		lastTickUpdate = getSimTicks();
 	}
 
-	public void update() {
-		if( closed )
-			closedSimTime += getSimTime() - simTimeOfLastUpdate;
-		else
-			openSimTime += getSimTime() - simTimeOfLastUpdate;
+	public final void setOpen(boolean open) {
+		// If setting to the same value as current, return
+		if (this.open == open)
+			return;
 
-		simTimeOfLastUpdate = getSimTime();
+		if (this.open) {
+			openTicks += getSimTicks() - lastTickUpdate;
+		}
+		else {
+			closedTicks += getSimTicks() - lastTickUpdate;
+		}
+
+		lastTickUpdate = getSimTicks();
+		this.open = open;
+
+		for (ThresholdUser user : this.userList) {
+			if (!userUpdate.users.contains(user))
+				userUpdate.users.add(user);
+		}
+		if (!userUpdate.users.isEmpty() && !updateHandle.isScheduled())
+			this.scheduleProcessTicks(0, 2, false, userUpdate, updateHandle);
 	}
 
 	/**
@@ -191,27 +198,58 @@ public class Threshold extends DisplayEntity {
 	 * Print the threshold name and percentage of time open and closed
 	 */
 	public void printUtilizationOn( FileEntity anOut ) {
-		this.update();
-
-		double totalSimTime = openSimTime + closedSimTime;
-		if (totalSimTime == 0.0d)
+		long durTicks = getSimTicks() - lastTickUpdate;
+		long totalSimTicks = openTicks + closedTicks + durTicks;
+		if (totalSimTicks == 0)
 			return;
 
 		anOut.format( "%s\t", getName() );
 
+		long totOpen = openTicks;
+		long totClosed = closedTicks;
+		if (isClosed())
+			totClosed += durTicks;
+		else
+			totOpen += durTicks;
 		// Print percentage of time open
-		double fraction = openSimTime/totalSimTime;
-		anOut.format("%.1f%%\t", fraction * 100.0d);
+		anOut.format("%.1f%%\t", (totOpen * 100 / (double)totalSimTicks));
 
 		// Print percentage of time closed
-		fraction = closedSimTime/totalSimTime;
-		anOut.format("%.1f%%\t", fraction * 100.0d);
+		anOut.format("%.1f%%\t", (totClosed * 100 / (double)totalSimTicks));
 	}
 
 	@Output(name = "Open",
 	 description = "If open, then return TRUE.  Otherwise, return FALSE.",
 	    unitType = DimensionlessUnit.class)
 	public Boolean getOpen(double simTime) {
-		return !closed;
+		return open;
+	}
+
+	@Output(name = "OpenFraction",
+	 description = "The fraction of total simulation time that the threshold is open.",
+	    unitType = DimensionlessUnit.class)
+	public double getOpenFraction(double simTime) {
+		double dur = simTime - FrameBox.ticksToSeconds(lastTickUpdate);
+		double openTime = FrameBox.ticksToSeconds(openTicks);
+		double closedTime = FrameBox.ticksToSeconds(closedTicks);
+		double totalTime = openTime + closedTime + dur;
+		if (isOpen())
+			return (openTime + dur) / totalTime;
+		else
+			return openTime / totalTime;
+	}
+
+	@Output(name = "ClosedFraction",
+	 description = "The fraction of total simulation time that the threshold is closed.",
+	    unitType = DimensionlessUnit.class)
+	public double getClosedFraction(double simTime) {
+		double dur = simTime - FrameBox.ticksToSeconds(lastTickUpdate);
+		double openTime = FrameBox.ticksToSeconds(openTicks);
+		double closedTime = FrameBox.ticksToSeconds(closedTicks);
+		double totalTime = openTime + closedTime + dur;
+		if (isClosed())
+			return (closedTime + dur) / totalTime;
+		else
+			return closedTime / totalTime;
 	}
 }

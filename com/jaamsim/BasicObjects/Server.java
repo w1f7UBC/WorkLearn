@@ -14,6 +14,7 @@
  */
 package com.jaamsim.BasicObjects;
 
+import com.jaamsim.Samples.SampleConstant;
 import com.jaamsim.Samples.SampleExpInput;
 import com.jaamsim.input.Keyword;
 import com.jaamsim.math.Vec3d;
@@ -44,7 +45,9 @@ public class Server extends LinkedComponent {
 	private DisplayEntity servedEntity;	// the DisplayEntity being server
 
 	{
-		serviceTimeInput = new SampleExpInput( "ServiceTime", "Key Inputs", null);
+		operatingThresholdList.setHidden(true);
+
+		serviceTimeInput = new SampleExpInput( "ServiceTime", "Key Inputs", new SampleConstant(TimeUnit.class, 0.0));
 		serviceTimeInput.setUnitType( TimeUnit.class );
 		serviceTimeInput.setEntity(this);
 		this.addInput( serviceTimeInput);
@@ -56,11 +59,6 @@ public class Server extends LinkedComponent {
 	@Override
 	public void validate() {
 		super.validate();
-
-		// Confirm that probability distribution has been specified
-		if( serviceTimeInput.getValue() == null ) {
-			throw new InputErrorException( "The keyword ServiceTime must be set." );
-		}
 
 		// Confirm that the target queue has been specified
 		if( waitQueueInput.getValue() == null ) {

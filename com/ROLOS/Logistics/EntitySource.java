@@ -4,7 +4,6 @@ import java.util.ArrayList;
 
 import com.jaamsim.input.ValueInput;
 import com.jaamsim.units.TimeUnit;
-import com.sandwell.JavaSimulation.DoubleInput;
 import com.sandwell.JavaSimulation.InputErrorException;
 import com.jaamsim.input.Keyword;
 import com.sandwell.JavaSimulation.Tester;

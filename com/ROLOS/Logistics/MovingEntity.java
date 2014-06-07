@@ -15,7 +15,6 @@ import com.jaamsim.input.Keyword;
 import com.sandwell.JavaSimulation.Tester;
 import com.sandwell.JavaSimulation.Vec3dInput;
 import com.ROLOS.ROLOSEntity;
-import com.ROLOS.Logistics.ModelEntity;
 import com.ROLOS.Utils.HandyUtils;
 import com.ROLOS.Utils.HashMapList;
 import com.ROLOS.Utils.MathUtilities;
@@ -27,7 +26,7 @@ import com.jaamsim.events.Process;
  * TODO refactor loader/processor only moving entities. Right now only when loading area gets exhausted (LoadingArea.isExhausted) sends the 
  * moving processors and loaders away
  */
-public class MovingEntity extends ModelEntity {
+public class MovingEntity extends LogisticsEntity {
 	private static final ArrayList<MovingEntity> allInstances;
 	
 	@Keyword(description = "Upper limit speed that this entity can travel freely on the route (i.e. actual speed = min(CrusingSpeed, LoadedSpeed, UnLoadedSpeed, MaxSpeed(route's),...).", 
@@ -78,7 +77,7 @@ public class MovingEntity extends ModelEntity {
 	private LoadingBay lastLoadingBay;
 	private ArrayList<? extends DiscreteHandlingLinkedEntity> plannedNextRouteSegments;
 	private double startTravelingTimeOnCurrentRouteSegment;
-	private HashMapList<String,ModelEntity> currentlyTowingList;
+	private HashMapList<String,LogisticsEntity> currentlyTowingList;
 	
 	//1st value list stores cargo capacity 
 	//2nd value list stores current cargo
@@ -444,7 +443,7 @@ public class MovingEntity extends ModelEntity {
 	 * all towed entities should be added to the currentlyTowingList through their class'es simple name
 	 * @return the currently towed entities list.
 	 */
-	public HashMapList<String, ModelEntity> getCurrentlyTowingEntityList(){
+	public HashMapList<String, LogisticsEntity> getCurrentlyTowingEntityList(){
 		return currentlyTowingList;
 	}
 
@@ -530,7 +529,7 @@ public class MovingEntity extends ModelEntity {
 		}		
 		Vec3d orient = new Vec3d();
 		for (String eachKey: currentlyTowingList.getKeys()) {
-			for (ModelEntity each : currentlyTowingList.get(eachKey)) {
+			for (LogisticsEntity each : currentlyTowingList.get(eachKey)) {
 				//	if (each.getPresentState() == "Idle") {
 				orient.add3(each.getOrientationInput(), this.getOrientation());
 				orient.sub3(this.getOrientationInput());

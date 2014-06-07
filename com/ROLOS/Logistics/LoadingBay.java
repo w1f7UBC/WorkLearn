@@ -181,8 +181,8 @@ public class LoadingBay extends DiscreteHandlingLinkedEntity {
 						}
 					}
 					if (entityUnderProcess.isMovingEquipment()){
-						for(ArrayList<ModelEntity> eachList: entityUnderProcess.getCurrentlyTowingEntityList().getValues())
-							for(ModelEntity each: eachList)
+						for(ArrayList<LogisticsEntity> eachList: entityUnderProcess.getCurrentlyTowingEntityList().getValues())
+							for(LogisticsEntity each: eachList)
 								((BulkHandlingLinkedEntity)each).setLoadingBay(this);
 						
 						entityUnderProcess.setPresentState("Operating in Facility");
@@ -299,8 +299,8 @@ public class LoadingBay extends DiscreteHandlingLinkedEntity {
 		}
 		*/
 		if (entityUnderProcess.isMovingEquipment()){
-			for(ArrayList<ModelEntity> eachList: entityUnderProcess.getCurrentlyTowingEntityList().getValues())
-				for(ModelEntity each: eachList)
+			for(ArrayList<LogisticsEntity> eachList: entityUnderProcess.getCurrentlyTowingEntityList().getValues())
+				for(LogisticsEntity each: eachList)
 					((BulkHandlingLinkedEntity)each).removeFromLoadingBay(this);					
 		}
 			

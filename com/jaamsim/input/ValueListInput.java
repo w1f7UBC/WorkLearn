@@ -19,7 +19,6 @@ import com.jaamsim.units.Unit;
 import com.sandwell.JavaSimulation.DoubleVector;
 import com.sandwell.JavaSimulation.InputErrorException;
 import com.sandwell.JavaSimulation.ListInput;
-import com.sandwell.JavaSimulation.StringVector;
 
 public class ValueListInput extends ListInput<DoubleVector> {
 	private Class<? extends Unit> unitType = DimensionlessUnit.class;
@@ -38,15 +37,23 @@ public class ValueListInput extends ListInput<DoubleVector> {
 	}
 
 	@Override
-	public void parse(StringVector input)
+	public void parse(KeywordIndex kw)
 	throws InputErrorException {
-		DoubleVector temp = Input.parseDoubles(input, minValue, maxValue, unitType);
+		DoubleVector temp = Input.parseDoubles(kw, minValue, maxValue, unitType);
 		Input.assertCount(temp, validCounts);
 		Input.assertCountRange(temp, minCount, maxCount);
 		if (!Double.isNaN(sumValue))
 			Input.assertSumTolerance(temp, sumValue, sumTolerance);
 
 		value = temp;
+	}
+
+	@Override
+	public int getListSize() {
+		if (value == null)
+			return 0;
+		else
+			return value.size();
 	}
 
 	public void setValidRange(double min, double max) {

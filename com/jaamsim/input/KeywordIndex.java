@@ -19,29 +19,29 @@ import java.util.ArrayList;
 import com.jaamsim.input.Input.ParseContext;
 
 public class KeywordIndex {
-	public final ArrayList<String> input;
+	private final ArrayList<String> input;
 	public final String keyword;
-	public final int start;
-	public final int end;
+	private final int start;
+	private final int end;
 	public final ParseContext context;
 
-	public KeywordIndex(ArrayList<String> inp, int s, int e, ParseContext ctxt) {
+	public KeywordIndex(ArrayList<String> inp, String word, int s, int e, ParseContext ctxt) {
 		input = inp;
-		keyword = input.get(s);
+		keyword = word;
 		start = s;
 		end = e;
 		context = ctxt;
 	}
 
 	public int numArgs() {
-		return end - start - 2;
+		return end - start;
 	}
 
 	public String argString() {
 		StringBuilder sb = new StringBuilder();
-		for (int i = start + 2; i < end; i++) {
+		for (int i = start; i < end; i++) {
 			String dat = this.input.get(i);
-			if (i > start + 2)
+			if (i > start)
 				sb.append("  ");
 
 			if (Parser.needsQuoting(dat) && !dat.equals("{") && !dat.equals("}"))
@@ -55,6 +55,31 @@ public class KeywordIndex {
 	public String getArg(int index) {
 		if (index < 0 || index >= numArgs())
 			throw new IndexOutOfBoundsException("Index out of range:" + index);
-		return input.get(start + index + 2);
+		return input.get(start + index);
+	}
+
+	public ArrayList<KeywordIndex> getSubArgs() {
+		ArrayList<KeywordIndex> subArgs = new ArrayList<KeywordIndex>();
+		for (int i= 0; i < this.numArgs(); i++) {
+			//skip over opening brace if present
+			if (this.getArg(i).equals("{"))
+				i++;
+
+			//iterate until closing brace, or end of entry
+			int subArgStart = i;
+			int subArgEnd = i;
+			for (int j = i; j < this.numArgs(); j++, i++){
+				if (this.getArg(j).equals("}")) {
+					break;
+				}
+
+				subArgEnd++;
+			}
+
+			KeywordIndex subArg = new KeywordIndex(this.input, keyword, subArgStart + start, subArgEnd + start, context);
+			subArgs.add(subArg);
+		}
+
+		return subArgs;
 	}
 }

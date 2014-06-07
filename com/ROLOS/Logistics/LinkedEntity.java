@@ -2,7 +2,6 @@ package com.ROLOS.Logistics;
 
 import java.util.ArrayList;
 
-import com.ROLOS.Logistics.ModelEntity;
 import com.ROLOS.ROLOSEntity;
 import com.ROLOS.Utils.ThreeLinkedLists;
 import com.ROLOS.Utils.TwoLinkedLists;
@@ -23,7 +22,7 @@ import com.sandwell.JavaSimulation.Tester;
  * LinkedEntity is the superclass of all connectable entities
  */
 
-public class LinkedEntity extends ModelEntity {
+public class LinkedEntity extends LogisticsEntity {
 
 	private static final ArrayList<LinkedEntity> allInstances;
 	 
@@ -228,20 +227,6 @@ public class LinkedEntity extends ModelEntity {
 	//////////////////////////////////////////////////////////////////////////////////////
 	// BREAKDOWN AND MAINTENANCE METHODS
 	//////////////////////////////////////////////////////////////////////////////////////
-	
-	// sets availability of entity for breakdown and maintenance should refactor when maintenance and breakdowns are incorporated 
-	@Override
-	public boolean isAvailable() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-	
-	// sets availability of entity for breakdown and maintenance should refactor when maintenance and breakdowns are incorporated 
-	@Override
-	public boolean areAllEntitiesAvailable() {
-		// TODO Auto-generated method stub
-		return false;
-	}
 
 	//////////////////////////////////////////////////////////////////////////////////////
 	// ADDER METHODS

@@ -2,9 +2,10 @@ package com.ROLOS.Logistics;
 
 import java.util.ArrayList;
 
-import com.sandwell.JavaSimulation.DoubleInput;
 import com.sandwell.JavaSimulation.ErrorException;
 import com.jaamsim.input.Keyword;
+import com.jaamsim.input.ValueInput;
+import com.jaamsim.units.TimeUnit;
 import com.sandwell.JavaSimulation.Tester;
 
 public class EntitySink extends BulkHandlingLinkedEntity {
@@ -16,7 +17,7 @@ public class EntitySink extends BulkHandlingLinkedEntity {
 			+ "i.e. amounts are removed in batches corresponding to the amount condumed during the interval. is used to control consumption speed", 
 			example = "Pulpmarket ConsumptionIAT { 5 h }"
 			+ "Default value is 6 min")
-	private final DoubleInput consumptionIAT;
+	private final ValueInput consumptionIAT;
 	
 	private double consumedAmount;
 	
@@ -25,9 +26,9 @@ public class EntitySink extends BulkHandlingLinkedEntity {
 	}
 
 	{
-		consumptionIAT = new DoubleInput("ConsumptionIAT", "Key Inputs", 0.1d);
+		consumptionIAT = new ValueInput("ConsumptionIAT", "Key Inputs", 0.1d);
 		consumptionIAT.setValidRange(0.0d, Double.POSITIVE_INFINITY);
-		consumptionIAT.setUnits("h");
+		consumptionIAT.setUnitType(TimeUnit.class);
 		this.addInput(consumptionIAT);
 	}
 	

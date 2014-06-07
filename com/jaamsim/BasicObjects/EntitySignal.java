@@ -14,6 +14,7 @@
  */
 package com.jaamsim.BasicObjects;
 
+import com.jaamsim.Thresholds.SignalThreshold;
 import com.jaamsim.input.Keyword;
 import com.sandwell.JavaSimulation.BooleanInput;
 import com.sandwell.JavaSimulation.EntityInput;
@@ -22,17 +23,19 @@ import com.sandwell.JavaSimulation3D.DisplayEntity;
 
 public class EntitySignal extends LinkedComponent {
 
-	@Keyword(description = "The EntityGate controlled by this Signal.",
-	         example = "EntitySignal1 TargetGate { Gate1 }")
-	private final EntityInput<EntityGate> targetGate;
+	@Keyword(description = "The Threshold controlled by this Signal.",
+	         example = "EntitySignal1 TargetSignalThreshold { SignalThreshold1 }")
+	private final EntityInput<SignalThreshold> targetSignalThreshold;
 
-	@Keyword(description = "The new state for the target EntityGate: TRUE = Open, FALSE = Closed.",
+	@Keyword(description = "The new state for the target SignalThreshold: TRUE = Open, FALSE = Closed.",
 	         example = "EntitySignal1 NewState { FALSE }")
 	private final BooleanInput newState;
 
 	{
-		targetGate = new EntityInput<EntityGate>( EntityGate.class, "TargetGate", "Key Inputs", null);
-		this.addInput( targetGate);
+		operatingThresholdList.setHidden(true);
+
+		targetSignalThreshold = new EntityInput<SignalThreshold>( SignalThreshold.class, "TargetSignalThreshold", "Key Inputs", null);
+		this.addInput( targetSignalThreshold);
 
 		newState = new BooleanInput( "NewState", "Key Inputs", true);
 		this.addInput( newState);
@@ -42,9 +45,9 @@ public class EntitySignal extends LinkedComponent {
 	public void validate() {
 		super.validate();
 
-		// Confirm that the target gate has been specified
-		if( targetGate.getValue() == null ) {
-			throw new InputErrorException( "The keyword TargetGate must be set." );
+		// Confirm that the target threshold has been specified
+		if( targetSignalThreshold.getValue() == null ) {
+			throw new InputErrorException( "The keyword TargetThreshold must be set." );
 		}
 	}
 
@@ -56,8 +59,8 @@ public class EntitySignal extends LinkedComponent {
 	public void addDisplayEntity( DisplayEntity ent ) {
 		super.addDisplayEntity(ent);
 
-		// Signal the target gate
-		targetGate.getValue().setState(newState.getValue());
+		// Signal the target threshold
+		targetSignalThreshold.getValue().setOpen(newState.getValue());
 
 		// Send the entity to the next component
 		this.sendToNextComponent( ent );

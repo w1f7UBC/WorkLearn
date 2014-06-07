@@ -17,24 +17,42 @@ package com.sandwell.JavaSimulation;
 import java.util.ArrayList;
 
 import com.jaamsim.input.Input;
+import com.jaamsim.input.KeywordIndex;
 
-public class StringListInput extends ListInput<StringVector> {
+public class StringListInput extends ListInput<ArrayList<String>> {
 	private ArrayList<String> validOptions;
 
 	 // If true convert all the the items to uppercase
 	private boolean caseSensitive;
 
-	public StringListInput(String key, String cat, StringVector def) {
+	public StringListInput(String key, String cat, ArrayList<String> def) {
 		super(key, cat, def);
 		validOptions = null;
 		caseSensitive = true;
 	}
 
 	@Override
-	public void parse(StringVector input)
+	public void parse(KeywordIndex kw)
 	throws InputErrorException {
-		Input.assertCountRange(input, minCount, maxCount);
-		value = input;
+		Input.assertCountRange(kw, minCount, maxCount);
+		if (validOptions != null) {
+			value = Input.parseStrings(kw, validOptions, caseSensitive);
+			return;
+		}
+
+		ArrayList<String> tmp = new ArrayList<String>(kw.numArgs());
+		for (int i = 0; i < kw.numArgs(); i++) {
+			tmp.add(kw.getArg(i));
+		}
+		value = tmp;
+	}
+
+	@Override
+	public int getListSize() {
+		if (value == null)
+			return 0;
+		else
+			return value.size();
 	}
 
 	public void setValidOptions(ArrayList<String> list) {
