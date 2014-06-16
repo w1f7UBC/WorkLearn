@@ -35,7 +35,6 @@ import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import DataBase.DataBase;
-
 import com.jaamsim.input.Input.ParseContext;
 import com.jaamsim.ui.ExceptionBox;
 import com.jaamsim.ui.FrameBox;
@@ -47,7 +46,6 @@ import com.sandwell.JavaSimulation.Group;
 import com.sandwell.JavaSimulation.InputErrorException;
 import com.sandwell.JavaSimulation.ObjectType;
 import com.sandwell.JavaSimulation.Simulation;
-import com.sandwell.JavaSimulation.StringVector;
 import com.sandwell.JavaSimulation3D.GUIFrame;
 
 public class InputAgent {
@@ -668,11 +666,11 @@ public class InputAgent {
     		InputAgent.setLoadFile(gui, temp);
         }
 	}
-    
     public static void loadDB(GUIFrame guiFrame) throws SQLException {
 		LogBox.logLine("Loading...");
 		DataBase.test();
 	}
+
 	public static void save(GUIFrame gui) {
 		LogBox.logLine("Saving...");
 		if( InputAgent.getConfigFile() != null ) {
@@ -1118,7 +1116,7 @@ public class InputAgent {
 		ArrayList<Class<? extends Entity>> newClasses = new ArrayList<Class<? extends Entity>>();
 		for (int i = 0; i < Entity.getAll().size(); i++) {
 			Entity ent = Entity.getAll().get(i);
-			if (!ent.testFlag(Entity.FLAG_ADDED))
+			if (!ent.testFlag(Entity.FLAG_ADDED) || ent.testFlag(Entity.FLAG_GENERATED))
 				continue;
 
 			if (!newClasses.contains(ent.getClass()))
@@ -1143,7 +1141,7 @@ public class InputAgent {
 			// Print the new instances that were defined
 			for (int i = 0; i < Entity.getAll().size(); i++) {
 				Entity ent = Entity.getAll().get(i);
-				if (!ent.testFlag(Entity.FLAG_ADDED))
+				if (!ent.testFlag(Entity.FLAG_ADDED) || ent.testFlag(Entity.FLAG_GENERATED))
 					continue;
 
 				if (ent.getClass() == newClass)
@@ -1157,7 +1155,7 @@ public class InputAgent {
 		// Identify the entities whose inputs were edited
 		for (int i = 0; i < Entity.getAll().size(); i++) {
 			Entity ent = Entity.getAll().get(i);
-			if (ent.testFlag(Entity.FLAG_EDITED)) {
+			if (ent.testFlag(Entity.FLAG_EDITED) && !ent.testFlag(Entity.FLAG_GENERATED)) {
 				file.format("%n");
 				writeInputsOnFile_ForEntity( file, ent );
 			}
@@ -1275,39 +1273,6 @@ public class InputAgent {
 	}
 
 
-	/**
-	 * Expects a StringVector of one of two forms:
-	 * 1.  { entry entry entry } { entry entry entry }
-	 * 2.  entry entry entry
-	 * If format 1, returns a vector of stringvectors without braces.
-	 * if format 2, returns a vector of a stringvector, size1.
-	 * @param data
-	 * @return
-	 */
-	public static ArrayList<StringVector> splitStringVectorByBraces(StringVector data) {
-		ArrayList<StringVector> newData = new ArrayList<StringVector>();
-		for (int i=0; i < data.size(); i++) {
-
-			//skip over opening brace if present
-			if (data.get(i).equals("{") )
-				continue;
-
-			StringVector cmd = new StringVector();
-
-			//iterate until closing brace, or end of entry
-			for (int j = i; j < data.size(); j++, i++){
-				if (data.get(j).equals("}"))
-					break;
-
-				cmd.add(data.get(j));
-			}
-
-			//add to vector
-			newData.add(cmd);
-		}
-
-		return newData;
-	}
 
 	/**
 	 * Converts a file path String to a URI.

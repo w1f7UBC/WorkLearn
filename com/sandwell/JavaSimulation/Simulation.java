@@ -14,6 +14,8 @@
  */
 package com.sandwell.JavaSimulation;
 
+import java.io.File;
+
 import javax.swing.JFrame;
 
 import com.jaamsim.events.EventManager;
@@ -31,6 +33,7 @@ import com.jaamsim.ui.LogBox;
 import com.jaamsim.ui.ObjectSelector;
 import com.jaamsim.ui.OutputBox;
 import com.jaamsim.ui.PropertyBox;
+import com.jaamsim.units.DimensionlessUnit;
 import com.jaamsim.units.TimeUnit;
 import com.sandwell.JavaSimulation3D.Clock;
 import com.sandwell.JavaSimulation3D.GUIFrame;
@@ -144,6 +147,7 @@ public class Simulation extends Entity {
 		startTimeInput.setValidRange(0.0d, Double.POSITIVE_INFINITY);
 
 		simTimeScaleInput = new ValueInput("SimulationTimeScale", "Key Inputs", 4000.0d);
+		simTimeScaleInput.setUnitType(DimensionlessUnit.class);
 		simTimeScaleInput.setValidRange(1e-15d, Double.POSITIVE_INFINITY);
 
 		traceEventsInput = new BooleanInput("TraceEvents", "Key Inputs", false);
@@ -276,7 +280,6 @@ public class Simulation extends Entity {
 	}
 
 	public static void clear() {
-		EventTracer.init();
 		initializationTime.reset();
 		runDuration.reset();
 		simTimeScaleInput.reset();
@@ -335,16 +338,20 @@ public class Simulation extends Entity {
 		}
 
 		InputAgent.prepareReportDirectory();
-		EventTracer.init();
 		root.clear();
 		root.setTraceListener(null);
 
 		if( traceEventsInput.getValue() ) {
-			EventTracer.traceAllEvents(root, traceEventsInput.getValue());
+			String evtName = InputAgent.getConfigFile().getParentFile() + File.separator + InputAgent.getRunName() + ".evt";
+			EventRecorder rec = new EventRecorder(evtName);
+			root.setTraceListener(rec);
 		}
 		else if( verifyEventsInput.getValue() ) {
-			EventTracer.verifyAllEvents(root, verifyEventsInput.getValue());
+			String evtName = InputAgent.getConfigFile().getParentFile() + File.separator + InputAgent.getRunName() + ".evt";
+			EventTracer trc = new EventTracer(evtName);
+			root.setTraceListener(trc);
 		}
+
 		root.setSimTimeScale(simTimeScaleInput.getValue());
 		setSimTimeScale(simTimeScaleInput.getValue());
 		FrameBox.setSecondsPerTick(3600.0d / simTimeScaleInput.getValue());
@@ -356,7 +363,7 @@ public class Simulation extends Entity {
 		startTime = Clock.calcTimeForYear_Month_Day_Hour(1, Clock.getStartingMonth(), Clock.getStartingDay(), startTimeHours);
 		endTime = startTime + Simulation.getInitializationHours() + Simulation.getRunDurationHours();
 
-		root.scheduleProcess(0, Entity.PRIO_DEFAULT, false, new InitModelTarget());
+		root.scheduleProcess(0, Entity.PRIO_DEFAULT, false, new InitModelTarget(), null);
 	}
 
 
@@ -407,11 +414,11 @@ public class Simulation extends Entity {
 			EventManager cur = EventManager.current();
 			long startTick = calculateDelayLength(Simulation.getStartHours());
 			for (int i = Entity.getAll().size() - 1; i >= 0; i--) {
-				cur.scheduleProcess(startTick, 0, false, new StartUpTarget(Entity.getAll().get(i)));
+				cur.scheduleProcess(startTick, 0, false, new StartUpTarget(Entity.getAll().get(i)), null);
 			}
 
 			long endTick = calculateDelayLength(Simulation.getEndHours());
-			cur.scheduleProcess(endTick, Entity.PRIO_DEFAULT, false, new EndModelTarget());
+			cur.scheduleProcess(endTick, Entity.PRIO_DEFAULT, false, new EndModelTarget(), null);
 		}
 	}
 

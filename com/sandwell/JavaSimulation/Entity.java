@@ -76,7 +76,7 @@ public class Entity {
 			" The attribute name is followed by its initial value. The unit provided for" +
 			"this value will determine the attribute's unit type.",
 	         example = "Entity1 AttributeDefinitionList { { A 20.0 s } { alpha 42 } }")
-	private final AttributeDefinitionListInput attributeDefinitionList;
+	public final AttributeDefinitionListInput attributeDefinitionList;
 
 	// constants used when scheduling events using the Entity wrappers
 	public static final int PRIO_DEFAULT = 5;
@@ -189,6 +189,11 @@ public class Entity {
 	 * performed in this method. It is called after earlyInit().
 	 */
 	public void startUp() {}
+
+	/**
+	 * Resets the statistics collected by the entity.
+	 */
+	public void clearStatistics() {}
 
 	public void kill() {
 		synchronized (allInstances) {
@@ -470,13 +475,13 @@ public class Entity {
 	}
 
 	public final void scheduleProcess(ProcessTarget t) {
-		getEventManager().scheduleProcess(0, Entity.PRIO_DEFAULT, false, t);
+		getEventManager().scheduleProcess(0, Entity.PRIO_DEFAULT, false, t, null);
 	}
 
 	public final void scheduleProcess(double secs, int priority, ProcessTarget t) {
 		EventManager evt = getEventManager();
 		long ticks = evt.secondsToNearestTick(secs);
-		evt.scheduleProcess(ticks, priority, false, t);
+		evt.scheduleProcess(ticks, priority, false, t, null);
 	}
 
 	public final void scheduleProcess(double secs, int priority, ProcessTarget t, EventHandle handle) {
@@ -485,30 +490,18 @@ public class Entity {
 		evt.scheduleProcess(ticks, priority, false, t, handle);
 	}
 
+	public final void scheduleProcess(double secs, int priority, boolean fifo, ProcessTarget t, EventHandle handle) {
+		EventManager evt = getEventManager();
+		long ticks = evt.secondsToNearestTick(secs);
+		evt.scheduleProcess(ticks, priority, fifo, t, handle);
+	}
+
 	public final void scheduleProcessTicks(long ticks, int priority, boolean fifo, ProcessTarget t, EventHandle h) {
 		getEventManager().scheduleProcess(ticks, priority, fifo, t, h);
 	}
 
 	public final void scheduleProcessTicks(long ticks, int priority, ProcessTarget t) {
-		getEventManager().scheduleProcess(ticks, priority, false, t);
-	}
-
-	public final void scheduleSingleProcess(ProcessTarget t) {
-		getEventManager().scheduleSingleProcess(0, Entity.PRIO_LOWEST, true, t);
-	}
-
-	public final void scheduleSingleProcess(ProcessTarget t, double secs) {
-		EventManager evt = getEventManager();
-		long ticks = evt.secondsToNearestTick(secs);
-		getEventManager().scheduleSingleProcess(ticks, Entity.PRIO_LOWEST, true, t);
-	}
-
-	public final void scheduleSingleProcess(ProcessTarget t, int priority) {
-		getEventManager().scheduleSingleProcess(0, priority, false, t);
-	}
-
-	public final void scheduleSingleProcess(ProcessTarget t, int priority, boolean fifo) {
-		getEventManager().scheduleSingleProcess(0, priority, fifo, t);
+		getEventManager().scheduleProcess(ticks, priority, false, t, null);
 	}
 
 	/**

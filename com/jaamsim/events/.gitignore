@@ -17,3 +17,4 @@
 /ThreadKilledException.class
 /WaitTarget.class
 /ReflectionTarget.class
+/EventManager$KillAllEvents.class

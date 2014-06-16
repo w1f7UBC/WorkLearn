@@ -18,7 +18,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import com.jaamsim.input.Input;
-import com.jaamsim.input.InputAgent;
+import com.jaamsim.input.KeywordIndex;
 
 /**
  * Class TwoOrThreeKeyInput for storing objects of class V (e.g. Double or DoubleVector),
@@ -51,14 +51,17 @@ public class TwoOrThreeKeyInput<K1 extends Entity, K2 extends Entity, K3 extends
 	}
 
 	@Override
-	public void parse(StringVector input)
+	public void parse(KeywordIndex kw)
 	throws InputErrorException {
-		ArrayList<StringVector> split = InputAgent.splitStringVectorByBraces(input);
-		for (StringVector each : split)
+		for (KeywordIndex each : kw.getSubArgs())
 			this.innerParse(each);
 	}
 
-	private void innerParse(StringVector input) {
+	private void innerParse(KeywordIndex kw) {
+		ArrayList<String> input = new ArrayList<String>(kw.numArgs());
+		for (int i = 0; i < kw.numArgs(); i++)
+			input.add(kw.getArg(i));
+
 		// If two entity keys are not provided, set the default value
 		Entity ent1 = Input.tryParseEntity( input.get( 0 ), Entity.class );
 		Entity ent2 = null;
@@ -66,14 +69,14 @@ public class TwoOrThreeKeyInput<K1 extends Entity, K2 extends Entity, K3 extends
 			ent2 = Input.tryParseEntity( input.get( 1 ), Entity.class );
 		}
 		if( ent1 == null || ent2 == null ) {
-			V defValue = Input.parse( input.subString(0,input.size()-1), valClass, unitString, minValue, maxValue, minCount, maxCount, null );
+			V defValue = Input.parse( input, valClass, unitString, minValue, maxValue, minCount, maxCount, null );
 			this.setDefaultValue( defValue );
 			return;
 		}
 
 		// Determine the keys
-		ArrayList<K1> list = Input.parseEntityList(input.subString(0, 0), key1Class, true);
-		ArrayList<K2> list2 = Input.parseEntityList(input.subString(1, 1), key2Class, true);
+		ArrayList<K1> list = Input.parseEntityList(input.subList(0, 1), key1Class, true);
+		ArrayList<K2> list2 = Input.parseEntityList(input.subList(1, 2), key2Class, true);
 		ArrayList<K3> list3;
 
 		// If ent3 is null, assume the line is of the form <Key1> <Key2> <Value>
@@ -89,11 +92,11 @@ public class TwoOrThreeKeyInput<K1 extends Entity, K2 extends Entity, K3 extends
 			// Otherwise assume the line is of the form <Key1> <Key2> <Key3> <Value>
 			// The third key was given.  Store the third key.
 			numKeys = 3;
-			list3 = Input.parseEntityList(input.subString(2, 2), key3Class, true);
+			list3 = Input.parseEntityList(input.subList(2, 3), key3Class, true);
 		}
 
 		// Determine the value
-		V val = Input.parse( input.subString(numKeys,input.size()-1), valClass, unitString, minValue, maxValue, minCount, maxCount, null );
+		V val = Input.parse( input.subList(numKeys,input.size()), valClass, unitString, minValue, maxValue, minCount, maxCount, null );
 
 		// Set the value for the given keys
 		for( int i = 0; i < list.size(); i++ ) {

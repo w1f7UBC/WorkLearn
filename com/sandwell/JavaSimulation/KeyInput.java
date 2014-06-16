@@ -18,7 +18,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import com.jaamsim.input.Input;
-import com.jaamsim.input.InputAgent;
+import com.jaamsim.input.KeywordIndex;
 import com.jaamsim.units.DimensionlessUnit;
 import com.jaamsim.units.Unit;
 
@@ -54,28 +54,31 @@ public class KeyInput<K1 extends Entity, V> extends Input<V> {
 	}
 
 	@Override
-	public void parse(StringVector input)
+	public void parse(KeywordIndex kw)
 	throws InputErrorException {
-		ArrayList<StringVector> split = InputAgent.splitStringVectorByBraces(input);
-		for (StringVector each : split)
+		for (KeywordIndex each : kw.getSubArgs())
 			this.innerParse(each);
 	}
 
-	private void innerParse(StringVector input) {
+	private void innerParse(KeywordIndex kw) {
+		ArrayList<String> input = new ArrayList<String>(kw.numArgs());
+		for (int i = 0; i < kw.numArgs(); i++)
+			input.add(kw.getArg(i));
+
 		// If an entity key is not provided, set the default value
 		Entity ent = Input.tryParseEntity( input.get( 0 ), Entity.class );
 		if( ent == null || input.size() == 1 ) {
-			V defValue = Input.parse( input.subString(0,input.size()-1), valClass, unitString, minValue, maxValue, minCount, maxCount, unitType );
+			V defValue = Input.parse( input, valClass, unitString, minValue, maxValue, minCount, maxCount, unitType );
 			this.setDefaultValue( defValue );
 			return;
 		}
 
 		// The input is of the form: <Key> <Value>
 		// Determine the key(s)
-		ArrayList<K1> list = Input.parseEntityList(input.subString(0, 0), keyClass, true);
+		ArrayList<K1> list = Input.parseEntityList(input.subList(0, 1), keyClass, true);
 
 		// Determine the value
-		V val = Input.parse( input.subString(1,input.size()-1), valClass, unitString, minValue, maxValue, minCount, maxCount, unitType );
+		V val = Input.parse( input.subList(1,input.size()), valClass, unitString, minValue, maxValue, minCount, maxCount, unitType );
 
 		// Set the value for the given keys
 		for( int i = 0; i < list.size(); i++ ) {

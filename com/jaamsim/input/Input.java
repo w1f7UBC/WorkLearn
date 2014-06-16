@@ -16,6 +16,7 @@ package com.jaamsim.input;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.regex.Pattern;
 
 import com.jaamsim.Samples.SampleConstant;
@@ -34,7 +35,6 @@ import com.sandwell.JavaSimulation.InputErrorException;
 import com.sandwell.JavaSimulation.IntegerVector;
 import com.sandwell.JavaSimulation.ListInput;
 import com.sandwell.JavaSimulation.ObjectType;
-import com.sandwell.JavaSimulation.StringVector;
 import com.sandwell.JavaSimulation.Tester;
 import com.sandwell.JavaSimulation3D.Clock;
 
@@ -173,18 +173,8 @@ public abstract class Input<T> {
 		valueString = str;
 	}
 
-	public void parse(KeywordIndex kw) throws InputErrorException {
-		StringVector data = new StringVector(kw.numArgs());
-		for (int i = 0; i < kw.numArgs(); i++) {
-			data.add(kw.getArg(i));
-		}
+	public abstract void parse(KeywordIndex kw) throws InputErrorException;
 
-		parse(data);
-	}
-
-	public void parse(StringVector input) throws InputErrorException {
-		return;
-	}
 
 	public static void assertCount(DoubleVector input, int... counts)
 	throws InputErrorException {
@@ -230,7 +220,7 @@ public abstract class Input<T> {
 			throw new InputErrorException(INP_ERR_RANGECOUNT, min, max, kw.argString());
 	}
 
-	public static void assertCount(StringVector input, int... counts)
+	public static void assertCount(List<String> input, int... counts)
 	throws InputErrorException {
 		// If there is no constraint on the element count, return
 		if (counts.length == 0)
@@ -258,7 +248,7 @@ public abstract class Input<T> {
 			throw new InputErrorException(INP_ERR_RANGECOUNT, min, max, input.toString());
 	}
 
-	public static void assertCountRange(StringVector input, int min, int max)
+	public static void assertCountRange(List<String> input, int min, int max)
 	throws InputErrorException {
 		// For a range with a single value, fall back to the exact test
 		if (min == max) {
@@ -297,7 +287,7 @@ public abstract class Input<T> {
 		throw new InputErrorException(INP_ERR_BADSUM, sum, vec.sum());
 	}
 
-	public static <T> T parse(StringVector data, Class<T> aClass, String units, double minValue, double maxValue, int minCount, int maxCount, Class<? extends Unit> unitType) {
+	public static <T> T parse(List<String> data, Class<T> aClass, String units, double minValue, double maxValue, int minCount, int maxCount, Class<? extends Unit> unitType) {
 
 		if( aClass == Double.class ) {
 			if( units != null )
@@ -394,7 +384,7 @@ public abstract class Input<T> {
 		return temp;
 	}
 
-	public static BooleanVector parseBooleanVector(StringVector input)
+	public static BooleanVector parseBooleanVector(List<String> input)
 	throws InputErrorException {
 		BooleanVector temp = new BooleanVector(input.size());
 
@@ -466,7 +456,7 @@ public abstract class Input<T> {
 		catch (NumberFormatException e) { return false; }
 	}
 
-	public static IntegerVector parseIntegerVector(StringVector input, int minValue, int maxValue)
+	public static IntegerVector parseIntegerVector(List<String> input, int minValue, int maxValue)
 	throws InputErrorException {
 		IntegerVector temp = new IntegerVector(input.size());
 
@@ -741,7 +731,7 @@ public abstract class Input<T> {
 	/**
 	 * Convert the given String to a double including a unit conversion, if necessary
 	 */
-	public static double parseDouble(StringVector input, double minValue, double maxValue, String defaultUnitString)
+	public static double parseDouble(List<String> input, double minValue, double maxValue, String defaultUnitString)
 	throws InputErrorException {
 		Input.assertCountRange(input, 1, 2);
 
@@ -773,15 +763,10 @@ public abstract class Input<T> {
 		return Input.parseDouble( input.get(0), minValue, maxValue, conversionFactor);
 	}
 
-	public static DoubleVector parseDoubleVector(StringVector input, double minValue, double maxValue)
-	throws InputErrorException {
-		return Input.parseDoubleVector(input, minValue, maxValue, 1.0);
-	}
-
 	/**
-	 * Convert the given StringVector to a DoubleVector and apply the given conversion factor
+	 * Convert the given input to a DoubleVector and apply the given conversion factor
 	 */
-	public static DoubleVector parseDoubleVector(StringVector input, double minValue, double maxValue, double factor)
+	public static DoubleVector parseDoubleVector(List<String> input, double minValue, double maxValue, double factor)
 	throws InputErrorException {
 		DoubleVector temp = new DoubleVector(input.size());
 
@@ -797,7 +782,7 @@ public abstract class Input<T> {
 	}
 
 	/**
-	 * Convert the given StringVector to a DoubleVector and apply the given conversion factor
+	 * Convert the given input to a DoubleVector and apply the given conversion factor
 	 */
 	public static DoubleVector parseDoubles(KeywordIndex kw, double minValue, double maxValue, Class<? extends Unit> unitType)
 	throws InputErrorException {
@@ -841,9 +826,9 @@ public abstract class Input<T> {
 	}
 
 	/**
-	 * Convert the given StringVector to a DoubleVector and apply the given conversion factor
+	 * Convert the given input to a DoubleVector and apply the given conversion factor
 	 */
-	public static DoubleVector parseDoubles(StringVector input, double minValue, double maxValue, Class<? extends Unit> unitType)
+	public static DoubleVector parseDoubles(List<String> input, double minValue, double maxValue, Class<? extends Unit> unitType)
 	throws InputErrorException {
 		if (unitType == UserSpecifiedUnit.class)
 			throw new InputErrorException(INP_ERR_UNITUNSPECIFIED);
@@ -885,14 +870,11 @@ public abstract class Input<T> {
 	}
 
 	/**
-	 * Convert the given StringVector to a DoubleVector including a unit conversion, if necessary
+	 * Convert the given input to a DoubleVector including a unit conversion, if necessary
 	 */
-	public static DoubleVector parseDoubleVector(StringVector data, double minValue, double maxValue, String defaultUnitString)
+	public static DoubleVector parseDoubleVector(List<String> data, double minValue, double maxValue, String defaultUnitString)
 	throws InputErrorException {
-		StringVector numericData = new StringVector(data);
-
 		// If there is more than one value, and the last one is not a number, then assume it is a unit
-		double conversionFactor = 1.0;
 		String unitString = data.get( data.size()-1 );
 		if( data.size() > 1 && !Tester.isDouble(unitString) ) {
 
@@ -909,10 +891,14 @@ public abstract class Input<T> {
 				throw new InputErrorException( "Cannot convert from %s to %s", defaultUnit.getName(), unit.getName());
 
 			// Determine the conversion factor to the default units
-			conversionFactor = unit.getConversionFactorToUnit( defaultUnit );
+			double conversionFactor = unit.getConversionFactorToUnit( defaultUnit );
 
-			// Remove the unit string from the inputs
-			numericData.remove( numericData.size()-1 );
+			// grab all but the final argument (the unit)
+			ArrayList<String> numericData = new ArrayList<String>(data.size() - 1);
+			for (int i = 0; i < data.size() -1; i++)
+				numericData.add(data.get(i));
+
+			return Input.parseDoubleVector( numericData, minValue, maxValue, conversionFactor);
 		}
 		else {
 			if( defaultUnitString.length() > 0 )
@@ -920,7 +906,7 @@ public abstract class Input<T> {
 		}
 
 		// Parse and convert the values
-		return Input.parseDoubleVector( numericData, minValue, maxValue, conversionFactor);
+		return Input.parseDoubleVector( data, minValue, maxValue, 1.0d);
 	}
 
 	public static String parseString(String input, ArrayList<String> validList)
@@ -1067,7 +1053,7 @@ public abstract class Input<T> {
 	}
 
 
-	public static <T extends Entity> ArrayList<T> parseEntityList(StringVector input, Class<T> aClass, boolean unique)
+	public static <T extends Entity> ArrayList<T> parseEntityList(List<String> input, Class<T> aClass, boolean unique)
 	throws InputErrorException {
 		ArrayList<T> temp = new ArrayList<T>(input.size());
 

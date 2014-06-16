@@ -18,7 +18,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import com.jaamsim.input.Input;
-import com.jaamsim.input.InputAgent;
+import com.jaamsim.input.KeywordIndex;
 
 /**
  * Class KeyListInput for storing a list of entities of class V, with an optional key of class K1
@@ -37,29 +37,32 @@ public class KeyListInput<K1 extends Entity, V extends Entity> extends Input<Arr
 	}
 
 	@Override
-	public void parse(StringVector input)
+	public void parse(KeywordIndex kw)
 	throws InputErrorException {
-		ArrayList<StringVector> split = InputAgent.splitStringVectorByBraces(input);
-		for (StringVector each : split)
+		for (KeywordIndex each : kw.getSubArgs())
 			this.innerParse(each);
 	}
 
-	private void innerParse(StringVector input) {
+	private void innerParse(KeywordIndex kw) {
+		ArrayList<String> input = new ArrayList<String>(kw.numArgs());
+		for (int i = 0; i < kw.numArgs(); i++)
+			input.add(kw.getArg(i));
+
 		ArrayList<K1> list;
 		try {
 			// Determine the key(s)
-			list = Input.parseEntityList(input.subString(0, 0), keyClass, true);
+			list = Input.parseEntityList(input.subList(0, 1), keyClass, true);
 		}
 		catch (InputErrorException e) {
 			// A key was not provided.  Set the default value
-			ArrayList<V> defValue = Input.parseEntityList( input.subString(0,input.size()-1), valClass, true );
+			ArrayList<V> defValue = Input.parseEntityList( input, valClass, true );
 			this.setDefaultValue( defValue );
 			return;
 		}
 
 		// The input is of the form: <Key> <value1 value2 value3...>
 		// Determine the value
-		ArrayList<V> val = Input.parseEntityList( input.subString(1,input.size()-1), valClass, true );
+		ArrayList<V> val = Input.parseEntityList( input.subList(1,input.size()), valClass, true );
 
 		// Set the value for the given keys
 		for( int i = 0; i < list.size(); i++ ) {

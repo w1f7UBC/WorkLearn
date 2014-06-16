@@ -141,27 +141,7 @@ public final class EventManager {
 			timelistener.tickUpdate(currentTick);
 			rebaseRealTime = true;
 
-			eventTree.runOnAllNodes(new EventNode.Runner() {
-
-				@Override
-				public void runOnNode(EventNode node) {
-					Event each = node.head;
-					while (each != null) {
-						if (each.handle != null) {
-							each.handle.event = null;
-							each.handle = null;
-						}
-
-						Process proc = each.target.getProcess();
-						if (proc != null)
-							proc.kill();
-
-						each = each.next;
-					}
-				}
-
-			});
-
+			eventTree.runOnAllNodes(new KillAllEvents());
 			eventTree.reset();
 
 			// Kill conditional threads
@@ -173,6 +153,25 @@ public final class EventManager {
 			}
 			conditionalList.clear();
 			conditionalHandles.clear();
+		}
+	}
+
+	private static class KillAllEvents implements EventNode.Runner {
+		@Override
+		public void runOnNode(EventNode node) {
+			Event each = node.head;
+			while (each != null) {
+				if (each.handle != null) {
+					each.handle.event = null;
+					each.handle = null;
+				}
+
+				Process proc = each.target.getProcess();
+				if (proc != null)
+					proc.kill();
+
+				each = each.next;
+			}
 		}
 	}
 
@@ -251,7 +250,8 @@ public final class EventManager {
 					Process p = nextEvent.target.getProcess();
 					if (p != null) {
 						p.setNextProcess(cur);
-						switchThread(p);
+						p.wake();
+						threadWait();
 						continue;
 					}
 
@@ -276,7 +276,8 @@ public final class EventManager {
 
 						// Wake up the first conditional thread to be tested
 						// at this point, nextThread == conditionalList.get(0)
-						switchThread(conditionalList.get(0));
+						conditionalList.get(0).wake();
+						threadWait();
 					}
 
 					// If a conditional event was satisfied, we will have a new event at the
@@ -343,21 +344,12 @@ public final class EventManager {
 		// if we don't wake a new process, take one from the pool
 		if (!cur.wakeNextProcess()) {
 			processRunning = false;
-			Process.allocate(this, null, null).interrupt();
+			Process.allocate(this, null, null).wake();
 		}
 
 		threadWait();
 		if (cur.shouldDie()) throw new ThreadKilledException("Thread killed");
 		cur.setActive();
-	}
-
-	/**
-	 * Must hold the lockObject when calling this method
-	 * @param next
-	 */
-	private void switchThread(Process next) {
-		next.interrupt();
-		threadWait();
 	}
 
 	/**
@@ -375,27 +367,6 @@ public final class EventManager {
 			nextEventTime = Long.MAX_VALUE;
 
 		return nextEventTime;
-	}
-
-	public void scheduleSingleProcess(long waitLength, int eventPriority, boolean fifo, ProcessTarget t) {
-		synchronized (lockObject) {
-			assertNotWaitUntil();
-			long eventTime = calculateEventTime(waitLength);
-			EventNode node = getEventNode(eventTime, eventPriority);
-			Event each = node.head;
-			while (each != null) {
-				if (each.target == t) {
-					if (trcListener != null) trcListener.traceSchedProcess(this, each);
-					return;
-				}
-				each = each.next;
-			}
-
-			// Create an event for the new process at the present time, and place it on the event stack
-			Event newEvent = new Event(node, t);
-			if (trcListener != null) trcListener.traceSchedProcess(this, newEvent);
-			node.addEvent(newEvent, fifo);
-		}
 	}
 
 	/**
@@ -505,7 +476,8 @@ public final class EventManager {
 		synchronized (lockObject) {
 			if (trcListener != null) trcListener.traceProcessStart(this, t);
 			// Transfer control to the new process
-			switchThread(newProcess);
+			newProcess.wake();
+			threadWait();
 		}
 	}
 
@@ -605,7 +577,8 @@ public final class EventManager {
 			if (proc == null)
 				proc = Process.allocate(this, cur, evt.target);
 			proc.setNextProcess(cur);
-			switchThread(proc);
+			proc.wake();
+			threadWait();
 		}
 	}
 
@@ -659,10 +632,6 @@ public final class EventManager {
 
 	}
 
-	public void scheduleProcess(long waitLength, int eventPriority, boolean fifo, ProcessTarget t) {
-		this.scheduleProcess(waitLength, eventPriority, fifo, t, null);
-	}
-
 	public void scheduleProcess(long waitLength, int eventPriority, boolean fifo, ProcessTarget t, EventHandle handle) {
 		synchronized (lockObject) {
 			long schedTick = calculateEventTime(waitLength);
@@ -706,7 +675,7 @@ public final class EventManager {
 				return;
 
 			executeEvents = true;
-			Process.allocate(this, null, null).interrupt();
+			Process.allocate(this, null, null).wake();
 		}
 	}
 

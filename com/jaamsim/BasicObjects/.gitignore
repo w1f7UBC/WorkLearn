@@ -19,3 +19,7 @@
 /Seize.class
 /Assemble$CompletionOfProcessingTarget.class
 /Assemble.class
+/ReportGenerator$PerformInitialisationTarget.class
+/ReportGenerator$PerformRunEndTarget.class
+/ReportGenerator.class
+/Statistics.class
