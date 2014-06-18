@@ -60,21 +60,23 @@ public class DataBase<T> extends Input<T>{
 	    	{
 	    	   Name = rs.getString(1);
 	    	   System.out.println(Name);
-	    	   String ad ="AttributeDefinitionList"+"{"+rs.getString(2)+"}";
-	    	   String position ="Position"+"{"+ rs.getArray(3)+"}";
-	    	   String allignment ="Alignment"+"{"+rs.getArray(4)+"}";
-	    	   String dm = "DisplayModel"+"{"+rs.getString(5)+"}";
+	    	   String ad ="AttributeDefinitionList"+"{ "+rs.getString(2)+" }";
+	    	   String position ="Position"+"{ "+ rs.getArray(3)+" }";
+	    	   String allignment ="Alignment"+"{ "+rs.getArray(4)+" }";
+	    	   String dm = "DisplayModel"+"{ "+rs.getString(5)+" }";
 	 	       Entity ent1 = InputAgent.defineEntity(DisplayEntity.class, Name, rs.next());
-	 	       String cat ="Graphics";
-	 	 /*      ArrayList<String> kw = new ArrayList<String>() ;
+	 	       String cat ="Basic Graphics";
+	 	       ArrayList<String> kw = new ArrayList<String>() ;
 
 	 	       ParseContext pc= new ParseContext();
 	 	       kw.add(ad);
 	 	       kw.add(position);
 	 	       kw.add(allignment);
 	 	       kw.add(dm);
-	 	      KeywordIndex kwi= new KeywordIndex(kw,0,0,pc);
-	 	        InputAgent.apply(ent1, kwi); */
+	 	       KeywordIndex kwi= new KeywordIndex(kw,0,4,pc);
+	 	       Input<?> in = ent1.getInput(kwi.keyword);
+	 	      
+	 	     InputAgent.apply(ent1, in, kwi); 
 	    			   //Input.Input("DisplayModel",cat,rs.getString(5));
 	 	        //  Input("DisplayModel",cat,rs.getString(5));
 	    	  // ent1.updateForInput(in);
