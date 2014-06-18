@@ -3,6 +3,8 @@ package map;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.List;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Set;
@@ -19,11 +21,13 @@ import gov.nasa.worldwind.util.StatusBar;
 
 import javax.swing.JFrame;
 
+import com.jogamp.newt.event.MouseAdapter;
+
 public class Map {
 
 	public static void main(String[] args) {
 
-		StatusBar statusBar= new StatusBar();
+		final StatusBar statusBar= new StatusBar();
 
 
 		//create a WorldWind main object
@@ -31,32 +35,32 @@ public class Map {
 		BasicModel a=new BasicModel();
 		System.out.println(a.getLayers());
 
-		Set<String> abc=new HashSet<String>();
-		abc.add("Stars");
-		abc.add("Atmosphere");
-		//abc.add("NASA Blue Marble Image");
-		//abc.add("Blue Marble May 2004");
-		//abc.add("i-cubed Landsat");
-		abc.add("USDA NAIP");
-		abc.add("USDA NAIP USGS");
-		abc.add("MS Virtual Earth Aerial");
-		abc.add("Bing Imagery");
-		abc.add("USGS Topographic Maps 1:250K");
-		abc.add("USGS Topographic Maps 1:100K");
-		abc.add("USGS Topographic Maps 1:24K");
-		abc.add("USGS Urban Area Ortho");
-		abc.add("Political Boundaries");
-		abc.add("Open Street Map");
-		abc.add("Earth at Night");
-		//abc.add("Place Names");
-		abc.add("World Map");
-		//abc.add("Scale bar");
-		abc.add("Compass");
+		Set<String> exclusionList=new HashSet<String>();
+		exclusionList.add("Stars");
+		exclusionList.add("Atmosphere");
+		//exclusionList.add("NASA Blue Marble Image");
+		//exclusionList.add("Blue Marble May 2004");
+		//exclusionList.add("i-cubed Landsat");
+		exclusionList.add("USDA NAIP");
+		exclusionList.add("USDA NAIP USGS");
+		exclusionList.add("MS Virtual Earth Aerial");
+		exclusionList.add("Bing Imagery");
+		exclusionList.add("USGS Topographic Maps 1:250K");
+		exclusionList.add("USGS Topographic Maps 1:100K");
+		exclusionList.add("USGS Topographic Maps 1:24K");
+		exclusionList.add("USGS Urban Area Ortho");
+		exclusionList.add("Political Boundaries");
+		exclusionList.add("Open Street Map");
+		exclusionList.add("Earth at Night");
+		//exclusionList.add("Place Names");
+		exclusionList.add("World Map");
+		//exclusionList.add("Scale bar");
+		exclusionList.add("Compass");
 
 		LayerList layerList=a.getLayers();
 
 		for (Layer x: layerList){
-			if (abc.contains(x.getName())){
+			if (exclusionList.contains(x.getName())){
 				layerList.remove(x);
 			}
 		}
@@ -80,26 +84,51 @@ public class Map {
 		frame.setSize(800,600);
 		frame.setVisible(true);
 
-		//create some "Position" to build a polyline
-		LinkedList<Position> list = new LinkedList<Position>();
-		for(int i = 0 ; i < 90 ; i++) {
-			//in this case, points are in geographic coordinates.
-			//If you are using cartesian coordinates, you have to convert them to geographic coordinates.
-			//Maybe, there are some functions doing that in WWJ API...
-			list.add(Position.fromDegrees(i,0.0,i*20000));
-		}
 
-		//create "Polyline" with list of "Position" and set color / thickness
-		Polyline polyline = new Polyline(list);
-		polyline.setColor(Color.RED);
-		polyline.setLineWidth(3.0);
 
-		//create a layer and add Polyline
-		RenderableLayer layer = new RenderableLayer();
-		layer.addRenderable(polyline);
 
-		//add layer to WorldWind
-		worldWindCanvas.getModel().getLayers().add(layer);
+
+		frame.addMouseListener(new MouseListener() {
+
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				// TODO Auto-generated method stub
+
+			}
+
+			@Override
+			public void mousePressed(MouseEvent e) {
+				// TODO Auto-generated method stub
+
+
+
+			}
+
+			@Override
+			public void mouseExited(MouseEvent e) {
+				// TODO Auto-generated method stub
+
+			}
+
+			@Override
+			public void mouseEntered(MouseEvent e) {
+				// TODO Auto-generated method stub
+
+			}
+
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				// TODO Auto-generated method stub
+				/*
+				statusBar.get
+				System.out.println(statusBar.getLong());
+				System.out.println(statusBar.getElev());
+				*/
+			}
+
+		  });
+
+
 	}
 
 }
