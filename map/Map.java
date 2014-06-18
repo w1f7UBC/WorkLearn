@@ -1,5 +1,6 @@
 package map;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.List;
 import java.util.HashSet;
@@ -7,18 +8,23 @@ import java.util.LinkedList;
 import java.util.Set;
 
 import gov.nasa.worldwind.BasicModel;
+import gov.nasa.worldwind.WorldWindow;
 import gov.nasa.worldwind.awt.WorldWindowGLCanvas;
 import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.layers.Layer;
 import gov.nasa.worldwind.layers.LayerList;
 import gov.nasa.worldwind.layers.RenderableLayer;
 import gov.nasa.worldwind.render.Polyline;
+import gov.nasa.worldwind.util.StatusBar;
 
 import javax.swing.JFrame;
 
 public class Map {
 
 	public static void main(String[] args) {
+
+		StatusBar statusBar= new StatusBar();
+
 
 		//create a WorldWind main object
 		WorldWindowGLCanvas worldWindCanvas = new WorldWindowGLCanvas();
@@ -61,6 +67,14 @@ public class Map {
 
 		//build Java swing interface
 		JFrame frame = new JFrame("World Wind");
+        frame.add(statusBar, BorderLayout.PAGE_END);
+        statusBar.setEventSource(worldWindCanvas);
+
+
+
+        //frame.statusBar.setEventSource();
+
+
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.add(worldWindCanvas);
 		frame.setSize(800,600);
