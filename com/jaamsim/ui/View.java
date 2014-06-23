@@ -20,6 +20,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Locale;
 
+import com.jaamsim.input.Input;
 import com.jaamsim.input.InputAgent;
 import com.jaamsim.input.KeyedVec3dInput;
 import com.jaamsim.input.Keyword;
@@ -38,6 +39,7 @@ import com.sandwell.JavaSimulation.Vec3dInput;
 import com.sandwell.JavaSimulation3D.DisplayEntity;
 import com.sandwell.JavaSimulation3D.GUIFrame;
 import com.sandwell.JavaSimulation3D.Region;
+import map.Map;
 
 public class View extends Entity {
 private static final ArrayList<View> allInstances;
@@ -83,6 +85,10 @@ private final BooleanInput showWindow;
  example = "View1 Movable { FALSE }")
 private final BooleanInput movable;
 
+@Keyword(description = "A Boolean indicating whether the view should show the map baselayer", 
+example = "View1 BaseMap { TRUE }")
+private final BooleanInput baseMap;
+
 @Keyword(description = "The (optional) entity for this view to follow. Setting this input makes the view ignore ViewCenter " +
                 "and interprets ViewPosition as a relative offset to this entity.",
          example = "View1 FollowEntity { Ship1 }")
@@ -99,6 +105,7 @@ private final KeyedVec3dInput centerScriptInput;
 @Keyword(description = "The image file to use as the background for this view.",
 example = "View1 SkyboxImage { '/resources/images/sky_map_2048x1024.jpg' }")
 private final FileInput skyboxImage;
+
 
 private Object setLock = new Object();
 
@@ -120,6 +127,7 @@ static {
 	position.setUnitType(DistanceUnit.class);
 	this.addInput(position);
 
+	//this.addInput(Map.map());
 	IntegerVector defSize = new IntegerVector(2);
 	defSize.add(GUIFrame.VIEW_WIDTH);
 	defSize.add(GUIFrame.VIEW_HEIGHT);
@@ -144,6 +152,9 @@ static {
 
 	movable = new BooleanInput("Movable", "Graphics", true);
 	this.addInput(movable);
+	
+	baseMap = new BooleanInput("BaseMap", "Graphics", true);
+	this.addInput(baseMap);
 
 	followEntityInput = new EntityInput<DisplayEntity>(DisplayEntity.class, "FollowEntity", "Graphics", null);
 	this.addInput(followEntityInput);
@@ -158,7 +169,6 @@ static {
 
 	skyboxImage = new FileInput("SkyboxImage", "Graphics", null);
 	this.addInput(skyboxImage);
-
 }
 
 public View() {
@@ -270,6 +280,10 @@ public String getTitle() {
 
 public boolean showWindow() {
 	return showWindow.getValue();
+}
+
+public boolean baseMap(){
+	return baseMap.getValue();
 }
 
 public Region getRegion() {

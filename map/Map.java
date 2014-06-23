@@ -1,36 +1,23 @@
 package map;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.List;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.Set;
-
 import gov.nasa.worldwind.BasicModel;
-import gov.nasa.worldwind.WorldWindow;
+import gov.nasa.worldwind.Configuration;
+import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.awt.WorldWindowGLCanvas;
-import gov.nasa.worldwind.geom.Position;
+import gov.nasa.worldwind.globes.EarthFlat;
 import gov.nasa.worldwind.layers.Layer;
 import gov.nasa.worldwind.layers.LayerList;
-import gov.nasa.worldwind.layers.RenderableLayer;
-import gov.nasa.worldwind.render.Polyline;
-import gov.nasa.worldwind.util.StatusBar;
-
-import javax.swing.JFrame;
+import gov.nasa.worldwind.view.orbit.FlatOrbitView;
 
 public class Map {
-
-	public static void main(String[] args) {
-
-		StatusBar statusBar= new StatusBar();
-
-
+	public static WorldWindowGLCanvas map(){
 		//create a WorldWind main object
+		Configuration.setValue(AVKey.GLOBE_CLASS_NAME, EarthFlat.class.getName());
+        Configuration.setValue(AVKey.VIEW_CLASS_NAME, FlatOrbitView.class.getName());
 		WorldWindowGLCanvas worldWindCanvas = new WorldWindowGLCanvas();
-		BasicModel a=new BasicModel();
-		System.out.println(a.getLayers());
-
+		BasicModel a=new BasicModel();		
 		Set<String> abc=new HashSet<String>();
 		abc.add("Stars");
 		abc.add("Atmosphere");
@@ -52,54 +39,14 @@ public class Map {
 		abc.add("World Map");
 		//abc.add("Scale bar");
 		abc.add("Compass");
-
 		LayerList layerList=a.getLayers();
-
 		for (Layer x: layerList){
 			if (abc.contains(x.getName())){
 				layerList.remove(x);
 			}
 		}
 		a.setLayers(layerList);
-		System.out.println(a.getLayers());
-
 		worldWindCanvas.setModel(a);
-
-		//build Java swing interface
-		JFrame frame = new JFrame("World Wind");
-        frame.add(statusBar, BorderLayout.PAGE_END);
-        statusBar.setEventSource(worldWindCanvas);
-
-
-
-        //frame.statusBar.setEventSource();
-
-
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.add(worldWindCanvas);
-		frame.setSize(800,600);
-		frame.setVisible(true);
-
-		//create some "Position" to build a polyline
-		LinkedList<Position> list = new LinkedList<Position>();
-		for(int i = 0 ; i < 90 ; i++) {
-			//in this case, points are in geographic coordinates.
-			//If you are using cartesian coordinates, you have to convert them to geographic coordinates.
-			//Maybe, there are some functions doing that in WWJ API...
-			list.add(Position.fromDegrees(i,0.0,i*20000));
-		}
-
-		//create "Polyline" with list of "Position" and set color / thickness
-		Polyline polyline = new Polyline(list);
-		polyline.setColor(Color.RED);
-		polyline.setLineWidth(3.0);
-
-		//create a layer and add Polyline
-		RenderableLayer layer = new RenderableLayer();
-		layer.addRenderable(polyline);
-
-		//add layer to WorldWind
-		worldWindCanvas.getModel().getLayers().add(layer);
+		return worldWindCanvas;
 	}
-
 }

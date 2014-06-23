@@ -112,6 +112,7 @@ public class Renderer implements GLAnimatorControl {
 
 	private TexCache texCache = new TexCache(this);
 
+	
 	// An initalization time flag specifying if the 'safest' graphical techniques should be used
 	private boolean safeGraphics;
 

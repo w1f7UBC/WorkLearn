@@ -985,6 +985,7 @@ public class GUIFrame extends JFrame implements EventTimeListener, EventErrorLis
 		NewRenderWindowLauncher(View v) {
 			view = v;
 			this.setText(view.getName());
+			//System.out.println(view);
 			this.addActionListener(this);
 		}
 

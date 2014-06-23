@@ -24,7 +24,7 @@ import javax.media.opengl.GLEventListener;
 
 import com.jogamp.newt.awt.NewtCanvasAWT;
 import com.jogamp.newt.opengl.GLWindow;
-
+import map.Map;
 public class RenderWindow {
 
 	private Frame _awtFrame;
@@ -54,7 +54,7 @@ public class RenderWindow {
 
 		_awtFrame = new Frame(title);
 		NewtCanvasAWT canvas = new NewtCanvasAWT(_window);
-		_awtFrame.add(canvas);
+		_awtFrame.add(Map.map());
 		_awtFrame.setBounds(x, y, width, height);
 
 		if (icon != null) {
