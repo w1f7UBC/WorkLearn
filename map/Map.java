@@ -18,30 +18,30 @@ public class Map {
         Configuration.setValue(AVKey.VIEW_CLASS_NAME, FlatOrbitView.class.getName());
 		WorldWindowGLCanvas worldWindCanvas = new WorldWindowGLCanvas();
 		BasicModel a=new BasicModel();		
-		Set<String> abc=new HashSet<String>();
-		abc.add("Stars");
-		abc.add("Atmosphere");
-		//abc.add("NASA Blue Marble Image");
-		//abc.add("Blue Marble May 2004");
-		//abc.add("i-cubed Landsat");
-		abc.add("USDA NAIP");
-		abc.add("USDA NAIP USGS");
-		abc.add("MS Virtual Earth Aerial");
-		abc.add("Bing Imagery");
-		abc.add("USGS Topographic Maps 1:250K");
-		abc.add("USGS Topographic Maps 1:100K");
-		abc.add("USGS Topographic Maps 1:24K");
-		abc.add("USGS Urban Area Ortho");
-		abc.add("Political Boundaries");
-		abc.add("Open Street Map");
-		abc.add("Earth at Night");
-		//abc.add("Place Names");
-		abc.add("World Map");
-		//abc.add("Scale bar");
-		abc.add("Compass");
+		Set<String> exclusionList=new HashSet<String>();
+		exclusionList.add("Stars");
+		exclusionList.add("Atmosphere");
+		//exclusionList.add("NASA Blue Marble Image");
+		//exclusionList.add("Blue Marble May 2004");
+		//exclusionList.add("i-cubed Landsat");
+		exclusionList.add("USDA NAIP");
+		exclusionList.add("USDA NAIP USGS");
+		exclusionList.add("MS Virtual Earth Aerial");
+		exclusionList.add("Bing Imagery");
+		exclusionList.add("USGS Topographic Maps 1:250K");
+		exclusionList.add("USGS Topographic Maps 1:100K");
+		exclusionList.add("USGS Topographic Maps 1:24K");
+		exclusionList.add("USGS Urban Area Ortho");
+		exclusionList.add("Political Boundaries");
+		exclusionList.add("Open Street Map");
+		exclusionList.add("Earth at Night");
+		//exclusionList.add("Place Names");
+		exclusionList.add("World Map");
+		//exclusionList.add("Scale bar");
+		exclusionList.add("Compass");
 		LayerList layerList=a.getLayers();
 		for (Layer x: layerList){
-			if (abc.contains(x.getName())){
+			if (exclusionList.contains(x.getName())){
 				layerList.remove(x);
 			}
 		}
