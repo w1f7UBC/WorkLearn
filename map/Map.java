@@ -2,22 +2,30 @@ package map;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.List;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.util.EventListener;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Set;
 
 import gov.nasa.worldwind.BasicModel;
+import gov.nasa.worldwind.Configuration;
 import gov.nasa.worldwind.WorldWindow;
+import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.awt.WorldWindowGLCanvas;
+import gov.nasa.worldwind.event.PositionEvent;
+import gov.nasa.worldwind.event.PositionListener;
 import gov.nasa.worldwind.geom.Position;
+import gov.nasa.worldwind.globes.EarthFlat;
 import gov.nasa.worldwind.layers.Layer;
 import gov.nasa.worldwind.layers.LayerList;
 import gov.nasa.worldwind.layers.RenderableLayer;
 import gov.nasa.worldwind.render.Polyline;
 import gov.nasa.worldwind.util.StatusBar;
+import gov.nasa.worldwind.view.orbit.FlatOrbitView;
 
 import javax.swing.JFrame;
 
@@ -26,6 +34,9 @@ import com.jogamp.newt.event.MouseAdapter;
 public class Map {
 
 	public static void main(String[] args) {
+
+		Configuration.setValue(AVKey.GLOBE_CLASS_NAME, EarthFlat.class.getName());
+        Configuration.setValue(AVKey.VIEW_CLASS_NAME, FlatOrbitView.class.getName());
 
 		final StatusBar statusBar= new StatusBar();
 
@@ -58,12 +69,14 @@ public class Map {
 		exclusionList.add("Compass");
 
 		LayerList layerList=a.getLayers();
-
+/*
 		for (Layer x: layerList){
 			if (exclusionList.contains(x.getName())){
 				layerList.remove(x);
 			}
 		}
+
+		*/
 		a.setLayers(layerList);
 		System.out.println(a.getLayers());
 
@@ -74,61 +87,17 @@ public class Map {
         frame.add(statusBar, BorderLayout.PAGE_END);
         statusBar.setEventSource(worldWindCanvas);
 
-
-
-        //frame.statusBar.setEventSource();
+        MapListener xyz=new MapListener();
+        worldWindCanvas.addPositionListener(xyz);
 
 
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.add(worldWindCanvas);
 		frame.setSize(800,600);
 		frame.setVisible(true);
-
-
-
-
-
-		frame.addMouseListener(new MouseListener() {
-
-			@Override
-			public void mouseReleased(MouseEvent e) {
-				// TODO Auto-generated method stub
-
-			}
-
-			@Override
-			public void mousePressed(MouseEvent e) {
-				// TODO Auto-generated method stub
-
-
-
-			}
-
-			@Override
-			public void mouseExited(MouseEvent e) {
-				// TODO Auto-generated method stub
-
-			}
-
-			@Override
-			public void mouseEntered(MouseEvent e) {
-				// TODO Auto-generated method stub
-
-			}
-
-			@Override
-			public void mouseClicked(MouseEvent e) {
-				// TODO Auto-generated method stub
-				/*
-				statusBar.get
-				System.out.println(statusBar.getLong());
-				System.out.println(statusBar.getElev());
-				*/
-			}
-
-		  });
-
-
 	}
+
+
+
 
 }
