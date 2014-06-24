@@ -20,9 +20,10 @@ public class DataBase<T> extends Input<T>{
 
 	 public DataBase(String key, String cat, T def) {
 		super(key, cat, def);
+		System.out.println("World Wind Test");
 		// TODO Auto-generated constructor stub
 	}
-
+	 	
 
 	{
 
