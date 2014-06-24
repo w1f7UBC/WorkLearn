@@ -91,10 +91,15 @@ public class Map {
 		worldWindCanvas.setModel(a);
 
 		final StatusBar statusBar= new StatusBar();
+		MapListener xyz=new MapListener();
+
+	    worldWindCanvas.addPositionListener(xyz);
+		worldWindCanvas.addMouseListener(xyz);
 
 		JFrame frame = new JFrame("World Wind");
 		frame.add(worldWindCanvas);
         frame.add(statusBar, BorderLayout.PAGE_END);
+
         statusBar.setEventSource(worldWindCanvas);
  		frame.setSize(800,600);
  		frame.setVisible(true);
