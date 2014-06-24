@@ -27,6 +27,7 @@ import com.sandwell.JavaSimulation.Tester;
  * next available route or loading bay is planned.  
  */
 public class Facility extends DiscreteHandlingLinkedEntity {
+//
 	private static final ArrayList<Facility> allInstances;
 
 	@Keyword(description = "If TRUE, then statistics for all stocks will be printed for this facility"
