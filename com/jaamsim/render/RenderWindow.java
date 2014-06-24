@@ -54,7 +54,8 @@ public class RenderWindow {
 
 		_awtFrame = new Frame(title);
 		NewtCanvasAWT canvas = new NewtCanvasAWT(_window);
-		_awtFrame.add(Map.map());
+		//_awtFrame.add(Map.map());
+		_awtFrame.add(canvas);
 		_awtFrame.setBounds(x, y, width, height);
 
 		if (icon != null) {
