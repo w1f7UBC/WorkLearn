@@ -17,7 +17,7 @@ public class Map {
 		Configuration.setValue(AVKey.GLOBE_CLASS_NAME, EarthFlat.class.getName());
         Configuration.setValue(AVKey.VIEW_CLASS_NAME, FlatOrbitView.class.getName());
 		WorldWindowGLCanvas worldWindCanvas = new WorldWindowGLCanvas();
-		BasicModel a=new BasicModel();		
+		BasicModel a=new BasicModel();
 		Set<String> exclusionList=new HashSet<String>();
 		exclusionList.add("Stars");
 		exclusionList.add("Atmosphere");
@@ -49,4 +49,42 @@ public class Map {
 		worldWindCanvas.setModel(a);
 		return worldWindCanvas;
 	}
+
+	public static void main(String[] args){
+		Configuration.setValue(AVKey.GLOBE_CLASS_NAME, EarthFlat.class.getName());
+        Configuration.setValue(AVKey.VIEW_CLASS_NAME, FlatOrbitView.class.getName());
+		WorldWindowGLCanvas worldWindCanvas = new WorldWindowGLCanvas();
+		BasicModel a=new BasicModel();
+		Set<String> exclusionList=new HashSet<String>();
+		exclusionList.add("Stars");
+		exclusionList.add("Atmosphere");
+		//exclusionList.add("NASA Blue Marble Image");
+		//exclusionList.add("Blue Marble May 2004");
+		//exclusionList.add("i-cubed Landsat");
+		exclusionList.add("USDA NAIP");
+		exclusionList.add("USDA NAIP USGS");
+		exclusionList.add("MS Virtual Earth Aerial");
+		exclusionList.add("Bing Imagery");
+		exclusionList.add("USGS Topographic Maps 1:250K");
+		exclusionList.add("USGS Topographic Maps 1:100K");
+		exclusionList.add("USGS Topographic Maps 1:24K");
+		exclusionList.add("USGS Urban Area Ortho");
+		exclusionList.add("Political Boundaries");
+		exclusionList.add("Open Street Map");
+		exclusionList.add("Earth at Night");
+		//exclusionList.add("Place Names");
+		exclusionList.add("World Map");
+		//exclusionList.add("Scale bar");
+		exclusionList.add("Compass");
+		LayerList layerList=a.getLayers();
+		for (Layer x: layerList){
+			if (exclusionList.contains(x.getName())){
+				layerList.remove(x);
+			}
+		}
+		a.setLayers(layerList);
+		worldWindCanvas.setModel(a);
+	}
+
+
 }
