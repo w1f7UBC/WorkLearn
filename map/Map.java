@@ -1,7 +1,11 @@
 package map;
 
+import java.awt.BorderLayout;
 import java.util.HashSet;
 import java.util.Set;
+
+import javax.swing.JFrame;
+
 import gov.nasa.worldwind.BasicModel;
 import gov.nasa.worldwind.Configuration;
 import gov.nasa.worldwind.avlist.AVKey;
@@ -9,6 +13,7 @@ import gov.nasa.worldwind.awt.WorldWindowGLCanvas;
 import gov.nasa.worldwind.globes.EarthFlat;
 import gov.nasa.worldwind.layers.Layer;
 import gov.nasa.worldwind.layers.LayerList;
+import gov.nasa.worldwind.util.StatusBar;
 import gov.nasa.worldwind.view.orbit.FlatOrbitView;
 
 public class Map {
@@ -84,6 +89,15 @@ public class Map {
 		}
 		a.setLayers(layerList);
 		worldWindCanvas.setModel(a);
+
+		final StatusBar statusBar= new StatusBar();
+
+		JFrame frame = new JFrame("World Wind");
+		frame.add(worldWindCanvas);
+        frame.add(statusBar, BorderLayout.PAGE_END);
+        statusBar.setEventSource(worldWindCanvas);
+ 		frame.setSize(800,600);
+ 		frame.setVisible(true);
 	}
 
 
