@@ -3,15 +3,18 @@ import java.sql.Array;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.Properties;
 
 import com.jaamsim.input.Input;
 import com.jaamsim.input.InputAgent;
 import com.jaamsim.input.KeywordIndex;
 import com.sandwell.JavaSimulation.Entity;
+import com.sandwell.JavaSimulation.InputErrorException;
 import com.sandwell.JavaSimulation3D.DisplayEntity;
 
 
@@ -29,10 +32,11 @@ public class DataBase<T> extends Input<T>{
 	}
 
 
-	public static String url = "jdbc:postgresql://25.186.195.33:5432/fom";
-    public static Properties props = new Properties();
+	public static String url = "jdbc:postgresql://25.141.219.39:5432/fom";
+    public static  Properties props = new Properties();
     public static String Name;
     public static String[] names;
+    public static ArrayList<String> Names ;
 	public static void loadDriver() throws ClassNotFoundException {
 	try {
 		Class.forName("org.postgresql.Driver");
@@ -44,13 +48,14 @@ public class DataBase<T> extends Input<T>{
 	}
 	public static void Connection() throws SQLException{
 		props.setProperty("user","sde");
+		
 	    props.setProperty("password","Fomsummer2014");
 	    Connection conn = DriverManager.getConnection(url,props);
 
 	    System.out.println("try to connect");
 
 	}
-	    public static void testStatement() throws SQLException{
+	   /* public static void testStatement() throws SQLException{
 
 		 Connection conn = DriverManager.getConnection(url,props);
 
@@ -73,7 +78,7 @@ public class DataBase<T> extends Input<T>{
 	 	       kw.add(position);
 	 	       kw.add(allignment);
 	 	       kw.add(dm);
-	 	       KeywordIndex kwi= new KeywordIndex(kw,0,4,pc);
+	 	       KeywordIndex kwi= new KeywordIndex(kw,cat, 0,4,pc);
 	 	       Input<?> in = ent1.getInput(kwi.keyword);
 	 	      
 	 	     InputAgent.apply(ent1, in, kwi); 
@@ -92,18 +97,66 @@ public class DataBase<T> extends Input<T>{
 	    	rs.close();
 	    	st.close();
 	 }
+*/
+   public  void runSQL() throws SQLException{
+               boolean last;     
+	           Integer i = 1;
+	        
+            Names = new ArrayList<String>();     
+	        QueryStatement qs = new QueryStatement();
+            Connection conn = DriverManager.getConnection(url,props);
 
+		    Statement st = conn.createStatement();
+		    qs.setStatement();
+		    System.out.println(qs.getStatement());
+	    	ResultSet rs = st.executeQuery(qs.getStatement());
+	    	ResultSetMetaData rsmd = rs.getMetaData();
+	    	System.out.println(rsmd.getColumnCount());
+	    		while (rs.next()){
+	    			int column = 1;
+	    			while (column<rsmd.getColumnCount()){
+	    				System.out.println(rs.getString(column));	
+	    				column++;
+	    			}
+	    			
+	    	}
+	    	
+   }
+	    		/*while(){	
+	    	     
+	    		 Name =	Name + rs.getString(i);
+	    		 
+	    		 Names.iterator()
+	    	     
+	    		}
+	    	   Names.add(Name);
+	    	   System.out.println(Names);
+	    	}
+	    		
+   */
+ 
+	public void test() throws SQLException{
+    	try{ 
+    		DataObject d = new DataObject();
+    		
 
-    public static void test() throws SQLException{
-    	try{
-    		Connection();
-    		testStatement();
+    		.Connection();
+    		//Connection();
+    		runSQL();
+   // 		testStatement();
+    		
     	}catch(SQLException e)
     	{
-    		System.out.println("SQLException!");
+    		System.out.println(e);
 		System.exit(1);
 
 	}
 
     }
+	
+	@Override
+	public void parse(KeywordIndex kw) throws InputErrorException {
+		// TODO Auto-generated method stub
+		
+	}
 }
