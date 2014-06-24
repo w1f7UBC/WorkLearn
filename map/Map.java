@@ -19,6 +19,7 @@ import gov.nasa.worldwind.view.orbit.FlatOrbitView;
 public class Map {
 	public static WorldWindowGLCanvas map(){
 		//create a WorldWind main object
+		System.out.println("Test");
 		Configuration.setValue(AVKey.GLOBE_CLASS_NAME, EarthFlat.class.getName());
         Configuration.setValue(AVKey.VIEW_CLASS_NAME, FlatOrbitView.class.getName());
 		WorldWindowGLCanvas worldWindCanvas = new WorldWindowGLCanvas();
