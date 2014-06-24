@@ -16,10 +16,10 @@ public class DataObject extends Entity {
 		
 	}
 	@Keyword(description = "URL",example = "Test URL {jdbc:postgresql://25.141.219.39:5432/fom}")
-private final   StringInput url;
+private  StringInput url;
 
-private final   StringInput username;
-private final   StringInput pwd;
+private  StringInput username;
+private  StringInput pwd;
 
 
 	{
@@ -32,7 +32,8 @@ private final   StringInput pwd;
 	}
 	
 public  void Connection() throws SQLException{
-	 Properties props = new Properties();   
+	 Properties props = new Properties();  
+	 System.out.println(username.getKeyword());
 	  props.setProperty(username.getKeyword(),username.getValue());
 		
 	    props.setProperty(pwd.getKeyword(),pwd.getValue());

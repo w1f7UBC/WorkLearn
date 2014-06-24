@@ -99,7 +99,7 @@ public class DataBase<T> extends Input<T>{
 	    	st.close();
 	 }
 */
-   public  void runSQL() throws SQLException{
+   public static void runSQL() throws SQLException{
                boolean last;     
 	           Integer i = 1;
 	        
@@ -136,12 +136,12 @@ public class DataBase<T> extends Input<T>{
 	    		
    */
  
-	public void test() throws SQLException{
+	public static void test() throws SQLException{
     	try{ 
     		DataObject d = new DataObject();
     		
 
-    		.Connection();
+    		d.Connection();
     		//Connection();
     		runSQL();
    // 		testStatement();
