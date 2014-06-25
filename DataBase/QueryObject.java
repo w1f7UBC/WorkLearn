@@ -15,7 +15,7 @@ import com.sandwell.JavaSimulation.Vec3dInput;
 import com.sandwell.JavaSimulation3D.DisplayEntity;
 
 public  class QueryObject extends AbstractQuery {
-private String HardCodeStatement = "SELECT ecozone2 stdid currtype2 age vol biomass FROM saeed_gy WHERE ";
+private String HardCodeStatement = "SELECT A.grid_Code, B.ecozone2, B.stid2, B.curvtype2 FROM saeed_test A, saeed_gy B WHERE A.grid_code = B.grid_Code ORDER BY A.grid_Code ASC";
 private ArrayList<String> targets;
 private ArrayList<String> tablenames;
 
