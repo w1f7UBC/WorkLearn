@@ -111,6 +111,10 @@ public class DataBase<T> extends Input<T>{
 		    qs.setStatement();
 		    System.out.println(qs.getStatement());
 	    	ResultSet rs = st.executeQuery(qs.getStatement());
+	    	
+	    	
+	    	
+	    	
 	    	ResultSetMetaData rsmd = rs.getMetaData();
 	    	System.out.println(rsmd.getColumnCount());
 	    		while (rs.next()){
@@ -141,9 +145,9 @@ public class DataBase<T> extends Input<T>{
     		DataObject d = new DataObject();
     		
 
-    		d.Connection();
+    		d.runQuery("SELECT * FROM saeed_test LIMIT 10");
     		//Connection();
-    		runSQL();
+    		//runSQL();
    // 		testStatement();
     		
     	}catch(SQLException e)

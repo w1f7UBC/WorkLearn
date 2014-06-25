@@ -4,3 +4,5 @@
 /QueryStatement.class
 /QueryObject.class
 /DataObject.class
+/AbstractQuery.class
+/DatabaseOutput.class
