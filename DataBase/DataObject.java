@@ -46,6 +46,9 @@ public static Properties props = new Properties();
 		
 	}
 	
+	public static String getURL(){
+		return url.getValue();
+	}
 	public static ResultSet runQuery(String st) throws SQLException{
 		     
 	        QueryStatement qs = new QueryStatement();

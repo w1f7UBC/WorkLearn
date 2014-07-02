@@ -15,6 +15,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
+import javax.xml.crypto.Data;
 
 import com.jaamsim.input.Input;
 import com.jaamsim.input.InputAgent;
@@ -44,7 +45,7 @@ public class DataBase<T> extends Input<T>{
 			+ "AND A.point_x=-96.2293862010 "
 			+ "AND A.point_y=56.7500090970 "
 			+ "ORDER BY A.grid_Code ASC";
-	public static String url = "jdbc:postgresql://25.141.219.39:5432/fom";
+	//public static String url = "jdbc:postgresql://25.141.219.39:5432/fom";
     public static  Properties props = new Properties();
     public static String Name;
     public static String[] names;
@@ -58,7 +59,7 @@ public class DataBase<T> extends Input<T>{
 	}
 
 	}
-	public static void Connection() throws SQLException{
+	/*public static void Connection() throws SQLException{
 		props.setProperty("user","sde");
 		
 	    props.setProperty("password","Fomsummer2014");
@@ -111,12 +112,19 @@ public class DataBase<T> extends Input<T>{
 	 }
 */
    public static ResultSet runSQL(String s) throws SQLException{
-               boolean last;     
+	     props.setProperty("user","sde");
+		
+	    props.setProperty("password","Fomsummer2014");
+	     String url = DataObject.getURL();
+	    Connection conn = DriverManager.getConnection(url,props);
+
+	    System.out.println("try to connect"); 
+	          boolean last;     
 	           Integer i = 1;
 	        
             Names = new ArrayList<String>();     
 	        QueryStatement qs = new QueryStatement();
-            Connection conn = DriverManager.getConnection(url,props);
+        //    Connection conn = DriverManager.getConnection(url,props);
 
 		    Statement st = conn.createStatement();
 		//    qs.setStatement();
@@ -124,10 +132,10 @@ public class DataBase<T> extends Input<T>{
 	    	
 		    ResultSet rs = st.executeQuery(s);
 	    	
-		    while (rs.next()){
-	    	System.out.print(rs.getString(1)+" "+rs.getString(2));
+		  //  while (rs.next()){
+	    //	System.out.print(rs.getString(1)+" "+rs.getString(2));
 		    
-	    	ResultSetMetaData rsmd = rs.getMetaData();
+	    //	ResultSetMetaData rsmd = rs.getMetaData();
 	    	/* System.out.print(rsmd.getColumnCount());
 	    		while (rs.next()){
 	    			int column = 1;
@@ -138,7 +146,7 @@ public class DataBase<T> extends Input<T>{
 	    			
 	    		}
 	    	*/
-		    }
+		//    }
 			return rs;
    }
 	    		/*while(){	
@@ -164,16 +172,25 @@ public class DataBase<T> extends Input<T>{
 	    for (int column = 1; column <= columnCount; column++) {
 	        columnNames.add(metaData.getColumnName(column));
 	    }
-
+	    String a = "is in the c";
 	    // data of the table
 	    Vector<Vector<Object>> data = new Vector<Vector<Object>>();
-	    while (rs.next()) {
-	        Vector<Object> vector = new Vector<Object>();
+	    
+	  
+	    while (rs.next()){
+	    	
+	    	
+	    	Vector<Object> vector = new Vector<Object>();
+	        
+
+	        
 	        for (int columnIndex = 1; columnIndex <= columnCount; columnIndex++) {
 	            vector.add(rs.getObject(columnIndex));
+	     //       Vector<Object> c = data.get(1);
 	        }
 	        data.add(vector);
-	    }
+	        
+	       } 
 
 	    return new DefaultTableModel(data, columnNames);
 
@@ -188,15 +205,15 @@ public class DataBase<T> extends Input<T>{
     	try{ 
     		DataObject d = new DataObject();
     		
-    		Connection();
-    		Poptable();
+  //  		Connection();
+    		
     		runSQL("SELECT A.grid_Code, B.ecozone2, B.stid2, B.curvtype2 "
     				+ "FROM saeed_test A,saeed_gy B "
     				+ "WHERE A.grid_code = B.grid_Code "
     				+ "AND A.point_x=-96.2293862010 "
     				+ "AND A.point_y=56.7500090970 "
     				+ "ORDER BY A.grid_Code ASC");
-    		
+    		Poptable();
     		//runSQL();
    // 		testStatement();
     		

@@ -6,6 +6,9 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Vector;
 
+import javax.swing.JOptionPane;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 
 import com.jaamsim.input.Keyword;
@@ -15,7 +18,12 @@ import com.sandwell.JavaSimulation.Vec3dInput;
 import com.sandwell.JavaSimulation3D.DisplayEntity;
 
 public  class QueryObject extends AbstractQuery {
-private String HardCodeStatement = "SELECT A.grid_Code, B.ecozone2, B.stid2, B.curvtype2 FROM saeed_test A, saeed_gy B WHERE A.grid_code = B.grid_Code ORDER BY A.grid_Code ASC";
+private static String s = "SELECT A.grid_Code, B.ecozone2, B.stid2, B.curvtype2 "
+		+ "FROM saeed_test A,saeed_gy B "
+		+ "WHERE A.grid_code = B.grid_Code "
+		+ "AND A.point_x=-96.2293862010 "
+		+ "AND A.point_y=56.7500090970 "
+		+ "ORDER BY A.grid_Code ASC";
 private ArrayList<String> targets;
 private ArrayList<String> tablenames;
 
@@ -35,7 +43,7 @@ private  StringListInput coordinate;
 
 private void StatementBuild(){
 	
-	setStatement(HardCodeStatement);
+	setStatement(s);
 	}
 
 private DefaultTableModel DisplayTable() throws SQLException{
@@ -61,6 +69,11 @@ private DefaultTableModel DisplayTable() throws SQLException{
 
     return new DefaultTableModel(data, columnNames);
 
+}
+   public  void Poptable() throws SQLException{
+	   JTable table = new JTable(DisplayTable());
+	   JOptionPane.showMessageDialog(null, new JScrollPane(table));
+	   
 }
 	}
 
