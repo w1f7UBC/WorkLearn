@@ -49,29 +49,11 @@ public static Properties props = new Properties();
 	public static String getURL(){
 		return url.getValue();
 	}
-	public static ResultSet runQuery(String st) throws SQLException{
-		     
-	        QueryStatement qs = new QueryStatement();
-	     // System.out.println(username.getKeyword());
-	    	// System.out.println(username.getValue());
-	    	//	props.setProperty("username","sde");
-	    	  props.setProperty(username.getKeyword(),username.getValue());
-	    	//    props.setProperty("password","Fomsummer2014");
-	    	  props.setProperty(pwd.getKeyword(),pwd.getValue());
-	    	    System.out.println(props.getProperty("username"));
-
-	    	    System.out.println(props.getProperty("password"));
-	    	    System.out.println(url.getValue());
-	    	    Connection conn = DriverManager.getConnection(url.getValue(),props);
-	    	    System.out.println("connected");
-
-		    Statement st1 = conn.createStatement();
-		    qs.setStatement();
-		    System.out.println(qs.getStatement());
-	    	ResultSet rs = st1.executeQuery(qs.getStatement());
-			return rs;
-	    	
-	    	
+	public static Properties getProperties(){
+		props.setProperty("user","sde");
+		
+	    props.setProperty("password","Fomsummer2014");
+		return props;
 	}
 
 }

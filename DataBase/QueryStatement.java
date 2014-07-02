@@ -13,7 +13,13 @@ public class QueryStatement  {
   public String tablename;
   
   public String Num;
-  public String statement = "SELECT " + target +" FROM "+ tablename;
+  public String statement = "SELECT A.grid_Code, B.ecozone2, B.stid2, B.curvtype2 "
+			+ "FROM saeed_test A,saeed_gy B "
+			+ "WHERE A.grid_code = B.grid_Code "
+			+ "AND A.point_x=-96.2293862010 "
+			+ "AND A.point_y=56.7500090970 "
+			+ "ORDER BY A.grid_Code ASC";
+		  //"SELECT " + target +" FROM "+ tablename;
 
   public QueryStatement(){
 	}

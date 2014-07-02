@@ -6,7 +6,7 @@ import com.sandwell.JavaSimulation3D.DisplayEntity;
 
 public class AbstractQuery extends DisplayEntity {
 	private String statement;
-	private ArrayList<String> coordinates = null;
+	public ArrayList<String> coordinates;
     public AbstractQuery(){
     	
     }

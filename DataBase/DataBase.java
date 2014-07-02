@@ -111,7 +111,7 @@ public class DataBase<T> extends Input<T>{
 	    	st.close();
 	 }
 */
-   public static ResultSet runSQL(String s) throws SQLException{
+ /*  public static ResultSet runSQL(String s) throws SQLException{
 	     props.setProperty("user","sde");
 		
 	    props.setProperty("password","Fomsummer2014");
@@ -147,8 +147,8 @@ public class DataBase<T> extends Input<T>{
 	    		}
 	    	*/
 		//    }
-			return rs;
-   }
+	//		return rs;
+   //}
 	    		/*while(){	
 	    	     
 	    		 Name =	Name + rs.getString(i);
@@ -163,7 +163,7 @@ public class DataBase<T> extends Input<T>{
    */
    private static DefaultTableModel DisplayTable() throws SQLException{
 	   
-	    ResultSet rs= runSQL(s);
+	    ResultSet rs= QueryObject.runSQL();
 		ResultSetMetaData metaData = rs.getMetaData();
 
 	    // names of columns
@@ -203,16 +203,17 @@ public class DataBase<T> extends Input<T>{
    }
 	public static void test() throws SQLException{
     	try{ 
-    		DataObject d = new DataObject();
+    	//	DataObject d = new DataObject();
     		
   //  		Connection();
     		
-    		runSQL("SELECT A.grid_Code, B.ecozone2, B.stid2, B.curvtype2 "
+    	/*	runSQL("SELECT A.grid_Code, B.ecozone2, B.stid2, B.curvtype2 "
     				+ "FROM saeed_test A,saeed_gy B "
     				+ "WHERE A.grid_code = B.grid_Code "
     				+ "AND A.point_x=-96.2293862010 "
     				+ "AND A.point_y=56.7500090970 "
     				+ "ORDER BY A.grid_Code ASC");
+    				*/
     		Poptable();
     		//runSQL();
    // 		testStatement();
