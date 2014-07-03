@@ -1265,6 +1265,7 @@ private void initCoreShaders(GL2GL3 gl, String version) throws RenderException {
 			this.width = width;
 			this.height = height;
 			this.title = title;
+
 			this.name = name;
 			this.listener = listener;
 			this.windowID = windowID;

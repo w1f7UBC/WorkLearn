@@ -17,10 +17,10 @@ import gov.nasa.worldwind.util.StatusBar;
 import gov.nasa.worldwind.view.orbit.FlatOrbitView;
 
 public class Map {
-	public static WorldWindowGLCanvas map(){
+	public static WorldWindowGLCanvas initialize(){
 		//create a WorldWind main object
-		Configuration.setValue(AVKey.GLOBE_CLASS_NAME, EarthFlat.class.getName());
-        Configuration.setValue(AVKey.VIEW_CLASS_NAME, FlatOrbitView.class.getName());
+		//Configuration.setValue(AVKey.GLOBE_CLASS_NAME, EarthFlat.class.getName());
+        //Configuration.setValue(AVKey.VIEW_CLASS_NAME, FlatOrbitView.class.getName());
 		WorldWindowGLCanvas worldWindCanvas = new WorldWindowGLCanvas();
 		BasicModel a=new BasicModel();
 		Set<String> exclusionList=new HashSet<String>();
@@ -104,6 +104,4 @@ public class Map {
  		frame.setSize(800,600);
  		frame.setVisible(true);
 	}
-
-
 }

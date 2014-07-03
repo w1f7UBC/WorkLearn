@@ -14,6 +14,8 @@
  */
 package com.jaamsim.render;
 
+import gov.nasa.worldwind.awt.WorldWindowGLCanvas;
+
 import java.awt.Frame;
 import java.awt.Image;
 import java.util.ArrayList;
@@ -24,6 +26,7 @@ import javax.media.opengl.GLEventListener;
 
 import com.jogamp.newt.awt.NewtCanvasAWT;
 import com.jogamp.newt.opengl.GLWindow;
+
 import map.Map;
 public class RenderWindow {
 
@@ -47,14 +50,17 @@ public class RenderWindow {
 	             GLEventListener glListener, Image icon, int windowID, int viewID,
 	             WindowInteractionListener appListener) {
 
+		
 		_window = GLWindow.create(caps);
 
-		_window.addGLEventListener(glListener);
-		_window.setSharedContext(sharedContext);
-
+		//_window.addGLEventListener(glListener);
+		//_window.setSharedContext(sharedContext);
+		//NewtCanvasAWT canvas = new NewtCanvasAWT(_window);
 		_awtFrame = new Frame(title);
-		NewtCanvasAWT canvas = new NewtCanvasAWT(_window);
-		//_awtFrame.add(Map.map());
+		
+		WorldWindowGLCanvas canvas = Map.initialize();
+		//canvas.addGLEventListener(glListener);
+		//canvas.createContext(sharedContext);
 		_awtFrame.add(canvas);
 		_awtFrame.setBounds(x, y, width, height);
 
