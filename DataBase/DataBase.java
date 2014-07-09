@@ -50,6 +50,7 @@ public class DataBase<T> extends Input<T>{
     public static String Name;
     public static String[] names;
     public static ArrayList<String> Names ;
+	private static String a;
 	public static void loadDriver() throws ClassNotFoundException {
 	try {
 		Class.forName("org.postgresql.Driver");
@@ -68,7 +69,7 @@ public class DataBase<T> extends Input<T>{
 	    System.out.println("try to connect");
 
 	}
-	   /* public static void testStatement() throws SQLException{
+	    public static void testStatement() throws SQLException{
 
 		 Connection conn = DriverManager.getConnection(url,props);
 
@@ -228,8 +229,50 @@ public class DataBase<T> extends Input<T>{
     }
 	
 	@Override
-	public void parse(KeywordIndex kw) throws InputErrorException {
+	public void parse(KeywordIndex kw)  {
 		// TODO Auto-generated method stub
-		
+	}
+	public static void testing() throws SQLException { 
+		     props.setProperty("user","sde");
+			
+		    props.setProperty("password","Fomsummer2014");
+		    String x = JOptionPane.showInputDialog("X:");
+		    String y = JOptionPane.showInputDialog("Y:");
+		    Connection conn = DriverManager.getConnection("jdbc:postgresql://25.141.219.39:5432/fom",props);
+	         
+		    System.out.println("try to connect");
+		  
+		Statement st = conn.createStatement();
+		ResultSet rs = st.executeQuery("SELECT point_x,point_y,grid_code, pointid,"
+				+ "((point_x+"+x+")*(point_x+"+x+"))+((point_y-"+y+")*(point_y-"+y+")) AS distance"
+				+ " FROM saeed_test"
+				+ " WHERE point_x>-96.119838 AND point_y<56.65530818"
+				+ " ORDER BY distance ASC"
+				+ " LIMIT 1");
+		       
+		/*ResultSet rs = st.executeQuery("SELECT * "
+    			+ "FROM saeed_test "
+    			+ "WHERE point_x <= -96.23 AND point_y <= 56.74 "
+    			+ "ORDER BY point_x DESC, point_y DESC "
+    			+ "LIMIT 1;"
+    			+ "SELECT  point_x, point_y"
+    			+ "FROM saeed_test "
+    			+ "WHERE point_x <= -96.23 AND point_y <= 56.74"
+    			+ "ORDER BY point_y DESC, point_x DESC "
+    			+ "LIMIT 1;");
+		/*ResultSet rs = st.executeQuery("SELECT gid, point_x, point_y "
+	    			+ "FROM saeed_test "
+	    			+ "WHERE" +point_x+" <= -96.23 AND "+point_y+" <= 56.74 "
+	    			+ "ORDER BY point_x DESC, point_y DESC "
+	    			+ "LIMIT 1;"
+	    			+ "SELECT gid, point_x, point_y"
+	    			+ "FROM saeed_test "
+	    			+ "WHERE"+point_x+" <= -96.23 AND "+point_y+" <= 56.74"
+	    			+ "ORDER BY point_y DESC, point_x DESC "
+	    			+ "LIMIT 1;");
+	    			*/
+	    	while (rs.next()){
+	    	System.out.println(rs.getString(1)+" "+rs.getString(2)+" "+rs.getString(3));
+	    	}
 	}
 }
