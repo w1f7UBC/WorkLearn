@@ -14,8 +14,6 @@
  */
 package com.jaamsim.render;
 
-import gov.nasa.worldwind.awt.WorldWindowGLCanvas;
-
 import java.awt.Frame;
 import java.awt.Image;
 import java.util.ArrayList;
@@ -24,13 +22,16 @@ import javax.media.opengl.GLCapabilitiesImmutable;
 import javax.media.opengl.GLContext;
 import javax.media.opengl.GLEventListener;
 
-import com.jogamp.newt.awt.NewtCanvasAWT;
+import newt.Initializer;
+import newt.Initializer.AppFrame;
+import newt.WorldWindowNewtCanvas;
+
+
 import com.jogamp.newt.opengl.GLWindow;
 
-import map.Map;
 public class RenderWindow {
 
-	private Frame _awtFrame;
+	private AppFrame _awtFrame;
 	private final GLWindow _window;
 	private int _windowID;
 	private int _viewID;
@@ -52,17 +53,16 @@ public class RenderWindow {
 
 		
 		_window = GLWindow.create(caps);
-
-		//_window.addGLEventListener(glListener);
-		//_window.setSharedContext(sharedContext);
-		//NewtCanvasAWT canvas = new NewtCanvasAWT(_window);
-		_awtFrame = new Frame(title);
-		
-		WorldWindowGLCanvas canvas = Map.initialize();
-		//canvas.addGLEventListener(glListener);
-		//canvas.createContext(sharedContext);
-		_awtFrame.add(canvas);
-		_awtFrame.setBounds(x, y, width, height);
+		_window.addGLEventListener(glListener);
+		_window.setSharedContext(sharedContext);
+		_awtFrame = Initializer.start(title, AppFrame.class);
+		WorldWindowNewtCanvas canvas = (WorldWindowNewtCanvas) _awtFrame.getWwd();
+		GLWindow window =canvas.getWindow();
+		//window.setSharedContext(sharedContext);
+		//window.removeGLEventListener(window.getGLEventListener(0));
+		//window.addGLEventListener(glListener);
+		canvas.setNEWTChild(_window);
+		//canvas.setNEWTChild(arg0)
 
 		if (icon != null) {
 			_awtFrame.setIconImage(icon);
