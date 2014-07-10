@@ -103,6 +103,8 @@ public class NewtEventProcessor extends NEWTEventFiFo implements com.jogamp.newt
 	@Override
 	public void mousePressed(MouseEvent e)
 	{
+		System.out.println(e.getX());
+		System.out.println(e.getY());
 		put(e);
 		mouseDragged = false;
 	}

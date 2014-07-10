@@ -56,6 +56,7 @@ public class RenderWindow {
 		_window.addGLEventListener(glListener);
 		_window.setSharedContext(sharedContext);
 		_awtFrame = Initializer.start(title, AppFrame.class);
+		_awtFrame.setBounds(x, y, width, height);
 		//WorldWindowNewtCanvas canvas = (WorldWindowNewtCanvas) _awtFrame.getWwd();
 		//GLWindow window =canvas.getWindow();
 		//window.setSharedContext(sharedContext);
