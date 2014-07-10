@@ -39,7 +39,6 @@ import com.sandwell.JavaSimulation.Vec3dInput;
 import com.sandwell.JavaSimulation3D.DisplayEntity;
 import com.sandwell.JavaSimulation3D.GUIFrame;
 import com.sandwell.JavaSimulation3D.Region;
-import map.Map;
 
 public class View extends Entity {
 private static final ArrayList<View> allInstances;
