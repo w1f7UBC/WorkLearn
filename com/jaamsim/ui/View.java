@@ -126,7 +126,6 @@ static {
 	position.setUnitType(DistanceUnit.class);
 	this.addInput(position);
 
-	//this.addInput(Map.map());
 	IntegerVector defSize = new IntegerVector(2);
 	defSize.add(GUIFrame.VIEW_WIDTH);
 	defSize.add(GUIFrame.VIEW_HEIGHT);

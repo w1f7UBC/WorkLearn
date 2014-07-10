@@ -6,7 +6,6 @@ package newt;
  */
 import gov.nasa.worldwind.*;
 import gov.nasa.worldwind.avlist.AVKey;
-import gov.nasa.worldwind.awt.*;
 import gov.nasa.worldwind.event.*;
 import gov.nasa.worldwind.exception.WWAbsentRequirementException;
 import gov.nasa.worldwind.layers.*;
@@ -60,13 +59,6 @@ public class Initializer
             // Add controllers to manage highlighting and tool tips.
             this.toolTipController = new ToolTipController(this.getWwd(), AVKey.DISPLAY_NAME, null);
             this.highlightController = new HighlightController(this.getWwd(), SelectEvent.ROLLOVER);
-
-
-            MapListener ml=new MapListener();
-            this.wwd.addPositionListener(ml);
-            WorldWindowNewtCanvas newtWindow = (WorldWindowNewtCanvas) this.getWwd();
-            newtWindow.addMouseListener(ml);
-
         }
 
         protected WorldWindow createWorldWindow()
@@ -133,8 +125,7 @@ public class Initializer
             // Register a rendering exception listener that's notified when exceptions occur during rendering.
             this.wwjPanel.getWwd().addRenderingExceptionListener(new RenderingExceptionListener()
             {
-                @Override
-				public void exceptionThrown(Throwable t)
+                public void exceptionThrown(Throwable t)
                 {
                     if (t instanceof WWAbsentRequirementException)
                     {
@@ -304,8 +295,7 @@ public class Initializer
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             java.awt.EventQueue.invokeLater(new Runnable()
             {
-                @Override
-				public void run()
+                public void run()
                 {
                     frame.setVisible(true);
                 }

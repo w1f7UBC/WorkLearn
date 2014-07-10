@@ -54,8 +54,8 @@ public class NewtInputHandler extends AWTInputHandler
 		}
 
 		eventProcessor = new NewtEventProcessor((Component) newWorldWindow);
-		//window.addMouseListener(eventProcessor);
-		//window.addKeyListener(eventProcessor);
+		window.addMouseListener(eventProcessor);
+		window.addKeyListener(eventProcessor);
 		window.addWindowListener(eventProcessor);
 	}
 

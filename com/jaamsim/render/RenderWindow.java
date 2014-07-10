@@ -31,11 +31,11 @@ import com.jogamp.newt.opengl.GLWindow;
 
 public class RenderWindow {
 
-	private final AppFrame _awtFrame;
+	private AppFrame _awtFrame;
 	private final GLWindow _window;
-	private final int _windowID;
-	private final int _viewID;
-	private final String _name;
+	private int _windowID;
+	private int _viewID;
+	private String _name;
 
 	private final WindowInteractionListener _appListener;
 
@@ -43,7 +43,7 @@ public class RenderWindow {
 	private String _debugString = "";
 	private ArrayList<Long> _debugIDs = new ArrayList<Long>();
 
-	private final ArrayList<Integer> _VAOs = new ArrayList<Integer>();
+	private ArrayList<Integer> _VAOs = new ArrayList<Integer>();
 
 	RenderWindow(int x, int y, int width, int height, String title, String name,
 	             GLContext sharedContext,
@@ -51,16 +51,16 @@ public class RenderWindow {
 	             GLEventListener glListener, Image icon, int windowID, int viewID,
 	             WindowInteractionListener appListener) {
 
-
+		
 		_window = GLWindow.create(caps);
 		_window.addGLEventListener(glListener);
 		_window.setSharedContext(sharedContext);
 		_awtFrame = Initializer.start(title, AppFrame.class);
-		WorldWindowNewtCanvas canvas = (WorldWindowNewtCanvas) _awtFrame.getWwd();
-		GLWindow window =canvas.getWindow();
-		window.setSharedContext(sharedContext);
-		window.removeGLEventListener(window.getGLEventListener(0));
-		window.addGLEventListener(glListener);
+		//WorldWindowNewtCanvas canvas = (WorldWindowNewtCanvas) _awtFrame.getWwd();
+		//GLWindow window =canvas.getWindow();
+		//window.setSharedContext(sharedContext);
+		//window.removeGLEventListener(window.getGLEventListener(0));
+		//window.addGLEventListener(glListener);
 		//canvas.setNEWTChild(_window);
 		//canvas.setNEWTChild(arg0)
 
