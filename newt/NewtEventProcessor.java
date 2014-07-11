@@ -1,7 +1,16 @@
 package newt;
 
+import gov.nasa.worldwind.geom.Position;
+import gov.nasa.worldwind.layers.RenderableLayer;
+import gov.nasa.worldwind.render.AbstractBalloon;
+import gov.nasa.worldwind.render.DrawContext;
+import gov.nasa.worldwind.render.PointPlacemark;
+
 import java.awt.Component;
+import java.awt.Rectangle;
+
 import javax.swing.SwingUtilities;
+
 import com.jogamp.newt.Window;
 import com.jogamp.newt.event.KeyEvent;
 import com.jogamp.newt.event.MouseEvent;
@@ -21,7 +30,8 @@ public class NewtEventProcessor extends NEWTEventFiFo implements com.jogamp.newt
 		com.jogamp.newt.event.KeyListener, com.jogamp.newt.event.WindowListener
 {
 	protected final Component awtComponent;
-
+	protected RenderableLayer layer;
+	protected WorldWindowNewtCanvas canvas;
 	protected boolean mouseDragged = false;
 
 	public NewtEventProcessor(Component awtComponent)
@@ -89,7 +99,7 @@ public class NewtEventProcessor extends NEWTEventFiFo implements com.jogamp.newt
 	}
 
 	@Override
-	public void mouseEntered(MouseEvent e)
+	public void mouseEntered(MouseEvent e) 
 	{
 		put(e);
 	}
@@ -103,8 +113,18 @@ public class NewtEventProcessor extends NEWTEventFiFo implements com.jogamp.newt
 	@Override
 	public void mousePressed(MouseEvent e)
 	{
-		WorldWindowNewtCanvas canvas = (WorldWindowNewtCanvas) awtComponent;
-		System.out.println(canvas.getCurrentPosition());
+		canvas = (WorldWindowNewtCanvas) awtComponent;
+		Position pos = canvas.getCurrentPosition();
+	    if(e.getButton()==3){
+	        //if is right click
+			if (pos!=null){
+				PointPlacemark point = new PointPlacemark(canvas.getCurrentPosition());
+				layer = new RenderableLayer();
+				layer.addRenderable(point);
+				canvas.getModel().getLayers().add(layer);
+				pos=null;
+			}
+	    }
 		put(e);
 		mouseDragged = false;
 	}
