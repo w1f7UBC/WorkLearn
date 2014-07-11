@@ -22,12 +22,25 @@ import com.sandwell.JavaSimulation.Vec3dInput;
 import com.sandwell.JavaSimulation3D.DisplayEntity;
 
 public  class QueryObject extends AbstractQuery {
-private static String statement = "SELECT A.grid_Code, B.ecozone2, B.stid2, B.curvtype2 "
+	private static String x = "-96.119838";     
+    private static String y ="56.65530818";
+	private static String statement = 
+    "SELECT *"
+		+ " FROM saeed_gy"
+		+ " WHERE grid_code"
+		+ " IN (SELECT grid_code"
+		+ " FROM saeed_test"
+		+ " WHERE  point_x>"+(x)+" AND point_y<"+(y)
+		+ " ORDER BY point_x ASC, point_y DESC"
+		+ " LIMIT 1)";
+		
+/*"SELECT A.grid_Code, B.ecozone2, B.stid2, B.curvtype2 "
 		+ "FROM saeed_test A,saeed_gy B "
 		+ "WHERE A.grid_code = B.grid_Code "
 		+ "AND A.point_x=-96.2293862010 "
 		+ "AND A.point_y=56.7500090970 "
 		+ "ORDER BY A.grid_Code ASC";
+*/
 private ArrayList<String> targets;
 private ArrayList<String> tablenames;
 
