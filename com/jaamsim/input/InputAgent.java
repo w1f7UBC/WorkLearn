@@ -668,7 +668,7 @@ public class InputAgent {
 	}
     public static void loadDB(GUIFrame guiFrame) throws SQLException {
 		LogBox.logLine("Loading...");
-		DataBase.test();
+		DataBase.testing();
 	}
 
 	public static void save(GUIFrame gui) {

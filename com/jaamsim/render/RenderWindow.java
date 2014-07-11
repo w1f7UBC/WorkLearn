@@ -21,17 +21,21 @@ import java.util.ArrayList;
 import javax.media.opengl.GLCapabilitiesImmutable;
 import javax.media.opengl.GLContext;
 import javax.media.opengl.GLEventListener;
+import javax.swing.JTabbedPane;
 
 import newt.Initializer;
 import newt.Initializer.AppFrame;
 import newt.WorldWindowNewtCanvas;
 
 
+
+
 import com.jogamp.newt.opengl.GLWindow;
 
 public class RenderWindow {
 
-	private AppFrame _awtFrame;
+	private Frame _awtFrame;
+	
 	private final GLWindow _window;
 	private int _windowID;
 	private int _viewID;

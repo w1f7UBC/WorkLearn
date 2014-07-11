@@ -14,6 +14,8 @@
  */
 package com.jaamsim.ui;
 
+import java.sql.SQLException;
+
 public abstract class MenuItem {
 	public String menuName;
 
@@ -21,5 +23,5 @@ public abstract class MenuItem {
 		menuName = name;
 	}
 
-	public abstract void action();
+	public abstract void action() throws SQLException;
 }

@@ -1,1 +1,9 @@
 /DataBase.class
+/Statement.class
+/QueryStatment.class
+/QueryStatement.class
+/QueryObject.class
+/DataObject.class
+/AbstractQuery.class
+/DatabaseOutput.class
+/Query.class

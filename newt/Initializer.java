@@ -8,6 +8,7 @@ import gov.nasa.worldwind.*;
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.event.*;
 import gov.nasa.worldwind.exception.WWAbsentRequirementException;
+import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.layers.*;
 import gov.nasa.worldwind.layers.placename.PlaceNameLayer;
 import gov.nasa.worldwind.util.*;
@@ -16,6 +17,10 @@ import gov.nasa.worldwindx.examples.LayerPanel;
 import gov.nasa.worldwindx.examples.util.*;
 
 import javax.swing.*;
+
+import com.jogamp.newt.event.MouseAdapter;
+import com.jogamp.newt.event.MouseEvent;
+import com.jogamp.newt.event.MouseListener;
 
 import java.awt.*;
 

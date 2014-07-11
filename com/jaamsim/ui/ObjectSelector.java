@@ -20,6 +20,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Locale;
@@ -37,6 +38,8 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
+
+import DataBase.DataBase;
 
 import com.jaamsim.controllers.RenderManager;
 import com.jaamsim.input.Input;
@@ -389,6 +392,22 @@ static class PropertyMenuItem extends MenuItem {
 		FrameBox.setSelectedEntity(ent);
 	}
 }
+static class DataBaseViewer extends MenuItem{
+	private final Entity ent;
+	public DataBaseViewer(Entity ent){
+		super("DataBase Viewer");
+		this.ent = ent;
+	}
+	@Override
+	public void action() {
+		try {
+			DataBase.test();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+}
 
 static class OutputMenuItem extends MenuItem {
 	private final Entity ent;
@@ -534,7 +553,12 @@ static class CenterInViewMenuItem extends MenuItem {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			de.action();
+			try {
+				de.action();
+			} catch (SQLException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 		}
 	}
 
@@ -555,7 +579,7 @@ static class CenterInViewMenuItem extends MenuItem {
 		list.add(new InputMenuItem(ent));
 		list.add(new OutputMenuItem(ent));
 		list.add(new PropertyMenuItem(ent));
-
+        list.add(new DataBaseViewer(ent) );
 		if (!ent.testFlag(Entity.FLAG_GENERATED))
 			list.add(new DuplicateMenuItem(ent));
 

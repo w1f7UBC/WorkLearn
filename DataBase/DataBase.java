@@ -3,24 +3,33 @@ import java.sql.Array;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.Properties;
+import java.util.Vector;
+
+import javax.swing.JOptionPane;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.table.DefaultTableModel;
+import javax.xml.crypto.Data;
 
 import com.jaamsim.input.Input;
 import com.jaamsim.input.InputAgent;
 import com.jaamsim.input.KeywordIndex;
 import com.sandwell.JavaSimulation.Entity;
+import com.sandwell.JavaSimulation.InputErrorException;
 import com.sandwell.JavaSimulation3D.DisplayEntity;
 
 
 
 public class DataBase<T> extends Input<T>{
-
+	 
 	 public DataBase(String key, String cat, T def) {
 		super(key, cat, def);
-		System.out.println("World Wind Test");
 		// TODO Auto-generated constructor stub
 	}
 	 	
@@ -29,11 +38,18 @@ public class DataBase<T> extends Input<T>{
 
 	}
 
-
-	public static String url = "jdbc:postgresql://25.186.195.33:5432/fom";
-    public static Properties props = new Properties();
+	private static String s = "SELECT A.grid_Code, B.ecozone2, B.stid2, B.curvtype2 "
+			+ "FROM saeed_test A,saeed_gy B "
+			+ "WHERE A.grid_code = B.grid_Code "
+			+ "AND A.point_x=-96.2293862010 "
+			+ "AND A.point_y=56.7500090970 "
+			+ "ORDER BY A.grid_Code ASC";
+	//public static String url = "jdbc:postgresql://25.141.219.39:5432/fom";
+    public static  Properties props = new Properties();
     public static String Name;
     public static String[] names;
+    public static ArrayList<String> Names ;
+	private static String a;
 	public static void loadDriver() throws ClassNotFoundException {
 	try {
 		Class.forName("org.postgresql.Driver");
@@ -43,8 +59,9 @@ public class DataBase<T> extends Input<T>{
 	}
 
 	}
-	public static void Connection() throws SQLException{
+	/*public static void Connection() throws SQLException{
 		props.setProperty("user","sde");
+		
 	    props.setProperty("password","Fomsummer2014");
 	    Connection conn = DriverManager.getConnection(url,props);
 
@@ -74,7 +91,7 @@ public class DataBase<T> extends Input<T>{
 	 	       kw.add(position);
 	 	       kw.add(allignment);
 	 	       kw.add(dm);
-	 	       KeywordIndex kwi= new KeywordIndex(kw,0,4,pc);
+	 	       KeywordIndex kwi= new KeywordIndex(kw,cat, 0,4,pc);
 	 	       Input<?> in = ent1.getInput(kwi.keyword);
 	 	      
 	 	     InputAgent.apply(ent1, in, kwi); 
@@ -93,18 +110,168 @@ public class DataBase<T> extends Input<T>{
 	    	rs.close();
 	    	st.close();
 	 }
+*/
+ /*  public static ResultSet runSQL(String s) throws SQLException{
+	     props.setProperty("user","sde");
+		
+	    props.setProperty("password","Fomsummer2014");
+	     String url = DataObject.getURL();
+	    Connection conn = DriverManager.getConnection(url,props);
 
+	    System.out.println("try to connect"); 
+	          boolean last;     
+	           Integer i = 1;
+	        
+            Names = new ArrayList<String>();     
+	        QueryStatement qs = new QueryStatement();
+        //    Connection conn = DriverManager.getConnection(url,props);
 
-    public static void test() throws SQLException{
-    	try{
-    		Connection();
-    		testStatement();
+		    Statement st = conn.createStatement();
+		//    qs.setStatement();
+		    System.out.println(s);
+	    	
+		    ResultSet rs = st.executeQuery(s);
+	    	
+		  //  while (rs.next()){
+	    //	System.out.print(rs.getString(1)+" "+rs.getString(2));
+		    
+	    //	ResultSetMetaData rsmd = rs.getMetaData();
+	    	/* System.out.print(rsmd.getColumnCount());
+	    		while (rs.next()){
+	    			int column = 1;
+	    			while (column < rsmd.getColumnCount()){
+	    				System.out.print(rs.getString(column));	
+	    				column++;
+	    			}
+	    			
+	    		}
+	    	*/
+		//    }
+	//		return rs;
+   //}
+	    		/*while(){	
+	    	     
+	    		 Name =	Name + rs.getString(i);
+	    		 
+	    		 Names.iterator()
+	    	     
+	    		}
+	    	   Names.add(Name);
+	    	   System.out.println(Names);
+	    	}
+	    		
+   */
+   private static DefaultTableModel DisplayTable() throws SQLException{
+	   
+	    ResultSet rs= QueryObject.runSQL();
+		ResultSetMetaData metaData = rs.getMetaData();
+
+	    // names of columns
+	    Vector<String> columnNames = new Vector<String>();
+	    int columnCount = metaData.getColumnCount();
+	    for (int column = 1; column <= columnCount; column++) {
+	        columnNames.add(metaData.getColumnName(column));
+	    }
+	    String a = "is in the c";
+	    // data of the table
+	    Vector<Vector<Object>> data = new Vector<Vector<Object>>();
+	    
+	  
+	    while (rs.next()){
+	    	
+	    	
+	    	Vector<Object> vector = new Vector<Object>();
+	        
+
+	        
+	        for (int columnIndex = 1; columnIndex <= columnCount; columnIndex++) {
+	            vector.add(rs.getObject(columnIndex));
+	     //       Vector<Object> c = data.get(1);
+	        }
+	        data.add(vector);
+	        
+	       } 
+
+	    return new DefaultTableModel(data, columnNames);
+
+	}
+		
+   public static void Poptable() throws SQLException{
+	   JTable table = new JTable(DisplayTable());
+	   JOptionPane.showMessageDialog(null, new JScrollPane(table));
+	   
+   }
+	public static void test() throws SQLException{
+    	try{ 
+    	//	DataObject d = new DataObject();
+    		
+  //  		Connection();
+    		
+    	/*	runSQL("SELECT A.grid_Code, B.ecozone2, B.stid2, B.curvtype2 "
+    				+ "FROM saeed_test A,saeed_gy B "
+    				+ "WHERE A.grid_code = B.grid_Code "
+    				+ "AND A.point_x=-96.2293862010 "
+    				+ "AND A.point_y=56.7500090970 "
+    				+ "ORDER BY A.grid_Code ASC");
+    				*/
+    		Poptable();
+    		//runSQL();
+   // 		testStatement();
+    		
     	}catch(SQLException e)
     	{
-    		System.out.println("SQLException!");
+    		System.out.println(e);
 		System.exit(1);
 
 	}
 
     }
+	
+	@Override
+	public void parse(KeywordIndex kw)  {
+		// TODO Auto-generated method stub
+	}
+	public static void testing() throws SQLException { 
+		     props.setProperty("user","sde");
+			
+		    props.setProperty("password","Fomsummer2014");
+		    String x = JOptionPane.showInputDialog("X:");
+		    String y = JOptionPane.showInputDialog("Y:");
+		    Connection conn = DriverManager.getConnection("jdbc:postgresql://25.141.219.39:5432/fom",props);
+	         
+		    System.out.println("try to connect");
+		  
+		Statement st = conn.createStatement();
+		ResultSet rs = st.executeQuery("SELECT point_x,point_y,grid_code, pointid,"
+				+ "((point_x+"+x+")*(point_x+"+x+"))+((point_y-"+y+")*(point_y-"+y+")) AS distance"
+				+ " FROM saeed_test"
+				+ " WHERE point_x>-96.119838 AND point_y<56.65530818"
+				+ " ORDER BY distance ASC"
+				+ " LIMIT 1");
+		       
+		/*ResultSet rs = st.executeQuery("SELECT * "
+    			+ "FROM saeed_test "
+    			+ "WHERE point_x <= -96.23 AND point_y <= 56.74 "
+    			+ "ORDER BY point_x DESC, point_y DESC "
+    			+ "LIMIT 1;"
+    			+ "SELECT  point_x, point_y"
+    			+ "FROM saeed_test "
+    			+ "WHERE point_x <= -96.23 AND point_y <= 56.74"
+    			+ "ORDER BY point_y DESC, point_x DESC "
+    			+ "LIMIT 1;");
+		/*ResultSet rs = st.executeQuery("SELECT gid, point_x, point_y "
+	    			+ "FROM saeed_test "
+	    			+ "WHERE" +point_x+" <= -96.23 AND "+point_y+" <= 56.74 "
+	    			+ "ORDER BY point_x DESC, point_y DESC "
+	    			+ "LIMIT 1;"
+	    			+ "SELECT gid, point_x, point_y"
+	    			+ "FROM saeed_test "
+	    			+ "WHERE"+point_x+" <= -96.23 AND "+point_y+" <= 56.74"
+	    			+ "ORDER BY point_y DESC, point_x DESC "
+	    			+ "LIMIT 1;");
+	    			*/
+	    	while (rs.next()){
+	    	System.out.println(rs.getString(1)+" "+rs.getString(2)+" "+rs.getString(3));
+	    	}
+	}
 }
