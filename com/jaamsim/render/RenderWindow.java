@@ -21,13 +21,21 @@ import java.util.ArrayList;
 import javax.media.opengl.GLCapabilitiesImmutable;
 import javax.media.opengl.GLContext;
 import javax.media.opengl.GLEventListener;
+import javax.swing.JTabbedPane;
 
-import com.jogamp.newt.awt.NewtCanvasAWT;
+import newt.Initializer;
+import newt.Initializer.AppFrame;
+import newt.WorldWindowNewtCanvas;
+
+
+
+
 import com.jogamp.newt.opengl.GLWindow;
-import map.Map;
+
 public class RenderWindow {
 
 	private Frame _awtFrame;
+	
 	private final GLWindow _window;
 	private int _windowID;
 	private int _viewID;
@@ -47,16 +55,19 @@ public class RenderWindow {
 	             GLEventListener glListener, Image icon, int windowID, int viewID,
 	             WindowInteractionListener appListener) {
 
+		
 		_window = GLWindow.create(caps);
-
 		_window.addGLEventListener(glListener);
 		_window.setSharedContext(sharedContext);
-
-		_awtFrame = new Frame(title);
-		NewtCanvasAWT canvas = new NewtCanvasAWT(_window);
-		//_awtFrame.add(Map.map());
-		_awtFrame.add(canvas);
+		_awtFrame = Initializer.start(title, AppFrame.class);
 		_awtFrame.setBounds(x, y, width, height);
+		//WorldWindowNewtCanvas canvas = (WorldWindowNewtCanvas) _awtFrame.getWwd();
+		//GLWindow window =canvas.getWindow();
+		//window.setSharedContext(sharedContext);
+		//window.removeGLEventListener(window.getGLEventListener(0));
+		//window.addGLEventListener(glListener);
+		//canvas.setNEWTChild(_window);
+		//canvas.setNEWTChild(arg0)
 
 		if (icon != null) {
 			_awtFrame.setIconImage(icon);

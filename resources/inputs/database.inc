@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 Define ObjectType {
                     DataObject
                     QueryObject
