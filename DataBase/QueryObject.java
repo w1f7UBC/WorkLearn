@@ -15,6 +15,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 
+import com.jaamsim.input.Input;
 import com.jaamsim.input.Keyword;
 import com.jaamsim.math.Vec3d;
 import com.sandwell.JavaSimulation.StringInput;
@@ -60,13 +61,9 @@ private StringInput querystatment;
 	this.addInput(tablename);
 	coordinate = new Vec3dInput("coordinate", "Query property", new Vec3d(-0.1d, -0.1d, -0.001d));
 	this.addInput(coordinate);
-	querystatment = new StringInput("querystatement","Query property","SELECT A.grid_Code, B.ecozone2, B.stid2, B.curvtype2 "
-			+ "FROM saeed_test A,saeed_gy B "
-			+ "WHERE A.grid_code = B.grid_Code "
-			+ "AND A.point_x=-96.2293862010 "
-			+ "AND A.point_y=56.7500090970 "
-			+ "ORDER BY A.grid_Code ASC" );
-	}
+	querystatment = new StringInput("statement","Query property",statement);
+	this.addInput(querystatment);
+    }
 
 
 private void StatementBuild(){
@@ -76,12 +73,14 @@ private void StatementBuild(){
  	
 public String getStatement(){
 	  
-	  return statement;
+	  return querystatment.getValue();
 
 
 	}
 
-
+public void updateForInput( Input<?> in ) {
+	super.updateForInput( in );
+	}
 
 public static ResultSet runSQL() throws SQLException{
 	QueryObject q = new QueryObject();
