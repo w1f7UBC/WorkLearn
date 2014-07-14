@@ -1519,6 +1519,7 @@ public class RenderManager implements DragSourceListener {
 		// Do not look straight down the Z axis as that is actually a degenerate state
 		control.setRotationAngles(0.0000001, 0.0);
 	}
+	
 
 	public View getActiveView() {
 		return windowToViewMap.get(activeWindowID);
@@ -1536,6 +1537,11 @@ public class RenderManager implements DragSourceListener {
 		renderer.focusWindow(windowID);
 	}
 
+	public void setCursorMode(int mode){
+		//renderer.setCursor(activeWindowID, mode);
+		renderer.setCursor(2, mode);
+	}
+	
 	/**
 	 * Queue up an off screen rendering, this simply passes the call directly to the renderer
 	 * @param scene

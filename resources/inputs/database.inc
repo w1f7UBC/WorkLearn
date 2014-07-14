@@ -1,3 +1,4 @@
+
 Define ObjectType {
                     DataObject
                     QueryObject

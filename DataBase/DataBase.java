@@ -236,7 +236,7 @@ public class DataBase<T> extends Input<T>{
     		//Poptable();
     		//runSQL();
    // 		testStatement();
-    	Poptabletest();
+    	Poptable();
     	}catch(SQLException e)
     	{
     		System.out.println(e);
@@ -329,6 +329,7 @@ public class DataBase<T> extends Input<T>{
 	    	}
 	    	  return new DefaultTableModel(data, columnNames);
 	}
+
 	 public static void Poptabletest() throws SQLException{
 		   JTable table = new JTable(testing());
 		   JOptionPane.showMessageDialog(null, new JScrollPane(table));
@@ -336,4 +337,7 @@ public class DataBase<T> extends Input<T>{
 	   }
 	
 }
+
+
+
 
