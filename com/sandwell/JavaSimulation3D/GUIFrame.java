@@ -889,7 +889,7 @@ public class GUIFrame extends JFrame implements EventTimeListener, EventErrorLis
 				// Not implemented
 			}
 		} );
-		mainToolBar.add( toolButtonUndo );
+		//mainToolBar.add( toolButtonUndo );
 
 		// add a button to redo the last step ( viewer and window )
 		toolButtonRedo = new JButton(new ImageIcon(GUIFrame.class.getResource("/resources/images/next.png")));
@@ -916,7 +916,8 @@ public class GUIFrame extends JFrame implements EventTimeListener, EventErrorLis
 
 			@Override
 			public void actionPerformed( ActionEvent event ) {
-
+				if (RenderManager.isGood())
+					RenderManager.inst().setCursorMode(0);
 			}
 		} );
 		mainToolBar.add( toolButtonNone );
@@ -927,7 +928,8 @@ public class GUIFrame extends JFrame implements EventTimeListener, EventErrorLis
 
 			@Override
 			public void actionPerformed( ActionEvent event ) {
-
+				if (RenderManager.isGood())
+					RenderManager.inst().setCursorMode(1);
 			}
 		} );
 		mainToolBar.add( toolButtonPoint );

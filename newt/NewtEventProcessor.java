@@ -33,6 +33,7 @@ public class NewtEventProcessor extends NEWTEventFiFo implements com.jogamp.newt
 	protected RenderableLayer layer;
 	protected WorldWindowNewtCanvas canvas;
 	protected boolean mouseDragged = false;
+	protected int cursorMode;
 
 	public NewtEventProcessor(Component awtComponent)
 	{
@@ -117,11 +118,12 @@ public class NewtEventProcessor extends NEWTEventFiFo implements com.jogamp.newt
 		Position pos = canvas.getCurrentPosition();
 	    if(e.getButton()==3){
 	        //if is right click
-			if (pos!=null){
-				PointPlacemark point = new PointPlacemark(canvas.getCurrentPosition());
-				layer = new RenderableLayer();
-				layer.addRenderable(point);
-				canvas.getModel().getLayers().add(layer);
+			if (pos!=null && cursorMode==1){
+				System.out.println(pos);
+				//PointPlacemark point = new PointPlacemark(canvas.getCurrentPosition());
+				//layer = new RenderableLayer();
+				//layer.addRenderable(point);
+				//canvas.getModel().getLayers().add(layer);
 				pos=null;
 			}
 	    }
@@ -194,5 +196,9 @@ public class NewtEventProcessor extends NEWTEventFiFo implements com.jogamp.newt
 	public void windowRepaint(WindowUpdateEvent e)
 	{
 		put(e);
+	}
+
+	public void setCursor(int mode) {
+		cursorMode=mode;
 	}
 }

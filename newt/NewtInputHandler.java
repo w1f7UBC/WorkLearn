@@ -88,6 +88,10 @@ public class NewtInputHandler extends AWTInputHandler
 		}
 	}
 
+	public void setCursor(int mode){
+		eventProcessor.setCursor(mode);
+	}
+	
 	protected boolean isEventFromNewt(AWTEvent event)
 	{
 		return event instanceof NewtEventConverter.AWTEventFromNewt;

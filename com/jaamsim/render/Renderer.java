@@ -53,6 +53,9 @@ import javax.media.opengl.GLEventListener;
 import javax.media.opengl.GLException;
 import javax.media.opengl.GLProfile;
 
+import newt.Initializer.AppFrame;
+import newt.NewtInputHandler;
+
 import com.jaamsim.DisplayModels.DisplayModel;
 import com.jaamsim.MeshFiles.MeshData;
 import com.jaamsim.font.OverlayString;
@@ -499,6 +502,19 @@ public class Renderer implements GLAnimatorControl {
 			}
 			win.getAWTFrameRef().setExtendedState(Frame.NORMAL);
 			win.getAWTFrameRef().toFront();
+		}
+	}
+	
+	public void setCursor(int windowID, int mode) {
+		synchronized(openWindows) {
+			RenderWindow win = openWindows.get(windowID);
+			if (win == null) {
+				//System.out.println(windowID);
+				return;
+			}
+			AppFrame frame = (AppFrame) win.getAWTFrameRef();
+			NewtInputHandler inputHandler = (NewtInputHandler) frame.getWwd().getInputHandler();
+			inputHandler.setCursor(mode);
 		}
 	}
 	/**
