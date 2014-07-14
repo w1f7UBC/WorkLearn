@@ -1,6 +1,7 @@
 package DataBase;
 import java.sql.Array;
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -232,10 +233,10 @@ public class DataBase<T> extends Input<T>{
     				+ "AND A.point_y=56.7500090970 "
     				+ "ORDER BY A.grid_Code ASC");
     				*/
-    		Poptable();
+    		//Poptable();
     		//runSQL();
    // 		testStatement();
-    		
+    	Poptabletest();
     	}catch(SQLException e)
     	{
     		System.out.println(e);
@@ -249,24 +250,59 @@ public class DataBase<T> extends Input<T>{
 	public void parse(KeywordIndex kw)  {
 		// TODO Auto-generated method stub
 	}
-	public static void testing() throws SQLException { 
-		     props.setProperty("user","sde");
+	public static DefaultTableModel testing() throws SQLException { 
+		     
+		props.setProperty("user","sde");
 			
 		    props.setProperty("password","Fomsummer2014");
-		    String x = JOptionPane.showInputDialog("X:");
-		    String y = JOptionPane.showInputDialog("Y:");
+		    
 		    Connection conn = DriverManager.getConnection("jdbc:postgresql://25.141.219.39:5432/fom",props);
 	         
 		    System.out.println("try to connect");
 		  
 		Statement st = conn.createStatement();
-		ResultSet rs = st.executeQuery("SELECT point_x,point_y,grid_code, pointid,"
-				+ "((point_x+"+x+")*(point_x+"+x+"))+((point_y-"+y+")*(point_y-"+y+")) AS distance"
-				+ " FROM saeed_test"
-				+ " WHERE point_x>-96.119838 AND point_y<56.65530818"
-				+ " ORDER BY distance ASC"
-				+ " LIMIT 1");
-		       
+		ResultSet rs = st.executeQuery("SELECT table_schema,table_name "
+				+ "FROM information_schema.tables "
+				+ "ORDER BY table_schema,table_name;");
+	    System.out.println("query sent");
+
+	//	DatabaseMetaData md = conn.getMetaData();
+	//	ResultSet rs = md.getTables(null, null, "%", null);
+		ResultSetMetaData metaData1 = rs.getMetaData();
+
+	    int columnCount = metaData1.getColumnCount();
+
+			   
+
+		    // names of columns
+		    Vector<String> columnNames = new Vector<String>();
+		    columnNames.add("Database");
+		    	
+		        
+		    	
+		      
+		    // data of the table
+		    Vector<Vector<Object>> data = new Vector<Vector<Object>>();
+		    
+		    while (rs.next()){
+		    	
+		    	
+		    	Vector<Object> vector = new Vector<Object>();
+		        
+
+		        
+		        for (int i = 1;i<=columnCount;i++) {
+
+		                   vector.add(rs.getObject(i));
+
+		        
+		        data.add(vector);
+		        
+		       } 
+		    
+			  
+
+		}
 		/*ResultSet rs = st.executeQuery("SELECT * "
     			+ "FROM saeed_test "
     			+ "WHERE point_x <= -96.23 AND point_y <= 56.74 "
@@ -291,5 +327,13 @@ public class DataBase<T> extends Input<T>{
 	    	while (rs.next()){
 	    	System.out.println(rs.getString(1)+" "+rs.getString(2)+" "+rs.getString(3));
 	    	}
+	    	  return new DefaultTableModel(data, columnNames);
 	}
+	 public static void Poptabletest() throws SQLException{
+		   JTable table = new JTable(testing());
+		   JOptionPane.showMessageDialog(null, new JScrollPane(table));
+		   
+	   }
+	
 }
+
