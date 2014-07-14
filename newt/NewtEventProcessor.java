@@ -8,8 +8,11 @@ import gov.nasa.worldwind.render.PointPlacemark;
 
 import java.awt.Component;
 import java.awt.Rectangle;
+import java.sql.SQLException;
 
 import javax.swing.SwingUtilities;
+
+import DataBase.DataBase;
 
 import com.jogamp.newt.Window;
 import com.jogamp.newt.event.KeyEvent;
@@ -119,7 +122,21 @@ public class NewtEventProcessor extends NEWTEventFiFo implements com.jogamp.newt
 	    if(e.getButton()==3){
 	        //if is right click
 			if (pos!=null && cursorMode==1){
-				System.out.println(pos);
+				String x = method(pos.getLatitude().toDecimalDegreesString(10).toString());
+				String y = method(pos.getLongitude().toDecimalDegreesString(10).toString());
+				System.out.println(x);
+				System.out.println(y);
+				
+				Container.getInstance().setPosition(pos);
+				
+				
+				try {
+					DataBase.test();
+				} catch (SQLException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				
 				//PointPlacemark point = new PointPlacemark(canvas.getCurrentPosition());
 				//layer = new RenderableLayer();
 				//layer.addRenderable(point);
@@ -202,4 +219,11 @@ public class NewtEventProcessor extends NEWTEventFiFo implements com.jogamp.newt
 		cursorMode=mode;
 		System.out.println(mode);
 	}
+	public String method(String str) {
+
+		  if (str.length() > 0 && str.charAt(str.length()-1)=='бу') {
+		    str = str.substring(0, str.length()-1);
+		  }
+		  return str;
+		}
 }

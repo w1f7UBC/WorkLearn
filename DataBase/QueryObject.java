@@ -24,17 +24,9 @@ import com.sandwell.JavaSimulation.Vec3dInput;
 import com.sandwell.JavaSimulation3D.DisplayEntity;
 
 public  class QueryObject extends AbstractQuery {
-	private static String x = "-96.119838";     
-    private static String y ="56.65530818";
-	private static String statement = 
-    "SELECT *"
-		+ " FROM saeed_gy"
-		+ " WHERE grid_code"
-		+ " IN (SELECT grid_code"
-		+ " FROM saeed_test"
-		+ " WHERE  point_x>"+(x)+" AND point_y<"+(y)
-		+ " ORDER BY point_x ASC, point_y DESC"
-		+ " LIMIT 1)";
+//	private static String x = "-96.119838";     
+//    private static String y ="56.65530818";
+	
 		
 /*"SELECT A.grid_Code, B.ecozone2, B.stid2, B.curvtype2 "
 		+ "FROM saeed_test A,saeed_gy B "
@@ -54,6 +46,17 @@ private  StringListInput tablename;
 private Vec3dInput  coordinate;
 @Keyword(description = "query statement")
 private StringInput querystatment;
+@Keyword(description ="x coordiantes")
+private static StringInput x;
+@Keyword(description ="y coordiantes")
+private static StringInput y;
+
+
+static
+{
+	x = new StringInput("x","Query property","-96.119838");
+	y = new StringInput("y","Query property","56.65530818");
+}
 { 
 	target = new StringListInput("target","Query property", new ArrayList<String>(0));
 	this.addInput(target);
@@ -63,9 +66,18 @@ private StringInput querystatment;
 	this.addInput(coordinate);
 	querystatment = new StringInput("statement","Query property",statement);
 	this.addInput(querystatment);
-    }
+	    
+}
 
-
+private static String statement = 
+"SELECT *"
+	+ " FROM saeed_gy"
+	+ " WHERE grid_code"
+	+ " IN (SELECT grid_code"
+	+ " FROM saeed_test"
+	+ " WHERE  point_x>"+(x.getValue())+" AND point_y<"+(y.getValue())
+	+ " ORDER BY point_x ASC, point_y DESC"
+	+ " LIMIT 1)";
 private void StatementBuild(){
 	
 	setStatement(statement);
