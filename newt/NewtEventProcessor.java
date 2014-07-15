@@ -117,6 +117,8 @@ public class NewtEventProcessor extends NEWTEventFiFo implements com.jogamp.newt
 	@Override
 	public void mousePressed(MouseEvent e)
 	{
+		put(e);
+		mouseDragged = false;
 		canvas = (WorldWindowNewtCanvas) awtComponent;
 		Position pos = canvas.getCurrentPosition();
 	    if(e.getButton()==3){
@@ -126,17 +128,13 @@ public class NewtEventProcessor extends NEWTEventFiFo implements com.jogamp.newt
 				String y = method(pos.getLongitude().toDecimalDegreesString(10).toString());
 				System.out.println(x);
 				System.out.println(y);
-				
 				Container.getInstance().setPosition(pos);
-				
-				
 				try {
 					DataBase.test();
 				} catch (SQLException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
-				
 				//PointPlacemark point = new PointPlacemark(canvas.getCurrentPosition());
 				//layer = new RenderableLayer();
 				//layer.addRenderable(point);
@@ -144,8 +142,6 @@ public class NewtEventProcessor extends NEWTEventFiFo implements com.jogamp.newt
 				pos=null;
 			}
 	    }
-		put(e);
-		mouseDragged = false;
 	}
 
 	@Override
@@ -221,7 +217,7 @@ public class NewtEventProcessor extends NEWTEventFiFo implements com.jogamp.newt
 	}
 	public String method(String str) {
 
-		  if (str.length() > 0 && str.charAt(str.length()-1)=='¡ã') {
+		  if (str.length() > 0 && str.charAt(str.length()-1)=='°') {
 		    str = str.substring(0, str.length()-1);
 		  }
 		  return str;

@@ -38,7 +38,7 @@ public static Properties props = new Properties();
 	   
 	
 
-	    
+
 	}
 	
 	public Connection getConnection(){
@@ -49,9 +49,9 @@ public static Properties props = new Properties();
 	public static String getURL(){
 		return url.getValue();
 	}
+	
 	public static Properties getProperties(){
 		props.setProperty("user","sde");
-		
 	    props.setProperty("password","Fomsummer2014");
 		return props;
 	}
