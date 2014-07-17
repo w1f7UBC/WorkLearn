@@ -200,8 +200,13 @@ public class DataBase<T> extends Input<T>{
 	}
 		
    public static void Poptable() throws SQLException{
-	   JTable table = new JTable(DisplayTable());
-	   JOptionPane.showMessageDialog(null, new JScrollPane(table));
+	   final JTable table = new JTable(DisplayTable());
+	   EventQueue.invokeLater(new Runnable() {
+	        @Override
+	        public void run() {
+	        	JOptionPane.showMessageDialog(null, new JScrollPane(table));	   
+	        }
+	   });
 	   return;
    }
    
@@ -289,11 +294,11 @@ public class DataBase<T> extends Input<T>{
 	 public static void Poptabletest() throws SQLException{
 		 final JTable table = new JTable(testing());
 		 EventQueue.invokeLater(new Runnable() {
-		        @Override
-		        public void run() {
-		        	JOptionPane.showMessageDialog(null, new JScrollPane(table));	   
-		        }
-		    });
+	        @Override
+	        public void run() {
+	        	JOptionPane.showMessageDialog(null, new JScrollPane(table));	   
+	        }
+		 });
 	 }
 }
 
