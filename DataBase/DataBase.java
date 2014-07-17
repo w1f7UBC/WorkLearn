@@ -1,4 +1,5 @@
 package DataBase;
+import java.awt.EventQueue;
 import java.sql.Array;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -286,8 +287,13 @@ public class DataBase<T> extends Input<T>{
 	}
 
 	 public static void Poptabletest() throws SQLException{
-		 JTable table = new JTable(testing());
-		 JOptionPane.showMessageDialog(null, new JScrollPane(table));	   
+		 final JTable table = new JTable(testing());
+		 EventQueue.invokeLater(new Runnable() {
+		        @Override
+		        public void run() {
+		        	JOptionPane.showMessageDialog(null, new JScrollPane(table));	   
+		        }
+		    });
 	 }
 }
 
