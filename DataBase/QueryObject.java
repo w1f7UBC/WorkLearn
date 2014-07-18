@@ -24,17 +24,7 @@ import com.sandwell.JavaSimulation.Vec3dInput;
 import com.sandwell.JavaSimulation3D.DisplayEntity;
 
 public  class QueryObject extends AbstractQuery {
-	//	private static String x = "-96.119838";     
-	//    private static String y ="56.65530818";
-		
-			
-	/*"SELECT A.grid_Code, B.ecozone2, B.stid2, B.curvtype2 "
-			+ "FROM saeed_test A,saeed_gy B "
-			+ "WHERE A.grid_code = B.grid_Code "
-			+ "AND A.point_x=-96.2293862010 "
-			+ "AND A.point_y=56.7500090970 "
-			+ "ORDER BY A.grid_Code ASC";
-	*/
+	
 	private ArrayList<String> targets;
 	private ArrayList<String> tablenames;
 	
@@ -46,16 +36,13 @@ public  class QueryObject extends AbstractQuery {
 	private Vec3dInput  coordinate;
 	@Keyword(description = "query statement")
 	private StringInput querystatment;
-	@Keyword(description ="x coordiantes")
-	private static StringInput x;
-	@Keyword(description ="y coordiantes")
-	private static StringInput y;
-	
-	
-	static{
-		x = new StringInput("x","Query property","-96.119838");
-		y = new StringInput("y","Query property","56.65530818");
-	}
+//	@Keyword(description ="x coordiantes")
+//	private static StringInput x;
+//	@Keyword(description ="y coordiantes")
+//	private static StringInput y;
+	public static String x = "";
+	public static String y = "";
+
 	{ 
 		target = new StringListInput("target","Query property", new ArrayList<String>(0));
 		this.addInput(target);
@@ -67,24 +54,42 @@ public  class QueryObject extends AbstractQuery {
 		this.addInput(querystatment);  
 	}
 	
-	private static String statement = 
-	"SELECT *"
-		+ " FROM saeed_gy"
-		+ " WHERE grid_code"
-		+ " IN (SELECT grid_code"
-		+ " FROM saeed_test"
-		+ " WHERE point_x>"+(x.getValue())+" AND point_y<"+(y.getValue())
-		+ " ORDER BY point_x ASC, point_y DESC"
-		+ " LIMIT 1)";
+	public static String statement = 
+			"SELECT *"
+				+ " FROM saeed_gy"
+				+ " WHERE grid_code"
+				+ " IN (SELECT grid_code"
+				+ " FROM saeed_test"
+				+ " WHERE point_x>"+(x)+" AND point_y<"+(y)
+				+ " ORDER BY point_x ASC, point_y DESC"
+				+ " LIMIT 1)";
 	
 	public String getStatement(){
-		return querystatment.getValue();
+		return statement;
 	}
-	
+	/*public String setCoordinateX(String a){		
+		return x=a;
+		
+	}
+	public String setCoordinate1Y(String b){
+		return y=b;
+	}
+	*/
 	public void updateForInput( Input<?> in ) {
 		super.updateForInput( in );
 	}
-	
+	public static void updateStatement(String a,String b){
+		x=a;
+		y=b;
+		statement =  "SELECT *"
+					+ " FROM saeed_gy"
+					+ " WHERE grid_code"
+					+ " IN (SELECT grid_code"
+					+ " FROM saeed_test"
+					+ " WHERE point_x>"+(x)+" AND point_y<"+(y)
+					+ " ORDER BY point_x ASC, point_y DESC"
+					+ " LIMIT 1)";
+	}
 	public static ResultSet runSQL() throws SQLException{
 		QueryObject q = new QueryObject();
 		String s = q.getStatement(); 

@@ -13,6 +13,7 @@ import java.sql.SQLException;
 import javax.swing.SwingUtilities;
 
 import DataBase.DataBase;
+import DataBase.QueryObject;
 
 import com.jogamp.newt.Window;
 import com.jogamp.newt.event.KeyEvent;
@@ -121,15 +122,19 @@ public class NewtEventProcessor extends NEWTEventFiFo implements com.jogamp.newt
 		mouseDragged = false;
 		canvas = (WorldWindowNewtCanvas) awtComponent;
 		Position pos = canvas.getCurrentPosition();
+	
 	    if(e.getButton()==3){
 	        //if is right click
 			if (pos!=null && cursorMode==1){
-				String x = method(pos.getLatitude().toDecimalDegreesString(10).toString());
-				String y = method(pos.getLongitude().toDecimalDegreesString(10).toString());
-				System.out.println(x);
-				System.out.println(y);
+				String latitude = method(pos.latitude.toDecimalDegreesString(10));
+				String longtitude = method(pos.longitude.toDecimalDegreesString(10));
+			//	String x = method(pos.getLatitude().toDecimalDegreesString(10).toString());
+		//		String y = method(pos.getLongitude().toDecimalDegreesString(10).toString());
+			//	System.out.println(x);
+			//	System.out.println(y);
 				Container.getInstance().setPosition(pos);
 				try {
+					QueryObject.updateStatement(longtitude, latitude);
 					DataBase.test();
 				} catch (SQLException e1) {
 					// TODO Auto-generated catch block
@@ -215,9 +220,10 @@ public class NewtEventProcessor extends NEWTEventFiFo implements com.jogamp.newt
 		cursorMode=mode;
 		System.out.println(mode);
 	}
+
 	public String method(String str) {
 
-		  if (str.length() > 0 && str.charAt(str.length()-1)=='°') {
+		  if (str.length() > 0 && str.charAt(str.length()-1)== '¡ã') {
 		    str = str.substring(0, str.length()-1);
 		  }
 		  return str;

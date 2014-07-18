@@ -3,73 +3,39 @@ import java.awt.EventQueue;
 import java.sql.Array;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
-import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.Properties;
 import java.util.Vector;
 
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
-import javax.xml.crypto.Data;
-
 import com.jaamsim.input.Input;
-import com.jaamsim.input.InputAgent;
 import com.jaamsim.input.KeywordIndex;
-import com.sandwell.JavaSimulation.Entity;
-import com.sandwell.JavaSimulation.InputErrorException;
-import com.sandwell.JavaSimulation3D.DisplayEntity;
 
 
 
 public class DataBase<T> extends Input<T>{
 	 
-	 public DataBase(String key, String cat, T def) {
+	
+	 	
+
+	public DataBase(String key, String cat, T def) {
 		super(key, cat, def);
 		// TODO Auto-generated constructor stub
 	}
-	 	
 
 	{
-
-	}
-
-	private static String s = "SELECT A.grid_Code, B.ecozone2, B.stid2, B.curvtype2 "
-			+ "FROM saeed_test A,saeed_gy B "
-			+ "WHERE A.grid_code = B.grid_Code "
-			+ "AND A.point_x=-96.2293862010 "
-			+ "AND A.point_y=56.7500090970 "
-			+ "ORDER BY A.grid_Code ASC";
-	//public static String url = "jdbc:postgresql://25.141.219.39:5432/fom";
-    public static  Properties props = new Properties();
-    public static String Name;
-    public static String[] names;
-    public static ArrayList<String> Names ;
-	private static String a;
-	public static void loadDriver() throws ClassNotFoundException {
-		try {
-			Class.forName("org.postgresql.Driver");
-		}
-		catch(ClassNotFoundException e){
-			System.out.print("Driver error");
-		}
-	}
-	/*public static void Connection() throws SQLException{
-		props.setProperty("user","sde");
 		
-	    props.setProperty("password","Fomsummer2014");
-	    Connection conn = DriverManager.getConnection(url,props);
-
-	    System.out.println("try to connect");
-
 	}
-	    public static void testStatement() throws SQLException{
+
+	
+
+	 /*   public static void testStatement() throws SQLException{
 
 		 Connection conn = DriverManager.getConnection(url,props);
 
@@ -112,56 +78,7 @@ public class DataBase<T> extends Input<T>{
 	    	st.close();
 	 }
 */
- /*  public static ResultSet runSQL(String s) throws SQLException{
-	     props.setProperty("user","sde");
-		
-	    props.setProperty("password","Fomsummer2014");
-	     String url = DataObject.getURL();
-	    Connection conn = DriverManager.getConnection(url,props);
 
-	    System.out.println("try to connect"); 
-	          boolean last;     
-	           Integer i = 1;
-	        
-            Names = new ArrayList<String>();     
-	        QueryStatement qs = new QueryStatement();
-        //    Connection conn = DriverManager.getConnection(url,props);
-
-		    Statement st = conn.createStatement();
-		//    qs.setStatement();
-		    System.out.println(s);
-	    	
-		    ResultSet rs = st.executeQuery(s);
-	    	
-		  //  while (rs.next()){
-	    //	System.out.print(rs.getString(1)+" "+rs.getString(2));
-		    
-	    //	ResultSetMetaData rsmd = rs.getMetaData();
-	    	/* System.out.print(rsmd.getColumnCount());
-	    		while (rs.next()){
-	    			int column = 1;
-	    			while (column < rsmd.getColumnCount()){
-	    				System.out.print(rs.getString(column));	
-	    				column++;
-	    			}
-	    			
-	    		}
-	    	*/
-		//    }
-	//		return rs;
-   //}
-	    		/*while(){	
-	    	     
-	    		 Name =	Name + rs.getString(i);
-	    		 
-	    		 Names.iterator()
-	    	     
-	    		}
-	    	   Names.add(Name);
-	    	   System.out.println(Names);
-	    	}
-	    		
-   */
    private static DefaultTableModel DisplayTable() throws SQLException{  
 	    ResultSet rs= QueryObject.runSQL();
 		ResultSetMetaData metaData = rs.getMetaData();
@@ -212,20 +129,7 @@ public class DataBase<T> extends Input<T>{
    
 	public static void test() throws SQLException{
     	try{ 
-    	//	DataObject d = new DataObject();
-    		
-  //  		Connection();
-    		
-    	/*	runSQL("SELECT A.grid_Code, B.ecozone2, B.stid2, B.curvtype2 "
-    				+ "FROM saeed_test A,saeed_gy B "
-    				+ "WHERE A.grid_code = B.grid_Code "
-    				+ "AND A.point_x=-96.2293862010 "
-    				+ "AND A.point_y=56.7500090970 "
-    				+ "ORDER BY A.grid_Code ASC");
-    				*/
-    		//Poptable();
-    		//runSQL();
-   // 		testStatement();
+    	
     		Poptable();
     	}catch(SQLException e){
     		System.out.println(e);
@@ -237,7 +141,7 @@ public class DataBase<T> extends Input<T>{
 	public void parse(KeywordIndex kw)  {
 		// TODO Auto-generated method stub
 	}
-	public static DefaultTableModel testing() throws SQLException { 
+/*	public static DefaultTableModel testing() throws SQLException { 
 		props.setProperty("user","sde");
 		props.setProperty("password","Fomsummer2014");
 		Connection conn = DriverManager.getConnection("jdbc:postgresql://25.141.219.39:5432/fom",props); 
@@ -285,13 +189,13 @@ public class DataBase<T> extends Input<T>{
 	    			+ "ORDER BY point_y DESC, point_x DESC "
 	    			+ "LIMIT 1;");
 	    			*/
-	    	while (rs.next()){
-	    		System.out.println(rs.getString(1)+" "+rs.getString(2)+" "+rs.getString(3));
-	    	}
-	    	return new DefaultTableModel(data, columnNames);
-	}
+    //	while (rs.next()){
+  // 		System.out.println(rs.getString(1)+" "+rs.getString(2)+" "+rs.getString(3));
+   // 	}
+//	    	return new DefaultTableModel(data, columnNames);
+	
 
-	 public static void Poptabletest() throws SQLException{
+/*	 public static void Poptabletest() throws SQLException{
 		 final JTable table = new JTable(testing());
 		 EventQueue.invokeLater(new Runnable() {
 	        @Override
@@ -299,7 +203,7 @@ public class DataBase<T> extends Input<T>{
 	        	JOptionPane.showMessageDialog(null, new JScrollPane(table));	   
 	        }
 		 });
-	 }
+	 } */
 }
 
 
