@@ -19,12 +19,12 @@ import com.jaamsim.input.KeywordIndex;
 
 
 
-public class DataBase<T> extends Input<T>{
+public class TestingMethod<T> extends Input<T>{
 	 
 	
 	 	
 
-	public DataBase(String key, String cat, T def) {
+	public TestingMethod(String key, String cat, T def) {
 		super(key, cat, def);
 		// TODO Auto-generated constructor stub
 	}
