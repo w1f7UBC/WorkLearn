@@ -12,7 +12,7 @@ import java.sql.SQLException;
 
 import javax.swing.SwingUtilities;
 
-import DataBase.DataBase;
+import DataBase.TestingMethod;
 import DataBase.QueryObject;
 
 import com.jogamp.newt.Window;
@@ -135,7 +135,7 @@ public class NewtEventProcessor extends NEWTEventFiFo implements com.jogamp.newt
 				Container.getInstance().setPosition(pos);
 				try {
 					QueryObject.updateStatement(longtitude, latitude);
-					DataBase.test();
+					QueryObject.test();
 				} catch (SQLException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();

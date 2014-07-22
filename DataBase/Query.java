@@ -1,9 +1,18 @@
 package DataBase;
 
+import java.util.ArrayList;
 
+import com.sandwell.JavaSimulation3D.DisplayEntity;
 
-public @interface Query {
-	public String name();
-	public String description() default "";
-	public Class<? extends AbstractQuery> unitType() ;
+public class Query extends DisplayEntity {
+	private String statement;
+	public ArrayList<String> coordinates;
+    public Query(){
+    	
+    }
+	
+	public String getStatement(){
+		return statement;
+	}
+	
 }

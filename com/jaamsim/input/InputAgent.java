@@ -34,7 +34,7 @@ import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-import DataBase.DataBase;
+import DataBase.TestingMethod;
 import com.jaamsim.input.Input.ParseContext;
 import com.jaamsim.ui.ExceptionBox;
 import com.jaamsim.ui.FrameBox;

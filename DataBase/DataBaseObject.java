@@ -14,8 +14,8 @@ import com.sandwell.JavaSimulation.EntityInput;
 import com.sandwell.JavaSimulation.StringInput;
 import com.sandwell.JavaSimulation3D.Region;
 
-public class DataObject extends Entity {
-	public DataObject(){
+public class DataBaseObject extends Entity {
+	public DataBaseObject(){
 		
 	}
 	@Keyword(description = "URL",example = "Test URL {jdbc:postgresql://25.141.219.39:5432/fom}")

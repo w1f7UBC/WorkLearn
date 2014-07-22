@@ -1,6 +1,7 @@
 
 package DataBase;
 
+import java.awt.EventQueue;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -23,7 +24,7 @@ import com.sandwell.JavaSimulation.StringListInput;
 import com.sandwell.JavaSimulation.Vec3dInput;
 import com.sandwell.JavaSimulation3D.DisplayEntity;
 
-public  class QueryObject extends AbstractQuery {
+public  class QueryObject extends Query {
 	
 	private ArrayList<String> targets;
 	private ArrayList<String> tablenames;
@@ -93,13 +94,71 @@ public  class QueryObject extends AbstractQuery {
 	public static ResultSet runSQL() throws SQLException{
 		QueryObject q = new QueryObject();
 		String s = q.getStatement(); 
-		String url = DataObject.getURL();
-		Connection conn = DriverManager.getConnection(url,DataObject.getProperties());
+		String url = DataBaseObject.getURL();
+		Connection conn = DriverManager.getConnection(url,DataBaseObject.getProperties());
 	    System.out.println("try to connect"); 
 		    Statement st = conn.createStatement();
 		    System.out.println(s);
 		    ResultSet rs = st.executeQuery(s);
 			return rs;
 	}
+	private static DefaultTableModel DisplayTable() throws SQLException{  
+	    ResultSet rs= QueryObject.runSQL();
+		ResultSetMetaData metaData = rs.getMetaData();
+	    // names of columns
+	    Vector<String> columnNames = new Vector<String>();
+	    ArrayList<Integer> index = new ArrayList<Integer>();
+	    String ageIndex = "5";
+	    int columnCount = metaData.getColumnCount();
+	    ArrayList<Integer> index2 = new ArrayList<Integer>();
+	    for (int column = 1; column <= columnCount; column++) { 
+	    	if(metaData.getColumnName(column).contains("grid_code")||metaData.getColumnName(column).contains("ecozone2")||metaData.getColumnName(column).contains("stid2")||metaData.getColumnName(column).contains("si2")||metaData.getColumnName(column).contains("age")){	    		
+	    		System.out.println(metaData.getColumnName(column));
+	    		columnNames.add(metaData.getColumnName(column));
+	    		index.add(column);
+	    		}
+	    	}
+	    // data of the table
+	    Vector<Vector<Object>> data = new Vector<Vector<Object>>();
+	    while (rs.next()){
+	    	Vector<Object> vector = new Vector<Object>();
+	        for ( int columnIndex : index) {
+	        	if (columnIndex == 5){
+	        		
+	        	}
+	            vector.add(rs.getObject(columnIndex));
+	            //Vector<Object> c = data.get(1);
+	        }
+	        data.add(vector);
+	       } 
+	    String addCol = "vol"+"100"+"2";
+	    String addCol2 = "bio"+"100"+"2";
+	    columnNames.add(addCol);
+	    columnNames.add(addCol2);
+	    return new DefaultTableModel(data, columnNames);
+
+	}
+		
+   public static void Poptable() throws SQLException{
+	   final JTable table = new JTable(DisplayTable());
+	   EventQueue.invokeLater(new Runnable() {
+	        @Override
+	        public void run() {
+	        	JOptionPane.showMessageDialog(null, new JScrollPane(table));	   
+	        }
+	   });
+	   return;
+   }
+   
+	public static void test() throws SQLException{
+    	try{ 
+    	
+    		Poptable();
+    	}catch(SQLException e){
+    		System.out.println(e);
+    		System.exit(1);
+    	}
+    }
+	
 }
 
