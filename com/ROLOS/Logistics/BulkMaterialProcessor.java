@@ -6,10 +6,13 @@ import com.ROLOS.DMAgents.SimulationManager;
 import com.ROLOS.Economic.Contract;
 import com.jaamsim.input.ValueInput;
 import com.jaamsim.input.ValueListInput;
+import com.jaamsim.units.CostPerEnergyUnit;
 import com.jaamsim.units.CostPerMassUnit;
 import com.jaamsim.units.CostPerVolumeUnit;
+import com.jaamsim.units.EnergyUnit;
 import com.jaamsim.units.MassFlowUnit;
 import com.jaamsim.units.MassUnit;
+import com.jaamsim.units.PowerUnit;
 import com.jaamsim.units.RateUnit;
 import com.jaamsim.units.TimeUnit;
 import com.jaamsim.units.VolumeFlowUnit;
@@ -18,7 +21,6 @@ import com.sandwell.JavaSimulation.EntityInput;
 import com.sandwell.JavaSimulation.EntityListInput;
 import com.sandwell.JavaSimulation.ErrorException;
 import com.jaamsim.input.Input;
-
 import com.jaamsim.input.Keyword;
 import com.sandwell.JavaSimulation.Tester;
 import com.sandwell.JavaSimulation.TimeSeries;
@@ -355,6 +357,9 @@ public class BulkMaterialProcessor extends BulkHandlingLinkedEntity {
 			else if(outfeedEntityTypeList.getValue().get(0).getEntityUnit().equals(MassUnit.class)){
 				outfeedRateByEntityType.setUnitType(MassFlowUnit.class);
 				operatingCost.setUnitType(CostPerMassUnit.class);
+			} else if(outfeedEntityTypeList.getValue().get(0).getEntityUnit().equals(EnergyUnit.class)){
+				outfeedRateByEntityType.setUnitType(PowerUnit.class);
+				operatingCost.setUnitType(CostPerEnergyUnit.class);
 			}
 			else
 				outfeedRateByEntityType.setUnitType(RateUnit.class);

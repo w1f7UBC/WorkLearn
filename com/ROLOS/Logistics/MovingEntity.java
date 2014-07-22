@@ -214,7 +214,7 @@ public class MovingEntity extends LogisticsEntity {
 		LoadingBay tempLoadingBay;
 		// If loading bay is not defined for the owning facility, means that transportation is
 		// not explicitly model, hence return
-		if(this.getFacility().getInsideFacilityLimits().get(LoadingBay.class).isEmpty())
+		if(this.getFacility() == null || this.getFacility().getInsideFacilityLimits().get(LoadingBay.class).isEmpty())
 			return;
 		
 		// puts moving entities at a loading bay or if not found at an unloading bay

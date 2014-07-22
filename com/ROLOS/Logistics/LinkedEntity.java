@@ -167,7 +167,7 @@ public class LinkedEntity extends LogisticsEntity {
 				each.addToPreviousLinkedEntityList(this);
 			}
 			try{
-				((Facility)this).setFacilityConnectedToRoute(true);
+				
 			}catch(ClassCastException e){}	
 		}
 		

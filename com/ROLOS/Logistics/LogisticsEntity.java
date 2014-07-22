@@ -7,8 +7,10 @@ import com.ROLOS.Utils.TwoLinkedLists;
 import com.jaamsim.input.ValueInput;
 import com.jaamsim.input.ValueListInput;
 import com.jaamsim.units.CostUnit;
+import com.jaamsim.units.EnergyUnit;
 import com.jaamsim.units.MassFlowUnit;
 import com.jaamsim.units.MassUnit;
+import com.jaamsim.units.PowerUnit;
 import com.jaamsim.units.RateUnit;
 import com.jaamsim.units.TimeUnit;
 import com.jaamsim.units.Unit;
@@ -17,7 +19,6 @@ import com.jaamsim.units.VolumeUnit;
 import com.sandwell.JavaSimulation.EntityInput;
 import com.sandwell.JavaSimulation.EnumInput;
 import com.jaamsim.input.Input;
-
 import com.jaamsim.input.Keyword;
 import com.sandwell.JavaSimulation.TimeSeries;
 
@@ -32,7 +33,8 @@ public class LogisticsEntity extends ReportableEntity {
 		SOLID_BULK_massbased (true,MassUnit.class,MassFlowUnit.class),
 		SOLID_BULK_volumetric (true,VolumeUnit.class,VolumeFlowUnit.class),
 		LIQUID (true, VolumeUnit.class,VolumeFlowUnit.class),
-		GAS (true, VolumeUnit.class,VolumeFlowUnit.class);
+		GAS (true, VolumeUnit.class,VolumeFlowUnit.class),
+		ENERGY (true,EnergyUnit.class, PowerUnit.class);
 		
 		private final boolean isBulk; 						//whether entity is a bulk entity
 		private final Class<? extends Unit> unit;			//entity's  unit of measurement
@@ -50,9 +52,12 @@ public class LogisticsEntity extends ReportableEntity {
 			}else if (unit.getSimpleName().equals("MassUnit")){
 				unitString = "kg";
 				unitFlowString = "kg/s";
-			} else{
+			} else if (unit.getSimpleName().equals("VolumeUnit")){
 				unitString = "m3";
 				unitFlowString = "m3/s";
+			} else {
+				unitString = "J";
+				unitFlowString = "J/s";
 			}
 		}
 	}

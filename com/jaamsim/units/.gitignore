@@ -28,3 +28,5 @@
 /CostPerMassUnit.class
 /CostPerVolumePerDistUnit.class
 /CostPerVolumeUnit.class
+/CostPerEnergyUnit.class
+/EnergyFlowUnit.class

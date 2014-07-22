@@ -27,6 +27,7 @@ import com.sandwell.JavaSimulation.Tester;
  * next available route or loading bay is planned.  
  */
 public class Facility extends DiscreteHandlingLinkedEntity {
+//
 	private static final ArrayList<Facility> allInstances;
 
 	@Keyword(description = "If TRUE, then statistics for all stocks will be printed for this facility"
@@ -50,9 +51,7 @@ public class Facility extends DiscreteHandlingLinkedEntity {
 	
 	// If facilities are not able to technically produce output products (feedstock piles ran out of content, output piles ran out of content and processing capability is lost).
 	private boolean dormant;											
-	// if facility is modeled as an abstract entity and is connected to route entities
-	private boolean facilityConnectedToRoute;
-	
+		
 	// Report files
 	protected FileEntity stocksReportFile;       
 
@@ -196,14 +195,6 @@ public class Facility extends DiscreteHandlingLinkedEntity {
 
 	public HashMapList<String,LogisticsEntity> getInsideFacilityLimits(){
 		return insideFacilityLimits;
-	}
-
-	public boolean isFacilityConnectedToRoute() {
-		return facilityConnectedToRoute;
-	}
-
-	public void setFacilityConnectedToRoute(boolean facilityConnectedToRoute) {
-		this.facilityConnectedToRoute = facilityConnectedToRoute;
 	}
 
 	// TODO use Enums instead of numbers for better readability

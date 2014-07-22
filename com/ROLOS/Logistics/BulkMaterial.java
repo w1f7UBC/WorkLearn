@@ -4,6 +4,7 @@ import com.jaamsim.DisplayModels.DisplayModel;
 import com.jaamsim.Samples.SampleInput;
 import com.jaamsim.input.InputAgent;
 import com.jaamsim.math.Vec3d;
+import com.jaamsim.units.CostPerEnergyUnit;
 import com.jaamsim.units.CostPerMassUnit;
 import com.jaamsim.units.CostPerVolumeUnit;
 import com.jaamsim.units.DensityUnit;
@@ -193,8 +194,10 @@ public class BulkMaterial extends LogisticsEntity {
 	public void setInputUnits(){
 		if(this.getEntityUnit().equals(MassUnit.class))
 			price.setUnitType(CostPerMassUnit.class);
-		else
+		else if (this.getEntityUnit().equals(VolumeUnit.class))
 			price.setUnitType(CostPerVolumeUnit.class);
+		else 
+			price.setUnitType(CostPerEnergyUnit.class);
 	}
 	
 // linear blending formula

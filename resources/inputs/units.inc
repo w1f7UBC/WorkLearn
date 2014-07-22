@@ -28,7 +28,7 @@ Define ObjectType  { TimeUnit
                      CostPerMassUnit
                      CostPerVolumePerDistUnit
                      CostPerVolumeUnit                     
- 
+                     CostPerEnergyUnit                     
                      }
 
 TimeUnit            JavaClass { com.jaamsim.units.TimeUnit            } Palette { Units } DragAndDrop { FALSE }
@@ -59,6 +59,7 @@ CostPerMassPerDistUnit     JavaClass { com.jaamsim.units.CostPerMassPerDistUnit 
 CostPerMassUnit             JavaClass { com.jaamsim.units.CostPerMassUnit          } Palette { Units } DragAndDrop { FALSE }
 CostPerVolumePerDistUnit   JavaClass { com.jaamsim.units.CostPerVolumePerDistUnit          } Palette { Units } DragAndDrop { FALSE }
 CostPerVolumeUnit           JavaClass { com.jaamsim.units.CostPerVolumeUnit          } Palette { Units } DragAndDrop { FALSE }
+CostPerEnergyUnit           JavaClass { com.jaamsim.units.CostPerEnergyUnit          } Palette { Units } DragAndDrop { FALSE }
 
 TimeUnit                Description { 'Unit of time. Default = seconds (s).' }
 DistanceUnit            Description { 'Unit of length. Default = meters (m).' }
@@ -88,6 +89,7 @@ CostPerMassPerDistUnit Description { 'Cost per Unit of Mass per unit Distance. D
 CostPerMassUnit         Description { 'Cost per Unit of Mass. Default = Dollar per kilogram ($/kg)' }
 CostPerVolumePerDistUnit  Description { 'Cost per Unit of Volume per unit Distance. Default = Dollar per cubic meter per kilometre ($/m3/km).' }
 CostPerVolumeUnit       Description { 'Cost per Unit of Volume. Default = Dollar per cubic meter ($/m3).' }
+CostPerEnergyUnit       Description { 'Cost per Unit of Energy. Default = Dollar per joule ($/J).' }
 
 " ======================================================================================================================================================
 " Time units
@@ -258,11 +260,14 @@ kWh/t  ConversionFactorToSI { 3600000 1000 }  Description { 'Kilowatt-Hours per 
 " Power units
 " ======================================================================================================================================================
 
-Define PowerUnit { W kW MW}
+Define PowerUnit { J/s W kW kWh/y MW GW }
 
+J/s    ConversionFactorToSI { 1     }  Description { 'Joule per second' }
 W      ConversionFactorToSI { 1     }  Description { 'Watts' }
 kW     ConversionFactorToSI { 1000  }  Description { 'Kilowatts' }
+kWh/y  ConversionFactorToSI { 3600000 31536000 }  Description { 'Kilowatthour per year' }
 MW     ConversionFactorToSI { 1.0e6 }  Description { 'Megawatts' }
+GW     ConversionFactorToSI { 1.0e9 }  Description { 'Gigawatts' }
 
 " ======================================================================================================================================================
 " Cost units
@@ -382,3 +387,11 @@ $/m3/km    ConversionFactorToSI { 1 1.0e3      }  Description { 'Dollar per cubi
 Define CostPerVolumeUnit  { $/m3 }
 
 $/m3      ConversionFactorToSI { 1          }  Description { 'Dollar per cubic meter' }
+
+" ======================================================================================================================================================
+" CostPerEnergyUnit units
+" ======================================================================================================================================================
+Define CostPerEnergyUnit  { $/J $/kWh }
+
+$/J      ConversionFactorToSI { 1          }  Description { 'Dollar per joule' }
+$/kWh      ConversionFactorToSI { 1   3600000       }  Description { 'Dollar per kilowatthour' }

@@ -223,7 +223,7 @@ public class NewtEventProcessor extends NEWTEventFiFo implements com.jogamp.newt
 
 	public String method(String str) {
 
-		  if (str.length() > 0 && str.charAt(str.length()-1)== '¡ã') {
+		  if (str.length() > 0 && str.charAt(str.length()-1)== '°') {
 		    str = str.substring(0, str.length()-1);
 		  }
 		  return str;

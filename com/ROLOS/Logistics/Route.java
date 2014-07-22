@@ -6,7 +6,7 @@ import java.util.ArrayList;
  * This class holds route information from the origin to destination. 
  */
 public class Route {
-	
+		
 	private DiscreteHandlingLinkedEntity origin;
 	private DiscreteHandlingLinkedEntity destination;
 	private ArrayList<DiscreteHandlingLinkedEntity> routeSegmentsList;
