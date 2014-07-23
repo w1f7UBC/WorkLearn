@@ -130,16 +130,14 @@ public class NewtEventProcessor extends NEWTEventFiFo implements com.jogamp.newt
 			if (pos!=null && cursorMode==1){
 				String latitude = method(pos.latitude.toDecimalDegreesString(10));
 				String longtitude = method(pos.longitude.toDecimalDegreesString(10));
-			//	String x = method(pos.getLatitude().toDecimalDegreesString(10).toString());
-		//		String y = method(pos.getLongitude().toDecimalDegreesString(10).toString());
-			//	System.out.println(x);
-			//	System.out.println(y);
+		
 				Container.getInstance().setPosition(pos);
 				try {
+				    
+				    queryObject = QueryObject.getAll().get(index);
 					queryObject.updateStatement(longtitude, latitude);
-					queryObject.ExcuteQuery();
+					queryObject.excuteQuery(queryObject.getStatement());
 				} catch (SQLException e1) {
-					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
 				//PointPlacemark point = new PointPlacemark(canvas.getCurrentPosition());

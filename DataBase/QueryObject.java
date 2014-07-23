@@ -16,6 +16,8 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 
+import com.ROLOS.DMAgents.FacilityFinancialManager;
+import com.ROLOS.Logistics.LinkedEntity;
 import com.jaamsim.Thresholds.Threshold;
 import com.jaamsim.input.Input;
 import com.jaamsim.input.Keyword;
@@ -31,11 +33,11 @@ public  class QueryObject extends Query {
 	
 	private  String DataBaseName ="";
 	public QueryObject(){
-		
+		allInstances.add(this);
 	}
 	private ArrayList<String> targets;
 	private ArrayList<String> tablenames;
-	
+	private static  ArrayList<QueryObject> allInstances;
 	@Keyword(description = "target databaseobject of the query")
 	private  EntityInput<DataBaseObject> targetDB;
 	@Keyword(description = "display targets of the query")
@@ -47,7 +49,9 @@ public  class QueryObject extends Query {
 	@Keyword(description = "query statement")
 	private StringInput querystatment;
 	
-
+	static {
+		allInstances = new ArrayList<QueryObject>();
+	}
 	{   
 	//	databaseEntity = new EntityInput<DataBaseObject>( DataBaseObject.class, "DataBaseEntity", "Key Inputs", null);
 	//	this.addInput(databaseEntity);
@@ -63,6 +67,13 @@ public  class QueryObject extends Query {
 		this.addInput(querystatment);  
 	}	
 
+	
+	
+	public static ArrayList<? extends QueryObject> getAll() {
+		synchronized (allInstances) {
+			return allInstances;
+		}
+	}
 	public void updateForInput( Input<?> in ) {
 		super.updateForInput( in );
 	}
