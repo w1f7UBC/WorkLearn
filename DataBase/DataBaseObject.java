@@ -1,12 +1,25 @@
 package DataBase;
 
+import gov.nasa.worldwind.geom.Angle;
+import gov.nasa.worldwind.geom.LatLon;
+import gov.nasa.worldwind.geom.Position;
+
+import java.awt.EventQueue;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Properties;
+import java.util.Vector;
+
+import javax.swing.JOptionPane;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.table.DefaultTableModel;
 
 import com.jaamsim.input.Keyword;
 import com.sandwell.JavaSimulation.Entity;
@@ -15,46 +28,72 @@ import com.sandwell.JavaSimulation.StringInput;
 import com.sandwell.JavaSimulation3D.Region;
 
 public class DataBaseObject extends Entity {
-	public DataBaseObject(){
-		
-	}
+	
 	@Keyword(description = "URL",example = "Test URL {jdbc:postgresql://25.141.219.39:5432/fom}")
-public static  StringInput url;
+	private  StringInput url;
+	private  StringInput username;
+	private StringInput password;
+	private int connectionIndex;	
+	private Properties props = new Properties();
+    private ResultSet rs;
+    public String statement;
+    
+    public  DataBaseObject(){
+	
+}
 
-public static  StringInput username;
-public static  StringInput pwd;
-public static Properties props = new Properties();
-
-	{
+{
 		url = new StringInput("url","DataBase Properties","jdbc:postgresql://25.141.219.39:5432/fom");
 		this.addInput(url);
 		username = new StringInput("username","DataBase Properties","sde");
         this.addInput(username);
-        pwd = new StringInput("password","DataBase Properties","Fomsummer2014");
-	    this.addInput(pwd);
+        password = new StringInput("password","DataBase Properties","Fomsummer2014");
+	    this.addInput(password);
+     }
+    
+	@Override 
+	public void validate(){
+		try {
+			connectionIndex = Database.Connect(this);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 	}
-
-	public  void Connection() throws SQLException{
-	   
 	
-
-
+	
+	public Connection getConnection() {
+	    return Database.getConnection(connectionIndex);
 	}
-	
-	public Connection getConnection(){
-		return null;
+		
+	public DataBaseObject getDataBaseObject(){
+		return this;
 		
 	}
 	
-	public static String getURL(){
+	public String getURL(){
 		return url.getValue();
 	}
 	
-	public static Properties getProperties(){
-		props.setProperty("user","sde");
-	    props.setProperty("password","Fomsummer2014");
+	public String getUserName(){
+		return username.getValue();
+	}
+	
+	public String getPassword(){
+		return password.getValue();
+	}
+	
+
+	public ResultSet getResultset(String statement) throws SQLException{
+        Statement st = this.getConnection().createStatement();
+	    
+		return rs = st.executeQuery(statement);
+	}
+	
+	public Properties getProperties() {
+		props.setProperty("user",username.getValue());
+	    props.setProperty("password",password.getValue());
 		return props;
 	}
-
+	  
 }
 

@@ -39,6 +39,8 @@ public class NewtEventProcessor extends NEWTEventFiFo implements com.jogamp.newt
 	protected boolean mouseDragged = false;
 	protected int cursorMode;
 
+	private QueryObject queryObject; 
+	
 	public NewtEventProcessor(Component awtComponent)
 	{
 		this.awtComponent = awtComponent;
@@ -134,8 +136,8 @@ public class NewtEventProcessor extends NEWTEventFiFo implements com.jogamp.newt
 			//	System.out.println(y);
 				Container.getInstance().setPosition(pos);
 				try {
-					QueryObject.updateStatement(longtitude, latitude);
-					QueryObject.test();
+					queryObject.updateStatement(longtitude, latitude);
+					queryObject.ExcuteQuery();
 				} catch (SQLException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
