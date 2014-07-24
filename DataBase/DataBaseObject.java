@@ -83,11 +83,7 @@ public class DataBaseObject extends Entity {
 	}
 	
 
-	public ResultSet getResultset(String statement) throws SQLException{
-        Statement st = this.getConnection().createStatement();
-	    
-		return rs = st.executeQuery(statement);
-	}
+	
 	
 	public Properties getProperties() {
 		props.setProperty("user",username.getValue());

@@ -110,5 +110,43 @@ public  class QueryObject extends Query {
 				+ " LIMIT 1)";
 	}
 	
+	@Override
+	public  DefaultTableModel getTableContent(String statement) throws SQLException{  
+			
+			
+			ResultSetMetaData metaData = rs.getMetaData();
+		    // names of columns
+		    Vector<String> columnNames = new Vector<String>();
+		    ArrayList<Integer> index = new ArrayList<Integer>();
+		    String ageIndex = "5";
+		    int columnCount = metaData.getColumnCount();
+		    ArrayList<Integer> index2 = new ArrayList<Integer>();
+		    for (int column = 1; column <= columnCount; column++) { 
+		    	if(metaData.getColumnName(column).contains("grid_code")||metaData.getColumnName(column).contains("ecozone2")||metaData.getColumnName(column).contains("stid2")||metaData.getColumnName(column).contains("si2")||metaData.getColumnName(column).contains("age")){	    		
+		    		columnNames.add(metaData.getColumnName(column));
+		    		index.add(column);
+		    		}
+		    	}
+		    // data of the table
+		    Vector<Vector<Object>> data = new Vector<Vector<Object>>();
+		    while (rs.next()){
+		    	Vector<Object> vector = new Vector<Object>();
+		        for ( int columnIndex : index) {
+		        	if (columnIndex == 5){
+		        		
+		        	}
+		            vector.add(rs.getObject(columnIndex));
+		           
+		        }
+		        data.add(vector);
+		       } 
+		    String addCol = "vol"+"100"+"2";
+		    String addCol2 = "bio"+"100"+"2";
+		    columnNames.add(addCol);
+		    columnNames.add(addCol2);
+		    return new DefaultTableModel(data, columnNames);
+
+		}
+	
 }
 
