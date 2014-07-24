@@ -12,8 +12,7 @@ import java.sql.SQLException;
 
 import javax.swing.SwingUtilities;
 
-import DataBase.TestingMethod;
-import DataBase.QueryObject;
+import DataBase.InventoryQuery;
 
 import com.jogamp.newt.Window;
 import com.jogamp.newt.event.KeyEvent;
@@ -39,7 +38,7 @@ public class NewtEventProcessor extends NEWTEventFiFo implements com.jogamp.newt
 	protected boolean mouseDragged = false;
 	protected int cursorMode;
 
-	private QueryObject queryObject; 
+	private InventoryQuery inventoryQuery; 
 	
 	public NewtEventProcessor(Component awtComponent)
 	{
@@ -134,9 +133,9 @@ public class NewtEventProcessor extends NEWTEventFiFo implements com.jogamp.newt
 				Container.getInstance().setPosition(pos);
 				try {
 				    
-				    queryObject = QueryObject.getAll().get(index);
-					queryObject.updateStatement(longtitude, latitude);
-					queryObject.excuteQuery(queryObject.getStatement());
+				    inventoryQuery = InventoryQuery.getAll().get(0);
+					inventoryQuery.updateStatement(longtitude, latitude);
+					inventoryQuery.excuteQuery(inventoryQuery.getStatement());
 				} catch (SQLException e1) {
 					e1.printStackTrace();
 				}

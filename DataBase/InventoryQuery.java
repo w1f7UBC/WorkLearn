@@ -29,15 +29,15 @@ import com.sandwell.JavaSimulation.StringListInput;
 import com.sandwell.JavaSimulation.Vec3dInput;
 import com.sandwell.JavaSimulation3D.DisplayEntity;
 
-public  class QueryObject extends Query {
+public  class InventoryQuery extends Query {
 	
 	private  String DataBaseName ="";
-	public QueryObject(){
+	public InventoryQuery(){
 		allInstances.add(this);
 	}
 	private ArrayList<String> targets;
 	private ArrayList<String> tablenames;
-	private static  ArrayList<QueryObject> allInstances;
+	private static  ArrayList<InventoryQuery> allInstances;
 	@Keyword(description = "target databaseobject of the query")
 	private  EntityInput<DataBaseObject> targetDB;
 	@Keyword(description = "display targets of the query")
@@ -50,7 +50,7 @@ public  class QueryObject extends Query {
 	private StringInput querystatment;
 	
 	static {
-		allInstances = new ArrayList<QueryObject>();
+		allInstances = new ArrayList<InventoryQuery>();
 	}
 	{   
 	//	databaseEntity = new EntityInput<DataBaseObject>( DataBaseObject.class, "DataBaseEntity", "Key Inputs", null);
@@ -69,7 +69,7 @@ public  class QueryObject extends Query {
 
 	
 	
-	public static ArrayList<? extends QueryObject> getAll() {
+	public static ArrayList<? extends InventoryQuery> getAll() {
 		synchronized (allInstances) {
 			return allInstances;
 		}
@@ -81,39 +81,29 @@ public  class QueryObject extends Query {
 	
 	
    
-    public String getStatement(){
-    	statement =  "SELECT *"
-				+ " FROM saeed_gy"
-				+ " WHERE grid_code"
-				+ " IN (SELECT grid_code"
-				+ " FROM saeed_test"
-				+ " WHERE point_x>"+(x)+" AND point_y<"+(y)
-				+ " ORDER BY point_x ASC, point_y DESC"
-				+ " LIMIT 1)";
-    return statement;
     
     
-    
-    }
 
 
 
 
 	public void updateStatement(String longtitude, String latitude) {
-		this.statement =  "SELECT *"
+		String s =  "SELECT *"
 				+ " FROM saeed_gy"
 				+ " WHERE grid_code"
 				+ " IN (SELECT grid_code"
 				+ " FROM saeed_test"
-				+ " WHERE point_x>"+(x)+" AND point_y<"+(y)
+				+ " WHERE point_x>"+(longtitude)+" AND point_y<"+(latitude)
 				+ " ORDER BY point_x ASC, point_y DESC"
 				+ " LIMIT 1)";
+		this.setStatement(s);
+		
 	}
 	
 	@Override
 	public  DefaultTableModel getTableContent(String statement) throws SQLException{  
-			
-			
+    	rs = getResultset();
+
 			ResultSetMetaData metaData = rs.getMetaData();
 		    // names of columns
 		    Vector<String> columnNames = new Vector<String>();

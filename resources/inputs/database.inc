@@ -1,10 +1,11 @@
 
 Define ObjectType {
-                    DataBaseObject	
-                    QueryObject
+                    DataBaseObject
+                    InventoryQuery 
 					}
 DataBaseObject	JavaClass { DataBase.DataBaseObject               } Palette { 'database' } DefaultDisplayModel 	{ Circle 				}
 
-QueryObject	JavaClass { DataBase.QueryObject               } Palette { 'database' } DefaultDisplayModel 	{ Circle 				}
+InventoryQuery JavaClass { DataBase.InventoryQuery              } Palette { 'database' } DefaultDisplayModel 	{ Circle 				}
 Define DataBaseObject { InventoryDataBase }
-Define QueryObject{ InventoryQueryObject }
+
+Define InventoryQuery { InventoryQueryObject }

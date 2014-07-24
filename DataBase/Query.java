@@ -16,13 +16,14 @@ import javax.swing.table.DefaultTableModel;
 
 import com.jaamsim.input.Keyword;
 import com.sandwell.JavaSimulation.EntityInput;
+import com.sandwell.JavaSimulation.InputErrorException;
 import com.sandwell.JavaSimulation3D.DisplayEntity;
 
 public class Query extends DisplayEntity {
-	protected String statement = "";
+	private String statement = "";
+	
 	public ArrayList<String> coordinates;
-	protected  String x = "";
-	protected  String y = "";
+
 	protected ResultSet rs;
 	@Keyword(description = "target databaseobject of the query")
 	private  EntityInput<DataBaseObject> targetDB;	
@@ -30,16 +31,29 @@ public class Query extends DisplayEntity {
 	targetDB = new EntityInput<>(DataBaseObject.class, "TargetDatabase","Key Inputs", null);
 	this.addInput(targetDB);
 	}
-	
-	
+	@Override
+	public void validate() {
+		super.validate();
+
+		// Confirm that prototype entity has been specified
+		if( targetDB.getValue() == null ) {
+			throw new InputErrorException( "The keyword targetDB must be set." );
+		}
+	}
 	
 	public String getStatement(){
 		return statement;
 	}
-	
-    public  DefaultTableModel getTableContent(String statement) throws SQLException{  
+	public void setStatement(String s){
+		statement = s;
+	}
+    public ResultSet getResultset() throws SQLException{
     	Statement st = targetDB.getValue().getConnection().createStatement();
 		 rs = st.executeQuery(statement);
+		 return rs;
+    }
+	public  DefaultTableModel getTableContent(String statement) throws SQLException{  
+    	rs = getResultset();
     ResultSetMetaData metaData = rs.getMetaData();
 
     // names of columns

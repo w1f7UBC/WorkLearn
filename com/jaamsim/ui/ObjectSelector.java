@@ -39,7 +39,7 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
-import DataBase.QueryObject;
+import DataBase.InventoryQuery;
 
 import com.jaamsim.controllers.RenderManager;
 import com.jaamsim.input.Input;

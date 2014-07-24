@@ -33,11 +33,10 @@ public class DataBaseObject extends Entity {
 	private  StringInput url;
 	private  StringInput username;
 	private StringInput password;
-	private int connectionIndex;	
+	private int connectionIndex = 0;	
 	private Properties props = new Properties();
-    private ResultSet rs;
-    public String statement;
-    
+    private String statement;
+    private boolean established = false;
     public  DataBaseObject(){
 	
 }
@@ -54,14 +53,20 @@ public class DataBaseObject extends Entity {
 	@Override 
 	public void validate(){
 		try {
+			
 			connectionIndex = Database.Connect(this);
+			established = true;
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 	}
 	
 	
-	public Connection getConnection() {
+	public Connection getConnection() throws SQLException {
+		if (!established){
+			connectionIndex = Database.Connect(this);
+			established = true;
+		} 
 	    return Database.getConnection(connectionIndex);
 	}
 		
