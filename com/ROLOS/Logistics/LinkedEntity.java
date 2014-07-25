@@ -29,7 +29,7 @@ public class LinkedEntity extends LogisticsEntity {
 	@Keyword(description = "The next entity(ies) recieving the handeled entity. Dir1 is finish to end, Dir2 is end to finish." +
 			" two way routes should define next linkedentities at both ends. This is used for discrete entities only, bulk handling equipment should use Outfeeds keyword.", 
 			example = "Route1 Next { Route2 Route3 }, Stacker1 Next { Stockpile1 Stockpile2 }")
-	private final EntityListInput<LinkedEntity> nextLinkedEntityList;
+	private final EntityListInput<LinkedEntity> nextList;
 	
 	@Keyword(description = "This is only used for loading bays and bulk handling equipment. and identifies the next"
 			+ "linked entity which this entity outfeeds its bulk material to.", 
@@ -67,7 +67,7 @@ public class LinkedEntity extends LogisticsEntity {
 			example = "Berth1 DestinationPriority { 10 } ")
 	private final IntegerInput destinationPriority;
 	
-	private final ArrayList<LinkedEntity> previousLinkedEntityList,infeedEntityList;
+	private final ArrayList<LinkedEntity> nextLinkedEntityList, previousLinkedEntityList,infeedEntityList;
 	private final TwoLinkedLists<LogisticsEntity> currentlyHandlingList;		
 	// following list correspond to the handlingList
 	private final ArrayList<Double> entityAmountProcessed; 						// this list corresponds to the handledEntityTypeList
@@ -89,8 +89,8 @@ public class LinkedEntity extends LogisticsEntity {
 	}
 
 	{
-		nextLinkedEntityList = new EntityListInput<LinkedEntity>(LinkedEntity.class, "Next", "Key Inputs", new ArrayList<LinkedEntity>(2));
-		this.addInput(nextLinkedEntityList);
+		nextList = new EntityListInput<LinkedEntity>(LinkedEntity.class, "Next", "Key Inputs", new ArrayList<LinkedEntity>(2));
+		this.addInput(nextList);
 		
 		outfeedLinkedEntityList = new EntityListInput<>(LinkedEntity.class, "Outfeeds", "Key Inputs", new ArrayList<LinkedEntity>(1));
 		this.addInput(outfeedLinkedEntityList);
@@ -136,6 +136,7 @@ public class LinkedEntity extends LogisticsEntity {
 		prioritizedOriginsList = new ArrayList<>(1);
 		prioritizedDestinationsList = new ArrayList<>(1);				
 
+		nextLinkedEntityList = new ArrayList<>(1);
 		previousLinkedEntityList = new ArrayList<>(1);	
 		infeedEntityList = new ArrayList<>(1);
 	}
@@ -161,9 +162,10 @@ public class LinkedEntity extends LogisticsEntity {
 			}	
 		}
 		
-		if(in == nextLinkedEntityList){
+		if(in == nextList){
 			// populate previousLinkedEntityAssertion
-			for (LinkedEntity each : nextLinkedEntityList.getValue()) {
+			for (LinkedEntity each : nextList.getValue()) {
+				nextLinkedEntityList.add(each);
 				each.addToPreviousLinkedEntityList(this);
 			}
 			try{
@@ -397,7 +399,7 @@ public class LinkedEntity extends LogisticsEntity {
 	}
 
 	public ArrayList<? extends LinkedEntity> getNextLinkedEntityList() {
-		return nextLinkedEntityList.getValue();
+		return nextLinkedEntityList;
 	}
 	
 	public ArrayList<? extends LinkedEntity> getOutfeedLinkedEntityList() {

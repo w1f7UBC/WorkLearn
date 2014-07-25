@@ -443,10 +443,10 @@ public class Facility extends DiscreteHandlingLinkedEntity {
 			for (ArrayList<Contract> eachMaterialList : this.getGeneralManager()
 					.getDemandContractsList().getValues()) {
 				for (Contract eachContract: eachMaterialList) {
-					for(DiscreteHandlingLinkedEntity eachSegment: RouteManager.transportationNetworkManager.getRoute(this, eachContract.getSupplier(), eachContract.getTransporterProtoType()).getRouteSegmentsList()){
+					for(DiscreteHandlingLinkedEntity eachSegment: RouteManager.getRoute(this, eachContract.getSupplier(), eachContract.getTransporterProtoType()).getRouteSegmentsList()){
 						try{
-							InputAgent.processEntity_Keyword_Value((RouteEntity)eachSegment, "Width", ((Double)(Math.ceil(eachContract.getContractAmount()/total)*10)).toString());
-							InputAgent.processEntity_Keyword_Value((RouteEntity)eachSegment,"Colour",eachContract.getProduct().getColour());
+							InputAgent.processEntity_Keyword_Value((RouteSegment)eachSegment, "Width", ((Double)(Math.ceil(eachContract.getContractAmount()/total)*10)).toString());
+							InputAgent.processEntity_Keyword_Value((RouteSegment)eachSegment,"Colour",eachContract.getProduct().getColour());
 						}catch (ClassCastException e){
 							
 						}

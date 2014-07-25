@@ -16,7 +16,7 @@ import com.ROLOS.Logistics.LoadingBay;
 import com.ROLOS.Logistics.MovingEntity;
 import com.ROLOS.Logistics.ReportAgent;
 import com.ROLOS.Logistics.Route;
-import com.ROLOS.Logistics.RouteEntity;
+import com.ROLOS.Logistics.RouteSegment;
 import com.ROLOS.Logistics.Stockpile;
 import com.ROLOS.Utils.HandyUtils;
 import com.ROLOS.Utils.HashMapList;
@@ -187,8 +187,8 @@ public class FacilityTransportationManager extends FacilityManager {
 		fleet.setEstimatedCycleAtBuyer(buyerBay.calcTurnAroundTime(tempMovingEntity, tempMaterial, requiredAmount));
 		fleet.setEstimatedCycleAtSupplier(supplierBay.calcTurnAroundTime(tempMovingEntity, tempMaterial, requiredAmount));
 		
-		fleet.setEstimatedBuyerToSupplier(this.estimateTravelTimeOnRoute(tempMovingEntity, RouteManager.transportationNetworkManager.getBayToBayRoute(buyerBay, supplierBay, tempMovingEntity)));
-		fleet.setEstimatedSupplierToBuyer(this.estimateTravelTimeOnRoute(tempMovingEntity, RouteManager.transportationNetworkManager.getBayToBayRoute(supplierBay, buyerBay, tempMovingEntity)));
+		fleet.setEstimatedBuyerToSupplier(this.estimateTravelTimeOnRoute(tempMovingEntity, RouteManager.getBayToBayRoute(buyerBay, supplierBay, tempMovingEntity)));
+		fleet.setEstimatedSupplierToBuyer(this.estimateTravelTimeOnRoute(tempMovingEntity, RouteManager.getBayToBayRoute(supplierBay, buyerBay, tempMovingEntity)));
 		
 		cycle = fleet.getEstimatedCycleAtBuyer()+fleet.getEstimatedBuyerToSupplier()+
 				fleet.getEstimatedCycleAtSupplier()+fleet.getEstimatedSupplierToBuyer();
@@ -234,7 +234,7 @@ public class FacilityTransportationManager extends FacilityManager {
 		if(!transportableMaterialList.getValue().contains(bulkMaterial))
 			return null;
 		for(MovingEntity each: transportersList.getValue()){
-			tempRoute = RouteManager.transportationNetworkManager.getRoute(origin, destination, each);
+			tempRoute = RouteManager.getRoute(origin, destination, each);
 			if(Tester.greaterCheckTolerance(transportationCapacityList.getValueFor(each, 1) - transportationCapacityList.getValueFor(each, 2),0.0d) &&
 					tempRoute != null){
 				tempCost = this.estimateTransportationCostonRoute(each, bulkMaterial, tempRoute);
@@ -262,7 +262,7 @@ public class FacilityTransportationManager extends FacilityManager {
 	public EntranceBlock getFacilityEntranceBlock(MovingEntity movingEntity, LoadingBay loadingBay){
 		for(EntranceBlock each: this.getFacility().getInsideFacilityLimits().get(EntranceBlock.class)){
 			if(each.checkIfHandles(movingEntity) && 
-					RouteManager.transportationNetworkManager.getRoute(each, loadingBay,movingEntity).getRouteSegmentsList() != null)
+					RouteManager.getRoute(each, loadingBay,movingEntity).getRouteSegmentsList() != null)
 				return each;
 		}
 		return null;
@@ -275,7 +275,7 @@ public class FacilityTransportationManager extends FacilityManager {
 	public ExitBlock getFacilityExitBlock(MovingEntity movingEntity, LoadingBay loadingBay){
 		for(ExitBlock each: this.getFacility().getInsideFacilityLimits().get(ExitBlock.class)){
 			if(each.checkIfHandles(movingEntity) && 
-					RouteManager.transportationNetworkManager.getRoute(loadingBay,each,movingEntity).getRouteSegmentsList() != null)
+					RouteManager.getRoute(loadingBay,each,movingEntity).getRouteSegmentsList() != null)
 				return each;
 		}
 		return null;
@@ -353,7 +353,7 @@ public class FacilityTransportationManager extends FacilityManager {
 			for(Delay eachDelay: eachSegment.getExitDelay())
 				travelTime += eachDelay.getNextDelayDuration(movingEntity);
 			try{
-				RouteEntity tempRouteEntity = ((RouteEntity)eachSegment);
+				RouteSegment tempRouteEntity = ((RouteSegment)eachSegment);
 				 //  TODO speed limit is calculated just based on route's speed limit, add moving entity's speed limit as well
 				travelTime += movingEntity.calcRemainingTravelTime(tempRouteEntity, tempRouteEntity.getSpeedLimit(movingEntity), 0.0d);
 			}catch(ClassCastException e){};

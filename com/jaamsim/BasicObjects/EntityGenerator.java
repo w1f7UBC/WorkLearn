@@ -57,7 +57,6 @@ public class EntityGenerator extends LinkedComponent {
 	private int numberGenerated = 0;  // Number of entities generated so far
 	private boolean busy;
 
-
 	{
 		testEntity.setHidden(true);
 

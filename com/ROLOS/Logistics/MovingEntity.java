@@ -184,7 +184,7 @@ public class MovingEntity extends LogisticsEntity {
 	 * @return travel time to reach the end of the specified route
 	 */
 
-	public double calcRemainingTravelTime (RouteEntity route, double speed, double distAlreadyTraveled) {
+	public double calcRemainingTravelTime (RouteSegment route, double speed, double distAlreadyTraveled) {
 		double remainingTravelTime = (route.getLength() - distAlreadyTraveled) / speed;
 		if (remainingTravelTime== 0) {
 			throw new ErrorException("%s's length is %f but %s has traveled %f on it!",route.getName(),route.getLength(),this.getName(),distAlreadyTraveled);
@@ -242,12 +242,12 @@ public class MovingEntity extends LogisticsEntity {
 			plannedNextRouteSegments.remove(0);
 		startTravelingTimeOnCurrentRouteSegment = this.getSimTime();
 		this.setCurrentSpeed(speed);
-		double travelTimeToEnd = this.calcRemainingTravelTime((RouteEntity) headRoute,speed, distanceTraveledOnCurrentRouteSegment);
+		double travelTimeToEnd = this.calcRemainingTravelTime((RouteSegment) headRoute,speed, distanceTraveledOnCurrentRouteSegment);
 		this.simWait(travelTimeToEnd);
 		//TODO when interrupt is figured out set distanceTraveled on current route and change traveling
 		// checking traveled distance for when interrupted travel is allowed
 		distanceTraveledOnCurrentRouteSegment += this.calcDistTraveled(speed, this.getSimTime() - startTravelingTimeOnCurrentRouteSegment);
-		if (!Tester.equalCheckTolerance(distanceTraveledOnCurrentRouteSegment, ((RouteEntity) headRoute).getLength())) {	
+		if (!Tester.equalCheckTolerance(distanceTraveledOnCurrentRouteSegment, ((RouteSegment) headRoute).getLength())) {	
 			traveling = false;
 			while(!this.isReadyToResumeTraveling()){
 				waitUntil();
@@ -466,7 +466,7 @@ public class MovingEntity extends LogisticsEntity {
 	/**
 	 * true if travelling start to finish, false otherwise
 	 */
-	public void setTravellingDirectionOnCurrentRouteSegment(RouteEntity currentRouteEntity){
+	public void setTravellingDirectionOnCurrentRouteSegment(RouteSegment currentRouteEntity){
 		Vec3d firstPoint = new Vec3d(currentRouteEntity.getFirstPointInput());
 		Vec3d lastPoint = new Vec3d(currentRouteEntity.getLastPointInput());
 		// set travelling direction for the moving entity
@@ -520,9 +520,9 @@ public class MovingEntity extends LogisticsEntity {
 			Vec3d orientInput = new Vec3d(this.getOrientationInput());
 			double actualDistTraveled = this.calcDistTraveled(currentSpeed,
 							simTime- this.getStartTravellingTimeOnCurrentRouteSegment());
-			Vec3d graphicaldist = ((RouteEntity) this.getHeadRoute()).calcPositionForDistance(actualDistTraveled,
+			Vec3d graphicaldist = ((RouteSegment) this.getHeadRoute()).calcPositionForDistance(actualDistTraveled,
 							travellingStoFOnCurrentRouteSegment);
-			orientInput.add3(((RouteEntity) this.getHeadRoute()).caclOrientation(actualDistTraveled,
+			orientInput.add3(((RouteSegment) this.getHeadRoute()).caclOrientation(actualDistTraveled,
 					travellingStoFOnCurrentRouteSegment));
 			this.setOrientation(orientInput);
 			this.setPosition(graphicaldist);

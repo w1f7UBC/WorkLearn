@@ -4,7 +4,7 @@ import com.ROLOS.DMAgents.TrafficController;
 import com.sandwell.JavaSimulation.EntityListInput;
 import com.jaamsim.input.Keyword;
 
-public class ParkBlock extends RouteEntity {
+public class ParkBlock extends RouteSegment {
 
 	@Keyword(description = "List of facilities that use this parkblock", 
 			example = "SilverdaleParkBlock FacilitiesList { Silverdale HSPP }")

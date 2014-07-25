@@ -91,6 +91,7 @@ public  class QueryObject extends Query {
 					+ " ORDER BY point_x ASC, point_y DESC"
 					+ " LIMIT 1)";
 	}
+	
 	public static ResultSet runSQL() throws SQLException{
 		QueryObject q = new QueryObject();
 		String s = q.getStatement(); 

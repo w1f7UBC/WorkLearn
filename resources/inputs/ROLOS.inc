@@ -20,7 +20,7 @@ Define ObjectType {
                     BulkMaterial
                     BulkMaterialProcessor
                     Stockpile
-                    RouteEntity
+                    RouteSegment
                     EntitySource
                     EntitySink
                     LoadingBay
@@ -52,7 +52,7 @@ Loader                      JavaClass { com.ROLOS.Logistics.Loader              
 BulkMaterial                JavaClass { com.ROLOS.Logistics.BulkMaterial                } Palette { 'ROLOS' } DefaultDisplayModel 	{ ScreenPointsModelDefault 				}
 BulkMaterialProcessor       JavaClass { com.ROLOS.Logistics.BulkMaterialProcessor       } Palette { 'ROLOS' } DefaultDisplayModel 	{ ScreenPointsModelDefault 				}
 Stockpile                   JavaClass { com.ROLOS.Logistics.Stockpile                   } Palette { 'ROLOS' } DefaultDisplayModel 	{ ScreenPointsModelDefault 				}
-RouteEntity                 JavaClass { com.ROLOS.Logistics.RouteEntity                 } Palette { 'ROLOS' } DefaultDisplayModel 	{ ScreenPointsModelDefault 				}
+RouteSegment                 JavaClass { com.ROLOS.Logistics.RouteSegment                 } Palette { 'ROLOS' } DefaultDisplayModel 	{ ScreenPointsModelDefault 				}
 ParkBlock                   JavaClass { com.ROLOS.Logistics.ParkBlock                   } Palette { 'ROLOS' } DefaultDisplayModel 	{ ScreenPointsModelDefault 				}
 LoadingBay                  JavaClass { com.ROLOS.Logistics.LoadingBay                  } Palette { 'ROLOS' } DefaultDisplayModel 	{ ScreenPointsModelDefault 				}
 Delay                       JavaClass { com.ROLOS.Logistics.Delay                       } Palette { 'ROLOS' } DragAndDrop 	{ FALSE 	}
@@ -61,3 +61,4 @@ EntitySink                  JavaClass { com.ROLOS.Logistics.EntitySink          
 
 Define ReportAgent { Report }
 Define SimulationManager { PlanningManager }
+Define RouteManager { TransportationManager }

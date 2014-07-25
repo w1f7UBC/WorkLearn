@@ -78,7 +78,7 @@ public class SimulationManager extends DisplayEntity {
 			this.printContractsReportHeader();
 		}
 		if(printTransportReport.getValue()){
-			transportReportFile = ReportAgent.initializeFile(this,".tpr");
+			transportReportFile = ReportAgent.initializeFile(this,".trp");
 			this.printTransportReportHeader();
 		}
 	}
@@ -87,7 +87,6 @@ public class SimulationManager extends DisplayEntity {
 		return planningHorizon.getValue();
 	}
 	
-
 	public static double getTimeStep(){
 		return timeStep.getValue();
 	}

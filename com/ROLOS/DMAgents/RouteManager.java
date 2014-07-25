@@ -4,7 +4,8 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.PriorityQueue;
 
-import com.ROLOS.ROLOSEntity;
+import DataBase.DataBaseObject;
+
 import com.ROLOS.Logistics.DiscreteHandlingLinkedEntity;
 import com.ROLOS.Logistics.DiscreteHandlingLinkedEntity.DijkstraComparator;
 import com.ROLOS.Logistics.EntranceBlock;
@@ -15,32 +16,44 @@ import com.ROLOS.Logistics.LogisticsEntity;
 import com.ROLOS.Logistics.MovingEntity;
 import com.ROLOS.Logistics.ReportAgent;
 import com.ROLOS.Logistics.Route;
-import com.ROLOS.Logistics.RouteEntity;
+import com.ROLOS.Logistics.RouteSegment;
 import com.ROLOS.Utils.HandyUtils;
 import com.ROLOS.Utils.HashMapList;
 import com.sandwell.JavaSimulation.BooleanInput;
+import com.sandwell.JavaSimulation.EntityInput;
 import com.sandwell.JavaSimulation.FileEntity;
+import com.sandwell.JavaSimulation3D.DisplayEntity;
 import com.jaamsim.input.Keyword;
 
-public class RouteManager extends ROLOSEntity {
-	private boolean printManagerReport;
-	protected FileEntity managerReportFile;        // The file to store the manager reports
-	private boolean reportInitialized = false;
-	{
-		
+public class RouteManager extends DisplayEntity {
+	
+	@Keyword(description = "If TRUE, then reports for established contracts will be printed out.",
+		     example = "TransportationManager PrintRoutesReport { TRUE }")
+	private static final BooleanInput printManagerReport;
+
+	@Keyword(description = "the database entity containing routes information. "
+			+ "the code is very specific to the data base format.",
+		     example = "TransportationManager RouteDataBase { Somedatabase }")
+	private static final EntityInput<DataBaseObject> routeDB;
+
+	protected static FileEntity managerReportFile;        // The file to store the manager reports
+	
+	static {		
 		// TODO bad implementation! set true to print out the configured or unresolved routes report
-		printManagerReport = true; 
+		printManagerReport = new BooleanInput("PrintRoutesReport", "Report", false);
+		routeDB = new EntityInput<DataBaseObject>(DataBaseObject.class, "RouteDataBase", "Key Inputs", null);
+	}
+	
+	{
+		this.addInput(printManagerReport);
+		this.addInput(routeDB);
 	}
 	
 	public static boolean lockedDijkstraParameters = false;
-	public static final RouteManager transportationNetworkManager;
-	private HashMapList<String, Route> routesList;
+	private static HashMapList<String, Route> routesList;
 	// list of routes that won't allow movingEntity
-	private HashMapList<MovingEntity, String> unResolvedRoutesList;
-	static {
-		transportationNetworkManager = new RouteManager();
-	}
-
+	private static HashMapList<MovingEntity, String> unResolvedRoutesList;
+	
 	public RouteManager() {
 		routesList = new HashMapList<String, Route>();
 		unResolvedRoutesList = new HashMapList<MovingEntity, String>(2);
@@ -48,6 +61,15 @@ public class RouteManager extends ROLOSEntity {
 		
 	}
 
+	@Override
+	public void earlyInit() {
+		super.earlyInit();
+
+		if( printManagerReport.getValue()){
+			managerReportFile = ReportAgent.initializeFile(this,".mgmt");
+			this.printManagerReportHeader();
+		}
+	}
 	// ////////////////////////////////////////////////////////////////////////////////////////////////////
 	// ADDER METHODS
 	// ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -60,7 +82,7 @@ public class RouteManager extends ROLOSEntity {
 	 * @return This method constructs the route from origin loading bay to the destination loading bay if 
 	 * route doesn't already exist. 
 	 */
-	public Route getBayToBayRoute(LoadingBay originBay, LoadingBay destinationBay, MovingEntity movingEntity) {
+	public static Route getBayToBayRoute(LoadingBay originBay, LoadingBay destinationBay, MovingEntity movingEntity) {
 		String routeName = originBay.getName()+ "-" +destinationBay.getName();
 		Route finalRoute = null;
 		if(!routesList.contains(routeName)){
@@ -75,20 +97,20 @@ public class RouteManager extends ROLOSEntity {
 				.getFacilityEntranceBlock(movingEntity, destinationBay);
 
 			//origin to exit block 
-			tempRoute = this.getRoute(originBay, exit,movingEntity);
+			tempRoute = RouteManager.getRoute(originBay, exit,movingEntity);
 			distance += tempRoute.getDistance();
 			ArrayList<DiscreteHandlingLinkedEntity> tempRouteSegments = new ArrayList<>(
 				tempRoute.getRouteSegmentsList());
 			ArrayList<LogisticsEntity> retainedEntities = new ArrayList<>(tempRoute.getHandlingMovingEntitiesList());
 			
 			//exit to entrance
-			tempRoute = this.getRoute(exit, entrance,movingEntity);
+			tempRoute = RouteManager.getRoute(exit, entrance,movingEntity);
 			distance += tempRoute.getDistance();
 			tempRouteSegments.addAll(tempRoute.getRouteSegmentsList());
 			retainedEntities.retainAll(tempRoute.getHandlingMovingEntitiesList());
 
 			//entrance to destination bay
-			tempRoute = this.getRoute(entrance,destinationBay,movingEntity);
+			tempRoute = RouteManager.getRoute(entrance,destinationBay,movingEntity);
 			distance += tempRoute.getDistance();
 			tempRouteSegments.addAll(tempRoute.getRouteSegmentsList());
 			retainedEntities.retainAll(tempRoute.getHandlingMovingEntitiesList());
@@ -97,7 +119,7 @@ public class RouteManager extends ROLOSEntity {
 			finalRoute.setRoute(tempRouteSegments);
 			routesList.add(routeName, finalRoute);
 		} else{
-			finalRoute = this.getRoute(originBay, destinationBay, movingEntity);
+			finalRoute = RouteManager.getRoute(originBay, destinationBay, movingEntity);
 		}
 		return finalRoute;
 	}
@@ -105,11 +127,11 @@ public class RouteManager extends ROLOSEntity {
 	/**
 	 * @return route from origin to destination or tries to compute one if doesn't exist.
 	 */
-	public <T extends DiscreteHandlingLinkedEntity> ArrayList<Route> getRoute(
+	public static <T extends DiscreteHandlingLinkedEntity> ArrayList<Route> getRoute(
 			T origin, T destination) {
 		String tempKey = origin.getName() + "-" + destination.getName();
 		if (!routesList.contains(tempKey)) {
-			this.computeDijkstraPath(origin, destination, null);
+			RouteManager.computeDijkstraPath(origin, destination, null);
 		}
 
 		if(routesList.get(tempKey).get(0).getDistance() == Double.POSITIVE_INFINITY)
@@ -128,14 +150,14 @@ public class RouteManager extends ROLOSEntity {
 	 * @return route that handles the passed moving entity or computes one if
 	 * existed. null if such route doesn't exist. 
 	 */
-	public <T extends DiscreteHandlingLinkedEntity> Route getRoute(T origin,
+	public static <T extends DiscreteHandlingLinkedEntity> Route getRoute(T origin,
 			T destination, MovingEntity movingEntity) {
 		String tempKey = origin.getName() + "-" + destination.getName();
 		
 		if(unResolvedRoutesList.get(movingEntity).contains(tempKey))
 			return null;
 		
-		for (Route each : this.getRoute(origin, destination))
+		for (Route each : RouteManager.getRoute(origin, destination))
 			if (each.getHandlingMovingEntitiesList().contains(
 					movingEntity.getProtoTypeEntity()))
 				return each;
@@ -157,13 +179,12 @@ public class RouteManager extends ROLOSEntity {
 	 *            route is computed that handles movingEntity throughout. if
 	 *            null is passed shortest path is calculated
 	 */
-	public <T extends DiscreteHandlingLinkedEntity> Route computeDijkstraPath(
+	public static <T extends DiscreteHandlingLinkedEntity> Route computeDijkstraPath(
 			T origin, T destination, MovingEntity movingEntity) {
 		DijkstraComparator dijkstraComparator = new DijkstraComparator();
 		origin.getDijkstraComparatorList().add(dijkstraComparator, null, 0,
 				0.0d);
-		PriorityQueue<T> vertexQueue = new PriorityQueue<>(10,
-				dijkstraComparator);
+		PriorityQueue<T> vertexQueue = new PriorityQueue<>(10,dijkstraComparator);
 		vertexQueue.add(origin);
 
 		while (!vertexQueue.isEmpty()) {
@@ -183,8 +204,8 @@ public class RouteManager extends ROLOSEntity {
 
 				double weight;
 				if (each.checkIfHandles(movingEntity)
-						&& each instanceof RouteEntity) {
-					weight = ((RouteEntity) each).getLength();
+						&& each instanceof RouteSegment) {
+					weight = ((RouteSegment) each).getLength();
 					double weightThroughU = u.getDijkstraComparatorList()
 							.getValueListFor(dijkstraComparator, 0).get(0)
 							+ weight;
@@ -233,15 +254,15 @@ public class RouteManager extends ROLOSEntity {
 			Route tempRoute = new Route(origin, destination,
 					Double.POSITIVE_INFINITY, new ArrayList<LogisticsEntity>());
 			routesList.add(tempKey, tempRoute);
-			this.printManagerReport(origin, destination, null, null);
+			RouteManager.printRouteReport(origin, destination, null, null);
 		} else{
 			unResolvedRoutesList.add(movingEntity, tempKey);
-			this.printManagerReport(origin, destination, null, movingEntity);
+			RouteManager.printRouteReport(origin, destination, null, movingEntity);
 		}
 		return null;
 	}
 
-	private <T extends DiscreteHandlingLinkedEntity> Route setRoute(T origin,
+	private static <T extends DiscreteHandlingLinkedEntity> Route setRoute(T origin,
 			T destination, DijkstraComparator dijkstraComparator) {
 		ArrayList<LogisticsEntity> retainedEntities = new ArrayList<>(1);
 
@@ -270,7 +291,7 @@ public class RouteManager extends ROLOSEntity {
 				retainedEntities);
 		tempRoute.setRoute(path);
 		routesList.add(tempKey, tempRoute);
-		this.printManagerReport(origin, destination, tempRoute, null);
+		RouteManager.printRouteReport(origin, destination, tempRoute, null);
 		// remove dijkstraComparator in all route segments after setting up the
 		// route
 		for (DiscreteHandlingLinkedEntity each : path)
@@ -286,16 +307,10 @@ public class RouteManager extends ROLOSEntity {
 
 
 	// TODO- REFACTOR FOR BETTER IMPLEMENTATION - used for quick checking of all routes configured or left unresolved!
-	public boolean printManagerReport(DiscreteHandlingLinkedEntity origin, DiscreteHandlingLinkedEntity destination, 
+	public static void printRouteReport(DiscreteHandlingLinkedEntity origin, DiscreteHandlingLinkedEntity destination, 
 			Route route, MovingEntity movingEntity){
 		
-		if( !reportInitialized && printManagerReport){
-			managerReportFile = ReportAgent.initializeFile(this,".mgmt");
-			this.printManagerReportHeader();
-			reportInitialized = true;
-		}
-		
-		if (printManagerReport) {
+		if (printManagerReport.getValue()) {
 			if(route != null){
 				managerReportFile.putStringTabs(origin.getName(), 1);
 				managerReportFile.putStringTabs(destination.getName(), 1);
@@ -319,8 +334,6 @@ public class RouteManager extends ROLOSEntity {
 				managerReportFile.flush();
 			}
 		}
-
-		return printManagerReport;
 	}
 	
 	public void printManagerReportHeader(){	

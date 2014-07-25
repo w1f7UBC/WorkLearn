@@ -168,7 +168,7 @@ public class Market extends ROLOSEntity {
 			transporter = buyer.getTransportationManager().getLeastCostTransporter(product.getValue(),buyer,seller);
 			this.amount = Tester.min(amount,buyer.getTransportationManager().getTransportersList().getValueFor(transporter, 1)-buyer.getTransportationManager().getTransportersList().getValueFor(transporter, 2));
 			estimatedTransportCost = buyer.getTransportationManager().estimateTransportationCostonRoute(transporter, getProduct(), 
-					RouteManager.transportationNetworkManager.getRoute(buyer, seller, transporter));
+					RouteManager.getRoute(buyer, seller, transporter));
 			marketOfferPrice = offeredPrice - estimatedTransportCost; 
 		}
 		

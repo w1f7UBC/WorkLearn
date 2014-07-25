@@ -23,7 +23,7 @@ public class TrafficController extends DisplayEntity {
 	public <T extends MovingEntity> void planNextMove(T movingEntity){
 		DiscreteHandlingLinkedEntity origin = movingEntity.getHeadRoute();
 		DiscreteHandlingLinkedEntity destination = movingEntity.getCurrentDestination();
-		Route tempRoute = RouteManager.transportationNetworkManager.getRoute(origin, destination,movingEntity);
+		Route tempRoute = RouteManager.getRoute(origin, destination,movingEntity);
 		if (tempRoute == null){
 			throw new ErrorException("%s tried to travel from %s to %s but there is not any accessible route between the two destinations!",movingEntity.getName(),
 					origin.getName(),destination.getName());
