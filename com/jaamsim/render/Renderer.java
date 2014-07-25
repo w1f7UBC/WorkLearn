@@ -537,6 +537,7 @@ public class Renderer implements GLAnimatorControl {
 		                                       message.windowID,
 		                                       message.viewID,
 		                                       message.listener);
+		//System.out.println(message.windowID);
 		listener.setWindow(window);
 
 		Camera camera = new Camera(Math.PI/3.0, 1, 0.1, 1000);

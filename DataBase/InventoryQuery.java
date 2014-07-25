@@ -1,33 +1,23 @@
 
 package DataBase;
 
-import java.awt.EventQueue;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Vector;
-
-import javax.swing.JOptionPane;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
-
-import com.ROLOS.DMAgents.FacilityFinancialManager;
-import com.ROLOS.Logistics.LinkedEntity;
-import com.jaamsim.Thresholds.Threshold;
 import com.jaamsim.input.Input;
 import com.jaamsim.input.Keyword;
 import com.jaamsim.math.Vec3d;
 import com.sandwell.JavaSimulation.EntityInput;
-import com.sandwell.JavaSimulation.EntityListInput;
 import com.sandwell.JavaSimulation.StringInput;
 import com.sandwell.JavaSimulation.StringListInput;
 import com.sandwell.JavaSimulation.Vec3dInput;
-import com.sandwell.JavaSimulation3D.DisplayEntity;
 
 public  class InventoryQuery extends Query {
 	
@@ -67,26 +57,16 @@ public  class InventoryQuery extends Query {
 		this.addInput(querystatment);  
 	}	
 
-	
-	
 	public static ArrayList<? extends InventoryQuery> getAll() {
 		synchronized (allInstances) {
 			return allInstances;
 		}
 	}
+	
 	public void updateForInput( Input<?> in ) {
 		super.updateForInput( in );
 	}
 	
-	
-	
-   
-    
-    
-
-
-
-
 	public void updateStatement(String longtitude, String latitude) {
 		String s =  "SELECT *"
 				+ " FROM saeed_gy"
@@ -97,46 +77,62 @@ public  class InventoryQuery extends Query {
 				+ " ORDER BY point_x ASC, point_y DESC"
 				+ " LIMIT 1)";
 		this.setStatement(s);
-		
+	}
+	
+	public String queryAreaGenerate() throws IOException{
+		String exe = System.getProperty("user.dir")+"\\resources\\exe\\pgsql2shp.exe";
+		String destination = System.getProperty("user.dir")+"\\resources\\temp";
+		File destinationDir = new File(destination);
+		if(!destinationDir.exists()){
+			destinationDir.mkdirs();
+		}
+		destination+="\\shape3.shp";
+		System.out.println(exe);
+		System.out.println(destination);
+		Process process = new ProcessBuilder(exe, "-f", destination, "-h", "25.141.219.39", "-p", "5432", "-u", "sde", "-P", "Fomsummer2014", "fom", "\"SELECT geom FROM ab_ten;\"").start();
+		InputStream is = process.getInputStream();
+		InputStreamReader isr = new InputStreamReader(is);
+		BufferedReader br = new BufferedReader(isr);
+		String line;
+		while ((line = br.readLine()) != null) {
+			System.out.println(line);
+		}
+		return destination;
 	}
 	
 	@Override
 	public  DefaultTableModel getTableContent(String statement) throws SQLException{  
     	rs = getResultset();
-
-			ResultSetMetaData metaData = rs.getMetaData();
-		    // names of columns
-		    Vector<String> columnNames = new Vector<String>();
-		    ArrayList<Integer> index = new ArrayList<Integer>();
-		    String ageIndex = "5";
-		    int columnCount = metaData.getColumnCount();
-		    ArrayList<Integer> index2 = new ArrayList<Integer>();
-		    for (int column = 1; column <= columnCount; column++) { 
-		    	if(metaData.getColumnName(column).contains("grid_code")||metaData.getColumnName(column).contains("ecozone2")||metaData.getColumnName(column).contains("stid2")||metaData.getColumnName(column).contains("si2")||metaData.getColumnName(column).contains("age")){	    		
-		    		columnNames.add(metaData.getColumnName(column));
-		    		index.add(column);
-		    		}
-		    	}
-		    // data of the table
-		    Vector<Vector<Object>> data = new Vector<Vector<Object>>();
-		    while (rs.next()){
-		    	Vector<Object> vector = new Vector<Object>();
-		        for ( int columnIndex : index) {
-		        	if (columnIndex == 5){
+		ResultSetMetaData metaData = rs.getMetaData();
+	    // names of columns
+	    Vector<String> columnNames = new Vector<String>();
+	    ArrayList<Integer> index = new ArrayList<Integer>();
+	    String ageIndex = "5";
+	    int columnCount = metaData.getColumnCount();
+	    ArrayList<Integer> index2 = new ArrayList<Integer>();
+	    for (int column = 1; column <= columnCount; column++) { 
+	    	if(metaData.getColumnName(column).contains("grid_code")||metaData.getColumnName(column).contains("ecozone2")||metaData.getColumnName(column).contains("stid2")||metaData.getColumnName(column).contains("si2")||metaData.getColumnName(column).contains("age")){	
+    			columnNames.add(metaData.getColumnName(column));
+	    		index.add(column);
+			}
+    	}
+	    // data of the table
+	    Vector<Vector<Object>> data = new Vector<Vector<Object>>();
+	    while (rs.next()){
+	    	Vector<Object> vector = new Vector<Object>();
+	        for ( int columnIndex : index) {
+	        	if (columnIndex == 5){
 		        		
-		        	}
-		            vector.add(rs.getObject(columnIndex));
-		           
-		        }
-		        data.add(vector);
-		       } 
-		    String addCol = "vol"+"100"+"2";
-		    String addCol2 = "bio"+"100"+"2";
-		    columnNames.add(addCol);
-		    columnNames.add(addCol2);
-		    return new DefaultTableModel(data, columnNames);
-
-		}
-	
+	        	}
+	        	vector.add(rs.getObject(columnIndex));   
+	        }
+	        data.add(vector);
+	    } 
+	    String addCol = "vol"+"100"+"2";
+	    String addCol2 = "bio"+"100"+"2";
+	    columnNames.add(addCol);
+	    columnNames.add(addCol2);
+	    return new DefaultTableModel(data, columnNames);
+	}
 }
 

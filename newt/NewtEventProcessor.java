@@ -1,13 +1,13 @@
 package newt;
 
 import gov.nasa.worldwind.geom.Position;
+import gov.nasa.worldwind.layers.Layer;
 import gov.nasa.worldwind.layers.RenderableLayer;
-import gov.nasa.worldwind.render.AbstractBalloon;
-import gov.nasa.worldwind.render.DrawContext;
-import gov.nasa.worldwind.render.PointPlacemark;
+import gov.nasa.worldwindx.examples.util.ShapefileLoader;
 
 import java.awt.Component;
-import java.awt.Rectangle;
+import java.io.File;
+import java.io.IOException;
 import java.sql.SQLException;
 
 import javax.swing.SwingUtilities;
@@ -37,7 +37,6 @@ public class NewtEventProcessor extends NEWTEventFiFo implements com.jogamp.newt
 	protected WorldWindowNewtCanvas canvas;
 	protected boolean mouseDragged = false;
 	protected int cursorMode;
-
 	private InventoryQuery inventoryQuery; 
 	
 	public NewtEventProcessor(Component awtComponent)
@@ -132,7 +131,6 @@ public class NewtEventProcessor extends NEWTEventFiFo implements com.jogamp.newt
 		
 				Container.getInstance().setPosition(pos);
 				try {
-				    
 				    inventoryQuery = InventoryQuery.getAll().get(0);
 					inventoryQuery.updateStatement(longtitude, latitude);
 					inventoryQuery.excuteQuery(inventoryQuery.getStatement());
@@ -217,12 +215,25 @@ public class NewtEventProcessor extends NEWTEventFiFo implements com.jogamp.newt
 
 	public void setCursor(int mode) {
 		cursorMode=mode;
-		System.out.println(mode);
+		//System.out.println(mode);
+		if(cursorMode==1){
+			ShapefileLoader loader = new ShapefileLoader();
+			try {
+				inventoryQuery = InventoryQuery.getAll().get(0);
+				String path=inventoryQuery.queryAreaGenerate();
+				Layer queryArea = loader.createLayerFromSource(path);
+				canvas = (WorldWindowNewtCanvas) awtComponent;
+	        	canvas.getModel().getLayers().add(queryArea);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 	}
 
 	public String method(String str) {
 
-		  if (str.length() > 0 && str.charAt(str.length()-1)== '¡ã') {
+		  if (str.length() > 0 && str.charAt(str.length()-1)== '°') {
 		    str = str.substring(0, str.length()-1);
 		  }
 		  return str;
