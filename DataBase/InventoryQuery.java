@@ -20,8 +20,8 @@ import com.sandwell.JavaSimulation.StringListInput;
 import com.sandwell.JavaSimulation.Vec3dInput;
 
 public  class InventoryQuery extends Query {
-	
-	private  String DataBaseName ="";
+
+	private final  String DataBaseName ="";
 	public InventoryQuery(){
 		allInstances.add(this);
 	}
@@ -38,11 +38,11 @@ public  class InventoryQuery extends Query {
 	private Vec3dInput  coordinate;
 	@Keyword(description = "query statement")
 	private StringInput querystatment;
-	
+
 	static {
 		allInstances = new ArrayList<InventoryQuery>();
 	}
-	{   
+	{
 	//	databaseEntity = new EntityInput<DataBaseObject>( DataBaseObject.class, "DataBaseEntity", "Key Inputs", null);
 	//	this.addInput(databaseEntity);
 		targetDB = new EntityInput<>(DataBaseObject.class, "TargetDatabase","Key Inputs", null);
@@ -54,19 +54,20 @@ public  class InventoryQuery extends Query {
 		coordinate = new Vec3dInput("coordinate", "Query property", new Vec3d(-0.1d, -0.1d, -0.001d));
 		this.addInput(coordinate);
 		querystatment = new StringInput("statement","Query property","");
-		this.addInput(querystatment);  
-	}	
+		this.addInput(querystatment);
+	}
 
 	public static ArrayList<? extends InventoryQuery> getAll() {
 		synchronized (allInstances) {
 			return allInstances;
 		}
 	}
-	
+
+	@Override
 	public void updateForInput( Input<?> in ) {
 		super.updateForInput( in );
 	}
-	
+
 	public void updateStatement(String longtitude, String latitude) {
 		String s =  "SELECT *"
 				+ " FROM saeed_gy"
@@ -78,9 +79,9 @@ public  class InventoryQuery extends Query {
 				+ " LIMIT 1)";
 		this.setStatement(s);
 	}
-	
+
 	public String queryAreaGenerate() throws IOException{
-		String exe = System.getProperty("user.dir")+"\\resources\\exe\\pgsql2shp.exe";
+		String exe = System.getProperty("user.dir")+"\\resources\\exe\\32\\pgsql2shp.exe";
 		String destination = System.getProperty("user.dir")+"\\resources\\temp";
 		File destinationDir = new File(destination);
 		if(!destinationDir.exists()){
@@ -99,9 +100,9 @@ public  class InventoryQuery extends Query {
 		}
 		return destination;
 	}
-	
+
 	@Override
-	public  DefaultTableModel getTableContent(String statement) throws SQLException{  
+	public  DefaultTableModel getTableContent(String statement) throws SQLException{
     	rs = getResultset();
 		ResultSetMetaData metaData = rs.getMetaData();
 	    // names of columns
@@ -110,8 +111,8 @@ public  class InventoryQuery extends Query {
 	    String ageIndex = "5";
 	    int columnCount = metaData.getColumnCount();
 	    ArrayList<Integer> index2 = new ArrayList<Integer>();
-	    for (int column = 1; column <= columnCount; column++) { 
-	    	if(metaData.getColumnName(column).contains("grid_code")||metaData.getColumnName(column).contains("ecozone2")||metaData.getColumnName(column).contains("stid2")||metaData.getColumnName(column).contains("si2")||metaData.getColumnName(column).contains("age")){	
+	    for (int column = 1; column <= columnCount; column++) {
+	    	if(metaData.getColumnName(column).contains("grid_code")||metaData.getColumnName(column).contains("ecozone2")||metaData.getColumnName(column).contains("stid2")||metaData.getColumnName(column).contains("si2")||metaData.getColumnName(column).contains("age")){
     			columnNames.add(metaData.getColumnName(column));
 	    		index.add(column);
 			}
@@ -122,12 +123,12 @@ public  class InventoryQuery extends Query {
 	    	Vector<Object> vector = new Vector<Object>();
 	        for ( int columnIndex : index) {
 	        	if (columnIndex == 5){
-		        		
+
 	        	}
-	        	vector.add(rs.getObject(columnIndex));   
+	        	vector.add(rs.getObject(columnIndex));
 	        }
 	        data.add(vector);
-	    } 
+	    }
 	    String addCol = "vol"+"100"+"2";
 	    String addCol2 = "bio"+"100"+"2";
 	    columnNames.add(addCol);
