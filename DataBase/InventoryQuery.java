@@ -81,7 +81,7 @@ public  class InventoryQuery extends Query {
 	}
 
 	public String queryAreaGenerate() throws IOException{
-		String exe = System.getProperty("user.dir")+"\\resources\\exe\\32\\pgsql2shp.exe";
+		String exe = System.getProperty("user.dir")+"\\resources\\exe\\pgsql2shp.exe";
 		String destination = System.getProperty("user.dir")+"\\resources\\temp";
 		File destinationDir = new File(destination);
 		if(!destinationDir.exists()){
