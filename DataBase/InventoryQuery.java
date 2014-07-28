@@ -87,7 +87,7 @@ public  class InventoryQuery extends Query {
 		if(!destinationDir.exists()){
 			destinationDir.mkdirs();
 		}
-		destination+="\\shape3.shp";
+		destination+="\\queryArea.shp";
 		System.out.println(exe);
 		System.out.println(destination);
 		Process process = new ProcessBuilder(exe, "-f", destination, "-h", "25.141.219.39", "-p", "5432", "-u", "sde", "-P", "Fomsummer2014", "fom", "\"SELECT geom FROM ab_ten;\"").start();
