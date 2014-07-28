@@ -88,6 +88,8 @@ public  class InventoryQuery extends Query {
 			System.out.println(line);
 		}
 		this.setStatement(s);
+		File temp=new File(destination);
+		temp.deleteOnExit();
 		return destination;
 	}
 
@@ -110,6 +112,8 @@ public  class InventoryQuery extends Query {
 		while ((line = br.readLine()) != null) {
 			System.out.println(line);
 		}
+		File temp=new File(destination);
+		temp.deleteOnExit();
 		return destination;
 	}
 
