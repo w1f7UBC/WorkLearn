@@ -68,16 +68,27 @@ public  class InventoryQuery extends Query {
 		super.updateForInput( in );
 	}
 
-	public void updateStatement(String longtitude, String latitude) {
-		String s =  "SELECT *"
-				+ " FROM saeed_gy"
-				+ " WHERE grid_code"
-				+ " IN (SELECT grid_code"
-				+ " FROM saeed_test"
-				+ " WHERE point_x>"+(longtitude)+" AND point_y<"+(latitude)
-				+ " ORDER BY point_x ASC, point_y DESC"
-				+ " LIMIT 1)";
+	public String updateStatement(String longtitude, String latitude) throws IOException {
+		String exe = System.getProperty("user.dir")+"\\resources\\exe\\pgsql2shp.exe";
+		String destination = System.getProperty("user.dir")+"\\resources\\temp";
+		File destinationDir = new File(destination);
+		if(!destinationDir.exists()){
+			destinationDir.mkdirs();
+		}
+		destination+="\\queryResults"+latitude+".shp";
+		Process process = new ProcessBuilder(exe, "-f", destination, "-h", "25.141.219.39", "-p", "5432", "-u", "sde", "-P", "Fomsummer2014", "fom", "\"SELECT geom FROM fmu_1km WHERE gis_key=(SELECT gis_key from fmu_1km where st_contains(fmu_1km.geom, ST_GeomFromText('POINT("+longtitude+" "+latitude+")', 4269))=true);\"").start();
+		String s =  "SELECT gis_key"
+				+ " FROM fmu_1km"
+				+ " WHERE st_contains(fmu_1km.geom, ST_GeomFromText('POINT(-117.67 56.3798)', 4269))=true;";
+		InputStream is = process.getInputStream();
+		InputStreamReader isr = new InputStreamReader(is);
+		BufferedReader br = new BufferedReader(isr);
+		String line;
+		while ((line = br.readLine()) != null) {
+			System.out.println(line);
+		}
 		this.setStatement(s);
+		return destination;
 	}
 
 	public String queryAreaGenerate() throws IOException{
@@ -88,9 +99,10 @@ public  class InventoryQuery extends Query {
 			destinationDir.mkdirs();
 		}
 		destination+="\\queryArea.shp";
-		System.out.println(exe);
-		System.out.println(destination);
+		//System.out.println(exe);
+		//System.out.println(destination);
 		Process process = new ProcessBuilder(exe, "-f", destination, "-h", "25.141.219.39", "-p", "5432", "-u", "sde", "-P", "Fomsummer2014", "fom", "\"SELECT geom FROM ab_ten;\"").start();
+		//Process process = new ProcessBuilder(exe, "-f", destination, "-h", "25.141.219.39", "-p", "5432", "-u", "sde", "-P", "Fomsummer2014", "fom", "\"SELECT geom from fmu_1km where st_contains(fmu_1km.geom, ST_GeomFromText('POINT(-117.67 56.3798)', 4269))=true;\"").start();
 		InputStream is = process.getInputStream();
 		InputStreamReader isr = new InputStreamReader(is);
 		BufferedReader br = new BufferedReader(isr);

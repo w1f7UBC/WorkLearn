@@ -12,6 +12,7 @@ import java.sql.SQLException;
 
 import javax.swing.SwingUtilities;
 
+import newt.Initializer.AppFrame;
 import DataBase.InventoryQuery;
 
 import com.jogamp.newt.Window;
@@ -130,13 +131,22 @@ public class NewtEventProcessor extends NEWTEventFiFo implements com.jogamp.newt
 				String longtitude = method(pos.longitude.toDecimalDegreesString(10));
 		
 				Container.getInstance().setPosition(pos);
-				try {
+				//try {
 				    inventoryQuery = InventoryQuery.getAll().get(0);
-					inventoryQuery.updateStatement(longtitude, latitude);
-					inventoryQuery.excuteQuery(inventoryQuery.getStatement());
-				} catch (SQLException e1) {
-					e1.printStackTrace();
-				}
+				    ShapefileLoader loader = new ShapefileLoader();
+					try {
+						String path = inventoryQuery.updateStatement(longtitude, latitude);
+						Layer queryResult = loader.createLayerFromSource(path);
+						canvas = (WorldWindowNewtCanvas) awtComponent;
+			        	canvas.getModel().getLayers().add(queryResult);
+					} catch (IOException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+					//inventoryQuery.excuteQuery(inventoryQuery.getStatement());
+				//} catch (SQLException e1) {
+					//e1.printStackTrace();
+				//}
 				//PointPlacemark point = new PointPlacemark(canvas.getCurrentPosition());
 				//layer = new RenderableLayer();
 				//layer.addRenderable(point);
@@ -222,6 +232,7 @@ public class NewtEventProcessor extends NEWTEventFiFo implements com.jogamp.newt
 				inventoryQuery = InventoryQuery.getAll().get(0);
 				String path=inventoryQuery.queryAreaGenerate();
 				Layer queryArea = loader.createLayerFromSource(path);
+				queryArea.setPickEnabled(false);
 				canvas = (WorldWindowNewtCanvas) awtComponent;
 	        	canvas.getModel().getLayers().add(queryArea);
 			} catch (IOException e) {
