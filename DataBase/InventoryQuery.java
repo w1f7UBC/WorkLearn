@@ -1,6 +1,8 @@
 
 package DataBase;
 
+import gov.nasa.worldwind.geom.Position;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -10,7 +12,11 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Vector;
+
 import javax.swing.table.DefaultTableModel;
+
+import newt.LayerManager;
+
 import com.jaamsim.input.Input;
 import com.jaamsim.input.Keyword;
 import com.jaamsim.math.Vec3d;
@@ -65,52 +71,32 @@ public  class InventoryQuery extends Query {
 	public void updateForInput( Input<?> in ) {
 		super.updateForInput( in );
 	}
+	
+	public LayerManager getCredentials(){
+		return new LayerManager(targetDB.getValue().getURL(), targetDB.getValue().getUserName(), targetDB.getValue().getPassword());
+	}
 
-	public String updateStatement(String longtitude, String latitude) throws IOException {
-		String exe = System.getProperty("user.dir")+"\\resources\\exe\\pgsql2shp.exe";
-		String destination = System.getProperty("user.dir")+"\\resources\\temp";
-		File destinationDir = new File(destination);
-		if(!destinationDir.exists()){
-			destinationDir.mkdirs();
-		}
-		destination+="\\queryResults"+latitude+".shp";
-		Process process = new ProcessBuilder(exe, "-f", destination, "-h", "25.141.219.39", "-p", "5432", "-u", "sde", "-P", "Fomsummer2014", "fom", "\"SELECT geom FROM fmu_1km WHERE gis_key=(SELECT gis_key from fmu_1km where st_contains(fmu_1km.geom, ST_GeomFromText('POINT("+longtitude+" "+latitude+")', 4269))=true);\"").start();
+	public String updateStatement(Position position){
+		String latitude = position.latitude.toString().split("°")[0];
+		String longtitude = position.longitude.toString().split("°")[0];
+		//for the shape generator/loader in LayerManager class to create the shape show on map
+		String statement = "\"SELECT geom FROM fmu_1km "
+				+ "WHERE gis_key=("
+				+ "SELECT gis_key "
+				+ "FROM fmu_1km "
+				+ "WHERE st_contains(fmu_1km.geom, ST_GeomFromText('POINT("+longtitude+" "+latitude+")', 4269))=true);\"";
+		//for querying the actual data that is represented in the selected/generated area
 		String s = "SELECT * FROM ab_03"
 				+ " WHERE giskey IN("
 				+ "SELECT CAST(gis_key AS CHAR(30))"
 				+ " FROM fmu_1km "
 				+ " WHERE st_contains(fmu_1km.geom, ST_GeomFromText('POINT("+longtitude+" "+latitude+")', 4269))=true)";
-		InputStream is = process.getInputStream();
-		InputStreamReader isr = new InputStreamReader(is);
-		BufferedReader br = new BufferedReader(isr);
-		String line;
-		while ((line = br.readLine()) != null) {
-			System.out.println(line);
-		}
 		this.setStatement(s);
-		return destination;
+		return statement;
 	}
-
-	public String queryAreaGenerate() throws IOException{
-		String exe = System.getProperty("user.dir")+"\\resources\\exe\\pgsql2shp.exe";
-		String destination = System.getProperty("user.dir")+"\\resources\\temp";
-		File destinationDir = new File(destination);
-		if(!destinationDir.exists()){
-			destinationDir.mkdirs();
-		}
-		destination+="\\queryArea.shp";
-		//System.out.println(exe);
-		//System.out.println(destination);
-		Process process = new ProcessBuilder(exe, "-f", destination, "-h", "25.141.219.39", "-p", "5432", "-u", "sde", "-P", "Fomsummer2014", "fom", "\"SELECT geom FROM ab_ten;\"").start();
-		//Process process = new ProcessBuilder(exe, "-f", destination, "-h", "25.141.219.39", "-p", "5432", "-u", "sde", "-P", "Fomsummer2014", "fom", "\"SELECT geom from fmu_1km where st_contains(fmu_1km.geom, ST_GeomFromText('POINT(-117.67 56.3798)', 4269))=true;\"").start();
-		InputStream is = process.getInputStream();
-		InputStreamReader isr = new InputStreamReader(is);
-		BufferedReader br = new BufferedReader(isr);
-		String line;
-		while ((line = br.readLine()) != null) {
-			System.out.println(line);
-		}
-		return destination;
+	
+	public String queryAreaStatement(){
+		return "SELECT geom FROM ab_ten;";
 	}
 /*
 	@Override

@@ -25,7 +25,7 @@ public class Query extends DisplayEntity {
 	protected ResultSet rs;
 	
 	@Keyword(description = "target databaseobject of the query")
-	private  EntityInput<DataBaseObject> targetDB;
+	protected  EntityInput<DataBaseObject> targetDB;
 	{
 		targetDB = new EntityInput<>(DataBaseObject.class, "TargetDatabase","Key Inputs", null);
 		this.addInput(targetDB);

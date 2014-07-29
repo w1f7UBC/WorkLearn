@@ -87,9 +87,6 @@ public class DataBaseObject extends Entity {
 		return password.getValue();
 	}
 	
-
-	
-	
 	public Properties getProperties() {
 		props.setProperty("user",username.getValue());
 	    props.setProperty("password",password.getValue());

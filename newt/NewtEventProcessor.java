@@ -38,7 +38,8 @@ public class NewtEventProcessor extends NEWTEventFiFo implements com.jogamp.newt
 	protected WorldWindowNewtCanvas canvas;
 	protected boolean mouseDragged = false;
 	protected int cursorMode;
-	private InventoryQuery inventoryQuery; 
+	private InventoryQuery inventoryQuery=null; 
+	private LayerManager manager=null;
 	
 	public NewtEventProcessor(Component awtComponent)
 	{
@@ -122,31 +123,15 @@ public class NewtEventProcessor extends NEWTEventFiFo implements com.jogamp.newt
 		put(e);
 		mouseDragged = false;
 		canvas = (WorldWindowNewtCanvas) awtComponent;
-		Position pos = canvas.getCurrentPosition();
-	
+		Position position = canvas.getCurrentPosition();
+		//if action is a right click
 	    if(e.getButton()==3){
-	        //if is right click
-			if (pos!=null && cursorMode==1){
-				String latitude = method(pos.latitude.toDecimalDegreesString(10));
-				String longtitude = method(pos.longitude.toDecimalDegreesString(10));
-		
-				Container.getInstance().setPosition(pos);
+	        //if cursor mode is set to 1 and WorldWind actually returns a position
+			if (position!=null && cursorMode==1){
+			    String statement = inventoryQuery.updateStatement(position);
+			    String filePath = manager.sql2shp(Integer.toString(position.hashCode()), statement);
+			    manager.addShape(canvas, filePath, 20);
 				try {
-				    inventoryQuery = InventoryQuery.getAll().get(0);
-				    ShapefileLoader loader = new ShapefileLoader();
-					try {
-						if (canvas.getModel().getLayers().get(10)!=null){
-							canvas.getModel().getLayers().remove(10);
-						}
-						String path = inventoryQuery.updateStatement(longtitude, latitude);
-						Layer queryResult = loader.createLayerFromSource(path);
-						canvas = (WorldWindowNewtCanvas) awtComponent;
-						System.out.println(canvas.getModel().getLayers());
-			        	canvas.getModel().getLayers().add(10, queryResult);
-					} catch (IOException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					}
 					inventoryQuery.excuteQuery(inventoryQuery.getStatement());
 				} catch (SQLException e1) {
 					e1.printStackTrace();
@@ -155,7 +140,7 @@ public class NewtEventProcessor extends NEWTEventFiFo implements com.jogamp.newt
 				//layer = new RenderableLayer();
 				//layer.addRenderable(point);
 				//canvas.getModel().getLayers().add(layer);
-				pos=null;
+				position=null;
 			}
 	    }
 	}
@@ -228,29 +213,18 @@ public class NewtEventProcessor extends NEWTEventFiFo implements com.jogamp.newt
 	}
 
 	public void setCursor(int mode) {
-		cursorMode=mode;
 		//System.out.println(mode);
-		if(cursorMode==1){
-			ShapefileLoader loader = new ShapefileLoader();
-			try {
-				inventoryQuery = InventoryQuery.getAll().get(0);
-				String path=inventoryQuery.queryAreaGenerate();
-				Layer queryArea = loader.createLayerFromSource(path);
-				queryArea.setPickEnabled(false);
-				canvas = (WorldWindowNewtCanvas) awtComponent;
-	        	canvas.getModel().getLayers().add(queryArea);
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+		if(cursorMode==0 && mode==1){
+			cursorMode=mode;
+			inventoryQuery = InventoryQuery.getAll().get(0);
+			manager = inventoryQuery.getCredentials();
+			String statement = inventoryQuery.queryAreaStatement();
+		    String filePath = manager.sql2shp("queryArea", statement);
+		    manager.addShape(canvas, filePath, 19);    
+		}
+		if(cursorMode==1 && mode==0){
+			cursorMode=mode;
+			manager.removeLayer(canvas, 19);
 		}
 	}
-
-	public String method(String str) {
-
-		  if (str.length() > 0 && str.charAt(str.length()-1)== '°') {
-		    str = str.substring(0, str.length()-1);
-		  }
-		  return str;
-		}
 }
