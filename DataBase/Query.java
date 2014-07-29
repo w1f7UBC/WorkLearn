@@ -19,6 +19,7 @@ import com.jaamsim.input.Keyword;
 import com.sandwell.JavaSimulation.EntityInput;
 import com.sandwell.JavaSimulation.InputErrorException;
 import com.sandwell.JavaSimulation3D.DisplayEntity;
+import com.sandwell.JavaSimulation3D.GUIFrame;
 
 public class Query extends DisplayEntity {
 	private String statement = "";
@@ -86,7 +87,7 @@ public class Query extends DisplayEntity {
 	        
 	        	   dataBasePanel.setViewportView(table);
 	        	   dataBaseFrame.add(dataBasePanel);
-	        	   dataBaseFrame.setBounds(1150,500,400,300);
+	        	   dataBaseFrame.setBounds(GUIFrame.COL3_START+GUIFrame.COL3_WIDTH,GUIFrame.LOWER_START,GUIFrame.COL3_WIDTH,GUIFrame.LOWER_HEIGHT);
 	           	   dataBaseFrame.setVisible(true);
 	        	
 	        }
