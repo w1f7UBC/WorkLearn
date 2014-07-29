@@ -14,14 +14,12 @@ import javax.swing.table.DefaultTableModel;
 import com.jaamsim.input.Input;
 import com.jaamsim.input.Keyword;
 import com.jaamsim.math.Vec3d;
-import com.sandwell.JavaSimulation.EntityInput;
 import com.sandwell.JavaSimulation.StringInput;
 import com.sandwell.JavaSimulation.StringListInput;
 import com.sandwell.JavaSimulation.Vec3dInput;
 
 public  class InventoryQuery extends Query {
 
-	private final  String DataBaseName ="";
 	public InventoryQuery(){
 		allInstances.add(this);
 	}
@@ -42,12 +40,11 @@ public  class InventoryQuery extends Query {
 		allInstances = new ArrayList<InventoryQuery>();
 	}
 	{
-	//	databaseEntity = new EntityInput<DataBaseObject>( DataBaseObject.class, "DataBaseEntity", "Key Inputs", null);
-	//	this.addInput(databaseEntity);
+	
 		
-		target = new StringListInput("target","Query property", new ArrayList<String>(0));
+		target = new StringListInput("target","Query property",targets);
 		this.addInput(target);
-		tablename = new StringListInput("tablename","Query property",new ArrayList<String>(0));
+		tablename = new StringListInput("tablename","Query property",tablenames);
 		this.addInput(tablename);
 		coordinate = new Vec3dInput("coordinate", "Query property", new Vec3d(-0.1d, -0.1d, -0.001d));
 		this.addInput(coordinate);
@@ -112,20 +109,18 @@ public  class InventoryQuery extends Query {
 		}
 		return destination;
 	}
-/*
+
 	@Override
 	public  DefaultTableModel getTableContent(String statement) throws SQLException{
-		//this.validate();
     	rs = this.getResultset();
 		ResultSetMetaData metaData = rs.getMetaData();
 	    // names of columns
 	    Vector<String> columnNames = new Vector<String>();
 	    ArrayList<Integer> index = new ArrayList<Integer>();
-	    String ageIndex = "5";
 	    int columnCount = metaData.getColumnCount();
 	    ArrayList<Integer> index2 = new ArrayList<Integer>();
 	    for (int column = 1; column <= columnCount; column++) {
-	    	if(metaData.getColumnName(column).contains("grid_code")||metaData.getColumnName(column).contains("ecozone2")||metaData.getColumnName(column).contains("stid2")||metaData.getColumnName(column).contains("si2")||metaData.getColumnName(column).contains("age")){
+	    	if(metaData.getColumnName(column).contains("primspec")||metaData.getColumnName(column).contains("secspec")||metaData.getColumnName(column).contains("landuse")||metaData.getColumnName(column).contains("primage")||metaData.getColumnName(column).contains("city")){
     			columnNames.add(metaData.getColumnName(column));
 	    		index.add(column);
 			}
@@ -142,12 +137,12 @@ public  class InventoryQuery extends Query {
 	        }
 	        data.add(vector);
 	    }
-	    String addCol = "vol"+"100"+"2";
-	    String addCol2 = "bio"+"100"+"2";
-	    columnNames.add(addCol);
-	    columnNames.add(addCol2);
+	 //  String addCol = "vol"+"100"+"2";
+	  // String addCol2 = "bio"+"100"+"2";
+  // columnNames.add(addCol);
+	//   columnNames.add(addCol2);
 	    return new DefaultTableModel(data, columnNames);
 	}
-	*/
+	
 }
 

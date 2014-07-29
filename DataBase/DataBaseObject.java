@@ -35,7 +35,6 @@ public class DataBaseObject extends Entity {
 	private StringInput password;
 	private int connectionIndex = 0;	
 	private Properties props = new Properties();
-    private String statement;
     private boolean established = false;
     public  DataBaseObject(){
 	

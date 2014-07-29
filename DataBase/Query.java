@@ -1,14 +1,15 @@
 package DataBase;
 
 import java.awt.EventQueue;
+import java.awt.ScrollPane;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.Properties;
 import java.util.Vector;
 
+import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -23,7 +24,8 @@ public class Query extends DisplayEntity {
 	private String statement = "";
 	public ArrayList<String> coordinates;
 	protected ResultSet rs;
-	
+	private final JFrame dataBaseFrame = new JFrame(); 
+	private final JScrollPane dataBasePanel = new JScrollPane();
 	@Keyword(description = "target databaseobject of the query")
 	private  EntityInput<DataBaseObject> targetDB;
 	{
@@ -81,10 +83,15 @@ public class Query extends DisplayEntity {
 	   EventQueue.invokeLater(new Runnable() {
 	        @Override
 	        public void run() {
-	        	JOptionPane.showMessageDialog(null, new JScrollPane(table));	   
+	        
+	        	   dataBasePanel.setViewportView(table);
+	        	   dataBaseFrame.add(dataBasePanel);
+	        	   dataBaseFrame.setBounds(1150,500,400,300);
+	           	   dataBaseFrame.setVisible(true);
+	        	
 	        }
 	   });
-	   return;
+	   
    }
 	
 	public  void excuteQuery(String statement) throws SQLException{
