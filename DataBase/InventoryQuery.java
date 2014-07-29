@@ -78,19 +78,20 @@ public  class InventoryQuery extends Query {
 
 	public String updateStatement(Position position){
 		String latitude = position.latitude.toString().split("°")[0];
-		String longtitude = position.longitude.toString().split("°")[0];
+		String longitude = position.longitude.toString().split("°")[0];
+		System.out.println(latitude + " " + longitude);
 		//for the shape generator/loader in LayerManager class to create the shape show on map
 		String statement = "\"SELECT geom FROM fmu_1km "
 				+ "WHERE gis_key=("
 				+ "SELECT gis_key "
 				+ "FROM fmu_1km "
-				+ "WHERE st_contains(fmu_1km.geom, ST_GeomFromText('POINT("+longtitude+" "+latitude+")', 4269))=true);\"";
+				+ "WHERE st_contains(fmu_1km.geom, ST_GeomFromText('POINT("+longitude+" "+latitude+")', 4269))=true);\"";
 		//for querying the actual data that is represented in the selected/generated area
 		String s = "SELECT * FROM ab_03"
 				+ " WHERE giskey IN("
 				+ "SELECT CAST(gis_key AS CHAR(30))"
 				+ " FROM fmu_1km "
-				+ " WHERE st_contains(fmu_1km.geom, ST_GeomFromText('POINT("+longtitude+" "+latitude+")', 4269))=true)";
+				+ " WHERE st_contains(fmu_1km.geom, ST_GeomFromText('POINT("+longitude+" "+latitude+")', 4269))=true)";
 		this.setStatement(s);
 		return statement;
 	}
