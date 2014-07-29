@@ -218,8 +218,10 @@ public class RouteManager extends DisplayEntity {
 						weight =  ((DiscreteHandlingLinkedEntity) each).getTravelTime(movingEntity);
 					else if (routingRule == Route_Type.SHORTEST)
 						weight = ((DiscreteHandlingLinkedEntity) each).getLength();
+					// leastcost is calculated based on per unit of material transportationcost
 					else if (routingRule == Route_Type.LEASTCOST)
-						weight = ((DiscreteHandlingLinkedEntity) each).getTravelCost(movingEntity);
+						weight = ((DiscreteHandlingLinkedEntity) each).getTravelCost(movingEntity)/
+							movingEntity.getAcceptingBulkMaterialList().getValueFor(bulkMaterial, 0);
 					
 					weightThroughU += weight;
 					if (weightThroughU < destinationWeight && weightThroughU <= weightCap && 
@@ -238,7 +240,7 @@ public class RouteManager extends DisplayEntity {
 					}
 				} 
 
-				if (each.equals(destination) && !(each instanceof Transshipment)) {
+				if (each.equals(destination)) {
 						if (weightThroughU < destinationWeight && weightThroughU < weightCap) {
 							vertexQueue.remove(each);
 							((DiscreteHandlingLinkedEntity) each)
@@ -255,7 +257,7 @@ public class RouteManager extends DisplayEntity {
 			}
 		}
 		if (destinationWeight < Double.POSITIVE_INFINITY)
-			return setRoute(origin, destination, movingEntity, dijkstraComparator);
+			return setRoute(origin, destination, movingEntity, dijkstraComparator,routingRule);
 		
 		// if method has reached here and not returned yet, it means that there
 		// isn't a path from origin to destination, to save this knowledge
@@ -274,7 +276,7 @@ public class RouteManager extends DisplayEntity {
 	}
 
 	private static <T extends DiscreteHandlingLinkedEntity> Route setRoute(T origin,
-			T destination, MovingEntity movingEntity, DijkstraComparator dijkstraComparator) {
+			T destination, MovingEntity movingEntity, DijkstraComparator dijkstraComparator, Route_Type routingRule) {
 		ArrayList<LogisticsEntity> retainedEntities = new ArrayList<>(1);
 
 		LinkedList<DiscreteHandlingLinkedEntity> reversePath = new LinkedList<>();
@@ -298,7 +300,7 @@ public class RouteManager extends DisplayEntity {
 		String tempKey = getRouteName(origin, destination, movingEntity);
 		Route tempRoute = new Route(origin, destination, destination
 				.getDijkstraComparatorList()
-				.getValueListFor(dijkstraComparator, 0).get(0));
+				.getValueListFor(dijkstraComparator, 0).get(0), movingEntity, routingRule);
 		tempRoute.setRoute(path);
 		routesList.add(tempKey, tempRoute);
 		RouteManager.printRouteReport(origin, destination, tempRoute, null);

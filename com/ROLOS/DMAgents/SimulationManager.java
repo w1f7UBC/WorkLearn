@@ -1,5 +1,7 @@
 package com.ROLOS.DMAgents;
 
+import java.util.ArrayList;
+
 import com.ROLOS.Economic.Contract;
 import com.ROLOS.Logistics.BulkMaterial;
 import com.ROLOS.Logistics.MovingEntity;
@@ -11,7 +13,6 @@ import com.jaamsim.input.ValueInput;
 import com.jaamsim.units.TimeUnit;
 import com.sandwell.JavaSimulation.BooleanInput;
 import com.sandwell.JavaSimulation.FileEntity;
-
 import com.jaamsim.input.Keyword;
 import com.sandwell.JavaSimulation3D.DisplayEntity;
 
@@ -149,13 +150,13 @@ public class SimulationManager extends DisplayEntity {
 		contractsReportFile.flush();	
 	}
 	
-	public static void printTransportationCostReport(MovingEntity movingEntity, Route route, BulkMaterial bulkMaterial, double unitCost){
+	public static void printTransportationCostReport(ArrayList<MovingEntity> movingEntitiesList, Route route, BulkMaterial bulkMaterial, double unitCost){
 		if (printTransportReport.getValue()) {
-			transportReportFile.putDoubleWithDecimalsTabs(movingEntity.getSimTime(),
+			transportReportFile.putDoubleWithDecimalsTabs(bulkMaterial.getSimTime(),
 					ReportAgent.getReportPrecision(), 1);
 			transportReportFile.putStringTabs(route.getOrigin().getName(), 1);
 			transportReportFile.putStringTabs(route.getDestination().getName(), 1);
-			transportReportFile.putStringTabs(movingEntity.getName(), 1);
+			transportReportFile.putStringTabs(movingEntitiesList.toString(), 1);
 			transportReportFile.putStringTabs(bulkMaterial.getName(), 1);
 			transportReportFile.putDoubleWithDecimalsTabs(route.getDijkstraWeight(),
 					ReportAgent.getReportPrecision(), 1);
@@ -170,7 +171,7 @@ public class SimulationManager extends DisplayEntity {
 		transportReportFile.putStringTabs("Time", 1);
 		transportReportFile.putStringTabs("Origin", 1);
 		transportReportFile.putStringTabs("Destination", 1);
-		transportReportFile.putStringTabs("Moving Entity", 1);
+		transportReportFile.putStringTabs("Moving Entities List", 1);
 		transportReportFile.putStringTabs("Bulk Material", 1);
 		transportReportFile.putStringTabs("Distance", 1);
 		transportReportFile.putStringTabs("Unit Cost", 1);

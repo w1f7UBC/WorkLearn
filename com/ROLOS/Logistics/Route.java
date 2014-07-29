@@ -15,21 +15,26 @@ public class Route {
 	private DiscreteHandlingLinkedEntity origin;
 	private DiscreteHandlingLinkedEntity destination;
 	private ArrayList<DiscreteHandlingLinkedEntity> routeSegmentsList;
+	// Transportation modes e.g. ROAD, RAIL (for multimodal)
 	private ArrayList<Transport_Mode> transportModeList;
-	Route_Type routeType;
+	// the list of moving entities this route is configured for. the first item is the one that 
+	// also appears in the name. if multi modal, the rest would indicate the transporters for other sections
+	private ArrayList<MovingEntity> movingEntitiesList;
+	private Route_Type routeType;
 	
 	private double dijkstraWeight;
-	
-	public Route(){
 		
-	}
-	
-	public Route(DiscreteHandlingLinkedEntity origin, DiscreteHandlingLinkedEntity destination, double dijkstraWeight) {
+	public Route(DiscreteHandlingLinkedEntity origin, DiscreteHandlingLinkedEntity destination, double dijkstraWeight, MovingEntity movingEntity, Route_Type routingRule) {
 		this.origin = origin;
 		this.destination = destination;
 		routeSegmentsList = new ArrayList<>();
 		this.dijkstraWeight = dijkstraWeight;
+		movingEntitiesList = new ArrayList<>(1);
+		movingEntitiesList.add(movingEntity);
+		
 		transportModeList = new ArrayList<>(1);
+		transportModeList.add(movingEntity.getTransportMode());
+				
 	}			
 	
 	/**
@@ -48,12 +53,17 @@ public class Route {
 		
 		return tempRoute;
 	}
-			
+	
+	/**
+	 * this method sets the transport mode as well (routes at creation time or unimodal). multi modal routes are
+	 * concatenated.
+	 */
 	public void setRoute(ArrayList<? extends DiscreteHandlingLinkedEntity> route){
 		this.routeSegmentsList.clear();
 		for(DiscreteHandlingLinkedEntity each: route){
 			this.routeSegmentsList.add(each);
 		}
+		transportModeList.add(movingEntitiesList.get(0).getTransportMode());
 	}
 		
 	/**
@@ -72,10 +82,6 @@ public class Route {
 		return destination;
 	}
 	
-	public Route_Type getRouteType() {
-		return routeType;
-	}
-
 	public void setRouteType(Route_Type routeType) {
 		this.routeType = routeType;
 	}
@@ -85,14 +91,25 @@ public class Route {
 	 * TODO add logic to use cost structure passed in the movingEntity and etc to calculate transportation cost 
 	 * @return $ per unit of bulkMaterial transported from origin to destination of the passed route. 
 	 */
-	public double estimateTransportationCostonRoute(MovingEntity movingEntity, BulkMaterial bulkMaterial){
-		if(!transportersList.getValue().contains(movingEntity) || !movingEntity.getAcceptingBulkMaterialList().contains(bulkMaterial))
-			throw new InputErrorException("Please check transportation structure for %s. Transpor"
-					+ "%s doesn't carry %s or doesn't appear in the transporters list of %s", this.getFacility(), movingEntity.getName(), bulkMaterial.getName(), this.getName());
-		double unitCost = movingEntity.getTransportationCost(bulkMaterial) * route.getTravelTime(movingEntity);
+	public double estimateTransportationCostonRoute(BulkMaterial bulkMaterial){
+		double unitCost = 0.0d;
+		if(routeType == Route_Type.LEASTCOST)
+			unitCost = dijkstraWeight;
+		else{
+			int index = 0;
+			for (DiscreteHandlingLinkedEntity each: routeSegmentsList){
+				if(each instanceof Transshipment){
+					unitCost += each.getTravelCost(movingEntitiesList.get(index));
+					index++;
+				}
+				else if(each instanceof Facility)
+					continue;
+				unitCost += each.getTravelCost(movingEntitiesList.get(index))/movingEntitiesList.get(index).getAcceptingBulkMaterialList().getValueFor(bulkMaterial, 1);
+			}
+		}
 		
 		// print transportation cost report
-		SimulationManager.printTransportationCostReport(movingEntity, route, bulkMaterial, unitCost);
+		SimulationManager.printTransportationCostReport(movingEntitiesList, this, bulkMaterial, unitCost);
 		return unitCost;
 					
 	}

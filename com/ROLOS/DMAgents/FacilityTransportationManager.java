@@ -209,18 +209,27 @@ public class FacilityTransportationManager extends FacilityManager {
 		Route returnEntity = null;
 		Route tempRoute;
 		double tempCost;
+		boolean foundMovingEntity = false;
 		
 		for(MovingEntity each: transportersList.getValue()){
-			tempRoute = RouteManager.getRoute(origin, destination, each, bulkMaterial, Route_Type.LEASTCOST, bulkMaterial.getTransportationCostCap());
-			if(Tester.greaterCheckTolerance(transportationCapacityList.getValueFor(each, 0) - transportationCapacityList.getValueFor(each, 1),0.0d) &&
+			if(each.getAcceptingBulkMaterialList().contains(bulkMaterial)){
+				foundMovingEntity = true;
+				tempRoute = RouteManager.getRoute(origin, destination, each, bulkMaterial, Route_Type.LEASTCOST, bulkMaterial.getTransportationCostCap());
+				if(Tester.greaterCheckTolerance(transportationCapacityList.getValueFor(each, 0) - transportationCapacityList.getValueFor(each, 1),0.0d) &&
 					tempRoute != null){
-				tempCost = this.estimateTransportationCostonRoute(each, bulkMaterial, tempRoute);
-				if(tempCost < cost ){
-					cost = tempCost;
-					returnEntity = tempRoute;	
+					tempCost = tempRoute.estimateTransportationCostonRoute(each, bulkMaterial);
+					if(tempCost < cost ){
+						cost = tempCost;
+						returnEntity = tempRoute;	
+					}
 				}
 			}
 		}
+		
+		if(!foundMovingEntity)
+			throw new InputErrorException("Please check transportation structure for %s. None of the moving entities that "
+					+ "this facility uses for transportation, carries %s!", this.getFacility(),  bulkMaterial.getName(), this.getName());
+		
 		return returnEntity;
 	}
 	

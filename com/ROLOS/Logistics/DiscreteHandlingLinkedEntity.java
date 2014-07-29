@@ -245,10 +245,18 @@ public class DiscreteHandlingLinkedEntity extends LinkedEntity {
 		return 0;
 	}
 	
+	/**
+	 * 
+	 * @return travel time of movingEntity based on maximum allowable speed and internal speed of the movingEntity
+	 */
 	public double getTravelTime(MovingEntity movingEntity) {
 		return 0;
 	}
 	
+	/**
+	 * 
+	 * @return travel cost of the moving entity based on its operating cost. 
+	 */
 	public double getTravelCost(MovingEntity movingEntity) {
 		return 0;
 	}
