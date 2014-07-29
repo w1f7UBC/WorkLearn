@@ -2,11 +2,17 @@ package com.ROLOS.Logistics;
 
 import java.util.ArrayList;
 
+import com.ROLOS.DMAgents.RouteManager.Transport_Mode;
+import com.ROLOS.Utils.MathUtilities;
+import com.jaamsim.input.Input;
 import com.jaamsim.input.Keyword;
 import com.jaamsim.input.ValueInput;
 import com.jaamsim.input.ValueListInput;
 import com.jaamsim.units.DistanceUnit;
 import com.sandwell.JavaSimulation.DoubleVector;
+import com.sandwell.JavaSimulation.EntityListInput;
+import com.sandwell.JavaSimulation.EntityListListInput;
+import com.sandwell.JavaSimulation.EnumInput;
 import com.sandwell.JavaSimulation.InputErrorException;
 import com.sandwell.JavaSimulation.StringListInput;
 
@@ -21,6 +27,18 @@ import com.sandwell.JavaSimulation.StringListInput;
  */
 public class RouteEntity extends DiscreteHandlingLinkedEntity {
 
+	@Keyword(description = "The transportation mode that this moving entity is allowed to travel on.", 
+			example = "Truck TransportMode { ROAD }")
+	private final EnumInput<Transport_Mode> transportMode;
+	
+	@Keyword(description = "The list of origins.", 
+			example = "Route1 OriginList { Road1 Road2 }")
+	private final EntityListInput<DiscreteHandlingLinkedEntity> originList;	
+	
+	@Keyword(description = "The list of destinations.", 
+			example = "Route1 DestinationList { Enterblock1 Enterblock2 }")
+	private final EntityListInput<DiscreteHandlingLinkedEntity> destinationList;	
+	
 	@Keyword(description = "The name of segments constituing this route entity.", 
 			example = "Route1 Segments { 'Road1' 'Road2' 'Rail1' }")
 	private final StringListInput segmentList;	
@@ -34,8 +52,17 @@ public class RouteEntity extends DiscreteHandlingLinkedEntity {
 	private final ValueListInput speedLimitList;	
 	
 	{
+		transportMode = new EnumInput<>(Transport_Mode.class, "TransportMode", "Key Inputs", Transport_Mode.ROAD);
+		this.addInput(transportMode);
+		
 		segmentList = new StringListInput("Segments", "Key Inputs", null);
 		this.addInput(segmentList);
+		
+		originList = new EntityListInput<>(DiscreteHandlingLinkedEntity.class, "OriginList", "Key Inputs", null);
+		this.addInput(originList);
+		
+		destinationList = new EntityListInput<>(DiscreteHandlingLinkedEntity.class, "DestinationList", "Key Inputs", null);
+		this.addInput(destinationList);
 		
 		lengthList = new ValueListInput("LengthList", "Key Inputs", null);
 		lengthList.setUnitType(DistanceUnit.class);
@@ -58,6 +85,46 @@ public class RouteEntity extends DiscreteHandlingLinkedEntity {
 			if (lengthList.getValue() == null || lengthList.getValue().size() != segmentList.getValue().size())
 				throw new InputErrorException("Lengthlist and SpeedLimitByEntityType must both be set together and of the same size!");
 			
+		}
+	}
+
+	public Transport_Mode getTransportMode(){
+		return transportMode.getValue();
+	}
+	
+	@Override
+	public double getLength() {
+		return lengthList.getValue().sum();
+	}
+	
+	@Override
+	public double getTravelTime(MovingEntity movingEntity) {
+		double total=0;
+		for(int i=0; i<lengthList.getValue().size(); i++)
+			total += lengthList.getValue().get(i)/ Math.min(speedLimitList.getValue().get(i), movingEntity.getInternalSpeed());
+		return total;
+	}
+	
+	@Override
+	public double getTravelCost(MovingEntity movingEntity) {
+		return movingEntity.getOperatingCost() * getTravelTime(movingEntity);
+	}
+	
+	@Override
+	public void updateForInput(Input<?> in) {
+		super.updateForInput(in);
+		// populate previous and next LinkedEntitylists
+		if(in == originList){
+			for (LinkedEntity each : originList.getValue()) {
+				each.addToNextLinkedEntityList(this);
+				this.addToPreviousLinkedEntityList(each);
+			}
+		}
+		if(in == destinationList){
+			for (LinkedEntity each : destinationList.getValue()) {
+				this.addToNextLinkedEntityList(each);
+				each.addToPreviousLinkedEntityList(this);
+			}
 		}
 	}
 

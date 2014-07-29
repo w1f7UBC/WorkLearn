@@ -157,7 +157,7 @@ public class SimulationManager extends DisplayEntity {
 			transportReportFile.putStringTabs(route.getDestination().getName(), 1);
 			transportReportFile.putStringTabs(movingEntity.getName(), 1);
 			transportReportFile.putStringTabs(bulkMaterial.getName(), 1);
-			transportReportFile.putDoubleWithDecimalsTabs(route.getDistance(),
+			transportReportFile.putDoubleWithDecimalsTabs(route.getDijkstraWeight(),
 					ReportAgent.getReportPrecision(), 1);
 			transportReportFile.putDoubleWithDecimalsTabs(unitCost,
 					ReportAgent.getReportPrecision(), 1);

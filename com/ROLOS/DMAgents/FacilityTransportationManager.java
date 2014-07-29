@@ -3,6 +3,8 @@ package com.ROLOS.DMAgents;
 import java.util.ArrayList;
 
 import com.ROLOS.ROLOSEntity;
+import com.ROLOS.DMAgents.RouteManager.Route_Type;
+import com.ROLOS.DMAgents.RouteManager.Transport_Mode;
 import com.ROLOS.Economic.Contract;
 import com.ROLOS.Logistics.BulkHandlingRoute;
 import com.ROLOS.Logistics.BulkMaterial;
@@ -27,6 +29,7 @@ import com.jaamsim.units.CostPerVolumePerDistUnit;
 import com.jaamsim.units.MassFlowUnit;
 import com.jaamsim.units.VolumeFlowUnit;
 import com.jaamsim.units.VolumeUnit;
+import com.sandwell.JavaSimulation.BooleanInput;
 import com.sandwell.JavaSimulation.EntityListInput;
 import com.sandwell.JavaSimulation.InputErrorException;
 import com.jaamsim.input.Input;
@@ -36,46 +39,28 @@ import com.sandwell.JavaSimulation.Tester;
 
 public class FacilityTransportationManager extends FacilityManager {
 	
-	@Keyword(description = "List of material that this facility has the capacity to transport.", 
-			example = "Temiscaming/TransportationManager TransportableMaterialGroups { WoodChips }")
-	private final EntityListInput<BulkMaterial> transportableMaterialList;
-	
 	@Keyword(description = "Moving Entity list that have cost and capacity defined for them and apear in the TransportableMaterialGroups list."
 			+ "These transporters should correspond to fleets' prototypes. I.e. these cost structures apply to the fleet", 
 			example = "Temiscaming/TransportationManager TransporterCostGroups { Truck1 Truck2 Train1 Train2 }")
 	private final EntityListInput<MovingEntity> transportersList;
-	
-	@Keyword(description = "Yearly transportation capacity corresponding to TransporterCostGroups.", 
-			example = "Temiscaming/TransportationManager TransportionCapacity { 50 20 30 20 kt/y }")
-	private final ValueListInput transportationCapacity;
-
-	@Keyword(description = "Cost of transportation per material unit corresponding to TransporterCostGroups per distance of route.", 
-			example = "Temiscaming/TransportationManager TransportionCost { 5 2 1 1.8 $/t/km }")
-	private final ValueListInput transportationCostGroups;
-	
+		
 	private TwoLinkedLists<MovingEntity> transportationCapacityList;
 
+	private HashMapList<Transport_Mode,MovingEntity> transportersMap; 
 	private HashMapList<MovingEntity,MovingEntity> unassignedMovingEntityList;
 	private HashMapList<Contract,MovingEntity> inactiveContractsList;
 		
 	{
-		transportableMaterialList = new EntityListInput<>(BulkMaterial.class, "TransportableMaterialGroups", "Economic", null);
-		this.addInput(transportableMaterialList);
 		
 		transportersList = new EntityListInput<>(MovingEntity.class, "TransporterCostGroups", "Economic", null);
 		this.addInput(transportersList);
 		
-		transportationCostGroups = new ValueListInput("TransportationCost", "Economic", null);
-		this.addInput(transportationCostGroups);
-		
-		transportationCapacity = new ValueListInput("TransportationCapacity", "Key Inputs", null);
-		this.addInput(transportationCapacity);
-
 	}
 	
 	public FacilityTransportationManager() {
-		transportationCapacityList = new TwoLinkedLists<>(3, new DescendingPriotityComparator<MovingEntity>(ROLOSEntity.class, "getInternalPriority"));
+		transportationCapacityList = new TwoLinkedLists<>(2, new DescendingPriotityComparator<MovingEntity>(ROLOSEntity.class, "getInternalPriority"));
 
+		transportersMap = new HashMapList<>(1);
 		unassignedMovingEntityList = new HashMapList<MovingEntity,MovingEntity>(1);
 		inactiveContractsList = new HashMapList<Contract,MovingEntity>(1);
 	}
@@ -83,23 +68,17 @@ public class FacilityTransportationManager extends FacilityManager {
 	@Override
 	public void validate() {
 		super.validate();
-		
-		if(transportableMaterialList.getValue() != null){
-			if(transportationCostGroups.getValue() == null || 
-				(transportersList.getValue() != null && transportersList.getValue().size() != transportationCostGroups.getValue().size()))
-				throw new InputErrorException("Number of groups in transportationCostGroups doesn't match TransporterCost list!");				
-		}		
+			
 	}
 	
 	@Override
 	public void earlyInit() {
 		super.earlyInit();
 
-		// the transportation capacity is added 
+		// TODO assign fleet size when fleets are figured out
 		if(transportersList.getValue() != null){
 			for(int i = 0; i<transportersList.getValue().size(); i++){
-				transportationCapacityList.set(transportersList.getValue().get(i), 0, transportationCostGroups.getValue().get(i));
-				transportationCapacityList.set(transportersList.getValue().get(i), 1, transportationCapacity.getValue().get(i)*SimulationManager.getPlanningHorizon());
+				transportationCapacityList.set(transportersList.getValue().get(i), 0, Double.POSITIVE_INFINITY);
 			}
 		}
 	}
@@ -214,9 +193,8 @@ public class FacilityTransportationManager extends FacilityManager {
 	
 	/**
 	 *  List of transporters and costs and capacities
-	 * <br> <b> 0- </b> Transporters' cost per unit of material per distance
-	 * <br> <b> 1- </b> transporters' total capacity (for the planning horizon)
-	 * <br> <b> 2- </b> transporter's reserved capacity (for the planning horizon)
+	 * <br> <b> 0- </b> number of active transporters in the fleet
+	 * <br> <b> 1- </b> transporter's reserved capacity (for the planning horizon)
 	 */
 	public TwoLinkedLists<MovingEntity> getTransportersList(){
 		return transportationCapacityList;
@@ -226,21 +204,20 @@ public class FacilityTransportationManager extends FacilityManager {
 	 * 
 	 * @return least cost per unit transporter that has remaining capacity for transporting bulkMaterial
 	 */
-	public MovingEntity getLeastCostTransporter(BulkMaterial bulkMaterial,Facility origin, Facility destination){
+	public Route getLeastCostTranspotationRoute(BulkMaterial bulkMaterial,Facility origin, Facility destination){
 		double cost = Double.POSITIVE_INFINITY;
-		MovingEntity returnEntity = null;
+		Route returnEntity = null;
 		Route tempRoute;
 		double tempCost;
-		if(!transportableMaterialList.getValue().contains(bulkMaterial))
-			return null;
+		
 		for(MovingEntity each: transportersList.getValue()){
-			tempRoute = RouteManager.getRoute(origin, destination, each);
-			if(Tester.greaterCheckTolerance(transportationCapacityList.getValueFor(each, 1) - transportationCapacityList.getValueFor(each, 2),0.0d) &&
+			tempRoute = RouteManager.getRoute(origin, destination, each, bulkMaterial, Route_Type.LEASTCOST, bulkMaterial.getTransportationCostCap());
+			if(Tester.greaterCheckTolerance(transportationCapacityList.getValueFor(each, 0) - transportationCapacityList.getValueFor(each, 1),0.0d) &&
 					tempRoute != null){
 				tempCost = this.estimateTransportationCostonRoute(each, bulkMaterial, tempRoute);
 				if(tempCost < cost ){
 					cost = tempCost;
-					returnEntity = each;	
+					returnEntity = tempRoute;	
 				}
 			}
 		}
@@ -360,26 +337,7 @@ public class FacilityTransportationManager extends FacilityManager {
 		}
 		return travelTime;
 	}
-	
-	/**
-	 * TODO add logic to use cost structure passed in the movingEntity and etc to calculate transportation cost 
-	 * @return $ per unit of bulkMaterial transported from origin to destination of the passed route. 
-	 */
-	public double estimateTransportationCostonRoute(MovingEntity movingEntity, BulkMaterial bulkMaterial, Route route){
-		if(!transportableMaterialList.getValue().contains(bulkMaterial)|| !transportersList.getValue().contains(movingEntity))
-			throw new InputErrorException("Please check transportation structure for %s. Transportation keywords aren't set correctly for"
-					+ "%s to carry %s", this.getFacility(), movingEntity.getName(), bulkMaterial.getName());
-		double unitCost = transportationCapacityList.getValueFor(movingEntity, 0) * route.getDistance();
-		
-		// print transportation cost report
-		SimulationManager.printTransportationCostReport(movingEntity, route, bulkMaterial, unitCost);
-		return unitCost;
-					
-	}
-	
-	public boolean canTransport(BulkMaterial bulkMaterial){
-		return transportableMaterialList.getValue().contains(bulkMaterial) ? true : false;
-	}
+
 	
 	//////////////////////////////////////////////////////////////////////////////////////
 	// Report METHODS
@@ -393,13 +351,10 @@ public class FacilityTransportationManager extends FacilityManager {
 	@Override
 	public void updateForInput(Input<?> in) {
 		super.updateForInput(in);
-		if(in == transportableMaterialList)
-			if(transportableMaterialList.getValue().get(0).getEntityUnit() == VolumeUnit.class){
-				transportationCostGroups.setUnitType(CostPerVolumePerDistUnit.class);
-				transportationCapacity.setUnitType(VolumeFlowUnit.class);
-			} else {
-				transportationCostGroups.setUnitType(CostPerMassPerDistUnit.class);
-				transportationCapacity.setUnitType(MassFlowUnit.class);
+		if(in == transportersList){
+			for(MovingEntity each: transportersList.getValue()){
+				transportersMap.add(each.getTransportMode(), each);
 			}
-	}		
+		}
+	}
 }

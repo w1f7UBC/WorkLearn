@@ -241,6 +241,18 @@ public class DiscreteHandlingLinkedEntity extends LinkedEntity {
 		return exitDelay.getValue();
 	}
 	
+	public double getLength() {
+		return 0;
+	}
+	
+	public double getTravelTime(MovingEntity movingEntity) {
+		return 0;
+	}
+	
+	public double getTravelCost(MovingEntity movingEntity) {
+		return 0;
+	}
+	
 	// ////////////////////////////////////////////////////////////////////////////////////
 	// REPORTING
 	// ////////////////////////////////////////////////////////////////////////////////////

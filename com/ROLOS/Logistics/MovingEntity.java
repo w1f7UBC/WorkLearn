@@ -8,13 +8,14 @@ import com.jaamsim.units.DistanceUnit;
 import com.jaamsim.units.SpeedUnit;
 import com.sandwell.JavaSimulation.BooleanInput;
 import com.sandwell.JavaSimulation.EntityListInput;
+import com.sandwell.JavaSimulation.EnumInput;
 import com.sandwell.JavaSimulation.ErrorException;
 import com.jaamsim.input.Input;
-
 import com.jaamsim.input.Keyword;
 import com.sandwell.JavaSimulation.Tester;
 import com.sandwell.JavaSimulation.Vec3dInput;
 import com.ROLOS.ROLOSEntity;
+import com.ROLOS.DMAgents.RouteManager.Transport_Mode;
 import com.ROLOS.Utils.HandyUtils;
 import com.ROLOS.Utils.HashMapList;
 import com.ROLOS.Utils.MathUtilities;
@@ -28,6 +29,10 @@ import com.jaamsim.events.Process;
  */
 public class MovingEntity extends LogisticsEntity {
 	private static final ArrayList<MovingEntity> allInstances;
+	
+	@Keyword(description = "The transportation mode that this moving entity is allowed to travel on.", 
+			example = "Truck TransportMode { ROAD }")
+	private final EnumInput<Transport_Mode> transportMode;
 	
 	@Keyword(description = "Upper limit speed that this entity can travel freely on the route (i.e. actual speed = min(CrusingSpeed, LoadedSpeed, UnLoadedSpeed, MaxSpeed(route's),...).", 
 			example = "Truck1 CruisingSpeed { 80 km/h } ")
@@ -79,10 +84,6 @@ public class MovingEntity extends LogisticsEntity {
 	private double startTravelingTimeOnCurrentRouteSegment;
 	private HashMapList<String,LogisticsEntity> currentlyTowingList;
 	
-	//1st value list stores cargo capacity 
-	//2nd value list stores current cargo
-	//3rd value list is the infeedable rate (meaning there is a loader/processor attached to at least one of the bulk cargos)
-	//4th value list is the outfeedable rate (meaning there is an unloader/processor attached to at least one of the bulk cargos)
 	private TwoLinkedLists<BulkMaterial> acceptingBulkMaterialList; // for moving equipment, cargo capacity and current cargo will be zero
 
 	
@@ -94,6 +95,9 @@ public class MovingEntity extends LogisticsEntity {
 	}
 	
 	{
+		transportMode = new EnumInput<>(Transport_Mode.class, "TransportMode", "Key Inputs", Transport_Mode.ROAD);
+		this.addInput(transportMode);
+		
 		movingEquipment = new BooleanInput("MovingEquipment", "Key Inputs", true);
 		this.addInput(movingEquipment);
 		
@@ -124,6 +128,7 @@ public class MovingEntity extends LogisticsEntity {
 		
 		facilitiesList = new EntityListInput<>(Facility.class, "FacilitiesList", "Key Inputs", null);
 		this.addInput(facilitiesList);
+		
 	}
 	
 	public MovingEntity() {
@@ -303,6 +308,10 @@ public class MovingEntity extends LogisticsEntity {
 		return destinationFacility;
 	}
 	
+	public Transport_Mode getTransportMode(){
+		return transportMode.getValue();
+	}
+	
 	public DiscreteHandlingLinkedEntity getCurrentDestination(){
 		return currentDestination;
 	}
@@ -435,8 +444,22 @@ public class MovingEntity extends LogisticsEntity {
 		return facilitiesList.getValue();
 	}
 	
+	/**
+	 * <br> <b>1-</b> Cargo capacity 
+	 * <br> <b>2-</b> Current cargo
+	 * <br> <b>3-</b> infeedable rate (meaning there is a loader/processor attached to at least one of the bulk cargos)
+	 * <br> <b>4-</b> outfeedable rate (meaning there is an unloader/processor attached to at least one of the bulk cargos)
+	 * @return
+	 */
 	public TwoLinkedLists<BulkMaterial> getAcceptingBulkMaterialList(){
 		return acceptingBulkMaterialList;
+	}
+	
+	/** 
+	 * @return cost of transporting material per unit of material per time (e.g. 5 $/t/h )
+	 */
+	public double getTransportationCost(BulkMaterial bulkMaterial){
+		return this.getOperatingCost()/this.getAcceptingBulkMaterialList().getValueFor(bulkMaterial, 1);
 	}
 	
 	/** 

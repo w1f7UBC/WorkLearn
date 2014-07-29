@@ -1,6 +1,9 @@
 package com.ROLOS.Utils;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Set;
+
 import com.sandwell.JavaSimulation.ErrorException;
 
 /**
@@ -8,46 +11,43 @@ import com.sandwell.JavaSimulation.ErrorException;
  */
 public class HashMapList<T1, T2> {
 
-	private ArrayList<T1> hashList;
-	private ArrayList<ArrayList<T2>> entityList;
+	private HashMap<T1, ArrayList<T2>> hashList; 
 	
 	public HashMapList() {
-		hashList = new ArrayList<>(5);
-		entityList = new ArrayList<>(5);
+		hashList = new HashMap<>(5);
+	
 	}
 	
 	public HashMapList(int initialCapacity) {
-		hashList = new ArrayList<>(initialCapacity);
-		entityList = new ArrayList<>();
+		hashList = new HashMap<>(initialCapacity);
+
 	}
 	
 	/**
 	 * will add element to the arraylist associated with name. 
+	 * <br> <b>WARNING: </b> wont check for duplicate elements. 
 	 */
 	public <V extends T2> void add(T1 hashIdentifier,V element){
-		if (!hashList.contains(hashIdentifier)){
+		if (!hashList.containsKey(hashIdentifier)){
 			ArrayList<T2> temp = new ArrayList<>(1);
 			temp.add(element);
-			hashList.add(hashIdentifier);
-			entityList.add(temp);
+			hashList.put(hashIdentifier, temp);
 		} 
 		else{
-			int index = hashList.indexOf(hashIdentifier);
-			entityList.get(index).add(element);
+			hashList.get(hashIdentifier).add(element);
 		}
 	}
 	
 	/**
 	 * will append passed arraylist to the list associated with name or create a list with the passed elements if name doesn't exist.
+	 * <br> <b>WARNING: </b> wont check for duplicate elements.
 	 */
 	public <V extends T2> void add(T1 hashIdentifier, ArrayList<T2> list){
-		if (!hashList.contains(hashIdentifier)){
-			hashList.add(hashIdentifier);
-			entityList.add(list);
+		if (!hashList.containsKey(hashIdentifier)){
+			hashList.put(hashIdentifier,list);
 		}
 		else{
-			int index = hashList.indexOf(hashIdentifier);
-			entityList.get(index).addAll(list);
+			hashList.get(hashIdentifier).addAll(list);
 		}
 	}
 	
@@ -56,14 +56,14 @@ public class HashMapList<T1, T2> {
 	}
 	
 	public boolean contains(T1 hashIdentifier){
-		return hashList.contains(hashIdentifier)? true : false;
+		return hashList.containsKey(hashIdentifier)? true : false;
 	}
 	
 	/**
 	 * @return arraylist associated with the hashIdentifier or null if not found
 	 */
 	public ArrayList<T2> get(T1 hashIdentifier){
-		return hashList.contains(hashIdentifier) ? entityList.get(hashList.indexOf(hashIdentifier)) : new ArrayList<T2>(1);
+		return hashList.get(hashIdentifier);
 	}
 	
 	/**
@@ -84,22 +84,26 @@ public class HashMapList<T1, T2> {
 	}
 	
 	public ArrayList<T1> getKeys(){
-		return new ArrayList<T1>(hashList);
+		ArrayList<T1> tempList = new ArrayList<>(hashList.keySet());
+		
+		return tempList;
 	}
 	
 	/**
+	 * TODO get rid of this and make processing route better
 	 *@return the array list of entitylists contained in the hashmap list
 	 */
 	public ArrayList<ArrayList<T2>> getValues(){
-		return entityList;
+		ArrayList<ArrayList<T2>> tempList = new ArrayList<>(1);
+		for(T1 each: hashList.keySet())
+			tempList.add(hashList.get(each));
+		return tempList;
 	}
 	
+	
 	public void remove(T1 hashIdentifier){
-		int index = hashList.indexOf(hashIdentifier);
-		if (index < 0)
-			return;
-		entityList.remove(index);
-		hashList.remove(index);
+		
+		hashList.remove(hashIdentifier);
 		
 	}
 	
@@ -107,23 +111,19 @@ public class HashMapList<T1, T2> {
 	 * @return true if hashIdentifier doesn't exist or associated arraylist with hashIdentifier is empty.
 	 */
 	public boolean isEmpty(T1 hashIdentifier){
-		if(!hashList.contains(hashIdentifier))
-			return true;
-		else if (entityList.get(hashList.indexOf(hashIdentifier)).isEmpty())
-				return true;	
-		else return false;		
+		return (!hashList.containsKey(hashIdentifier) || hashList.get(hashIdentifier).isEmpty()) ? true : false; 		
 	}
 	
 	public void remove(T1 hashIdentifier, T2 element){
-		if (hashList.contains(hashIdentifier))
-			entityList.get(hashList.indexOf(hashIdentifier)).remove(element);
+		if (hashList.containsKey(hashIdentifier))
+			hashList.get(hashIdentifier).remove(element);
 		else
 			return;
 	}
 	
 	public void remove(T1 hashIdentifier, ArrayList<T2> list){
-		if (hashList.contains(hashIdentifier))
-			entityList.get(hashList.indexOf(hashIdentifier)).removeAll(list);
+		if (hashList.containsKey(hashIdentifier))
+			hashList.get(hashIdentifier).removeAll(list);
 		else
 			return;
 	}

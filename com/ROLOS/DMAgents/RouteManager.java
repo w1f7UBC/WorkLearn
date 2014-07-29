@@ -6,6 +6,7 @@ import java.util.PriorityQueue;
 
 import DataBase.DataBaseObject;
 
+import com.ROLOS.Logistics.BulkMaterial;
 import com.ROLOS.Logistics.DiscreteHandlingLinkedEntity;
 import com.ROLOS.Logistics.DiscreteHandlingLinkedEntity.DijkstraComparator;
 import com.ROLOS.Logistics.EntranceBlock;
@@ -16,16 +17,31 @@ import com.ROLOS.Logistics.LogisticsEntity;
 import com.ROLOS.Logistics.MovingEntity;
 import com.ROLOS.Logistics.ReportAgent;
 import com.ROLOS.Logistics.Route;
+import com.ROLOS.Logistics.RouteEntity;
 import com.ROLOS.Logistics.RouteSegment;
+import com.ROLOS.Logistics.Transshipment;
 import com.ROLOS.Utils.HandyUtils;
 import com.ROLOS.Utils.HashMapList;
 import com.sandwell.JavaSimulation.BooleanInput;
 import com.sandwell.JavaSimulation.EntityInput;
+import com.sandwell.JavaSimulation.EnumInput;
 import com.sandwell.JavaSimulation.FileEntity;
 import com.sandwell.JavaSimulation3D.DisplayEntity;
 import com.jaamsim.input.Keyword;
 
 public class RouteManager extends DisplayEntity {
+	
+	public enum Transport_Mode {
+		ROAD,
+		RAIL,
+		WATER;
+	}
+	
+	public enum Route_Type {
+		LEASTCOST,
+		FASTEST,
+		SHORTEST;
+	}
 	
 	@Keyword(description = "If TRUE, then reports for established contracts will be printed out.",
 		     example = "TransportationManager PrintRoutesReport { TRUE }")
@@ -50,6 +66,7 @@ public class RouteManager extends DisplayEntity {
 	}
 	
 	public static boolean lockedDijkstraParameters = false;
+	
 	private static HashMapList<String, Route> routesList;
 	// list of routes that won't allow movingEntity
 	private static HashMapList<MovingEntity, String> unResolvedRoutesList;
@@ -79,11 +96,11 @@ public class RouteManager extends DisplayEntity {
 	// ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
-	 * @return This method constructs the route from origin loading bay to the destination loading bay if 
+	 * @return This method constructs the shortest route from origin loading bay to the destination loading bay if 
 	 * route doesn't already exist. 
 	 */
 	public static Route getBayToBayRoute(LoadingBay originBay, LoadingBay destinationBay, MovingEntity movingEntity) {
-		String routeName = originBay.getName()+ "-" +destinationBay.getName();
+		String routeName = getRouteName(originBay, destinationBay, movingEntity);
 		Route finalRoute = null;
 		if(!routesList.contains(routeName)){
 			ExitBlock exit;
@@ -97,72 +114,59 @@ public class RouteManager extends DisplayEntity {
 				.getFacilityEntranceBlock(movingEntity, destinationBay);
 
 			//origin to exit block 
-			tempRoute = RouteManager.getRoute(originBay, exit,movingEntity);
-			distance += tempRoute.getDistance();
+			tempRoute = RouteManager.getRoute(originBay, exit,movingEntity, null, Route_Type.SHORTEST, Double.POSITIVE_INFINITY);
+			distance += tempRoute.getDijkstraWeight();
 			ArrayList<DiscreteHandlingLinkedEntity> tempRouteSegments = new ArrayList<>(
 				tempRoute.getRouteSegmentsList());
-			ArrayList<LogisticsEntity> retainedEntities = new ArrayList<>(tempRoute.getHandlingMovingEntitiesList());
 			
 			//exit to entrance
-			tempRoute = RouteManager.getRoute(exit, entrance,movingEntity);
-			distance += tempRoute.getDistance();
+			tempRoute = RouteManager.getRoute(exit, entrance,movingEntity, null, Route_Type.SHORTEST, Double.POSITIVE_INFINITY);
+			distance += tempRoute.getDijkstraWeight();
 			tempRouteSegments.addAll(tempRoute.getRouteSegmentsList());
-			retainedEntities.retainAll(tempRoute.getHandlingMovingEntitiesList());
 
 			//entrance to destination bay
-			tempRoute = RouteManager.getRoute(entrance,destinationBay,movingEntity);
-			distance += tempRoute.getDistance();
+			tempRoute = RouteManager.getRoute(entrance,destinationBay,movingEntity, null, Route_Type.SHORTEST, Double.POSITIVE_INFINITY);
+			distance += tempRoute.getDijkstraWeight();
 			tempRouteSegments.addAll(tempRoute.getRouteSegmentsList());
-			retainedEntities.retainAll(tempRoute.getHandlingMovingEntitiesList());
 			
-			finalRoute = new Route(originBay, destinationBay, distance,retainedEntities);
+			finalRoute = new Route(originBay, destinationBay, distance);
 			finalRoute.setRoute(tempRouteSegments);
 			routesList.add(routeName, finalRoute);
 		} else{
-			finalRoute = RouteManager.getRoute(originBay, destinationBay, movingEntity);
+			finalRoute = RouteManager.getRoute(originBay, destinationBay, movingEntity, null, Route_Type.SHORTEST, Double.POSITIVE_INFINITY);
 		}
 		return finalRoute;
 	}
 
-	/**
-	 * @return route from origin to destination or tries to compute one if doesn't exist.
-	 */
-	public static <T extends DiscreteHandlingLinkedEntity> ArrayList<Route> getRoute(
-			T origin, T destination) {
-		String tempKey = origin.getName() + "-" + destination.getName();
-		if (!routesList.contains(tempKey)) {
-			RouteManager.computeDijkstraPath(origin, destination, null);
-		}
-
-		if(routesList.get(tempKey).get(0).getDistance() == Double.POSITIVE_INFINITY)
-			return new ArrayList<Route>();
-		else
-			return routesList.get(tempKey);
-	}
-
-	
 	// Returns route that handles the passed moving entity or computes one if
 	// existed
 
 	/**
 	 * @param origin if facility is passed as origin and destination, 
 	 * this method should be used for estimating distance from facility to facility and not for planning moving entity's moves
-	 * @return route that handles the passed moving entity or computes one if
+	 * @return the best (shortest,fastest, or least cost)route that starts with the same transport mode as that of moving entity or computes one if
 	 * existed. null if such route doesn't exist. 
 	 */
 	public static <T extends DiscreteHandlingLinkedEntity> Route getRoute(T origin,
-			T destination, MovingEntity movingEntity) {
-		String tempKey = origin.getName() + "-" + destination.getName();
+			T destination, MovingEntity movingEntity, BulkMaterial bulkMaterial, Route_Type routingRule, double weightCap) {
+		String tempKey = getRouteName(origin, destination, movingEntity);
 		
 		if(unResolvedRoutesList.get(movingEntity).contains(tempKey))
 			return null;
 		
-		for (Route each : RouteManager.getRoute(origin, destination))
-			if (each.getHandlingMovingEntitiesList().contains(
-					movingEntity.getProtoTypeEntity()))
-				return each;
-
-		return computeDijkstraPath(origin, destination, movingEntity);
+		// finds the best (shortest,fastest, or least cost) route that begins with the same transport mode as moving entity
+		Route tempRoute= null;
+		for (Route each : routesList.get(tempKey))
+			if (each.getTransportModeList().get(0) == movingEntity.getTransportMode())
+				if(tempRoute == null)
+					tempRoute = each;
+				else
+					if(each.getDijkstraWeight() < tempRoute.getDijkstraWeight())
+						tempRoute = each;
+		if (tempRoute != null)
+				return tempRoute;
+		else
+			return computeDijkstraPath(origin, destination, movingEntity, bulkMaterial, routingRule,weightCap);
 	}
 
 	// ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -175,16 +179,19 @@ public class RouteManager extends DisplayEntity {
 	 * origin and destinations and also that it's assumed that caller checks for
 	 * origin and destination's compatibility
 	 * 
-	 * @param movingEntity
-	 *            route is computed that handles movingEntity throughout. if
-	 *            null is passed shortest path is calculated
+	 * @param movingEntity is always the carrier from the begining of the route (from origin)
+	 * route is computed that handles movingEntity throughout. if
+	 * null is passed shortest path is calculated
+	 * @param weightCap is the maximum weight that will be considered in dijkstra calculation. e.g. if 
+	 * travel time cap is set to 12 hrs and routes exceed that, they'd get cut off.
 	 */
 	public static <T extends DiscreteHandlingLinkedEntity> Route computeDijkstraPath(
-			T origin, T destination, MovingEntity movingEntity) {
+			T origin, T destination, MovingEntity movingEntity, BulkMaterial bulkMaterial, Route_Type routingRule, double weightCap) {
+		double destinationWeight = Double.POSITIVE_INFINITY;
 		DijkstraComparator dijkstraComparator = new DijkstraComparator();
 		origin.getDijkstraComparatorList().add(dijkstraComparator, null, 0,
 				0.0d);
-		PriorityQueue<T> vertexQueue = new PriorityQueue<>(10,dijkstraComparator);
+		PriorityQueue<T> vertexQueue = new PriorityQueue<>(5,dijkstraComparator);
 		vertexQueue.add(origin);
 
 		while (!vertexQueue.isEmpty()) {
@@ -201,37 +208,38 @@ public class RouteManager extends DisplayEntity {
 									dijkstraComparator, null, 0,
 									Double.POSITIVE_INFINITY);
 				}
-
-				double weight;
-				if (each.checkIfHandles(movingEntity)
-						&& each instanceof RouteSegment) {
-					weight = ((RouteSegment) each).getLength();
-					double weightThroughU = u.getDijkstraComparatorList()
-							.getValueListFor(dijkstraComparator, 0).get(0)
-							+ weight;
-					if (weightThroughU < ((DiscreteHandlingLinkedEntity) each)
-							.getDijkstraComparatorList()
+				double weightThroughU = u.getDijkstraComparatorList()
+						.getValueListFor(dijkstraComparator, 0).get(0);
+				double weight = 0;
+				if ((each instanceof RouteSegment && ((RouteSegment) each).getTransportMode() == movingEntity.getTransportMode()) || 
+					(each instanceof RouteEntity && ((RouteEntity) each).getTransportMode() == movingEntity.getTransportMode()) ) {
+					//assign weight based on routing rule
+					if(routingRule == Route_Type.FASTEST)
+						weight =  ((DiscreteHandlingLinkedEntity) each).getTravelTime(movingEntity);
+					else if (routingRule == Route_Type.SHORTEST)
+						weight = ((DiscreteHandlingLinkedEntity) each).getLength();
+					else if (routingRule == Route_Type.LEASTCOST)
+						weight = ((DiscreteHandlingLinkedEntity) each).getTravelCost(movingEntity);
+					
+					weightThroughU += weight;
+					if (weightThroughU < destinationWeight && weightThroughU <= weightCap && 
+							weightThroughU < ((DiscreteHandlingLinkedEntity) each).getDijkstraComparatorList()
 							.getValueListFor(dijkstraComparator, 0).get(0)) {
 						vertexQueue.remove(each);
-						((DiscreteHandlingLinkedEntity) each)
+					    ((DiscreteHandlingLinkedEntity) each)
 								.getDijkstraComparatorList().remove(
 										dijkstraComparator);
 						((DiscreteHandlingLinkedEntity) each)
 								.getDijkstraComparatorList().add(
 										dijkstraComparator, u, 0,
 										weightThroughU);
-						if (each.equals(destination)) {
-							return setRoute(origin, destination, dijkstraComparator);
-						} else
-							vertexQueue.add((T) each);
+						
+						vertexQueue.add((T) each);
 					}
-				} else {
-					if (each.equals(destination)) {
-						double weightThroughU = u.getDijkstraComparatorList()
-								.getValueListFor(dijkstraComparator, 0).get(0);
-						if (weightThroughU < ((DiscreteHandlingLinkedEntity) each)
-								.getDijkstraComparatorList()
-								.getValueListFor(dijkstraComparator, 0).get(0)) {
+				} 
+
+				if (each.equals(destination) && !(each instanceof Transshipment)) {
+						if (weightThroughU < destinationWeight && weightThroughU < weightCap) {
 							vertexQueue.remove(each);
 							((DiscreteHandlingLinkedEntity) each)
 									.getDijkstraComparatorList().remove(
@@ -240,30 +248,33 @@ public class RouteManager extends DisplayEntity {
 									.getDijkstraComparatorList().add(
 											dijkstraComparator, u, 0,
 											weightThroughU);
-							return setRoute(origin, destination, dijkstraComparator);
-						}
 					}
+				} else if (each instanceof Transshipment && bulkMaterial != null){
+					Route routeThroughTransshipment = getRoute((T)each, destination, movingEntity, weightCap)
 				}
 			}
 		}
+		if (destinationWeight < Double.POSITIVE_INFINITY)
+			return setRoute(origin, destination, movingEntity, dijkstraComparator);
+		
 		// if method has reached here and not returned yet, it means that there
 		// isn't a path from origin to destination, to save this knowledge
 		// initiate a route with null routeSementsList and add to routesList! or add it to the unresolved list if moving entity is specified
-		String tempKey = origin.getName() + "-" + destination.getName();
-		if (movingEntity == null) {
-			Route tempRoute = new Route(origin, destination,
-					Double.POSITIVE_INFINITY, new ArrayList<LogisticsEntity>());
-			routesList.add(tempKey, tempRoute);
-			RouteManager.printRouteReport(origin, destination, null, null);
-		} else{
-			unResolvedRoutesList.add(movingEntity, tempKey);
-			RouteManager.printRouteReport(origin, destination, null, movingEntity);
-		}
+		String tempKey = getRouteName(origin, destination, movingEntity);
+		
+		unResolvedRoutesList.add(movingEntity, tempKey);
+		RouteManager.printRouteReport(origin, destination, null, movingEntity);
+		
 		return null;
+	}
+	
+	public static <T extends DiscreteHandlingLinkedEntity> String getRouteName(T origin,
+			T destination, MovingEntity movingEntity){
+		return origin.getName() + "-" + destination.getName() + "-" + movingEntity.getName();
 	}
 
 	private static <T extends DiscreteHandlingLinkedEntity> Route setRoute(T origin,
-			T destination, DijkstraComparator dijkstraComparator) {
+			T destination, MovingEntity movingEntity, DijkstraComparator dijkstraComparator) {
 		ArrayList<LogisticsEntity> retainedEntities = new ArrayList<>(1);
 
 		LinkedList<DiscreteHandlingLinkedEntity> reversePath = new LinkedList<>();
@@ -284,11 +295,10 @@ public class RouteManager extends DisplayEntity {
 					.getHandlingEntityTypeList());
 		}
 
-		String tempKey = origin.getName() + "-" + destination.getName();
+		String tempKey = getRouteName(origin, destination, movingEntity);
 		Route tempRoute = new Route(origin, destination, destination
 				.getDijkstraComparatorList()
-				.getValueListFor(dijkstraComparator, 0).get(0),
-				retainedEntities);
+				.getValueListFor(dijkstraComparator, 0).get(0));
 		tempRoute.setRoute(path);
 		routesList.add(tempKey, tempRoute);
 		RouteManager.printRouteReport(origin, destination, tempRoute, null);
@@ -315,7 +325,7 @@ public class RouteManager extends DisplayEntity {
 				managerReportFile.putStringTabs(origin.getName(), 1);
 				managerReportFile.putStringTabs(destination.getName(), 1);
 				managerReportFile.putStringTabs(HandyUtils.arraylistToString(route.getRouteSegmentsList()), 1);
-				managerReportFile.putDoubleWithDecimalsTabs(route.getDistance(),
+				managerReportFile.putDoubleWithDecimalsTabs(route.getDijkstraWeight(),
 					ReportAgent.getReportPrecision(), 1);
 				managerReportFile.putStringTabs("FoundRoute", 1);
 				if(movingEntity != null)

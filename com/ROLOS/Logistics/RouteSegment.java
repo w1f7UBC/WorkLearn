@@ -2,6 +2,7 @@ package com.ROLOS.Logistics;
 
 import java.util.ArrayList;
 
+import com.ROLOS.DMAgents.RouteManager.Transport_Mode;
 import com.jaamsim.input.InputAgent;
 import com.jaamsim.input.ValueInput;
 import com.jaamsim.input.ValueListInput;
@@ -12,6 +13,7 @@ import com.jaamsim.units.SpeedUnit;
 import com.sandwell.JavaSimulation.ColourInput;
 import com.sandwell.JavaSimulation.Entity;
 import com.sandwell.JavaSimulation.EntityListListInput;
+import com.sandwell.JavaSimulation.EnumInput;
 import com.sandwell.JavaSimulation.InputErrorException;
 import com.jaamsim.input.Keyword;
 import com.sandwell.JavaSimulation.Vec3dListInput;
@@ -29,7 +31,11 @@ public class RouteSegment extends DiscreteHandlingLinkedEntity implements HasScr
 
 	private static final ArrayList<RouteSegment> allInstances;
 
-   @Keyword(description = "A list of points in { x, y, z } coordinates defining the line segments that" +
+	@Keyword(description = "The transportation mode that this moving entity is allowed to travel on.", 
+			example = "Truck TransportMode { ROAD }")
+	private final EnumInput<Transport_Mode> transportMode;
+	
+    @Keyword(description = "A list of points in { x, y, z } coordinates defining the line segments that" +
            "make up the arrow.  When two coordinates are given it is assumed that z = 0." ,
             example = "Conveyor1  Points { { 6.7 2.2 m } { 4.9 2.2 m } { 4.9 3.4 m } }")
 	private final Vec3dListInput pointsInput;
@@ -75,6 +81,9 @@ public class RouteSegment extends DiscreteHandlingLinkedEntity implements HasScr
 	}
 	
 	{
+		transportMode = new EnumInput<>(Transport_Mode.class, "TransportMode", "Key Inputs", Transport_Mode.ROAD);
+		this.addInput(transportMode);
+		
 		ArrayList<Vec3d> defPoints =  new ArrayList<Vec3d>();
 		defPoints.add(new Vec3d(0.0d, 0.0d, 0.0d));
 		defPoints.add(new Vec3d(1.0d, 0.0d, 0.0d));
@@ -185,23 +194,35 @@ public class RouteSegment extends DiscreteHandlingLinkedEntity implements HasScr
 	// GETTERS AND SETTERS
 	// ////////////////////////////////////////////////////////////////////////////////////
 
-	public <T extends LogisticsEntity> double getSpeedLimit(T entity) {
-		LogisticsEntity ent;
+	public double getSpeedLimit(MovingEntity entity) {
+		MovingEntity ent;
 		if (entity.testFlag(Entity.FLAG_GENERATED)) {
-			ent = entity.getProtoTypeEntity();
+			ent = (MovingEntity) entity.getProtoTypeEntity();
 		} else {
 			ent = entity;
 		}
 		if (speedGroups.getValue() != null && this.getSpeedGroupIndex(ent)>=0 ) {
 			// else get and return respective speed
-			return speedLimitByEntityType.getValue().get(this.getSpeedGroupIndex(ent));
+			return Math.min(ent.getInternalSpeed(),
+					speedLimitByEntityType.getValue().get(this.getSpeedGroupIndex(ent)));
 		}
 			// return speed limit if speedByEntityType is not set
-			return speedLimit.getValue();
+			return Math.min(ent.getInternalSpeed(),speedLimit.getValue());
 	}
 	
+	@Override
 	public double getLength() {
 		return length.getValue();
+	}
+	
+	@Override
+	public double getTravelTime(MovingEntity movingEntity) {
+		return length.getValue()/this.getSpeedLimit(movingEntity);
+	}
+	
+	@Override
+	public double getTravelCost(MovingEntity movingEntity) {
+		return movingEntity.getOperatingCost() * getTravelTime(movingEntity);
 	}
 	
 	/**
@@ -349,8 +370,7 @@ public class RouteSegment extends DiscreteHandlingLinkedEntity implements HasScr
 								entityUnderProcess));
 					}
 				}
-				double speed = Math.min(entityUnderProcess.getInternalSpeed(),
-						this.getSpeedLimit(entityUnderProcess));
+				double speed = this.getSpeedLimit(entityUnderProcess);
 				this.startProcess("travel", speed);
 			} else 
 				i++;
@@ -388,6 +408,10 @@ public class RouteSegment extends DiscreteHandlingLinkedEntity implements HasScr
 	
 	public Vec3d getFirstPointInput(){
 		return new Vec3d(pointsInput.getValue().get(0));
+	}
+	
+	public Transport_Mode getTransportMode(){
+		return transportMode.getValue();
 	}
 	
 	public Vec3d getLastPointInput(){

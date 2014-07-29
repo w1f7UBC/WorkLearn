@@ -7,7 +7,6 @@ import com.ROLOS.DMAgents.FacilityFinancialManager;
 import com.ROLOS.DMAgents.FacilityGeneralManager;
 import com.ROLOS.DMAgents.FacilityOperationsManager;
 import com.ROLOS.DMAgents.FacilityTransportationManager;
-import com.ROLOS.DMAgents.RouteManager;
 import com.ROLOS.Economic.Contract;
 import com.ROLOS.Utils.HashMapList;
 import com.ROLOS.Utils.TwoLinkedLists;
@@ -39,11 +38,7 @@ public class Facility extends DiscreteHandlingLinkedEntity {
 			"usually it is better to pick an end point where entities always endup there. default is false", 
 			example = "Silverdale StartOfCycle { TRUE }")
 	private final BooleanInput cycleStart;
-	
-	@Keyword(description = "Whether to show demand contracts Sankey diagram.", 
-			example = "Silverdale ShowDemandSankeyDiagram { TRUE }")
-	private final BooleanInput demandSankey;
-	
+		
 	//TODO change to IRR when engineering economics calculations are implemented
 	@Keyword(description = "Profit margin for this facility. (Revenue-cost)/Revenue",
 	         example = "Temiscaming  ProfitMargin { 0.12 }")
@@ -82,8 +77,6 @@ public class Facility extends DiscreteHandlingLinkedEntity {
 		profitMargin = new ValueInput("ProfitMargin", "Economic", 0.0d);
 		this.addInput(profitMargin);
 		
-		demandSankey = new BooleanInput("ShowDemandSankeyDiagram", "Basic Graphics", false);
-		this.addInput(demandSankey);
 	}
 	
 	public Facility() {
@@ -432,7 +425,8 @@ public class Facility extends DiscreteHandlingLinkedEntity {
 	@Override
 	public void updateGraphics(double simTime) {
 		super.updateGraphics(simTime);
-		if (demandSankey.getValue()) {
+	// TODO configure for when route is active
+		/*	if (demandSankey.getValue()) {
 			double total = 0.0d;
 			for (ArrayList<Contract> eachMaterialList : this.getGeneralManager()
 					.getDemandContractsList().getValues()) {
@@ -454,7 +448,7 @@ public class Facility extends DiscreteHandlingLinkedEntity {
 					
 				}
 			}
-		}
+		}*/
 	}
 	
 }

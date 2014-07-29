@@ -6,6 +6,7 @@ import com.ROLOS.ROLOSEntity;
 import com.ROLOS.Utils.TwoLinkedLists;
 import com.jaamsim.input.ValueInput;
 import com.jaamsim.input.ValueListInput;
+import com.jaamsim.units.CostRateUnit;
 import com.jaamsim.units.CostUnit;
 import com.jaamsim.units.EnergyUnit;
 import com.jaamsim.units.MassFlowUnit;
@@ -92,6 +93,10 @@ public class LogisticsEntity extends ReportableEntity {
 	         example = "Temiscaming  FixedCost { 1000000 $ }")
 	private final ValueInput fixedCost;
 	
+	@Keyword(description = "the operating cost rate (time-based).", 
+			example = "WoodChipper OperatingCost { 2 $/h } ")
+	private final ValueInput operatingCost;
+	
 	@Keyword(description = "Lifespan of this logistics entity - used for calculating fixed cost contribution per planning horizon."
 			+ "Later to be used for depreciation calculation/replacement decisions",
 	         example = "Temiscaming  LifeSpan { 25 yr }")
@@ -118,7 +123,11 @@ public class LogisticsEntity extends ReportableEntity {
 		fixedCost = new ValueInput("FixedCost", "Economic", 0.0d);
 		fixedCost.setUnitType(CostUnit.class);
 		this.addInput(fixedCost);
-		
+
+		operatingCost = new ValueInput("OperatingCost", "Economic", null);
+		operatingCost.setUnitType(CostRateUnit.class);
+		this.addInput(operatingCost);
+
 		lifeSpan = new ValueInput("LifeSpan", "Economic", Double.POSITIVE_INFINITY);
 		lifeSpan.setUnitType(TimeUnit.class);
 		this.addInput(lifeSpan);
@@ -243,6 +252,10 @@ public class LogisticsEntity extends ReportableEntity {
 	 */
 	public double getFixedCost(){
 		return fixedCost.getValue();
+	}
+	
+	public double getOperatingCost(){
+		return operatingCost.getValue();
 	}
 	
 	/**

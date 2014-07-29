@@ -6,9 +6,6 @@ import com.ROLOS.DMAgents.SimulationManager;
 import com.ROLOS.Economic.Contract;
 import com.jaamsim.input.ValueInput;
 import com.jaamsim.input.ValueListInput;
-import com.jaamsim.units.CostPerEnergyUnit;
-import com.jaamsim.units.CostPerMassUnit;
-import com.jaamsim.units.CostPerVolumeUnit;
 import com.jaamsim.units.EnergyUnit;
 import com.jaamsim.units.MassFlowUnit;
 import com.jaamsim.units.MassUnit;
@@ -70,11 +67,7 @@ public class BulkMaterialProcessor extends BulkHandlingLinkedEntity {
 			+ "flow unit (Mass or volume flow unit) meaning throughputs are t/h or m3/h.", 
 			example = "Temiscaming Throughput { WoodChipeProductionSchedule }")
 	private final EntityInput<TimeSeries> mainProductThroughput;
-	
-	@Keyword(description = "the operating cost per tonne of material output.", 
-			example = "WoodChipper OperatingCost { 2 $/t } ")
-	private final ValueInput operatingCost;
-	
+		
 	private ProcessingRoute processingRoute;
 	
 	static {
@@ -92,9 +85,6 @@ public class BulkMaterialProcessor extends BulkHandlingLinkedEntity {
 		outfeedRateByEntityType = new ValueListInput("OutfeedRate", "Key Inputs", null);
 		this.addInput(outfeedRateByEntityType);
 		
-		operatingCost = new ValueInput("OperatingCost", "Economic", null);
-		this.addInput(operatingCost);
-
 		primaryProduct = new EntityInput<>(BulkMaterial.class, "PrimaryProduct", "Key Inputs", null);
 		this.addInput(primaryProduct);
 		
@@ -272,10 +262,11 @@ public class BulkMaterialProcessor extends BulkHandlingLinkedEntity {
 		return processingRoute;
 	}
 	
-	@Override
-	public <T extends LogisticsEntity> double getVariableCost(T... args) {
-		
-		return operatingCost.getValue();	
+	/**
+	 * @return production cost rate per unit of outfeed (operating cost/outfeedrate)
+	 */
+	public <T extends LogisticsEntity> double getVariableProductionCost(BulkMaterial bulkMaterial) {
+		return this.getOperatingCost()/this.getOutfeedRate(bulkMaterial);	
 	}
 
 	public BulkMaterial getPrimaryProduct(){
@@ -352,14 +343,11 @@ public class BulkMaterialProcessor extends BulkHandlingLinkedEntity {
 		if (in == outfeedEntityTypeList){
 			if(outfeedEntityTypeList.getValue().get(0).getEntityUnit().equals(VolumeUnit.class)){
 				outfeedRateByEntityType.setUnitType(VolumeFlowUnit.class);
-				operatingCost.setUnitType(CostPerVolumeUnit.class);
 			}
 			else if(outfeedEntityTypeList.getValue().get(0).getEntityUnit().equals(MassUnit.class)){
 				outfeedRateByEntityType.setUnitType(MassFlowUnit.class);
-				operatingCost.setUnitType(CostPerMassUnit.class);
 			} else if(outfeedEntityTypeList.getValue().get(0).getEntityUnit().equals(EnergyUnit.class)){
 				outfeedRateByEntityType.setUnitType(PowerUnit.class);
-				operatingCost.setUnitType(CostPerEnergyUnit.class);
 			}
 			else
 				outfeedRateByEntityType.setUnitType(RateUnit.class);

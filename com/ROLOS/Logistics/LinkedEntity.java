@@ -8,7 +8,6 @@ import com.ROLOS.Utils.TwoLinkedLists;
 import com.jaamsim.input.ValueInput;
 import com.jaamsim.input.ValueListInput;
 import com.jaamsim.units.Unit;
-import com.sandwell.JavaSimulation.Entity;
 import com.sandwell.JavaSimulation.EntityListInput;
 import com.sandwell.JavaSimulation.EntityListListInput;
 import com.sandwell.JavaSimulation.ErrorException;
@@ -165,12 +164,9 @@ public class LinkedEntity extends LogisticsEntity {
 		if(in == nextList){
 			// populate previousLinkedEntityAssertion
 			for (LinkedEntity each : nextList.getValue()) {
-				nextLinkedEntityList.add(each);
+				this.addToNextLinkedEntityList(each);
 				each.addToPreviousLinkedEntityList(this);
 			}
-			try{
-				
-			}catch(ClassCastException e){}	
 		}
 		
 		if(in == outfeedLinkedEntityList){
@@ -233,8 +229,14 @@ public class LinkedEntity extends LogisticsEntity {
 	//////////////////////////////////////////////////////////////////////////////////////
 	// ADDER METHODS
 	//////////////////////////////////////////////////////////////////////////////////////
+	public <T extends LinkedEntity> void addToNextLinkedEntityList(T ent){
+		if (!nextLinkedEntityList.contains(ent))
+			nextLinkedEntityList.add(ent);
+	}
+	
 	public <T extends LinkedEntity> void addToPreviousLinkedEntityList(T ent){
-		previousLinkedEntityList.add(ent);
+		if (!previousLinkedEntityList.contains(ent))
+			previousLinkedEntityList.add(ent);
 	}
 	
 	public <T extends LinkedEntity> void addToInfeedEntityList(T ent){

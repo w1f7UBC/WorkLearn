@@ -41,6 +41,13 @@ public class BulkMaterial extends LogisticsEntity {
 			example = "Stockpile2 Price { 300 $/t }")
 	private final SampleInput price;
 	
+	//TODO This cap is a test and used for CFS project. 
+	// Should be refactored to get the price from the market module
+	@Keyword(description = "Maximum transportation cost allowed for this bulk material. It's used "
+			+ "in figuring out the transportation.", 
+			example = "Stockpile2 TransportationCostCap { 300 $/t }")
+	private final SampleInput transportationCostCap;
+		
 	@Keyword(description = "Fixed moisture content for the cargo", 
 			example = "Stockpile2 MoistureContent { 0.55 }")
 	private final SampleInput moistureContent;
@@ -81,6 +88,9 @@ public class BulkMaterial extends LogisticsEntity {
 		price = new SampleInput("Price", "Economic", null);
 		this.addInput(price);
 				
+		transportationCostCap = new SampleInput("TransportationCostCap", "Economic", null);
+		this.addInput(transportationCostCap);
+		
 		moistureContent = new SampleInput("MoistureContent", "Key Inputs", null);
 		this.addInput(moistureContent);
 		
@@ -156,6 +166,13 @@ public class BulkMaterial extends LogisticsEntity {
 	}
 	
 	/**
+	 * @return maximum allowable transportation cost or infinity if transportationCostCap not set
+	 */
+	public double getTransportationCostCap(){
+		return transportationCostCap.getValue() != null ? transportationCostCap.getValue().getNextSample(this.getSimTime()) : Double.POSITIVE_INFINITY;
+	}
+	
+	/**
 	 * TODO this loosely returns density. it should be refactored to include mass and volume change in the cargo when moisture content changes.
 	 * @return 1)blend density if this is currently handling material, 2)blend density 
 	 */
@@ -192,12 +209,19 @@ public class BulkMaterial extends LogisticsEntity {
 	 * This method is called after the logistics entity matter state is figured out
 	 */
 	public void setInputUnits(){
-		if(this.getEntityUnit().equals(MassUnit.class))
+		
+		if(this.getEntityUnit().equals(MassUnit.class)){
 			price.setUnitType(CostPerMassUnit.class);
-		else if (this.getEntityUnit().equals(VolumeUnit.class))
+			transportationCostCap.setUnitType(CostPerMassUnit.class);
+		}
+		else if (this.getEntityUnit().equals(VolumeUnit.class)){
 			price.setUnitType(CostPerVolumeUnit.class);
-		else 
+			transportationCostCap.setUnitType(CostPerVolumeUnit.class);
+		}
+		else {
 			price.setUnitType(CostPerEnergyUnit.class);
+			transportationCostCap.setUnitType(CostPerEnergyUnit.class);
+		}
 	}
 	
 // linear blending formula

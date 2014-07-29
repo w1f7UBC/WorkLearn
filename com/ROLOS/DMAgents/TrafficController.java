@@ -2,6 +2,7 @@ package com.ROLOS.DMAgents;
 
 import java.util.ArrayList;
 
+import com.ROLOS.DMAgents.RouteManager.Route_Type;
 import com.ROLOS.Logistics.DiscreteHandlingLinkedEntity;
 import com.ROLOS.Logistics.MovingEntity;
 import com.ROLOS.Logistics.Route;
@@ -23,7 +24,7 @@ public class TrafficController extends DisplayEntity {
 	public <T extends MovingEntity> void planNextMove(T movingEntity){
 		DiscreteHandlingLinkedEntity origin = movingEntity.getHeadRoute();
 		DiscreteHandlingLinkedEntity destination = movingEntity.getCurrentDestination();
-		Route tempRoute = RouteManager.getRoute(origin, destination,movingEntity);
+		Route tempRoute = RouteManager.getRoute(origin, destination, movingEntity, Route_Type.FASTEST, Double.POSITIVE_INFINITY);
 		if (tempRoute == null){
 			throw new ErrorException("%s tried to travel from %s to %s but there is not any accessible route between the two destinations!",movingEntity.getName(),
 					origin.getName(),destination.getName());

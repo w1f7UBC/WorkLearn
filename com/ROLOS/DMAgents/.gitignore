@@ -12,3 +12,6 @@
 /FacilityScheduleManager.class
 /MarketManager.class
 /SimulationManager.class
+/RouteManager$Route_Mode.class
+/RouteManager$Transport_Mode.class
+/RouteManager$Route_Type.class
