@@ -135,10 +135,14 @@ public class NewtEventProcessor extends NEWTEventFiFo implements com.jogamp.newt
 				    inventoryQuery = InventoryQuery.getAll().get(0);
 				    ShapefileLoader loader = new ShapefileLoader();
 					try {
+						if (canvas.getModel().getLayers().get(10)!=null){
+							canvas.getModel().getLayers().remove(10);
+						}
 						String path = inventoryQuery.updateStatement(longtitude, latitude);
 						Layer queryResult = loader.createLayerFromSource(path);
 						canvas = (WorldWindowNewtCanvas) awtComponent;
-			        	canvas.getModel().getLayers().add(queryResult);
+						System.out.println(canvas.getModel().getLayers());
+			        	canvas.getModel().getLayers().add(10, queryResult);
 					} catch (IOException e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
