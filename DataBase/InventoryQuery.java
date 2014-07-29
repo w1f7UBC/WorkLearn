@@ -28,8 +28,7 @@ public  class InventoryQuery extends Query {
 	private ArrayList<String> targets;
 	private ArrayList<String> tablenames;
 	private static  ArrayList<InventoryQuery> allInstances;
-	@Keyword(description = "target databaseobject of the query")
-	private  EntityInput<DataBaseObject> targetDB;
+	
 	@Keyword(description = "display targets of the query")
 	private  StringListInput target;
 	@Keyword(description = "tables to select from")
@@ -45,8 +44,7 @@ public  class InventoryQuery extends Query {
 	{
 	//	databaseEntity = new EntityInput<DataBaseObject>( DataBaseObject.class, "DataBaseEntity", "Key Inputs", null);
 	//	this.addInput(databaseEntity);
-		targetDB = new EntityInput<>(DataBaseObject.class, "TargetDatabase","Key Inputs", null);
-		this.addInput(targetDB);
+		
 		target = new StringListInput("target","Query property", new ArrayList<String>(0));
 		this.addInput(target);
 		tablename = new StringListInput("tablename","Query property",new ArrayList<String>(0));
@@ -77,9 +75,11 @@ public  class InventoryQuery extends Query {
 		}
 		destination+="\\queryResults"+latitude+".shp";
 		Process process = new ProcessBuilder(exe, "-f", destination, "-h", "25.141.219.39", "-p", "5432", "-u", "sde", "-P", "Fomsummer2014", "fom", "\"SELECT geom FROM fmu_1km WHERE gis_key=(SELECT gis_key from fmu_1km where st_contains(fmu_1km.geom, ST_GeomFromText('POINT("+longtitude+" "+latitude+")', 4269))=true);\"").start();
-		String s =  "SELECT gis_key"
-				+ " FROM fmu_1km"
-				+ " WHERE st_contains(fmu_1km.geom, ST_GeomFromText('POINT(-117.67 56.3798)', 4269))=true;";
+		String s = "SELECT * FROM ab_03"
+				+ " WHERE giskey IN("
+				+ "SELECT CAST(gis_key AS CHAR(30))"
+				+ " FROM fmu_1km "
+				+ " WHERE st_contains(fmu_1km.geom, ST_GeomFromText('POINT("+longtitude+" "+latitude+")', 4269))=true)";
 		InputStream is = process.getInputStream();
 		InputStreamReader isr = new InputStreamReader(is);
 		BufferedReader br = new BufferedReader(isr);
@@ -88,8 +88,6 @@ public  class InventoryQuery extends Query {
 			System.out.println(line);
 		}
 		this.setStatement(s);
-		File temp=new File(destination);
-		temp.deleteOnExit();
 		return destination;
 	}
 
@@ -112,14 +110,13 @@ public  class InventoryQuery extends Query {
 		while ((line = br.readLine()) != null) {
 			System.out.println(line);
 		}
-		File temp=new File(destination);
-		temp.deleteOnExit();
 		return destination;
 	}
-
+/*
 	@Override
 	public  DefaultTableModel getTableContent(String statement) throws SQLException{
-    	rs = getResultset();
+		//this.validate();
+    	rs = this.getResultset();
 		ResultSetMetaData metaData = rs.getMetaData();
 	    // names of columns
 	    Vector<String> columnNames = new Vector<String>();
@@ -151,5 +148,6 @@ public  class InventoryQuery extends Query {
 	    columnNames.add(addCol2);
 	    return new DefaultTableModel(data, columnNames);
 	}
+	*/
 }
 

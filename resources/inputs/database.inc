@@ -9,3 +9,4 @@ InventoryQuery JavaClass { DataBase.InventoryQuery              } Palette { 'dat
 Define DataBaseObject { InventoryDataBase }
 
 Define InventoryQuery { InventoryQueryObject }
+InventoryQueryObject TargetDatabase { InventoryDataBase }

@@ -131,7 +131,7 @@ public class NewtEventProcessor extends NEWTEventFiFo implements com.jogamp.newt
 				String longtitude = method(pos.longitude.toDecimalDegreesString(10));
 		
 				Container.getInstance().setPosition(pos);
-				//try {
+				try {
 				    inventoryQuery = InventoryQuery.getAll().get(0);
 				    ShapefileLoader loader = new ShapefileLoader();
 					try {
@@ -143,10 +143,10 @@ public class NewtEventProcessor extends NEWTEventFiFo implements com.jogamp.newt
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
 					}
-					//inventoryQuery.excuteQuery(inventoryQuery.getStatement());
-				//} catch (SQLException e1) {
-					//e1.printStackTrace();
-				//}
+					inventoryQuery.excuteQuery(inventoryQuery.getStatement());
+				} catch (SQLException e1) {
+					e1.printStackTrace();
+				}
 				//PointPlacemark point = new PointPlacemark(canvas.getCurrentPosition());
 				//layer = new RenderableLayer();
 				//layer.addRenderable(point);
