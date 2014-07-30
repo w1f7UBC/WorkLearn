@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import com.ROLOS.DMAgents.SimulationManager;
 import com.ROLOS.DMAgents.RouteManager.Route_Type;
 import com.ROLOS.DMAgents.RouteManager.Transport_Mode;
-import com.sandwell.JavaSimulation.InputErrorException;
 
 /**
  * This class holds route information from the origin to destination. 
@@ -111,6 +110,49 @@ public class Route {
 		// print transportation cost report
 		SimulationManager.printTransportationCostReport(movingEntitiesList, this, bulkMaterial, unitCost);
 		return unitCost;
+					
+	}
+	
+	/**
+	 * @return estimated travel time from origin to destination of the route. 
+	 */
+	public double estimateTravelTimeonRoute(){
+		double tempTime = 0.0d;
+		if(routeType == Route_Type.FASTEST)
+			tempTime = dijkstraWeight;
+		else{
+			int index = 0;
+			for (DiscreteHandlingLinkedEntity each: routeSegmentsList){
+				if(each instanceof Transshipment){
+					tempTime += each.getTravelTime(movingEntitiesList.get(index));
+					index++;
+				}
+				else if(each instanceof Facility)
+					continue;
+				tempTime += each.getTravelTime(movingEntitiesList.get(index));
+			}
+		}
+		
+		return tempTime;
+					
+	}
+	
+	/**
+	 * @return Routes' length. 
+	 */
+	public double getLength(){
+		double tempLength = 0.0d;
+		if(routeType == Route_Type.SHORTEST)
+			tempLength = dijkstraWeight;
+		else{
+			for (DiscreteHandlingLinkedEntity each: routeSegmentsList){
+			if(each instanceof Facility)
+				continue;
+			tempLength += each.getLength();
+			}
+		}
+		
+		return tempLength;
 					
 	}
 }

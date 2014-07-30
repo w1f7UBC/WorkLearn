@@ -1,17 +1,11 @@
 package com.ROLOS.Logistics;
 
-import java.util.ArrayList;
-
 import com.ROLOS.DMAgents.RouteManager.Transport_Mode;
-import com.ROLOS.Utils.MathUtilities;
 import com.jaamsim.input.Input;
 import com.jaamsim.input.Keyword;
-import com.jaamsim.input.ValueInput;
 import com.jaamsim.input.ValueListInput;
 import com.jaamsim.units.DistanceUnit;
-import com.sandwell.JavaSimulation.DoubleVector;
 import com.sandwell.JavaSimulation.EntityListInput;
-import com.sandwell.JavaSimulation.EntityListListInput;
 import com.sandwell.JavaSimulation.EnumInput;
 import com.sandwell.JavaSimulation.InputErrorException;
 import com.sandwell.JavaSimulation.StringListInput;

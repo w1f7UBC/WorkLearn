@@ -204,7 +204,7 @@ public class FacilityTransportationManager extends FacilityManager {
 	 * 
 	 * @return least cost per unit transporter that has remaining capacity for transporting bulkMaterial
 	 */
-	public Route getLeastCostTranspotationRoute(BulkMaterial bulkMaterial,Facility origin, Facility destination){
+	public <T extends DiscreteHandlingLinkedEntity> Route getLeastCostTranspotationRoute(BulkMaterial bulkMaterial, T origin, T destination, double transportaionCostCap){
 		double cost = Double.POSITIVE_INFINITY;
 		Route returnEntity = null;
 		Route tempRoute;
@@ -214,10 +214,10 @@ public class FacilityTransportationManager extends FacilityManager {
 		for(MovingEntity each: transportersList.getValue()){
 			if(each.getAcceptingBulkMaterialList().contains(bulkMaterial)){
 				foundMovingEntity = true;
-				tempRoute = RouteManager.getRoute(origin, destination, each, bulkMaterial, Route_Type.LEASTCOST, bulkMaterial.getTransportationCostCap());
+				tempRoute = RouteManager.getRoute(origin, destination, each, bulkMaterial, Route_Type.LEASTCOST, transportaionCostCap);
 				if(Tester.greaterCheckTolerance(transportationCapacityList.getValueFor(each, 0) - transportationCapacityList.getValueFor(each, 1),0.0d) &&
 					tempRoute != null){
-					tempCost = tempRoute.estimateTransportationCostonRoute(each, bulkMaterial);
+					tempCost = tempRoute.estimateTransportationCostonRoute(bulkMaterial);
 					if(tempCost < cost ){
 						cost = tempCost;
 						returnEntity = tempRoute;	
@@ -233,6 +233,71 @@ public class FacilityTransportationManager extends FacilityManager {
 		return returnEntity;
 	}
 	
+	/**
+	 * 
+	 * @return least cost per unit transporter that has remaining capacity for transporting bulkMaterial
+	 */
+	public <T extends DiscreteHandlingLinkedEntity> Route getFastestTranspotationRoute(BulkMaterial bulkMaterial,T origin, T destination, double travelTimeCap){
+		double leastTime = Double.POSITIVE_INFINITY;
+		Route returnEntity = null;
+		Route tempRoute;
+		double tempTime;
+		boolean foundMovingEntity = false;
+		
+		for(MovingEntity each: transportersList.getValue()){
+			if(each.getAcceptingBulkMaterialList().contains(bulkMaterial)){
+				foundMovingEntity = true;
+				tempRoute = RouteManager.getRoute(origin, destination, each, bulkMaterial, Route_Type.FASTEST, travelTimeCap);
+				if(Tester.greaterCheckTolerance(transportationCapacityList.getValueFor(each, 0) - transportationCapacityList.getValueFor(each, 1),0.0d) &&
+					tempRoute != null){
+					tempTime = tempRoute.estimateTravelTimeonRoute();
+					if(tempTime < leastTime ){
+						leastTime = tempTime;
+						returnEntity = tempRoute;	
+					}
+				}
+			}
+		}
+		
+		if(!foundMovingEntity)
+			throw new InputErrorException("Please check transportation structure for %s. None of the moving entities that "
+					+ "this facility uses for transportation, carries %s!", this.getFacility(),  bulkMaterial.getName(), this.getName());
+		
+		return returnEntity;
+	}
+	
+	/**
+	 * 
+	 * @return least cost per unit transporter that has remaining capacity for transporting bulkMaterial
+	 */
+	public <T extends DiscreteHandlingLinkedEntity> Route getShortestTranspotationRoute(BulkMaterial bulkMaterial, T origin, T destination, double distanceCap){
+		double length = Double.POSITIVE_INFINITY;
+		Route returnEntity = null;
+		Route tempRoute;
+		double tempLength;
+		boolean foundMovingEntity = false;
+		
+		for(MovingEntity each: transportersList.getValue()){
+			if(each.getAcceptingBulkMaterialList().contains(bulkMaterial)){
+				foundMovingEntity = true;
+				tempRoute = RouteManager.getRoute(origin, destination, each, bulkMaterial, Route_Type.SHORTEST, distanceCap);
+				if(Tester.greaterCheckTolerance(transportationCapacityList.getValueFor(each, 0) - transportationCapacityList.getValueFor(each, 1),0.0d) &&
+					tempRoute != null){
+					tempLength = tempRoute.getLength();
+					if(tempLength < length ){
+						length = tempLength;
+						returnEntity = tempRoute;	
+					}
+				}
+			}
+		}
+		
+		if(!foundMovingEntity)
+			throw new InputErrorException("Please check transportation structure for %s. None of the moving entities that "
+					+ "this facility uses for transportation, carries %s!", this.getFacility(),  bulkMaterial.getName(), this.getName());
+		
+		return returnEntity;
+	}
 	public void resetTransportationPlan(){
 		if(transportersList.getValue() != null){
 			for(int i = 0; i<transportersList.getValue().size(); i++){

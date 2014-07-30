@@ -11,6 +11,7 @@ import com.ROLOS.Logistics.DiscreteHandlingLinkedEntity;
 import com.ROLOS.Logistics.DiscreteHandlingLinkedEntity.DijkstraComparator;
 import com.ROLOS.Logistics.EntranceBlock;
 import com.ROLOS.Logistics.ExitBlock;
+import com.ROLOS.Logistics.Facility;
 import com.ROLOS.Logistics.LinkedEntity;
 import com.ROLOS.Logistics.LoadingBay;
 import com.ROLOS.Logistics.LogisticsEntity;
@@ -188,6 +189,9 @@ public class RouteManager extends DisplayEntity {
 	public static <T extends DiscreteHandlingLinkedEntity> Route computeDijkstraPath(
 			T origin, T destination, MovingEntity movingEntity, BulkMaterial bulkMaterial, Route_Type routingRule, double weightCap) {
 		double destinationWeight = Double.POSITIVE_INFINITY;
+		double weightThroughTransshipment = Double.POSITIVE_INFINITY;
+		Route routeThroughTransshipment = null;
+		
 		DijkstraComparator dijkstraComparator = new DijkstraComparator();
 		origin.getDijkstraComparatorList().add(dijkstraComparator, null, 0,
 				0.0d);
@@ -196,6 +200,7 @@ public class RouteManager extends DisplayEntity {
 
 		while (!vertexQueue.isEmpty()) {
 			T u = vertexQueue.poll();
+			double weightThroughU;
 			// Visit each edge exiting u
 			for (LinkedEntity each : u.getNextLinkedEntityList()) {
 				// create a new entry for discrete entity's dijkstra list and
@@ -208,7 +213,7 @@ public class RouteManager extends DisplayEntity {
 									dijkstraComparator, null, 0,
 									Double.POSITIVE_INFINITY);
 				}
-				double weightThroughU = u.getDijkstraComparatorList()
+				weightThroughU = u.getDijkstraComparatorList()
 						.getValueListFor(dijkstraComparator, 0).get(0);
 				double weight = 0;
 				if ((each instanceof RouteSegment && ((RouteSegment) each).getTransportMode() == movingEntity.getTransportMode()) || 
@@ -242,6 +247,7 @@ public class RouteManager extends DisplayEntity {
 
 				if (each.equals(destination)) {
 						if (weightThroughU < destinationWeight && weightThroughU < weightCap) {
+							destinationWeight = weightThroughU;
 							vertexQueue.remove(each);
 							((DiscreteHandlingLinkedEntity) each)
 									.getDijkstraComparatorList().remove(
@@ -251,8 +257,50 @@ public class RouteManager extends DisplayEntity {
 											dijkstraComparator, u, 0,
 											weightThroughU);
 					}
-				} else if (each instanceof Transshipment && bulkMaterial != null){
-					Route routeThroughTransshipment = getRoute((T)each, destination, movingEntity, weightCap)
+				} 
+				// if reached a transshipment, see if going through transshipment would be better and hold information until the end to compare to a unimodal route.
+				else if (each instanceof Transshipment){
+					//assign weight based on routing rule
+					if(routingRule == Route_Type.FASTEST)
+						weight =  ((DiscreteHandlingLinkedEntity) each).getTravelTime(movingEntity);
+					else if (routingRule == Route_Type.SHORTEST)
+						weight = ((DiscreteHandlingLinkedEntity) each).getLength();
+					// leastcost should be passed on as a per unit of material transportationcost in transshipment
+					else if (routingRule == Route_Type.LEASTCOST)
+						weight = ((DiscreteHandlingLinkedEntity) each).getTravelCost(movingEntity);
+					
+					weightThroughU += weight;
+					if (weightThroughU < destinationWeight && weightThroughU < weightCap && 
+							weightThroughU < ((DiscreteHandlingLinkedEntity) each).getDijkstraComparatorList()
+							.getValueListFor(dijkstraComparator, 0).get(0)){
+						vertexQueue.remove(each);
+					    ((DiscreteHandlingLinkedEntity) each)
+								.getDijkstraComparatorList().remove(
+										dijkstraComparator);
+						((DiscreteHandlingLinkedEntity) each)
+								.getDijkstraComparatorList().add(
+										dijkstraComparator, u, 0,
+										weightThroughU);
+						
+						Route tempRoute = null;
+						//explore routes from transshipment to destination based on routing rule.
+						if(routingRule == Route_Type.FASTEST)
+							tempRoute = ((Facility)each).getTransportationManager().getFastestTranspotationRoute(bulkMaterial, (T)each, destination, weightCap-weightThroughU);
+						else if (routingRule == Route_Type.SHORTEST)
+							tempRoute = ((Facility)each).getTransportationManager().getShortestTranspotationRoute(bulkMaterial, (T)each, destination, weightCap-weightThroughU);
+						// leastcost should be passed on as a per unit of material transportationcost in transshipment
+						else if (routingRule == Route_Type.LEASTCOST)
+							tempRoute = ((Facility)each).getTransportationManager().getLeastCostTranspotationRoute(bulkMaterial, (T)each, destination, weightCap-weightThroughU);
+						
+						// if route through transshipment was found and result is betther than so far, save information for later evaluation of unimodal and intermodal
+						if(tempRoute != null ){
+							double tempWeight = tempRoute.getDijkstraWeight() + weightThroughU;
+							if(tempWeight < weightThroughTransshipment){
+								weightThroughTransshipment = tempWeight;
+								routeThroughTransshipment = tempRoute;
+							}
+						}
+					}
 				}
 			}
 		}
@@ -277,7 +325,6 @@ public class RouteManager extends DisplayEntity {
 
 	private static <T extends DiscreteHandlingLinkedEntity> Route setRoute(T origin,
 			T destination, MovingEntity movingEntity, DijkstraComparator dijkstraComparator, Route_Type routingRule) {
-		ArrayList<LogisticsEntity> retainedEntities = new ArrayList<>(1);
 
 		LinkedList<DiscreteHandlingLinkedEntity> reversePath = new LinkedList<>();
 		ArrayList<DiscreteHandlingLinkedEntity> path = new ArrayList<>();
@@ -289,12 +336,9 @@ public class RouteManager extends DisplayEntity {
 			reversePath.add(vertex);
 
 		path.add(reversePath.pollLast());
-		retainedEntities.addAll(path.get(0).getHandlingEntityTypeList());
 
 		while (!reversePath.isEmpty()) {
 			path.add(reversePath.pollLast());
-			retainedEntities.retainAll(path.get(path.size() - 1)
-					.getHandlingEntityTypeList());
 		}
 
 		String tempKey = getRouteName(origin, destination, movingEntity);
