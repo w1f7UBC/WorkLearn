@@ -62,6 +62,7 @@ public class LayerManager {
 		String fileDestination=destination+"\\"+fileName+".shp";
 		Process process;
 		try {
+			//Check outputs for the inputs going into the proccess builder by uncommenting these
 			//System.out.println(statement);
 			//System.out.println(exe+"\n" + fileDestination+"\n"+ip+"\n"+port+"\n"+user+"\n"+password+"\n"+db);
 			process = new ProcessBuilder(exe, "-f", fileDestination, "-h", ip, "-p", port, "-u", user, "-P", password, db, statement).start();
@@ -70,6 +71,7 @@ public class LayerManager {
 			BufferedReader br = new BufferedReader(isr);
 			String line;
 			while ((line = br.readLine()) != null) {
+				//Check outputs of shape generation by uncommenting this if it all it says is "Initializing..." something is wrong
 				//System.out.println(line);
 			}
 		} catch (IOException e) {

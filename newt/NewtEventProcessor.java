@@ -129,7 +129,7 @@ public class NewtEventProcessor extends NEWTEventFiFo implements com.jogamp.newt
 	        //if cursor mode is set to 1 and WorldWind actually returns a position
 			if (position!=null && cursorMode==1){
 			    String statement = inventoryQuery.updateStatement(position);
-			    String filePath = manager.sql2shp(Integer.toString(position.hashCode()), statement);
+			    String filePath = manager.sql2shp(Integer.toString(Math.abs(position.hashCode())), statement);
 			    manager.addShape(canvas, filePath, 20);
 				try {
 					inventoryQuery.excuteQuery(inventoryQuery.getStatement());
