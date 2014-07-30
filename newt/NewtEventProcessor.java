@@ -220,7 +220,7 @@ public class NewtEventProcessor extends NEWTEventFiFo implements com.jogamp.newt
 			manager = inventoryQuery.getCredentials();
 			String statement = inventoryQuery.queryAreaStatement();
 		    String filePath = manager.sql2shp("queryArea", statement);
-		    manager.addShape(canvas, filePath, 19);    
+		    manager.addShape(canvas, filePath, 19);  
 		}
 		if(cursorMode==1 && mode==0){
 			cursorMode=mode;

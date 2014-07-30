@@ -83,8 +83,9 @@ public class LayerManager {
 	
 	//loads a shapefile onto the given canvas, note: use layer=-1 if you want to toss a layer on the canvas thats rather permament, otherwise specify a layer thats >10, layers already in use would be removed if the same layer is chosen
 	public int addShape(WorldWindowNewtCanvas canvas, String filePath, int layer){
-		ShapefileLoader loader = new ShapefileLoader();
+		DefinedShapeLoader loader = new DefinedShapeLoader();
 		Layer toAdd = loader.createLayerFromSource(filePath);
+		toAdd.setPickEnabled(false);
 		LayerList layerList = canvas.getModel().getLayers();
 		if(layer!=-1){
 			if (layerList.get(layer)!=null){

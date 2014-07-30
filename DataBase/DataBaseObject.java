@@ -1,31 +1,11 @@
 package DataBase;
 
-import gov.nasa.worldwind.geom.Angle;
-import gov.nasa.worldwind.geom.LatLon;
-import gov.nasa.worldwind.geom.Position;
-
-import java.awt.EventQueue;
 import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Properties;
-import java.util.Vector;
-
-import javax.swing.JOptionPane;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.table.DefaultTableModel;
-
 import com.jaamsim.input.Keyword;
 import com.sandwell.JavaSimulation.Entity;
-import com.sandwell.JavaSimulation.EntityInput;
 import com.sandwell.JavaSimulation.StringInput;
-import com.sandwell.JavaSimulation3D.Region;
 
 public class DataBaseObject extends Entity {
 	
@@ -52,7 +32,6 @@ public class DataBaseObject extends Entity {
 	@Override 
 	public void validate(){
 		try {
-			
 			connectionIndex = Database.Connect(this);
 			established = true;
 		} catch (SQLException e) {
