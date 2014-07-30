@@ -1,6 +1,7 @@
 package com.ROLOS.Logistics;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 
 import com.ROLOS.DMAgents.SimulationManager;
 import com.ROLOS.DMAgents.RouteManager.Route_Type;
@@ -13,7 +14,7 @@ public class Route {
 		
 	private DiscreteHandlingLinkedEntity origin;
 	private DiscreteHandlingLinkedEntity destination;
-	private ArrayList<DiscreteHandlingLinkedEntity> routeSegmentsList;
+	private LinkedList<DiscreteHandlingLinkedEntity> routeSegmentsList;
 	// Transportation modes e.g. ROAD, RAIL (for multimodal)
 	private ArrayList<Transport_Mode> transportModeList;
 	// the list of moving entities this route is configured for. the first item is the one that 
@@ -26,14 +27,14 @@ public class Route {
 	public Route(DiscreteHandlingLinkedEntity origin, DiscreteHandlingLinkedEntity destination, double dijkstraWeight, MovingEntity movingEntity, Route_Type routingRule) {
 		this.origin = origin;
 		this.destination = destination;
-		routeSegmentsList = new ArrayList<>();
+		routeSegmentsList = new LinkedList<>();
 		this.dijkstraWeight = dijkstraWeight;
 		movingEntitiesList = new ArrayList<>(1);
-		movingEntitiesList.add(movingEntity);
-		
 		transportModeList = new ArrayList<>(1);
-		transportModeList.add(movingEntity.getTransportMode());
-				
+		if(movingEntity != null) {
+			movingEntitiesList.add(movingEntity);
+			transportModeList.add(movingEntity.getTransportMode());
+		}		
 	}			
 	
 	/**
@@ -47,10 +48,14 @@ public class Route {
 	 * @return will return the sequence of route segments from origin to destination or null if a route from
 	 * origin to destination doesn't exist. 
 	 */
-	public ArrayList<DiscreteHandlingLinkedEntity> getRouteSegmentsList(){
-		ArrayList<DiscreteHandlingLinkedEntity> tempRoute = new ArrayList<>(routeSegmentsList);
+	public LinkedList<DiscreteHandlingLinkedEntity> getRouteSegmentsList(){
+		LinkedList<DiscreteHandlingLinkedEntity> tempRoute = new LinkedList<>(routeSegmentsList);
 		
 		return tempRoute;
+	}
+	
+	public ArrayList<MovingEntity> getMovingEntitiesList(){
+		return movingEntitiesList;
 	}
 	
 	/**
@@ -60,7 +65,7 @@ public class Route {
 	public void setRoute(ArrayList<? extends DiscreteHandlingLinkedEntity> route){
 		this.routeSegmentsList.clear();
 		for(DiscreteHandlingLinkedEntity each: route){
-			this.routeSegmentsList.add(each);
+			this.routeSegmentsList.addLast(each);
 		}
 		transportModeList.add(movingEntitiesList.get(0).getTransportMode());
 	}
@@ -71,6 +76,10 @@ public class Route {
 	 */
 	public double getDijkstraWeight(){
 		return dijkstraWeight;
+	}
+	
+	public void setDijkstraWeight(double dijkstraWeight){
+		this.dijkstraWeight = dijkstraWeight;
 	}
 
 	public DiscreteHandlingLinkedEntity getOrigin() {
@@ -85,6 +94,9 @@ public class Route {
 		this.routeType = routeType;
 	}
 	
+	public Route_Type getRouteType(){
+		return routeType;
+	}
 	
 	/**
 	 * TODO add logic to use cost structure passed in the movingEntity and etc to calculate transportation cost 
@@ -120,7 +132,7 @@ public class Route {
 		double tempTime = 0.0d;
 		if(routeType == Route_Type.FASTEST)
 			tempTime = dijkstraWeight;
-		else{
+		else {
 			int index = 0;
 			for (DiscreteHandlingLinkedEntity each: routeSegmentsList){
 				if(each instanceof Transshipment){

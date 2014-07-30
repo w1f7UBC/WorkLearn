@@ -1,6 +1,7 @@
 package com.ROLOS.DMAgents;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.PriorityQueue;
 
@@ -130,7 +131,7 @@ public class RouteManager extends DisplayEntity {
 			distance += tempRoute.getDijkstraWeight();
 			tempRouteSegments.addAll(tempRoute.getRouteSegmentsList());
 			
-			finalRoute = new Route(originBay, destinationBay, distance);
+			finalRoute = new Route(originBay, destinationBay, distance, movingEntity, Route_Type.SHORTEST);
 			finalRoute.setRoute(tempRouteSegments);
 			routesList.add(routeName, finalRoute);
 		} else{
@@ -304,7 +305,9 @@ public class RouteManager extends DisplayEntity {
 				}
 			}
 		}
-		if (destinationWeight < Double.POSITIVE_INFINITY)
+		if (weightThroughTransshipment < destinationWeight){
+			return concatenateRoutes(setRoute(origin, destination, movingEntity, dijkstraComparator,routingRule),routeThroughTransshipment);
+		} else if (destinationWeight < Double.POSITIVE_INFINITY)
 			return setRoute(origin, destination, movingEntity, dijkstraComparator,routingRule);
 		
 		// if method has reached here and not returned yet, it means that there
@@ -323,6 +326,26 @@ public class RouteManager extends DisplayEntity {
 		return origin.getName() + "-" + destination.getName() + "-" + movingEntity.getName();
 	}
 
+	/**
+	 * Attaches the two
+	 * @param routesList
+	 * @return
+	 */
+	private static Route concatenateRoutes (Route... routesList){
+		LinkedList<Route> tempRoutesList = new LinkedList<>(Arrays.asList(routesList));
+		Route returnRoute = new Route(tempRoutesList.getFirst().getOrigin(), tempRoutesList.getLast().getDestination(), 0.0d, null, tempRoutesList.get(0).getRouteType());
+		double tempWeight = 0.0d;
+		for(int i =0; i < tempRoutesList.size(); i++){
+			tempWeight += tempRoutesList.get(i).getDijkstraWeight();
+			returnRoute.getTransportModeList().addAll(tempRoutesList.get(i).getTransportModeList());
+			returnRoute.getMovingEntitiesList().addAll(tempRoutesList.get(i).getMovingEntitiesList());
+			returnRoute.getRouteSegmentsList().addAll(tempRoutesList.get(i).getRouteSegmentsList());
+			if (i<tempRoutesList.size()-1)
+					returnRoute.getRouteSegmentsList().removeLast();
+		}
+		return returnRoute;
+	}
+	
 	private static <T extends DiscreteHandlingLinkedEntity> Route setRoute(T origin,
 			T destination, MovingEntity movingEntity, DijkstraComparator dijkstraComparator, Route_Type routingRule) {
 
@@ -370,7 +393,7 @@ public class RouteManager extends DisplayEntity {
 			if(route != null){
 				managerReportFile.putStringTabs(origin.getName(), 1);
 				managerReportFile.putStringTabs(destination.getName(), 1);
-				managerReportFile.putStringTabs(HandyUtils.arraylistToString(route.getRouteSegmentsList()), 1);
+				managerReportFile.putStringTabs(HandyUtils.arraylistToString(new ArrayList<>(route.getRouteSegmentsList())), 1);
 				managerReportFile.putDoubleWithDecimalsTabs(route.getDijkstraWeight(),
 					ReportAgent.getReportPrecision(), 1);
 				managerReportFile.putStringTabs("FoundRoute", 1);
