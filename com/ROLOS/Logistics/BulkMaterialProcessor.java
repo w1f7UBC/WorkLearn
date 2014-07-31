@@ -264,9 +264,15 @@ public class BulkMaterialProcessor extends BulkHandlingLinkedEntity {
 	
 	/**
 	 * @return production cost rate per unit of outfeed (operating cost/outfeedrate)
-	 */
-	public <T extends LogisticsEntity> double getVariableProductionCost(BulkMaterial bulkMaterial) {
-		return this.getOperatingCost()/this.getOutfeedRate(bulkMaterial);	
+	 */	
+	@Override
+	public <T extends LogisticsEntity> double getVariableCost(T... args) {
+		try{
+			return this.getOperatingCost()/this.getOutfeedRate((BulkMaterial)args[0]);
+		} catch(ClassCastException e) {
+			throw new ErrorException("checked variable cost for bulkmaterial processor %s without passing a"
+					+ "bulkmaterial type. argument passed was %s!", this.getName(), args[0].getName());
+		}
 	}
 
 	public BulkMaterial getPrimaryProduct(){

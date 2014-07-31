@@ -51,6 +51,34 @@ public class HashMapList<T1, T2> {
 		}
 	}
 	
+	/**
+	 * will add element to the arraylist associated with name. 
+	 * <br> <b>WARNING: </b> wont check for duplicate elements. 
+	 */
+	public <V extends T2> void add(Class klass,V element){
+		if (!hashList.containsKey(klass.getSimpleName())){
+			ArrayList<T2> temp = new ArrayList<>(1);
+			temp.add(element);
+			hashList.put((T1) klass.getSimpleName(), temp);
+		} 
+		else{
+			hashList.get(klass).add(element);
+		}
+	}
+	
+	/**
+	 * will append passed arraylist to the list associated with name or create a list with the passed elements if name doesn't exist.
+	 * <br> <b>WARNING: </b> wont check for duplicate elements.
+	 */
+	public <V extends T2> void add(Class klass, ArrayList<T2> list){
+		if (!hashList.containsKey(klass.getSimpleName())){
+			hashList.put((T1) klass.getSimpleName(),list);
+		}
+		else{
+			hashList.get(klass).addAll(list);
+		}
+	}
+	
 	public void clear(){
 		hashList.clear();
 	}
@@ -63,7 +91,7 @@ public class HashMapList<T1, T2> {
 	 * @return arraylist associated with the hashIdentifier or null if not found
 	 */
 	public ArrayList<T2> get(T1 hashIdentifier){
-		return hashList.get(hashIdentifier);
+		return hashList.get(hashIdentifier) == null ? new ArrayList<T2>(0) : hashList.get(hashIdentifier);
 	}
 	
 	/**

@@ -23,14 +23,14 @@ Define		ColladaModel	{ Sphere }
 Sphere		ColladaFile		{ '<res>/shapes/Sphere.dae' }
 
 
-Define ColladaModel { Truck }
-Truck ColladaFile { '<res>/ROLOS_resources/Shapes/Sin t_tulo.dae' }
+Define ColladaModel { Truck3D }
+Truck3D ColladaFile { '<res>/ROLOS_resources/Shapes/Sin t_tulo.dae' }
 
-Define ColladaModel { Cargo }
-Cargo ColladaFile { '<res>/ROLOS_resources/Shapes/WoodchipTrailer.dae' }
+Define ColladaModel { Cargo3D }
+Cargo3D ColladaFile { '<res>/ROLOS_resources/Shapes/WoodchipTrailer.dae' }
 
-Define ColladaModel { CargoContent }
-CargoContent ColladaFile { '<res>/ROLOS_resources/Shapes/CargoContent.dae' }
+Define ColladaModel { CargoContent3D }
+CargoContent3D ColladaFile { '<res>/ROLOS_resources/Shapes/CargoContent.dae' }
 
 Define ColladaModel { StockpileContent1 }
 StockpileContent1 ColladaFile { '<res>/ROLOS_resources/Shapes/Woodpile.dae' }

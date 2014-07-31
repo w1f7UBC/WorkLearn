@@ -86,7 +86,7 @@ public class FacilityFinancialManager extends FacilityManager {
 	public double calcRevenue(BulkMaterial inputMaterial, ProcessingRoute processingRoute){
 		double revenue;
 		revenue = (1-this.getFacility().getProfitMargin()) *((processingRoute.getProcessor().getPrimaryProduct().getPrice() -
-						processingRoute.getProcessor().getVariableCost(inputMaterial))-
+						processingRoute.getProcessor().getVariableCost(processingRoute.getProcessor().getPrimaryProduct()))-
 				//TODO use more generic definition for fixed cost (e.g. adding individual processes fixed costs)
 						this.getFacility().getFixedCost(getSimTime(), this.getSimTime()+ SimulationManager.getPlanningHorizon())/
 						this.getFacility().getStockList().getValueFor(processingRoute.getProcessor().getPrimaryProduct(), 1));

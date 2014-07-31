@@ -226,8 +226,8 @@ public class RouteManager extends DisplayEntity {
 						weight = ((DiscreteHandlingLinkedEntity) each).getLength();
 					// leastcost is calculated based on per unit of material transportationcost
 					else if (routingRule == Route_Type.LEASTCOST)
-						weight = ((DiscreteHandlingLinkedEntity) each).getTravelCost(movingEntity)/
-							movingEntity.getAcceptingBulkMaterialList().getValueFor(bulkMaterial, 0);
+						weight = ((DiscreteHandlingLinkedEntity) each).getTravelTime(movingEntity)*
+							movingEntity.getTransportationCost(bulkMaterial);
 					
 					weightThroughU += weight;
 					if (weightThroughU < destinationWeight && weightThroughU <= weightCap && 

@@ -122,6 +122,7 @@ public class Market extends ROLOSEntity {
 						buyersList.remove(ib);
 						continue;
 					}else{
+						offer
 						offersList.add(new MarketOffer(sellersList.get(is), buyersList.get(ib), 
 								Tester.min(buyersList.get(ib).getStockList().getValueFor(product.getValue(), 2),
 										sellersList.get(is).getStockList().getValueFor(product.getValue(), 2)),

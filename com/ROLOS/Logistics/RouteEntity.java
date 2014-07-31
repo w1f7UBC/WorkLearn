@@ -99,6 +99,7 @@ public class RouteEntity extends DiscreteHandlingLinkedEntity {
 		return total;
 	}
 	
+	
 	@Override
 	public double getTravelCost(MovingEntity movingEntity) {
 		return movingEntity.getOperatingCost() * getTravelTime(movingEntity);

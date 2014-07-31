@@ -170,7 +170,7 @@ public class BulkHandlingLinkedEntity extends LinkedEntity {
 			throw new ErrorException("%s is currently towed by %s and can not be attached to %s at time: %f", this.getName(),currentTow.getName(),towingMovingEntity.getName(), this.getCurrentTime());
 		
 		this.currentTow = towingMovingEntity;
-		towingMovingEntity.getCurrentlyTowingEntityList().get(this.getClass());
+		towingMovingEntity.getCurrentlyTowingEntityList().add(this.getClass(), this);
 		InputAgent.processEntity_Keyword_Value(this, "RelativeEntity", towingMovingEntity.getName());
 	}
 	
