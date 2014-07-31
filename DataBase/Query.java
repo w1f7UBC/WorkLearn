@@ -51,59 +51,57 @@ public class Query extends DisplayEntity {
 		statement = s;
 	}
 	
-    public ResultSet getResultset() throws SQLException{
-    	Statement st = targetDB.getValue().getConnection().createStatement();
-    	rs = st.executeQuery(statement);
-    	return rs;
+    public ResultSet getResultset(){
+		try {
+			Statement st = targetDB.getValue().getConnection().createStatement();
+			rs = st.executeQuery(statement);
+			return rs;
+		} catch (SQLException e) {
+			System.out.println(e);
+		}
+		return null;
     }
     
-	public  DefaultTableModel getTableContent(String statement) throws SQLException{  
-    	rs = getResultset();
-    	ResultSetMetaData metaData = rs.getMetaData();
-	    // names of columns
-	    Vector<String> columnNames = new Vector<String>();
-	    int columnCount = metaData.getColumnCount();
-	    for (int column = 1; column <= columnCount; column++) {
-	    	columnNames.add(metaData.getColumnName(column));
-	    }
-	    // data of the table
-	    Vector<Vector<Object>> data = new Vector<Vector<Object>>();
-	    while (rs.next()) {
-	    	Vector<Object> vector = new Vector<Object>();
-	    	for (int columnIndex = 1; columnIndex <= columnCount; columnIndex++) {
-	    		vector.add(rs.getObject(columnIndex));
-	    	}
-		    data.add(vector);
-	    }
-	    return new DefaultTableModel(data, columnNames);
+	public DefaultTableModel getTableContent(String statement){  
+		try {
+			rs = getResultset();
+			if (rs!=null){
+		    	ResultSetMetaData metaData = rs.getMetaData();
+			    // names of columns
+			    Vector<String> columnNames = new Vector<String>();
+			    int columnCount = metaData.getColumnCount();
+			    for (int column = 1; column <= columnCount; column++) {
+			    	columnNames.add(metaData.getColumnName(column));
+			    }
+			    // data of the table
+			    Vector<Vector<Object>> data = new Vector<Vector<Object>>();
+			    while (rs.next()) {
+			    	Vector<Object> vector = new Vector<Object>();
+			    	for (int columnIndex = 1; columnIndex <= columnCount; columnIndex++) {
+			    		vector.add(rs.getObject(columnIndex));
+			    	}
+			    	data.add(vector);
+			    }
+			    return new DefaultTableModel(data, columnNames);
+			}
+		} catch (SQLException e) {
+			System.out.println(e);
+		}
+		return null;
 	}
 
-	
-	public  void Poptable(String statement) throws SQLException{
+	public  void executePopulate(String statement){
 	   final JTable table = new JTable(getTableContent(statement));
 	   EventQueue.invokeLater(new Runnable() {
-	        @Override
-	        public void run() {
-	        
-	        	   dataBasePanel.setViewportView(table);
-	        	   dataBaseFrame.add(dataBasePanel);
-	        	   dataBaseFrame.setBounds(GUIFrame.COL3_START+GUIFrame.COL3_WIDTH,GUIFrame.LOWER_START,GUIFrame.COL3_WIDTH,GUIFrame.LOWER_HEIGHT);
-	           	   dataBaseFrame.setVisible(true);
-	        	
-	        }
-	   });
-	   
-   }
-	
-	public  void excuteQuery(String statement) throws SQLException{
-    	try{ 
-    		Poptable(statement);
-    	}
-    	catch(SQLException e){
-    		System.out.println(e);
-    		System.exit(1);
-    	}
-	}	
+		   @Override
+		   public void run() {  
+			   dataBasePanel.setViewportView(table);
+			   dataBaseFrame.add(dataBasePanel);
+			   dataBaseFrame.setBounds(GUIFrame.COL3_START+GUIFrame.COL3_WIDTH,GUIFrame.LOWER_START,GUIFrame.COL3_WIDTH,GUIFrame.LOWER_HEIGHT);
+			   dataBaseFrame.setVisible(true);
+		   }
+	   });   
+	}
 }
 
 	

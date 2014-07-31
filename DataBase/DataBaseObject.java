@@ -1,7 +1,6 @@
 package DataBase;
 
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.Properties;
 import com.jaamsim.input.Keyword;
 import com.sandwell.JavaSimulation.Entity;
@@ -31,16 +30,12 @@ public class DataBaseObject extends Entity {
     
 	@Override 
 	public void validate(){
-		try {
-			connectionIndex = Database.Connect(this);
-			established = true;
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
+		connectionIndex = Database.Connect(this);
+		established = true;
 	}
 	
 	
-	public Connection getConnection() throws SQLException {
+	public Connection getConnection(){
 		if (!established){
 			connectionIndex = Database.Connect(this);
 			established = true;

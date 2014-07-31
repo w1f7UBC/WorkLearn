@@ -3,12 +3,17 @@ package newt;
 import gov.nasa.worldwind.layers.Layer;
 import gov.nasa.worldwind.layers.LayerList;
 import gov.nasa.worldwindx.examples.util.ShapefileLoader;
-
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.lang.ProcessBuilder.Redirect;
+import java.util.Iterator;
 
 public class LayerManager {
 	//using a 32bit (64bit backwards compatible) pgsql2shp.exe to do the conversion
@@ -60,46 +65,55 @@ public class LayerManager {
 	//an improvement that can be made here is to include the data inside the shape file also and somehow use that data directly, right now it only returns a shape and a separate query is made for the data 
 	public String sql2shp(String fileName, String statement){
 		String fileDestination=destination+"\\"+fileName+".shp";
+		//Check outputs for the inputs going into the proccess builder by uncommenting these
+		//System.out.println(statement);
+		//System.out.println(exe+"\n" + fileDestination+"\n"+ip+"\n"+port+"\n"+user+"\n"+password+"\n"+db);
 		Process process;
 		try {
-			//Check outputs for the inputs going into the proccess builder by uncommenting these
-			//System.out.println(statement);
-			//System.out.println(exe+"\n" + fileDestination+"\n"+ip+"\n"+port+"\n"+user+"\n"+password+"\n"+db);
 			process = new ProcessBuilder(exe, "-f", fileDestination, "-h", ip, "-p", port, "-u", user, "-P", password, db, statement).start();
+			/*
+			//Check outputs of shape generation by uncommenting this if it all it says is "Initializing..." something is wrong
 			InputStream is = process.getInputStream();
 			InputStreamReader isr = new InputStreamReader(is);
 			BufferedReader br = new BufferedReader(isr);
 			String line;
 			while ((line = br.readLine()) != null) {
-				//Check outputs of shape generation by uncommenting this if it all it says is "Initializing..." something is wrong
-				//System.out.println(line);
+				System.out.println(line);
 			}
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}	
-		return fileDestination;
+			*/
+			process.waitFor();
+			File destination = new File(fileDestination);
+			if(destination.exists())
+				return fileDestination;
+			else{
+				//System.out.println("Shapefile wasn't generated, check query or simply no results");
+				return null;
+			}
+		} catch (IOException | InterruptedException e) {
+			System.out.println(e);
+		}
+		return null;
 	}
-	
-	//loads a shapefile onto the given canvas, note: use layer=-1 if you want to toss a layer on the canvas thats rather permament, otherwise specify a layer thats >10, layers already in use would be removed if the same layer is chosen
-	public int addShape(WorldWindowNewtCanvas canvas, String filePath, int layer){
+
+	//Loads shape file found at filePath into the given canvas under the name layer, if layer with same name already exists, it removes that layer.
+	public void addShape(WorldWindowNewtCanvas canvas, String filePath, String layer){
 		DefinedShapeLoader loader = new DefinedShapeLoader();
 		Layer toAdd = loader.createLayerFromSource(filePath);
 		toAdd.setPickEnabled(false);
+		toAdd.setName(layer);
+		
 		LayerList layerList = canvas.getModel().getLayers();
-		if(layer!=-1){
-			if (layerList.get(layer)!=null){
-				layerList.remove(layer);
-			}
-			layerList.add(layer, toAdd);
+		if (layerList.getLayerByName(layer)!=null){
+			layerList.remove(layerList.getLayerByName(layer));
 		}
-		else{
-			layerList.add(toAdd);
-		}
-		return layer;
+		layerList.add(toAdd);
 	}
 	
-	public void removeLayer(WorldWindowNewtCanvas canvas, int layer){
-		canvas.getModel().getLayers().remove(layer);
+	//removes layer with the given name if it exists
+	public void removeLayer(WorldWindowNewtCanvas canvas, String layer){
+		LayerList layerList=canvas.getModel().getLayers();
+		if (layerList.getLayerByName(layer)!=null){
+			layerList.remove(layerList.getLayerByName(layer));
+		}
 	}
 }

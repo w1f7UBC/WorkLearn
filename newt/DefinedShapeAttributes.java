@@ -52,13 +52,13 @@ public class DefinedShapeAttributes
 
         this.polygonAttrs = new ShapeAttributes[]
             {
-                //this.createPolygonAttributes(Color.YELLOW),
+                this.createPolygonAttributes(Color.YELLOW),
                 this.createPolygonAttributes(Color.BLUE),
-                //this.createPolygonAttributes(Color.RED),
-                //this.createPolygonAttributes(Color.GREEN),
-                //this.createPolygonAttributes(Color.CYAN),
-                //this.createPolygonAttributes(Color.ORANGE),
-                //this.createPolygonAttributes(Color.MAGENTA),
+                this.createPolygonAttributes(Color.RED),
+                this.createPolygonAttributes(Color.GREEN),
+                this.createPolygonAttributes(Color.CYAN),
+                this.createPolygonAttributes(Color.ORANGE),
+                this.createPolygonAttributes(Color.MAGENTA),
             };
     }
 
@@ -99,7 +99,7 @@ public class DefinedShapeAttributes
         ShapeAttributes attrs = new BasicShapeAttributes();
         attrs.setInteriorMaterial(new Material(color));
         attrs.setOutlineMaterial(new Material(WWUtil.makeColorBrighter(color)));
-        attrs.setInteriorOpacity(0.5);
+        attrs.setInteriorOpacity(0.03);
         attrs.setOutlineWidth(3);
         return attrs;
     }

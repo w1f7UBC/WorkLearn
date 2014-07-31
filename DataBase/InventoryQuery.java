@@ -21,26 +21,21 @@ import com.sandwell.JavaSimulation.StringInput;
 import com.sandwell.JavaSimulation.Vec3dInput;
 
 public  class InventoryQuery extends Query {
-
 	public InventoryQuery(){
 		allInstances.add(this);
 	}
 
 	private static  ArrayList<InventoryQuery> allInstances;
-	
+	static {
+		allInstances = new ArrayList<InventoryQuery>();
+	}
 
 	@Keyword(description = "Gerometric parameters")
 	private Vec3dInput  coordinate;
 	@Keyword(description = "query statement")
 	private StringInput querystatment;
-
-	static {
-		allInstances = new ArrayList<InventoryQuery>();
-	}
-	{
 	
-		
-		
+	{
 		querystatment = new StringInput("statement","Query property","");
 		this.addInput(querystatment);
 	}
@@ -88,63 +83,62 @@ public  class InventoryQuery extends Query {
 	}
 
 	@Override
-	public  DefaultTableModel getTableContent(String statement) throws SQLException{
-		
-		   rs = getResultset();
+	public  DefaultTableModel getTableContent(String statement){
+		try {
+			rs = getResultset();
 	    	ResultSetMetaData metaData = rs.getMetaData();
 		    // names of columns
 		    Vector<String> columnNames = new Vector<String>();
 		    int columnCount = metaData.getColumnCount();
-		    columnNames.add("STANDz_ID");
-			   columnNames.add("Site_Index");
-			   columnNames.add("Prime_Species");
-			   columnNames.add("Landuse");
-			   columnNames.add("STAND_AGE");
-			   columnNames.add("ecozone");
-			   columnNames.add("volumn");
-			   columnNames.add("Biomass");
-		    
+		    columnNames.add("Stand ID");
+			columnNames.add("Site Index");
+			columnNames.add("Prime Species");
+			columnNames.add("Landuse");
+			columnNames.add("Stand Age");
+			columnNames.add("Ecozone");
+			columnNames.add("Volume");
+			columnNames.add("Biomass");
 		    // data of the table
 		    Vector<Vector<Object>> data = new Vector<Vector<Object>>();
-		  
 		    while (rs.next()) {
-		    	  int age=0;
-				    String volumn  =" ";
-			    	String biomass =" ";
+		    	int age=0;
+		    	String volume  =" ";
+		    	String biomass =" ";
 		    	Vector<Object> vector = new Vector<Object>();
-    	for (int columnIndex = 1; columnIndex <= columnCount;columnIndex++ ){   
+		    	for (int columnIndex = 1; columnIndex <= columnCount;columnIndex++ ){   
 		    		if(rs.getMetaData().getColumnName(columnIndex).contains("giskey")||
-		    				rs.getMetaData().getColumnName(columnIndex).contains("si_1")||
-		    				rs.getMetaData().getColumnName(columnIndex).contains("primspec")||
-		    				rs.getMetaData().getColumnName(columnIndex).contains("landuse")||
-		    				rs.getMetaData().getColumnName(columnIndex).contains("primage")||
-		    				rs.getMetaData().getColumnName(columnIndex).contains("ecozone2")
-		    			){
+	    			rs.getMetaData().getColumnName(columnIndex).contains("si_1")||
+	    			rs.getMetaData().getColumnName(columnIndex).contains("primspec")||
+	    			rs.getMetaData().getColumnName(columnIndex).contains("landuse")||
+	    			rs.getMetaData().getColumnName(columnIndex).contains("primage")||
+	    			rs.getMetaData().getColumnName(columnIndex).contains("ecozone2")){
 		    			if(rs.getMetaData().getColumnName(columnIndex).contains("primage")){
-		    				age = rs.getInt(columnIndex);
-		    			}
-		    		   vector.add(rs.getObject(columnIndex));
-		    		   }
+		    					age = rs.getInt(columnIndex);
+		    				}
+		    		vector.add(rs.getObject(columnIndex));
+		    		}
 		    	}
-		    	     int remainder = age%10;
-		    	     if (remainder>5){
-		    	    	 age+=10-remainder;
-		    	     }
-		    	     else{
-		    	    	 age-=remainder;
-		    	     }
-		    		 volumn = "vol"+age+"2";
-		    		 biomass="bio"+age+"2";
-			    	for(int columnIndex = 1; columnIndex <= columnCount;columnIndex++){
-			    	   if(rs.getMetaData().getColumnName(columnIndex).contains(volumn)||
-			    			   rs.getMetaData().getColumnName(columnIndex).contains(biomass)   ){
+		    	int remainder = age%10;
+		    	if (remainder>5){
+		    		age+=10-remainder;
+		    	}
+		    	else{
+		    		age-=remainder;
+		    	}
+		    	volume = "vol"+age+"2";
+		    	biomass="bio"+age+"2";
+			    for(int columnIndex = 1; columnIndex <= columnCount;columnIndex++){
+			    	if(rs.getMetaData().getColumnName(columnIndex).contains(volume)||rs.getMetaData().getColumnName(columnIndex).contains(biomass)   ){
 			    		vector.add(rs.getObject(columnIndex));
-			    	   
-		    	} 
-		    	
+			    	} 
 		    	}
 			    data.add(vector);
 		    }
 		    return new DefaultTableModel(data, columnNames);
+		} catch (SQLException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
 		}
+	return null;
 	}
+}
