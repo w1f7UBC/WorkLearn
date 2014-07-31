@@ -29,6 +29,7 @@ Define ObjectType {
                     ParkBlock
                     TimeSeries
                     Delay
+                    Transshipment
                   }
 Group                       JavaClass { com.sandwell.JavaSimulation.Group               } Palette { 'ROLOS' } DragAndDrop 			{ FALSE 	}
 TimeSeries                  JavaClass { com.sandwell.JavaSimulation.TimeSeries          } Palette { 'ROLOS' } DragAndDrop 	{ FALSE 	}
@@ -44,6 +45,7 @@ Contract                    JavaClass { com.ROLOS.Economic.Contract             
 Market                      JavaClass { com.ROLOS.Economic.Market                         } Palette { 'ROLOS' } DragAndDrop 	{ FALSE 	}
 ReportAgent                 JavaClass { com.ROLOS.Logistics.ReportAgent                 } Palette { 'ROLOS' } DragAndDrop 			{ FALSE 	}
 Facility                    JavaClass { com.ROLOS.Logistics.Facility                    } Palette { 'ROLOS' } DefaultDisplayModel 	{ Circle 				}
+Transshipment               JavaClass { com.ROLOS.Logistics.Transshipment            } Palette { 'ROLOS' } DefaultDisplayModel 	{ Circle 				}
 Fleet                       JavaClass { com.ROLOS.Logistics.Fleet                       } Palette { 'ROLOS' } DefaultDisplayModel 	{ Circle 				}
 EntityGenerator             JavaClass { com.ROLOS.Logistics.EntityGenerator             } Palette { 'ROLOS' } DefaultDisplayModel 	{ Circle 				}
 MovingEntity                JavaClass { com.ROLOS.Logistics.MovingEntity                } Palette { 'ROLOS' } DefaultDisplayModel 	{ Truck3D 				}
@@ -52,7 +54,7 @@ Loader                      JavaClass { com.ROLOS.Logistics.Loader              
 BulkMaterial                JavaClass { com.ROLOS.Logistics.BulkMaterial                } Palette { 'ROLOS' } DefaultDisplayModel 	{ ScreenPointsModelDefault 				}
 BulkMaterialProcessor       JavaClass { com.ROLOS.Logistics.BulkMaterialProcessor       } Palette { 'ROLOS' } DefaultDisplayModel 	{ ScreenPointsModelDefault 				}
 Stockpile                   JavaClass { com.ROLOS.Logistics.Stockpile                   } Palette { 'ROLOS' } DefaultDisplayModel 	{ ScreenPointsModelDefault 				}
-RouteSegment                 JavaClass { com.ROLOS.Logistics.RouteSegment                 } Palette { 'ROLOS' } DefaultDisplayModel 	{ ScreenPointsModelDefault 				}
+RouteSegment                JavaClass { com.ROLOS.Logistics.RouteSegment                 } Palette { 'ROLOS' } DefaultDisplayModel 	{ ScreenPointsModelDefault 				}
 ParkBlock                   JavaClass { com.ROLOS.Logistics.ParkBlock                   } Palette { 'ROLOS' } DefaultDisplayModel 	{ ScreenPointsModelDefault 				}
 LoadingBay                  JavaClass { com.ROLOS.Logistics.LoadingBay                  } Palette { 'ROLOS' } DefaultDisplayModel 	{ ScreenPointsModelDefault 				}
 Delay                       JavaClass { com.ROLOS.Logistics.Delay                       } Palette { 'ROLOS' } DragAndDrop 	{ FALSE 	}

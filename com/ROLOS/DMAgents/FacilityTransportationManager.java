@@ -193,7 +193,7 @@ public class FacilityTransportationManager extends FacilityManager {
 	
 	/**
 	 * 
-	 * @return least cost per unit transporter that has remaining capacity for transporting bulkMaterial
+	 * @return least cost per unit transporter that has remaining capacity for transporting bulkMaterial o.w. null
 	 */
 	public <T extends DiscreteHandlingLinkedEntity> Route getLeastCostTranspotationRoute(BulkMaterial bulkMaterial, T origin, T destination, double transportaionCostCap){
 		double cost = Double.POSITIVE_INFINITY;
@@ -206,7 +206,7 @@ public class FacilityTransportationManager extends FacilityManager {
 			if(each.getAcceptingBulkMaterialList().contains(bulkMaterial)){
 				foundMovingEntity = true;
 				tempRoute = RouteManager.getRoute(origin, destination, each, bulkMaterial, Route_Type.LEASTCOST, transportaionCostCap);
-				if(Tester.greaterCheckTolerance(transportationCapacityList.getValueFor(each, 0) - transportationCapacityList.getValueFor(each, 1),0.0d) &&
+				if(Tester.greaterOrEqualCheckTolerance(transportationCapacityList.getValueFor(each, 0) - transportationCapacityList.getValueFor(each, 1),0.0d) &&
 					tempRoute != null){
 					tempCost = tempRoute.estimateTransportationCostonRoute(bulkMaterial);
 					if(tempCost < cost ){

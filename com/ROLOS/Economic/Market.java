@@ -122,7 +122,6 @@ public class Market extends ROLOSEntity {
 						buyersList.remove(ib);
 						continue;
 					}else{
-						offer
 						offersList.add(new MarketOffer(sellersList.get(is), buyersList.get(ib), 
 								Tester.min(buyersList.get(ib).getStockList().getValueFor(product.getValue(), 2),
 										sellersList.get(is).getStockList().getValueFor(product.getValue(), 2)),
@@ -170,7 +169,7 @@ public class Market extends ROLOSEntity {
 			// TODO URGENT! add proposer transportaion cost cap!
 			Route tempRoute = seller.getTransportationManager().getLeastCostTranspotationRoute(product.getValue(), seller, buyer, Double.POSITIVE_INFINITY);
 			transporter = tempRoute.getMovingEntitiesList().get(0);
-			this.amount = Tester.min(amount,buyer.getTransportationManager().getTransportersList().getValueFor(transporter, 0)-buyer.getTransportationManager().getTransportersList().getValueFor(transporter, 1));
+			this.amount = Tester.min(amount,seller.getTransportationManager().getTransportersList().getValueFor(transporter, 0)-seller.getTransportationManager().getTransportersList().getValueFor(transporter, 1));
 			estimatedTransportCost = tempRoute.estimateTransportationCostonRoute(product.getValue());
 			marketOfferPrice = offeredPrice - estimatedTransportCost; 
 		}
