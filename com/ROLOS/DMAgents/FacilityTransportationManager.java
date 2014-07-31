@@ -16,20 +16,11 @@ import com.ROLOS.Logistics.Facility;
 import com.ROLOS.Logistics.Fleet;
 import com.ROLOS.Logistics.LoadingBay;
 import com.ROLOS.Logistics.MovingEntity;
-import com.ROLOS.Logistics.ReportAgent;
 import com.ROLOS.Logistics.Route;
 import com.ROLOS.Logistics.RouteSegment;
 import com.ROLOS.Logistics.Stockpile;
-import com.ROLOS.Utils.HandyUtils;
 import com.ROLOS.Utils.HashMapList;
 import com.ROLOS.Utils.TwoLinkedLists;
-import com.jaamsim.input.ValueListInput;
-import com.jaamsim.units.CostPerMassPerDistUnit;
-import com.jaamsim.units.CostPerVolumePerDistUnit;
-import com.jaamsim.units.MassFlowUnit;
-import com.jaamsim.units.VolumeFlowUnit;
-import com.jaamsim.units.VolumeUnit;
-import com.sandwell.JavaSimulation.BooleanInput;
 import com.sandwell.JavaSimulation.EntityListInput;
 import com.sandwell.JavaSimulation.InputErrorException;
 import com.jaamsim.input.Input;
@@ -41,9 +32,9 @@ public class FacilityTransportationManager extends FacilityManager {
 	
 	@Keyword(description = "Moving Entity list that have cost and capacity defined for them and apear in the TransportableMaterialGroups list."
 			+ "These transporters should correspond to fleets' prototypes. I.e. these cost structures apply to the fleet", 
-			example = "Temiscaming/TransportationManager TransporterCostGroups { Truck1 Truck2 Train1 Train2 }")
+			example = "Temiscaming/TransportationManager Transporters { Truck1 Truck2 Train1 Train2 }")
 	private final EntityListInput<MovingEntity> transportersList;
-		
+	
 	private TwoLinkedLists<MovingEntity> transportationCapacityList;
 
 	private HashMapList<Transport_Mode,MovingEntity> transportersMap; 
@@ -52,7 +43,7 @@ public class FacilityTransportationManager extends FacilityManager {
 		
 	{
 		
-		transportersList = new EntityListInput<>(MovingEntity.class, "TransporterCostGroups", "Economic", null);
+		transportersList = new EntityListInput<>(MovingEntity.class, "Transporters", "Key Inputs", null);
 		this.addInput(transportersList);
 		
 	}
@@ -75,7 +66,7 @@ public class FacilityTransportationManager extends FacilityManager {
 	public void earlyInit() {
 		super.earlyInit();
 
-		// TODO assign fleet size when fleets are figured out
+		// TODO assign transportation capacity when figured out (from an input or based on logistics availability)!
 		if(transportersList.getValue() != null){
 			for(int i = 0; i<transportersList.getValue().size(); i++){
 				transportationCapacityList.set(transportersList.getValue().get(i), 0, Double.POSITIVE_INFINITY);
@@ -193,7 +184,7 @@ public class FacilityTransportationManager extends FacilityManager {
 	
 	/**
 	 *  List of transporters and costs and capacities
-	 * <br> <b> 0- </b> number of active transporters in the fleet
+	 * <br> <b> 0- </b> transportation capacity for the transporter!
 	 * <br> <b> 1- </b> transporter's reserved capacity (for the planning horizon)
 	 */
 	public TwoLinkedLists<MovingEntity> getTransportersList(){
@@ -299,11 +290,7 @@ public class FacilityTransportationManager extends FacilityManager {
 		return returnEntity;
 	}
 	public void resetTransportationPlan(){
-		if(transportersList.getValue() != null){
-			for(int i = 0; i<transportersList.getValue().size(); i++){
-				transportationCapacityList.set(transportersList.getValue().get(i), 2, 0.0d);
-			}
-		}
+		// TODO !!!!
 	}
 	
 	/**
@@ -311,11 +298,7 @@ public class FacilityTransportationManager extends FacilityManager {
 	 * @param loadingBay the loading bay 
 	 */
 	public EntranceBlock getFacilityEntranceBlock(MovingEntity movingEntity, LoadingBay loadingBay){
-		for(EntranceBlock each: this.getFacility().getInsideFacilityLimits().get(EntranceBlock.class)){
-			if(each.checkIfHandles(movingEntity) && 
-					RouteManager.getRoute(each, loadingBay,movingEntity).getRouteSegmentsList() != null)
-				return each;
-		}
+		//TODO rewrite!
 		return null;
 	}
 	
@@ -324,11 +307,7 @@ public class FacilityTransportationManager extends FacilityManager {
 	 * @return the first exit block that handles the passed entity
 	 */
 	public ExitBlock getFacilityExitBlock(MovingEntity movingEntity, LoadingBay loadingBay){
-		for(ExitBlock each: this.getFacility().getInsideFacilityLimits().get(ExitBlock.class)){
-			if(each.checkIfHandles(movingEntity) && 
-					RouteManager.getRoute(loadingBay,each,movingEntity).getRouteSegmentsList() != null)
-				return each;
-		}
+		// TODO rewrite
 		return null;
 	}
 	

@@ -1,6 +1,7 @@
 package com.ROLOS.Logistics;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 
 import com.jaamsim.input.ValueInput;
 import com.jaamsim.math.Vec3d;
@@ -80,7 +81,7 @@ public class MovingEntity extends LogisticsEntity {
 	private Facility destinationFacility;
 	private DiscreteHandlingLinkedEntity currentDestination;
 	private LoadingBay lastLoadingBay;
-	private ArrayList<? extends DiscreteHandlingLinkedEntity> plannedNextRouteSegments;
+	private LinkedList<? extends DiscreteHandlingLinkedEntity> plannedNextRouteSegments;
 	private double startTravelingTimeOnCurrentRouteSegment;
 	private HashMapList<String,LogisticsEntity> currentlyTowingList;
 	
@@ -138,7 +139,7 @@ public class MovingEntity extends LogisticsEntity {
 			allInstances.add(this);
 		}
 		
-		plannedNextRouteSegments = new ArrayList<>();
+		plannedNextRouteSegments = new LinkedList<>();
 		currentlyTowingList = new HashMapList<>(1);
 		acceptingBulkMaterialList = new TwoLinkedLists<>(4, new DescendingPriotityComparator<BulkMaterial>(ROLOSEntity.class, "getInternalPriority"),0);
 	}
@@ -445,10 +446,10 @@ public class MovingEntity extends LogisticsEntity {
 	}
 	
 	/**
-	 * <br> <b>1-</b> Cargo capacity 
-	 * <br> <b>2-</b> Current cargo
-	 * <br> <b>3-</b> infeedable rate (meaning there is a loader/processor attached to at least one of the bulk cargos)
-	 * <br> <b>4-</b> outfeedable rate (meaning there is an unloader/processor attached to at least one of the bulk cargos)
+	 * <br> <b>0-</b> Cargo capacity 
+	 * <br> <b>1-</b> Current cargo
+	 * <br> <b>2-</b> infeedable rate (meaning there is a loader/processor attached to at least one of the bulk cargos)
+	 * <br> <b>3-</b> outfeedable rate (meaning there is an unloader/processor attached to at least one of the bulk cargos)
 	 * @return
 	 */
 	public TwoLinkedLists<BulkMaterial> getAcceptingBulkMaterialList(){
@@ -459,7 +460,7 @@ public class MovingEntity extends LogisticsEntity {
 	 * @return cost of transporting material per unit of material per time (e.g. 5 $/t/h )
 	 */
 	public double getTransportationCost(BulkMaterial bulkMaterial){
-		return this.getOperatingCost()/this.getAcceptingBulkMaterialList().getValueFor(bulkMaterial, 1);
+		return this.getOperatingCost()/this.getAcceptingBulkMaterialList().getValueFor(bulkMaterial, 0);
 	}
 	
 	/** 
@@ -470,11 +471,11 @@ public class MovingEntity extends LogisticsEntity {
 		return currentlyTowingList;
 	}
 
-	public ArrayList<? extends DiscreteHandlingLinkedEntity> getPlannedNextRouteSegments() {
+	public LinkedList<? extends DiscreteHandlingLinkedEntity> getPlannedNextRouteSegments() {
 		return plannedNextRouteSegments;
 	}
 
-	public void setPlannedNextRouteSegments(ArrayList<? extends DiscreteHandlingLinkedEntity> plannedNextRouteSegments) {
+	public void setPlannedNextRouteSegments(LinkedList<? extends DiscreteHandlingLinkedEntity> plannedNextRouteSegments) {
 		this.plannedNextRouteSegments = plannedNextRouteSegments;
 	}
 

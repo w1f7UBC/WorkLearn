@@ -10,11 +10,11 @@ import com.ROLOS.DMAgents.SimulationManager;
 import com.ROLOS.Logistics.BulkMaterial;
 import com.ROLOS.Logistics.Facility;
 import com.ROLOS.Logistics.MovingEntity;
+import com.ROLOS.Logistics.Route;
 import com.jaamsim.input.InputAgent;
 import com.sandwell.JavaSimulation.Entity;
 import com.sandwell.JavaSimulation.EntityInput;
 import com.sandwell.JavaSimulation.EntityListInput;
-
 import com.jaamsim.input.Keyword;
 import com.sandwell.JavaSimulation.Tester;
 
@@ -116,8 +116,9 @@ public class Market extends ROLOSEntity {
 						buyersList.remove(ib);
 						continue;
 					}
-					// TODO assumes buyer is transporting and will remove from buyers list if transportation capacity is maxed out
-					if (buyersList.get(ib).getTransportationManager().getLeastCostTransporter(product.getValue(),buyersList.get(ib), sellersList.get(is)) == null){
+					// TODO assumes seller is transporting and will remove from buyers list if transportation capacity is maxed out
+					// TODO URGENT! transportation cost cap should be set properly - now just passing infinity!
+					if (sellersList.get(is).getTransportationManager().getLeastCostTranspotationRoute(product.getValue(), sellersList.get(is), buyersList.get(ib), Double.POSITIVE_INFINITY) == null){
 						buyersList.remove(ib);
 						continue;
 					}else{
@@ -164,11 +165,12 @@ public class Market extends ROLOSEntity {
 		public MarketOffer(Facility seller, Facility buyer, double amount, double offeredPrice) {
 			this.seller = seller;
 			this.buyer = buyer;
-			// TODO this assumes buyer always transports
-			transporter = buyer.getTransportationManager().getLeastCostTransporter(product.getValue(),buyer,seller);
-			this.amount = Tester.min(amount,buyer.getTransportationManager().getTransportersList().getValueFor(transporter, 1)-buyer.getTransportationManager().getTransportersList().getValueFor(transporter, 2));
-			estimatedTransportCost = buyer.getTransportationManager().estimateTransportationCostonRoute(transporter, getProduct(), 
-					RouteManager.getRoute(buyer, seller, transporter));
+			// TODO this assumes seller always transports
+			// TODO URGENT! add proposer transportaion cost cap!
+			Route tempRoute = seller.getTransportationManager().getLeastCostTranspotationRoute(product.getValue(), seller, buyer, Double.POSITIVE_INFINITY);
+			transporter = tempRoute.getMovingEntitiesList().get(0);
+			this.amount = Tester.min(amount,buyer.getTransportationManager().getTransportersList().getValueFor(transporter, 0)-buyer.getTransportationManager().getTransportersList().getValueFor(transporter, 1));
+			estimatedTransportCost = tempRoute.estimateTransportationCostonRoute(product.getValue());
 			marketOfferPrice = offeredPrice - estimatedTransportCost; 
 		}
 		

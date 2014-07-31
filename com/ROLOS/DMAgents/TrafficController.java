@@ -1,6 +1,7 @@
 package com.ROLOS.DMAgents;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 
 import com.ROLOS.DMAgents.RouteManager.Route_Type;
 import com.ROLOS.Logistics.DiscreteHandlingLinkedEntity;
@@ -24,14 +25,15 @@ public class TrafficController extends DisplayEntity {
 	public <T extends MovingEntity> void planNextMove(T movingEntity){
 		DiscreteHandlingLinkedEntity origin = movingEntity.getHeadRoute();
 		DiscreteHandlingLinkedEntity destination = movingEntity.getCurrentDestination();
-		Route tempRoute = RouteManager.getRoute(origin, destination, movingEntity, Route_Type.FASTEST, Double.POSITIVE_INFINITY);
+		// TODO add logic for planning route i.e. loaded vs. unloaded for passing bulkmaterial or route-type!
+		Route tempRoute = RouteManager.getRoute(origin, destination, movingEntity, null, Route_Type.FASTEST, Double.POSITIVE_INFINITY);
 		if (tempRoute == null){
 			throw new ErrorException("%s tried to travel from %s to %s but there is not any accessible route between the two destinations!",movingEntity.getName(),
 					origin.getName(),destination.getName());
 		}
 		
 		movingEntity.setPlannedNextRouteSegments(null);
-		ArrayList<? extends DiscreteHandlingLinkedEntity> tempRouteSegments = tempRoute.getRouteSegmentsList();
+		LinkedList<? extends DiscreteHandlingLinkedEntity> tempRouteSegments = tempRoute.getRouteSegmentsList();
 
 		//remove the head route
 		tempRouteSegments.remove(0);

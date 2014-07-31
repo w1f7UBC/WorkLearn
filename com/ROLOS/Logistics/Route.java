@@ -115,7 +115,7 @@ public class Route {
 				}
 				else if(each instanceof Facility)
 					continue;
-				unitCost += each.getTravelCost(movingEntitiesList.get(index))/movingEntitiesList.get(index).getAcceptingBulkMaterialList().getValueFor(bulkMaterial, 1);
+				unitCost += each.getTravelCost(movingEntitiesList.get(index))/movingEntitiesList.get(index).getAcceptingBulkMaterialList().getValueFor(bulkMaterial, 0);
 			}
 		}
 		
