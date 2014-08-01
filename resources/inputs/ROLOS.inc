@@ -12,6 +12,7 @@ Define ObjectType {
                     Contract
                     Market
                     Facility
+                    Transshipment
                     Fleet
                     EntityGenerator
                     MovingEntity
@@ -21,6 +22,7 @@ Define ObjectType {
                     BulkMaterialProcessor
                     Stockpile
                     RouteSegment
+                    RouteEntity
                     EntitySource
                     EntitySink
                     LoadingBay
@@ -29,7 +31,6 @@ Define ObjectType {
                     ParkBlock
                     TimeSeries
                     Delay
-                    Transshipment
                   }
 Group                       JavaClass { com.sandwell.JavaSimulation.Group               } Palette { 'ROLOS' } DragAndDrop 			{ FALSE 	}
 TimeSeries                  JavaClass { com.sandwell.JavaSimulation.TimeSeries          } Palette { 'ROLOS' } DragAndDrop 	{ FALSE 	}
@@ -55,6 +56,7 @@ BulkMaterial                JavaClass { com.ROLOS.Logistics.BulkMaterial        
 BulkMaterialProcessor       JavaClass { com.ROLOS.Logistics.BulkMaterialProcessor       } Palette { 'ROLOS' } DefaultDisplayModel 	{ ScreenPointsModelDefault 				}
 Stockpile                   JavaClass { com.ROLOS.Logistics.Stockpile                   } Palette { 'ROLOS' } DefaultDisplayModel 	{ ScreenPointsModelDefault 				}
 RouteSegment                JavaClass { com.ROLOS.Logistics.RouteSegment                 } Palette { 'ROLOS' } DefaultDisplayModel 	{ ScreenPointsModelDefault 				}
+RouteEntity                 JavaClass { com.ROLOS.Logistics.RouteEntity                 } Palette { 'ROLOS' } DefaultDisplayModel 	{ ScreenPointsModelDefault 				}
 ParkBlock                   JavaClass { com.ROLOS.Logistics.ParkBlock                   } Palette { 'ROLOS' } DefaultDisplayModel 	{ ScreenPointsModelDefault 				}
 LoadingBay                  JavaClass { com.ROLOS.Logistics.LoadingBay                  } Palette { 'ROLOS' } DefaultDisplayModel 	{ ScreenPointsModelDefault 				}
 Delay                       JavaClass { com.ROLOS.Logistics.Delay                       } Palette { 'ROLOS' } DragAndDrop 	{ FALSE 	}
