@@ -54,6 +54,14 @@ public class Route {
 		return tempRoute;
 	}
 	
+	public void addRouteSegmentsLast (LinkedList<DiscreteHandlingLinkedEntity> routesListToAdd){
+		routeSegmentsList.addAll(routesListToAdd);
+	}
+	
+	public void removeLast(){
+		routeSegmentsList.removeLast();
+	}
+	
 	public ArrayList<MovingEntity> getMovingEntitiesList(){
 		return movingEntitiesList;
 	}
@@ -109,7 +117,7 @@ public class Route {
 		else{
 			int index = 0;
 			for (DiscreteHandlingLinkedEntity each: routeSegmentsList){
-				if(each instanceof Transshipment){
+				if(each instanceof Transshipment && each != routeSegmentsList.getFirst() && each != routeSegmentsList.getLast()){
 					unitCost += each.getTravelCost(movingEntitiesList.get(index));
 					index++;
 				}

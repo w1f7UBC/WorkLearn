@@ -5,6 +5,7 @@ import com.jaamsim.input.Input;
 import com.jaamsim.input.Keyword;
 import com.jaamsim.input.ValueListInput;
 import com.jaamsim.units.DistanceUnit;
+import com.jaamsim.units.SpeedUnit;
 import com.sandwell.JavaSimulation.EntityListInput;
 import com.sandwell.JavaSimulation.EnumInput;
 import com.sandwell.JavaSimulation.InputErrorException;
@@ -64,8 +65,8 @@ public class RouteEntity extends DiscreteHandlingLinkedEntity {
 		lengthList.setValidRange(0.0d, Double.POSITIVE_INFINITY);
 		this.addInput(lengthList);
 		
-		speedLimitList = new ValueListInput("SpeedList", "Key Inputs", null);
-		speedLimitList.setUnitType(DistanceUnit.class);
+		speedLimitList = new ValueListInput("SpeedLimitList", "Key Inputs", null);
+		speedLimitList.setUnitType(SpeedUnit.class);
 		speedLimitList.setValidRange(0.0d, Double.POSITIVE_INFINITY);
 		this.addInput(speedLimitList);
 	}

@@ -1,5 +1,7 @@
 package com.ROLOS.Logistics;
 
+import com.jaamsim.input.Input;
+
 /**
  * Transshipment facility is a facility that is used as intermitent point for transportation.
  * transshipment facilities handle transportation from transshipment to destination, hence should define transporters list.
@@ -18,6 +20,11 @@ public class Transshipment extends Facility {
 	@Override
 	public double getTravelCost(MovingEntity movingEntity) {
 		return this.getOperatingCost();
+	}
+	
+	@Override
+	public void updateForInput(Input<?> in) {
+		super.updateForInput(in);
 	}
 
 }

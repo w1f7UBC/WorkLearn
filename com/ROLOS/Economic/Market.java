@@ -34,7 +34,7 @@ public class Market extends ROLOSEntity {
 		
 	private ArrayList<Facility> sellersList, buyersList;
 	
-	{
+	{ 
 		product = new EntityInput<BulkMaterial>(BulkMaterial.class, "Product", "Key Inputs", null);
 		this.addInput(product);
 		

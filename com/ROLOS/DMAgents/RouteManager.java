@@ -306,7 +306,7 @@ public class RouteManager extends DisplayEntity {
 			}
 		}
 		if (weightThroughTransshipment < destinationWeight){
-			return concatenateRoutes(setRoute(origin, destination, movingEntity, dijkstraComparator,routingRule),routeThroughTransshipment);
+			return concatenateRoutes(setRoute(origin, routeThroughTransshipment.getOrigin(), movingEntity, dijkstraComparator,routingRule),routeThroughTransshipment);
 		} else if (destinationWeight < Double.POSITIVE_INFINITY)
 			return setRoute(origin, destination, movingEntity, dijkstraComparator,routingRule);
 		
@@ -328,21 +328,30 @@ public class RouteManager extends DisplayEntity {
 
 	/**
 	 * Attaches the two
-	 * @param routesList
+	 * @param routeList
 	 * @return
 	 */
-	private static Route concatenateRoutes (Route... routesList){
-		LinkedList<Route> tempRoutesList = new LinkedList<>(Arrays.asList(routesList));
+	private static Route concatenateRoutes (Route... routeList){
+		LinkedList<Route> tempRoutesList = new LinkedList<>(Arrays.asList(routeList));
 		Route returnRoute = new Route(tempRoutesList.getFirst().getOrigin(), tempRoutesList.getLast().getDestination(), 0.0d, null, tempRoutesList.get(0).getRouteType());
 		double tempWeight = 0.0d;
 		for(int i =0; i < tempRoutesList.size(); i++){
 			tempWeight += tempRoutesList.get(i).getDijkstraWeight();
 			returnRoute.getTransportModeList().addAll(tempRoutesList.get(i).getTransportModeList());
 			returnRoute.getMovingEntitiesList().addAll(tempRoutesList.get(i).getMovingEntitiesList());
-			returnRoute.getRouteSegmentsList().addAll(tempRoutesList.get(i).getRouteSegmentsList());
+			returnRoute.addRouteSegmentsLast(tempRoutesList.get(i).getRouteSegmentsList());
 			if (i<tempRoutesList.size()-1)
-					returnRoute.getRouteSegmentsList().removeLast();
+					returnRoute.removeLast();
 		}
+		
+		returnRoute.setDijkstraWeight(tempWeight);
+		
+		String tempKey = getRouteName(returnRoute.getRouteSegmentsList().getFirst(), returnRoute.getRouteSegmentsList().getLast(),
+				returnRoute.getMovingEntitiesList().get(0));
+		routesList.add(tempKey, returnRoute);
+		RouteManager.printRouteReport(returnRoute.getRouteSegmentsList().getFirst(), returnRoute.getRouteSegmentsList().getLast(), 
+				returnRoute, null);
+		
 		return returnRoute;
 	}
 	
@@ -373,11 +382,18 @@ public class RouteManager extends DisplayEntity {
 		RouteManager.printRouteReport(origin, destination, tempRoute, null);
 		// remove dijkstraComparator in all route segments after setting up the
 		// route
-		for (DiscreteHandlingLinkedEntity each : path)
-			each.getDijkstraComparatorList().remove(dijkstraComparator);
+		removeDijkstraComparator(path,dijkstraComparator);
 		
 		return tempRoute;
 
+	}
+	
+	/**
+	 * removes the dijkstracomparator from all elements of the path
+	 */
+	private static void removeDijkstraComparator(ArrayList<DiscreteHandlingLinkedEntity> path, DijkstraComparator dijkstraComparator){
+		for (DiscreteHandlingLinkedEntity each : path)
+			each.getDijkstraComparatorList().remove(dijkstraComparator);
 	}
 	
 	// ////////////////////////////////////////////////////////////////////////////////////////////////////
