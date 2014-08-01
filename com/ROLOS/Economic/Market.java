@@ -191,6 +191,7 @@ public class Market extends ROLOSEntity {
 		public int compareTo(MarketOffer o) {
 			return this.marketOfferPrice >= o.getMarketOfferPrice() ? -1 : +1;
 		}
+		
 		public Facility getSeller() {
 			return seller;
 		}

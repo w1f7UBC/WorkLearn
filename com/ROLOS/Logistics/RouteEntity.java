@@ -14,6 +14,7 @@ import com.sandwell.JavaSimulation.StringListInput;
  * Implicit representation of route. i.e. travel and traffic on routeentities are not modeled explicitly.
  * RouteEntities can contain multiple segments, each segment will be implicit, and only be represented by
  * an array of inputs (map) including name, segments length, speedlimit, type.
+ *  TODO MERGE IT WITH ROUTE SEGMENT
  *  
  * @author Saeed Ghafghazi (email: saeedghaf@gmail.com) - Jul 25, 2014 
  * 
