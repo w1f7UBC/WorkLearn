@@ -65,9 +65,7 @@ public class FacilityOperationsManager extends FacilityManager {
 		super.startUp();
 		this.scheduleProcess(0.0d, 1, new ReflectionTarget(this, "resetPlannedStocks"));
 		
-		// priotiy 1 to activate before market manager
-		this.scheduleProcess(SimulationManager.getPlanningHorizon(), 1, new ReflectionTarget(this, "resetPlannedStocks"));
-			
+		
 	}
 	
 	public void resetPlannedStocks(){
@@ -75,6 +73,9 @@ public class FacilityOperationsManager extends FacilityManager {
 			this.getFacility().getStockList().set(each, 1, 0.0d);
 			this.getFacility().getStockList().set(each, 2, 0.0d);
 		}
+		// priotiy 1 to activate before market manager
+		this.scheduleProcess(SimulationManager.getPlanningHorizon(), 1, new ReflectionTarget(this, "resetPlannedStocks"));
+					
 	}
 	
 	public PriorityQueue<BulkHandlingRoute> getLoadingRoutesList() {
