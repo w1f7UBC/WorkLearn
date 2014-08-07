@@ -35,7 +35,7 @@ public class MarketManager extends ROLOSEntity {
 	@Override
 	public void startUp() {
 		super.startUp();
-		this.scheduleProcess(0.0d, 1, new ReflectionTarget(this, "activateMarkets"));
+		this.scheduleProcess(0.0d, 2, new ReflectionTarget(this, "activateMarkets"));
 
 	}
 	
@@ -68,6 +68,7 @@ public class MarketManager extends ROLOSEntity {
 					}
 				}
 				// TODO since this is just using a heuristic sellers market, when planning buyers production, offer prices from a buyer point of view is set
+				// Reseting planning information should be moved to the corresponding managers and scheduled for every planning horizon
 				for(Facility eachFacility: eachMarket.getBuyersList()){
 					for (ArrayList<ProcessingRoute> processingRoutesList: eachFacility.getOperationsManager().getProcessingRoutesList().getValues()) {
 						for (ProcessingRoute processingRoute: processingRoutesList) {
@@ -90,6 +91,7 @@ public class MarketManager extends ROLOSEntity {
 				eachMarket.runSellersMarket();
 			}
 		}
-		this.scheduleProcess(SimulationManager.getPlanningHorizon(), 1, new ReflectionTarget(this, "activateMarkets"));
+		// priotiy 2 to activate after reseting planed inputs from last period by operations manager
+		this.scheduleProcess(SimulationManager.getPlanningHorizon(), 2, new ReflectionTarget(this, "activateMarkets"));
 	}
 }
