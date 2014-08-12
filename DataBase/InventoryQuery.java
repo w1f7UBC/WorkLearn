@@ -56,8 +56,8 @@ public  class InventoryQuery extends Query {
 	}
 
 	public String updateStatement(Position position){
-		String latitude = position.latitude.toString().split("°")[0];
-		String longitude = position.longitude.toString().split("°")[0];
+		String latitude = position.latitude.toString().split("")[0];
+		String longitude = position.longitude.toString().split("")[0];
 		//System.out.println(latitude + " " + longitude);
 		//for the shape generator/loader in LayerManager class to create the shape show on map
 		String statement = "\"SELECT geom FROM fmu_1km"
