@@ -22,7 +22,7 @@ import com.sandwell.JavaSimulation.StringInput;
 
 public class ExcelObject extends Entity {
     private StringInput directory;
-    
+    private StringInput sheetname;
     private static final String USER_HOME = System.getProperty("user.home");
     public ExcelObject(){
     	
@@ -31,6 +31,8 @@ public class ExcelObject extends Entity {
     {
     	directory = new StringInput("directory","DataBase Properties",USER_HOME + "/Desktop/test.xls");
         this.addInput(directory);
+        sheetname = new StringInput("sheetname","DataBase Properties","");
+        this.addInput(sheetname);
     }
     public HSSFWorkbook returnWorkbook() throws IOException{
 	    FileInputStream file = new FileInputStream(new File(directory.getValue()));
@@ -38,7 +40,11 @@ public class ExcelObject extends Entity {
     	return workbook;
     	
     } 
-    
+    public HSSFSheet returnSheet() throws IOException {  
+    	HSSFSheet sheet = returnWorkbook().getSheetAt(0);
+        return sheet;
+    	
+    }
     /*public static final void main(String[] 
     		args) {
 
