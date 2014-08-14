@@ -129,8 +129,6 @@ public class Market extends ROLOSEntity {
 					continue;
 				}else{
 					offersList.add(new MarketOffer(sellersList.get(is), buyersList.get(ib), 
-							Tester.min(buyersList.get(ib).getStockList().getValueFor(product.getValue(), 2),
-									sellersList.get(is).getStockList().getValueFor(product.getValue(), 2)),
 							buyersList.get(ib).getStockList().getValueFor(product.getValue(), 7)));
 					ib++;
 				}
@@ -166,7 +164,13 @@ public class Market extends ROLOSEntity {
 			
 			if(!clearSupply.getValue() && Tester.lessCheckTolerance(tempOffer.getMarketOfferPrice(),0.0d))
 				break;
-				
+			
+			// set offers amount
+			//TODO offer amount is set here to avoid readjusting offer's amount every time a contract is established
+			tempOffer.setAmount(Tester.min(tempOffer.getSeller().getTransportationManager().getTransportersList().getValueFor(tempOffer.getTransporter(), 0)-tempOffer.getSeller().getTransportationManager().getTransportersList().getValueFor(tempOffer.getTransporter(), 1),
+									tempOffer.getBuyer().getStockList().getValueFor(product.getValue(), 2),
+									tempOffer.getSeller().getStockList().getValueFor(product.getValue(), 2)));
+					
 			this.establishContracts(offersList.get(0));
 			// clear and redo all market offers
 			//TODO use better implementation to keep offers and only change the changed ones
@@ -231,14 +235,13 @@ public class Market extends ROLOSEntity {
 		private MovingEntity transporter;
 		
 		private double amount, marketOfferPrice, estimatedTransportCost;
-		public MarketOffer(Facility seller, Facility buyer, double amount, double offeredPrice) {
+		public MarketOffer(Facility seller, Facility buyer, double offeredPrice) {
 			this.seller = seller;
 			this.buyer = buyer;
 			// TODO this assumes seller always transports
 			// TODO URGENT! add proposer transportaion cost cap!
 			Route tempRoute = seller.getTransportationManager().getLeastCostTranspotationRoute(product.getValue(), seller, buyer, Double.POSITIVE_INFINITY);
 			transporter = tempRoute.getMovingEntitiesList().get(0);
-			this.amount = Tester.min(amount,seller.getTransportationManager().getTransportersList().getValueFor(transporter, 0)-seller.getTransportationManager().getTransportersList().getValueFor(transporter, 1));
 			estimatedTransportCost = tempRoute.estimateTransportationCostonRoute(product.getValue());
 			marketOfferPrice = offeredPrice - estimatedTransportCost; 
 		}
@@ -272,7 +275,10 @@ public class Market extends ROLOSEntity {
 		public double getAmount() {
 			return amount;
 		}
-
+		
+		public void setAmount(double amount){
+			this.amount = amount;
+		}
 	}
 
 }
