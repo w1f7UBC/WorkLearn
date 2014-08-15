@@ -176,48 +176,6 @@ public class Market extends ROLOSEntity {
 			//TODO use better implementation to keep offers and only change the changed ones
 			offersList.remove(0);			
 		}
-				
-	/*	while(!sellersList.isEmpty() && ! buyersList.isEmpty()){
-			
-			//populate all offers
-			for(is=0; is< sellersList.size();){
- 				if(Tester.equalCheckTolerance(sellersList.get(is).getStockList().getValueFor(this.getProduct(), 2),0.0d)){
-					sellersList.remove(is);
-					continue;
-				}
-				for(ib=0; ib< buyersList.size();){
-					if(Tester.equalCheckTolerance(buyersList.get(ib).getStockList().getValueFor(this.getProduct(), 2),0.0d)){
-						buyersList.remove(ib);
-						continue;
-					}
-					// TODO assumes buyer is transporting and will remove from buyers list if transportation capacity is maxed out
-					if (buyersList.get(ib).getTransportationManager().getLeastCostTransporter(product.getValue(),buyersList.get(ib), sellersList.get(is)) == null){
-						buyersList.remove(ib);
-						continue;
-					}else{
-						offersList.add(new MarketOffer(sellersList.get(is), buyersList.get(ib), 
-								Tester.min(buyersList.get(ib).getStockList().getValueFor(product.getValue(), 2),
-										sellersList.get(is).getStockList().getValueFor(product.getValue(), 2)),
-								buyersList.get(ib).getStockList().getValueFor(product.getValue(), 7)));
-						ib++;
-					}
-				}
-				is++;
-				if(buyersList.isEmpty() || sellersList.isEmpty())
-					break;
-			}
-			if (!offersList.isEmpty()) {
-				//select the highest offer
-				Collections.sort(offersList);
-				// if the highest offer is negative break
-				if(Tester.lessCheckTolerance(offersList.get(0).getMarketOfferPrice(),0.0d))
-					break;
-				this.establishContracts(offersList.get(0));
-				// clear and redo all market offers
-				//TODO use better implementation to keep offers and only change the changed ones
-				offersList.clear();
-			}
-		}*/
 	}
 
 	/**
