@@ -41,6 +41,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 
+import worldwind.Renderer;
+
 import com.jaamsim.DisplayModels.DisplayModel;
 import com.jaamsim.DisplayModels.ImageModel;
 import com.jaamsim.DisplayModels.TextModel;
@@ -68,7 +70,6 @@ import com.jaamsim.render.OffscreenTarget;
 import com.jaamsim.render.PreviewCache;
 import com.jaamsim.render.RenderProxy;
 import com.jaamsim.render.RenderUtils;
-import com.jaamsim.render.Renderer;
 import com.jaamsim.render.TessFontKey;
 import com.jaamsim.render.WindowInteractionListener;
 import com.jaamsim.render.util.ExceptionLogger;
@@ -1535,11 +1536,6 @@ public class RenderManager implements DragSourceListener {
 
 	public void focusWindow(int windowID) {
 		renderer.focusWindow(windowID);
-	}
-
-	public void setCursorMode(int mode){
-		//renderer.setCursor(activeWindowID, mode);
-		renderer.setCursor(2, mode);
 	}
 	
 	/**

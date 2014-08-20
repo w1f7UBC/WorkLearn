@@ -1,19 +1,12 @@
-package newt;
+package worldwind;
 
+import gov.nasa.worldwind.awt.WorldWindowGLCanvas;
 import gov.nasa.worldwind.layers.Layer;
 import gov.nasa.worldwind.layers.LayerList;
-import gov.nasa.worldwindx.examples.util.ShapefileLoader;
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
+
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.lang.ProcessBuilder.Redirect;
-import java.util.Iterator;
+
 
 public class LayerManager {
 	//using a 32bit (64bit backwards compatible) pgsql2shp.exe to do the conversion
@@ -96,7 +89,7 @@ public class LayerManager {
 	}
 
 	//Loads shape file found at filePath into the given canvas under the name layer, if layer with same name already exists, it removes that layer.
-	public void addShape(WorldWindowNewtCanvas canvas, String filePath, String layer){
+	public void addShape(WorldWindowGLCanvas canvas, String filePath, String layer){
 		DefinedShapeLoader loader = new DefinedShapeLoader();
 		Layer toAdd = loader.createLayerFromSource(filePath);
 		toAdd.setPickEnabled(false);
@@ -110,7 +103,7 @@ public class LayerManager {
 	}
 	
 	//removes layer with the given name if it exists
-	public void removeLayer(WorldWindowNewtCanvas canvas, String layer){
+	public void removeLayer(WorldWindowGLCanvas canvas, String layer){
 		LayerList layerList=canvas.getModel().getLayers();
 		if (layerList.getLayerByName(layer)!=null){
 			layerList.remove(layerList.getLayerByName(layer));

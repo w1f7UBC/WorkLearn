@@ -421,12 +421,6 @@ public class GUIFrame extends JFrame implements EventTimeListener, EventErrorLis
 						return;
 					}
 				}
-				try {
-					InputAgent.loadDB(GUIFrame.this);
-				} catch (SQLException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
 			}
 		});
 		fileMenu.add(dataMenuItem);
@@ -904,38 +898,6 @@ public class GUIFrame extends JFrame implements EventTimeListener, EventErrorLis
 		} );
 		//mainToolBar.add( toolButtonRedo );
 		//mainToolBar.addSeparator(separatorDim);
-
-		// 8) Query Control buttons
-		mainToolBar.addSeparator(separatorDim);
-		JLabel viewLabel2 = new JLabel( "  Query Control:   " );
-		mainToolBar.add( viewLabel2 );
-
-		// 8a) None button
-		toolButtonNone = new JButton( "None" );
-		toolButtonNone.addActionListener( new ActionListener() {
-
-			@Override
-			public void actionPerformed( ActionEvent event ) {
-				if (RenderManager.isGood())
-					RenderManager.inst().setCursorMode(0);
-			}
-		} );
-		mainToolBar.add( toolButtonNone );
-
-		// 8b) Point button
-		toolButtonPoint = new JButton( "Point" );
-		toolButtonPoint.addActionListener( new ActionListener() {
-
-			@Override
-			public void actionPerformed( ActionEvent event ) {
-				if (RenderManager.isGood())
-					RenderManager.inst().setCursorMode(1);
-			}
-		} );
-		mainToolBar.add( toolButtonPoint );
-
-		// End creation of view control label and buttons
-
 		// Add toolbar to the window
 		getContentPane().add( mainToolBar, BorderLayout.NORTH );
 	}
