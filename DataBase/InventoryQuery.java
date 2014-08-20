@@ -32,7 +32,7 @@ public  class InventoryQuery extends Query {
 	public void updateForInput( Input<?> in ) {
 		super.updateForInput( in );
 	}
-	
+
 	@Override
 	public ResultSet execute(String latitude, String longitude, Boolean draw){
 		//System.out.println(latitude + " " + longitude);
