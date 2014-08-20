@@ -1,6 +1,7 @@
 
 package DataBase;
 
+import java.io.File;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -9,10 +10,11 @@ import java.util.Vector;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 
+import worldwind.WorldWindFrame;
+
 import com.jaamsim.input.Input;
 import com.jaamsim.input.Keyword;
 import com.sandwell.JavaSimulation.StringInput;
-import com.sandwell.JavaSimulation.Vec3dInput;
 
 public  class InventoryQuery extends Query {
 	public InventoryQuery(){
@@ -47,18 +49,27 @@ public  class InventoryQuery extends Query {
 				+ " WHERE st_contains(fmu_1km.geom, ST_GeomFromText('POINT("+longitude+" "+latitude+")', 4269))=true)"
 				+ " ORDER BY stid2, ABS(si2-si_1) ASC";
 		ResultSet resultset=getResultSet(statements);
-		if (draw==true && resultset!=null){
+		if (draw==true){
 			String toDraw = "\"SELECT geom FROM fmu_1km"
 					+ " WHERE gis_key=("
 					+ "SELECT gis_key"
 					+ " FROM fmu_1km"
 					+ " WHERE st_contains(fmu_1km.geom, ST_GeomFromText('POINT("+longitude+" "+latitude+")', 4269))=true);\"";
+			File file = getLayerManager().sql2shp(longitude+latitude, toDraw);
+			if (file!=null){
+				new WorldWindFrame.WorkerThread(file, WorldWindFrame.AppFrame).start();
+			}
 		}
-		return getResultSet(statements);
+		return resultset;
 	}
 	
-	public String queryAreaStatement(){
-		return "SELECT geom FROM ab_ten;";
+	@Override
+	public void executeArea(){
+		String statements="SELECT geom FROM ab_ten;";
+		File file = getLayerManager().sql2shp("ab_ten_area", statements);
+		if (file!=null){
+			new WorldWindFrame.WorkerThread(file, WorldWindFrame.AppFrame).start();
+		}
 	}
 
 	@Override

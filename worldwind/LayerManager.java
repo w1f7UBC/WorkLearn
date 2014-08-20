@@ -56,11 +56,15 @@ public class LayerManager {
 	
 	//generates a shapefile at fileDestination that encompasses the results that are returned from the query specified in the statement
 	//an improvement that can be made here is to include the data inside the shape file also and somehow use that data directly, right now it only returns a shape and a separate query is made for the data 
-	public String sql2shp(String fileName, String statement){
+	public File sql2shp(String fileName, String statement){
 		String fileDestination=destination+"\\"+fileName+".shp";
+		File destination = new File(fileDestination);
 		//Check outputs for the inputs going into the proccess builder by uncommenting these
 		//System.out.println(statement);
 		//System.out.println(exe+"\n" + fileDestination+"\n"+ip+"\n"+port+"\n"+user+"\n"+password+"\n"+db);
+		if (destination.exists()){
+			destination.delete();
+		}
 		Process process;
 		try {
 			process = new ProcessBuilder(exe, "-f", fileDestination, "-h", ip, "-p", port, "-u", user, "-P", password, db, statement).start();
@@ -75,9 +79,8 @@ public class LayerManager {
 			}
 			*/
 			process.waitFor();
-			File destination = new File(fileDestination);
 			if(destination.exists())
-				return fileDestination;
+				return destination;
 			else{
 				//System.out.println("Shapefile wasn't generated, check query or simply no results");
 				return null;

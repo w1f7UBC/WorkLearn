@@ -35,7 +35,6 @@ import java.awt.event.WindowEvent;
 import java.awt.geom.Rectangle2D;
 import java.io.File;
 import java.net.URL;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Locale;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -400,32 +399,7 @@ public class GUIFrame extends JFrame implements EventTimeListener, EventErrorLis
 		} );
 		fileMenu.add( configMenuItem );
 
-		// 3) "Open Database" menu item
-		JMenuItem dataMenuItem = new JMenuItem("Open Database...");
-		dataMenuItem.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent event) {
-				currentEvt.pause();
-				// check for unsaved changes
-				if (InputAgent.isSessionEdited()) {
-
-					int userOption = JOptionPane
-							.showConfirmDialog(
-									null,
-									"Opening a simulation will overwrite the existing simulation without saving changes.\n"
-											+ "Do you wish to continue opening a simulation?",
-									"Confirm Open", JOptionPane.YES_OPTION,
-									JOptionPane.WARNING_MESSAGE);
-
-					if (userOption == JOptionPane.NO_OPTION) {
-						return;
-					}
-				}
-			}
-		});
-		fileMenu.add(dataMenuItem);
-
-		// 4) "Save" menu item
+		// 3) "Save" menu item
 		saveConfigurationMenuItem = new JMenuItem( "Save" );
 		saveConfigurationMenuItem.setMnemonic( 'S' );
 		saveConfigurationMenuItem.addActionListener( new ActionListener() {
@@ -437,7 +411,7 @@ public class GUIFrame extends JFrame implements EventTimeListener, EventErrorLis
 		} );
 		fileMenu.add( saveConfigurationMenuItem );
 
-		// 5) "Save As..." menu item
+		// 4) "Save As..." menu item
 		JMenuItem saveConfigurationAsMenuItem = new JMenuItem( "Save As..." );
 		saveConfigurationAsMenuItem.setMnemonic( 'V' );
 		saveConfigurationAsMenuItem.addActionListener( new ActionListener() {
@@ -450,7 +424,7 @@ public class GUIFrame extends JFrame implements EventTimeListener, EventErrorLis
 		} );
 		fileMenu.add( saveConfigurationAsMenuItem );
 
-		// 6) "Import..." menu item
+		// 5) "Import..." menu item
 		JMenuItem importGraphicsMenuItem = new JMenuItem( "Import..." );
 		importGraphicsMenuItem.setMnemonic( 'I' );
 		importGraphicsMenuItem.addActionListener( new ActionListener() {
@@ -463,7 +437,7 @@ public class GUIFrame extends JFrame implements EventTimeListener, EventErrorLis
 		} );
 		fileMenu.add( importGraphicsMenuItem );
 
-		// 7) "Print Input Report" menu item
+		// 6) "Print Input Report" menu item
 		printInputItem = new JMenuItem( "Print Input Report" );
 		printInputItem.setMnemonic( 'I' );
 		printInputItem.addActionListener( new ActionListener() {
@@ -475,7 +449,7 @@ public class GUIFrame extends JFrame implements EventTimeListener, EventErrorLis
 		} );
 		fileMenu.add( printInputItem );
 
-		// 8) "Exit" menu item
+		// 7) "Exit" menu item
 		JMenuItem exitMenuItem = new JMenuItem( "Exit" );
 		exitMenuItem.setMnemonic( 'x' );
 		exitMenuItem.addActionListener(new CloseListener());

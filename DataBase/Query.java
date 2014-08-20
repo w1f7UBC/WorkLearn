@@ -1,6 +1,7 @@
 package DataBase;
 
 import java.awt.EventQueue;
+import java.io.File;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -14,6 +15,7 @@ import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 
 import worldwind.LayerManager;
+import worldwind.WorldWindFrame;
 
 import com.jaamsim.input.Input;
 import com.jaamsim.input.Keyword;
@@ -35,8 +37,9 @@ public class Query extends DisplayEntity {
 		this.addInput(targetDB);
 	}
 	
-	protected String table;
-	protected String statement;
+	private String table;
+	private String areaTable;
+	private String statement;
 	private LayerManager manager;
 		
 	public static ArrayList<Query> getAll() {
@@ -66,32 +69,46 @@ public class Query extends DisplayEntity {
 	}
 	
 	public ResultSet execute(Boolean draw){
-		ResultSet resultSet=getResultSet(statement);
-		if (draw==true && resultSet!=null){
-
+		if (draw==true){
+			File file = manager.sql2shp(table, statement);
+			if (file!=null){
+				new WorldWindFrame.WorkerThread(file, WorldWindFrame.AppFrame).start();
+			}
 		}
-		return resultSet;
+		return getResultSet(statement);
 	}
 	
 	public ResultSet execute(String name, Boolean draw){
 		String statements="SELECT * FROM " + table + " WHERE name=" + name;
-		ResultSet resultSet=getResultSet(statements);
-		if (draw==true && resultSet!=null){
-			
+		if (draw==true){
+			File file = manager.sql2shp(areaTable, statements);
+			if (file!=null){
+				new WorldWindFrame.WorkerThread(file, WorldWindFrame.AppFrame).start();
+			}
 		}
-		return resultSet;
+		return getResultSet(statements);
 	}
 	
 	public ResultSet execute(String latitude, String longitude, Boolean draw){
 		String statements="SELECT * FROM " + table + "WHERE st_contains("+table+".geom, ST_GeomFromText('POINT("+longitude+" "+latitude+")', 4269)";
-		ResultSet resultSet=getResultSet(statements);
-		if (draw==true && resultSet!=null){
-			
+		if (draw==true){
+			File file = manager.sql2shp(areaTable, statements);
+			if (file!=null){
+				new WorldWindFrame.WorkerThread(file, WorldWindFrame.AppFrame).start();
+			}
 		}
-		return resultSet;
+		return getResultSet(statements);
 	}
 	
-	protected ResultSet getResultSet(String statements){
+	public void executeArea(){
+		String statements="SELECT geom FROM " + areaTable;
+		File file = manager.sql2shp(areaTable, statements);
+		if (file!=null){
+			new WorldWindFrame.WorkerThread(file, WorldWindFrame.AppFrame).start();
+		}
+	}
+	
+	public ResultSet getResultSet(String statements){
 		try {
 			Statement st = targetDB.getValue().getConnection().createStatement();
 			ResultSet resultset = st.executeQuery(statements);
@@ -101,10 +118,6 @@ public class Query extends DisplayEntity {
 		}
 		return null;
     }
-    
-	public void drawResultContent(ResultSet resultset){
-		
-	}
 	
 	public void printResultContent(ResultSet restultset){  
 		try{
@@ -132,6 +145,7 @@ public class Query extends DisplayEntity {
 			return;
 		}
 	}
+
 	
 	@Override
 	public void updateForInput(Input<?> in) {
@@ -141,7 +155,7 @@ public class Query extends DisplayEntity {
 			
 	}
 	
-	protected void displayResultContent(final JTable content){
+	public void displayResultContent(final JTable content){
 		EventQueue.invokeLater(new Runnable() {
 			   @Override
 			   public void run() {  
@@ -149,10 +163,16 @@ public class Query extends DisplayEntity {
 				   final JScrollPane dataBasePanel = new JScrollPane();
 				   dataBasePanel.setViewportView(content);
 				   dataBaseFrame.add(dataBasePanel);
-				   dataBaseFrame.setBounds(GUIFrame.COL3_START+GUIFrame.COL3_WIDTH,GUIFrame.LOWER_START,GUIFrame.COL3_WIDTH,GUIFrame.LOWER_HEIGHT);
+				   dataBaseFrame.setSize(750, 305);
+	               dataBaseFrame.setLocation(1160, 735);
 				   dataBaseFrame.setVisible(true);
+				   dataBaseFrame.setIconImage(GUIFrame.getWindowIcon());
 			   }
 		});  
+	}
+	
+	public LayerManager getLayerManager(){
+		return manager;
 	}
 }
 

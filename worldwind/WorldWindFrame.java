@@ -43,9 +43,10 @@ import gov.nasa.worldwind.awt.WorldWindowGLCanvas;
  */
 public class WorldWindFrame extends ApplicationTemplate
 {
+	public static AppFrame AppFrame = null;
+	
     public static class AppFrame extends ApplicationTemplate.AppFrame
     {
-    	private LayerManager manager;
     	private QueryPanel queryPanel;
     	
         public AppFrame(){
@@ -74,8 +75,8 @@ public class WorldWindFrame extends ApplicationTemplate
                 	}
                 }
              });
+            AppFrame=this;
         }
-
         
         public void addShapefileLayer(Layer layer)
         {
@@ -115,7 +116,6 @@ public class WorldWindFrame extends ApplicationTemplate
                 controlFrame.setTitle("WorldView Controller");
                 controlFrame.setIconImage(GUIFrame.getWindowIcon());
                 controlFrame.setVisible(true);
-                
             }
 
             if (includeStatsPanel || System.getProperty("gov.nasa.worldwind.showStatistics") != null)
@@ -177,7 +177,7 @@ public class WorldWindFrame extends ApplicationTemplate
             this.shpSource = shpSource;
             this.appFrame = appFrame;
         }
-
+        
         public void run()
         {
             SwingUtilities.invokeLater(new Runnable()

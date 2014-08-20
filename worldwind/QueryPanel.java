@@ -1,7 +1,6 @@
 package worldwind;
 
 import java.awt.BorderLayout;
-import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -21,8 +20,6 @@ import javax.swing.JScrollPane;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.TitledBorder;
 
-import com.sandwell.JavaSimulation3D.DisplayEntity;
-
 import DataBase.Query;
 import gov.nasa.worldwind.WorldWindow;
 import gov.nasa.worldwindx.examples.FlatWorldPanel;
@@ -30,7 +27,6 @@ import gov.nasa.worldwindx.examples.FlatWorldPanel;
 
 public class QueryPanel extends JPanel{
 
-	private ArrayList<DisplayEntity>queryObjects;
 	private JList<String> querySelector;
 	private int mode=0;
 	
@@ -47,6 +43,8 @@ public class QueryPanel extends JPanel{
         final DefaultListModel<String> selection=new DefaultListModel<String>();
         querySelector=new JList<String>(selection);
         JScrollPane listScroller = new JScrollPane(querySelector); 
+        JPanel buttonPanel = new JPanel(new GridLayout(0, 1, 0, 0));
+        
         JButton refresh = new JButton("Refresh Queriables");
         refresh.addMouseListener(new MouseAdapter() {
             @Override
@@ -60,6 +58,21 @@ public class QueryPanel extends JPanel{
             	}
             }
         });
+        buttonPanel.add(refresh);
+        
+        JButton queryArea = new JButton("Plot queriables if exist");
+        queryArea.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+            	if (querySelector.getSelectedValue()!=null){
+            		if (querySelector.getSelectedValue()!="none"){
+            			Query query = getQueryObject();
+            			query.executeArea();
+            		}
+            	}
+            }
+        });
+        buttonPanel.add(queryArea);
         
         JPanel radioButtonPanel = new JPanel(new GridLayout(0, 2, 0, 0));
         JRadioButton noneRadioButton = new JRadioButton("None");
@@ -86,7 +99,7 @@ public class QueryPanel extends JPanel{
         group.add(pointRadioButton);
         
         selectorPanel.add(listScroller, BorderLayout.CENTER);
-        selectorPanel.add(refresh, BorderLayout.WEST);
+        selectorPanel.add(buttonPanel, BorderLayout.WEST);
         selectorPanel.add(radioButtonPanel, BorderLayout.SOUTH);
         selectorPanel.setBorder(new CompoundBorder(BorderFactory.createEmptyBorder(5, 9, 9, 9), new TitledBorder("Query Selector")));
         selectorPanel.setToolTipText("Set query target");
