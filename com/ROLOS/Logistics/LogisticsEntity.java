@@ -6,6 +6,9 @@ import com.ROLOS.ROLOSEntity;
 import com.ROLOS.Utils.TwoLinkedLists;
 import com.jaamsim.input.ValueInput;
 import com.jaamsim.input.ValueListInput;
+import com.jaamsim.units.CostPerEnergyUnit;
+import com.jaamsim.units.CostPerMassUnit;
+import com.jaamsim.units.CostPerVolumeUnit;
 import com.jaamsim.units.CostRateUnit;
 import com.jaamsim.units.CostUnit;
 import com.jaamsim.units.EnergyUnit;
@@ -30,35 +33,42 @@ import com.sandwell.JavaSimulation.TimeSeries;
 public class LogisticsEntity extends ReportableEntity {
 	
 	public enum Entity_State {
-		SOLID_DISCRETE (false, null, RateUnit.class),
-		SOLID_BULK_massbased (true,MassUnit.class,MassFlowUnit.class),
-		SOLID_BULK_volumetric (true,VolumeUnit.class,VolumeFlowUnit.class),
-		LIQUID (true, VolumeUnit.class,VolumeFlowUnit.class),
-		GAS (true, VolumeUnit.class,VolumeFlowUnit.class),
-		ENERGY (true,EnergyUnit.class, PowerUnit.class);
+		SOLID_DISCRETE (false, null, RateUnit.class,CostUnit.class),
+		SOLID_BULK_massbased (true,MassUnit.class,MassFlowUnit.class,CostPerMassUnit.class),
+		SOLID_BULK_volumetric (true,VolumeUnit.class,VolumeFlowUnit.class,CostPerVolumeUnit.class),
+		LIQUID (true, VolumeUnit.class,VolumeFlowUnit.class,CostPerVolumeUnit.class),
+		GAS (true, VolumeUnit.class,VolumeFlowUnit.class,CostPerVolumeUnit.class),
+		ENERGY (true,EnergyUnit.class, PowerUnit.class,CostPerEnergyUnit.class);
 		
 		private final boolean isBulk; 						//whether entity is a bulk entity
 		private final Class<? extends Unit> unit;			//entity's  unit of measurement
 		private final Class<? extends Unit> flowUnit; 		//entity's flow unit of measurement
+		private final Class<? extends Unit> costUnit; 		//entity's cost unit of measurement
 		private final String unitString;
 		private final String unitFlowString;
+		private final String costUnitString;
 		
-		Entity_State (boolean isBulk, Class<? extends Unit> unit, Class<? extends Unit> flowUnit) {
+		Entity_State (boolean isBulk, Class<? extends Unit> unit, Class<? extends Unit> flowUnit, Class<? extends Unit> costUnit) {
 			this.isBulk = isBulk;
 			this.unit = unit;
 			this.flowUnit = flowUnit;
+			this.costUnit = costUnit;
 			if(unit == null){
 				unitString = "";
 				unitFlowString = "/s";
+				costUnitString = "$";
 			}else if (unit.getSimpleName().equals("MassUnit")){
 				unitString = "kg";
 				unitFlowString = "kg/s";
+				costUnitString = "$/kg";
 			} else if (unit.getSimpleName().equals("VolumeUnit")){
 				unitString = "m3";
 				unitFlowString = "m3/s";
+				costUnitString = "$/m3";
 			} else {
 				unitString = "J";
 				unitFlowString = "J/s";
+				costUnitString = "$/J";
 			}
 		}
 	}
@@ -124,7 +134,7 @@ public class LogisticsEntity extends ReportableEntity {
 		fixedCost.setUnitType(CostUnit.class);
 		this.addInput(fixedCost);
 
-		operatingCost = new ValueInput("OperatingCost", "Economic", null);
+		operatingCost = new ValueInput("OperatingCost", "Economic", 0.0d);
 		operatingCost.setUnitType(CostRateUnit.class);
 		this.addInput(operatingCost);
 
@@ -203,6 +213,14 @@ public class LogisticsEntity extends ReportableEntity {
 	
 	public Class<? extends Unit> getEntityFlowUnit() {
 		return entityMatterState.getValue().flowUnit;
+	}
+	
+	public Class<? extends Unit> getEntityCostUnit() {
+		return entityMatterState.getValue().costUnit;
+	}
+	
+	public String getEntityCostUnitString(){
+		return entityMatterState.getValue().costUnitString;
 	}
 
 	@SuppressWarnings("unchecked")

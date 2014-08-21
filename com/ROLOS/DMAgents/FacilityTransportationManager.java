@@ -21,10 +21,13 @@ import com.ROLOS.Logistics.RouteSegment;
 import com.ROLOS.Logistics.Stockpile;
 import com.ROLOS.Utils.HashMapList;
 import com.ROLOS.Utils.TwoLinkedLists;
+import com.sandwell.JavaSimulation.BooleanInput;
+import com.sandwell.JavaSimulation.DoubleVector;
 import com.sandwell.JavaSimulation.EntityListInput;
 import com.sandwell.JavaSimulation.InputErrorException;
 import com.jaamsim.input.Input;
 import com.jaamsim.input.Keyword;
+import com.jaamsim.input.ValueListInput;
 import com.sandwell.JavaSimulation.Tester;
 
 
@@ -34,6 +37,10 @@ public class FacilityTransportationManager extends FacilityManager {
 			+ "These transporters should correspond to fleets' prototypes. I.e. these cost structures apply to the fleet", 
 			example = "Temiscaming/TransportationManager Transporters { Truck1 Truck2 Train1 Train2 }")
 	private final EntityListInput<MovingEntity> transportersList;
+
+	@Keyword(description = "Whether transshipment is allowed in calaculating routes. Default is false.", 
+			example = "Temiscaming/TransportationManager TransshipmentAllowed { TRUE }")
+	private final BooleanInput transshipmentAllowed;
 	
 	private TwoLinkedLists<MovingEntity> transportationCapacityList;
 
@@ -43,9 +50,11 @@ public class FacilityTransportationManager extends FacilityManager {
 		
 	{
 		
-		transportersList = new EntityListInput<>(MovingEntity.class, "Transporters", "Key Inputs", null);
+		transportersList = new EntityListInput<>(MovingEntity.class, "Transporters", "Key Inputs", new ArrayList<MovingEntity>(0));
 		this.addInput(transportersList);
 		
+		transshipmentAllowed = new BooleanInput("TransshipmentAllowed", "Key Inputs", false);
+		this.addInput(transshipmentAllowed);
 	}
 	
 	public FacilityTransportationManager() {
@@ -205,7 +214,7 @@ public class FacilityTransportationManager extends FacilityManager {
 		for(MovingEntity each: transportersList.getValue()){
 			if(each.getAcceptingBulkMaterialList().contains(bulkMaterial)){
 				foundMovingEntity = true;
-				tempRoute = RouteManager.getRoute(origin, destination, each, bulkMaterial, Route_Type.LEASTCOST, transportaionCostCap);
+				tempRoute = RouteManager.getRoute(origin, destination, each, bulkMaterial, Route_Type.LEASTCOST, transshipmentAllowed.getValue(), transportaionCostCap);
 				if(Tester.greaterOrEqualCheckTolerance(transportationCapacityList.getValueFor(each, 0) - transportationCapacityList.getValueFor(each, 1),0.0d) &&
 					tempRoute != null){
 					tempCost = tempRoute.estimateTransportationCostonRoute(bulkMaterial);
@@ -238,7 +247,7 @@ public class FacilityTransportationManager extends FacilityManager {
 		for(MovingEntity each: transportersList.getValue()){
 			if(each.getAcceptingBulkMaterialList().contains(bulkMaterial)){
 				foundMovingEntity = true;
-				tempRoute = RouteManager.getRoute(origin, destination, each, bulkMaterial, Route_Type.FASTEST, travelTimeCap);
+				tempRoute = RouteManager.getRoute(origin, destination, each, bulkMaterial, Route_Type.FASTEST, transshipmentAllowed.getValue(), travelTimeCap);
 				if(Tester.greaterCheckTolerance(transportationCapacityList.getValueFor(each, 0) - transportationCapacityList.getValueFor(each, 1),0.0d) &&
 					tempRoute != null){
 					tempTime = tempRoute.estimateTravelTimeonRoute();
@@ -271,7 +280,7 @@ public class FacilityTransportationManager extends FacilityManager {
 		for(MovingEntity each: transportersList.getValue()){
 			if(each.getAcceptingBulkMaterialList().contains(bulkMaterial)){
 				foundMovingEntity = true;
-				tempRoute = RouteManager.getRoute(origin, destination, each, bulkMaterial, Route_Type.SHORTEST, distanceCap);
+				tempRoute = RouteManager.getRoute(origin, destination, each, bulkMaterial, Route_Type.SHORTEST, transshipmentAllowed.getValue(), distanceCap);
 				if(Tester.greaterCheckTolerance(transportationCapacityList.getValueFor(each, 0) - transportationCapacityList.getValueFor(each, 1),0.0d) &&
 					tempRoute != null){
 					tempLength = tempRoute.getLength();
@@ -409,5 +418,6 @@ public class FacilityTransportationManager extends FacilityManager {
 				transportersMap.add(each.getTransportMode(), each);
 			}
 		}
+		
 	}
 }

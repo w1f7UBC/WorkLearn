@@ -86,7 +86,6 @@ public class Facility extends DiscreteHandlingLinkedEntity {
 		new TwoLinkedLists<>(4, new DescendingPriotityComparator<BulkMaterial>(ROLOSEntity.class, "getInternalPriority"),0);
 		
 		stocksList = new TwoLinkedLists<>(9, new DescendingPriotityComparator<BulkMaterial>(ROLOSEntity.class, "getInternalPriority"));
-		new TwoLinkedLists<>(2, new DescendingPriotityComparator<BulkMaterial>(ROLOSEntity.class, "getInternalPriority"));
 		
 		synchronized (allInstances) {
 			allInstances.add(this);

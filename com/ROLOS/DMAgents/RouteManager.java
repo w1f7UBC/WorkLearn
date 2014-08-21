@@ -116,18 +116,18 @@ public class RouteManager extends DisplayEntity {
 				.getFacilityEntranceBlock(movingEntity, destinationBay);
 
 			//origin to exit block 
-			tempRoute = RouteManager.getRoute(originBay, exit,movingEntity, null, Route_Type.SHORTEST, Double.POSITIVE_INFINITY);
+			tempRoute = RouteManager.getRoute(originBay, exit,movingEntity, null, Route_Type.SHORTEST, false, Double.POSITIVE_INFINITY);
 			distance += tempRoute.getDijkstraWeight();
 			ArrayList<DiscreteHandlingLinkedEntity> tempRouteSegments = new ArrayList<>(
 				tempRoute.getRouteSegmentsList());
 			
 			//exit to entrance
-			tempRoute = RouteManager.getRoute(exit, entrance,movingEntity, null, Route_Type.SHORTEST, Double.POSITIVE_INFINITY);
+			tempRoute = RouteManager.getRoute(exit, entrance,movingEntity, null, Route_Type.SHORTEST, false, Double.POSITIVE_INFINITY);
 			distance += tempRoute.getDijkstraWeight();
 			tempRouteSegments.addAll(tempRoute.getRouteSegmentsList());
 
 			//entrance to destination bay
-			tempRoute = RouteManager.getRoute(entrance,destinationBay,movingEntity, null, Route_Type.SHORTEST, Double.POSITIVE_INFINITY);
+			tempRoute = RouteManager.getRoute(entrance,destinationBay,movingEntity, null, Route_Type.SHORTEST, false, Double.POSITIVE_INFINITY);
 			distance += tempRoute.getDijkstraWeight();
 			tempRouteSegments.addAll(tempRoute.getRouteSegmentsList());
 			
@@ -135,7 +135,7 @@ public class RouteManager extends DisplayEntity {
 			finalRoute.setRoute(tempRouteSegments);
 			routesList.add(routeName, finalRoute);
 		} else{
-			finalRoute = RouteManager.getRoute(originBay, destinationBay, movingEntity, null, Route_Type.SHORTEST, Double.POSITIVE_INFINITY);
+			finalRoute = RouteManager.getRoute(originBay, destinationBay, movingEntity, null, Route_Type.SHORTEST, false, Double.POSITIVE_INFINITY);
 		}
 		return finalRoute;
 	}
@@ -150,7 +150,7 @@ public class RouteManager extends DisplayEntity {
 	 * existed. null if such route doesn't exist. 
 	 */
 	public static <T extends DiscreteHandlingLinkedEntity> Route getRoute(T origin,
-			T destination, MovingEntity movingEntity, BulkMaterial bulkMaterial, Route_Type routingRule, double weightCap) {
+			T destination, MovingEntity movingEntity, BulkMaterial bulkMaterial, Route_Type routingRule, boolean transshipmentAllowed, double weightCap) {
 		String tempKey = getRouteName(origin, destination, movingEntity);
 		
 		if(unResolvedRoutesList.get(movingEntity).contains(tempKey))
@@ -168,7 +168,7 @@ public class RouteManager extends DisplayEntity {
 		if (tempRoute != null)
 				return tempRoute;
 		else
-			return computeDijkstraPath(origin, destination, movingEntity, bulkMaterial, routingRule,weightCap);
+			return computeDijkstraPath(origin, destination, movingEntity, bulkMaterial, routingRule,transshipmentAllowed, weightCap);
 	}
 
 	// ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -188,7 +188,7 @@ public class RouteManager extends DisplayEntity {
 	 * travel time cap is set to 12 hrs and routes exceed that, they'd get cut off.
 	 */
 	public static <T extends DiscreteHandlingLinkedEntity> Route computeDijkstraPath(
-			T origin, T destination, MovingEntity movingEntity, BulkMaterial bulkMaterial, Route_Type routingRule, double weightCap) {
+			T origin, T destination, MovingEntity movingEntity, BulkMaterial bulkMaterial, Route_Type routingRule, boolean transshipmentAllowed, double weightCap) {
 		double destinationWeight = Double.POSITIVE_INFINITY;
 		double weightThroughTransshipment = Double.POSITIVE_INFINITY;
 		Route routeThroughTransshipment = null;
@@ -204,6 +204,9 @@ public class RouteManager extends DisplayEntity {
 			double weightThroughU;
 			// Visit each edge exiting u
 			for (LinkedEntity each : u.getNextLinkedEntityList()) {
+				if(each instanceof Transshipment && !transshipmentAllowed)
+					continue;
+				
 				// create a new entry for discrete entity's dijkstra list and
 				// set value to infinity
 				if (!((DiscreteHandlingLinkedEntity) each)

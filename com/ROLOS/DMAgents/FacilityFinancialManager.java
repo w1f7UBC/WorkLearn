@@ -57,7 +57,7 @@ public class FacilityFinancialManager extends FacilityManager {
 	 */
 	public void setOfferPrices(ProcessingRoute processingRoute){
 		for(LogisticsEntity eachMaterial: processingRoute.getProcessor().getHandlingEntityTypeList()){
-			this.getFacility().setStocksList((BulkMaterial) eachMaterial, 7, calcPurchaseOfferPrice((BulkMaterial) eachMaterial,processingRoute));
+			this.getFacility().setStocksList((BulkMaterial) eachMaterial, 7, calcPurchasePowerPrice((BulkMaterial) eachMaterial,processingRoute));
 		}
 		//TODO set min selling price?
 	}
@@ -65,14 +65,19 @@ public class FacilityFinancialManager extends FacilityManager {
 	 * TODO refactor to engineering economic calculations
 	 * TODO this method assumes only one input and one output, refactor to allocate value based on 
 	 * multiple inputs and outputs
+	 * TODO Until negative revenue is figured out, will return 0 for negative purchase power!!!
 	 * @return purchase offer per unit of inputMaterial so that processing breakevens!(or zero if offer is negative!- should make better production planning!)
 	 */
-	public double calcPurchaseOfferPrice(BulkMaterial inputMaterial, ProcessingRoute processingRoute){
-		return Tester.max(0.0d,this.calcRevenue(inputMaterial,processingRoute)/processingRoute.getCapacityRatio(inputMaterial, processingRoute.getProcessor().getPrimaryProduct()));
+	public double calcPurchasePowerPrice(BulkMaterial inputMaterial, ProcessingRoute processingRoute){
+		double inputRatio = processingRoute.getCapacityRatio(inputMaterial, processingRoute.getProcessor().getPrimaryProduct());
+		
+		return Tester.greaterCheckTolerance(inputRatio, 0.0d)? 
+				Tester.max(0.0d,this.calcRevenue(inputMaterial,processingRoute)/inputRatio): 0.0d;
+		
 	}
 	
 	/**
-	 * <b> This method should be caled after production planning </b>
+	 * <b> This method should be called after production planning </b>
 	 * @param inputMaterial the infeed material (alternative) whose revenue will be calculated for the processing route
 	 * TODO refactor for engineering economic calculations, assumes revenue is only generated from
 	 * the main product!
@@ -90,9 +95,7 @@ public class FacilityFinancialManager extends FacilityManager {
 				//TODO use more generic definition for fixed cost (e.g. adding individual processes fixed costs)
 						this.getFacility().getFixedCost(getSimTime(), this.getSimTime()+ SimulationManager.getPlanningHorizon())/
 						this.getFacility().getStockList().getValueFor(processingRoute.getProcessor().getPrimaryProduct(), 1));
-		// Until negative revenue is figured out, throw an error for those situations
-		if(Tester.lessCheckTolerance(revenue, 0.0d))
-			return 0.0d;
+		
 		return revenue;
 	}
 

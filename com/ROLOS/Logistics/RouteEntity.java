@@ -24,7 +24,7 @@ import com.sandwell.JavaSimulation.StringListInput;
 public class RouteEntity extends DiscreteHandlingLinkedEntity {
 
 	@Keyword(description = "The transportation mode that this moving entity is allowed to travel on.", 
-			example = "Truck TransportMode { ROAD }")
+			example = "Route1 TransportMode { ROAD }")
 	private final EnumInput<Transport_Mode> transportMode;
 	
 	@Keyword(description = "The list of origins.", 

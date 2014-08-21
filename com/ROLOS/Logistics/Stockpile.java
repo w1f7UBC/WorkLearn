@@ -4,8 +4,8 @@ import java.util.LinkedList;
 
 import com.jaamsim.input.ValueInput;
 import com.jaamsim.units.Unit;
-
 import com.jaamsim.input.Keyword;
+import com.sandwell.JavaSimulation.ErrorException;
 import com.sandwell.JavaSimulation.Tester;
 
 public class Stockpile extends BulkMaterialStorage {
@@ -36,6 +36,9 @@ public class Stockpile extends BulkMaterialStorage {
 	@Override
 	public void validate() {
 		super.validate();
+		if(this.getFacility() == null)
+			throw new ErrorException("Facility for %s is not set!", this.getName());
+		
 		this.getFacility().addToStocksList((BulkMaterial) this.getHandlingEntityTypeList().get(0), 3, this.getCapacity());
 		
 		// populate bulk handling routes

@@ -13,7 +13,7 @@ import com.jaamsim.units.DistanceUnit;
 import com.jaamsim.units.Unit;
 import com.sandwell.JavaSimulation.EntityInput;
 import com.sandwell.JavaSimulation.ErrorException;
-
+import com.sandwell.JavaSimulation.InputErrorException;
 import com.jaamsim.input.Keyword;
 import com.sandwell.JavaSimulation.Vec3dInput;
 import com.sandwell.JavaSimulation3D.DisplayEntity;
@@ -82,9 +82,11 @@ public class BulkHandlingLinkedEntity extends LinkedEntity {
 
 	{		
 		
-		rate = new ValueInput("Rate", "Key Inputs", 0.0d);
+		rate = new ValueInput("Rate", "Key Inputs", Double.POSITIVE_INFINITY);
 		rate.setValidRange(0.0d, Double.POSITIVE_INFINITY);
 		this.addInput(rate);
+		this.addSynonym(rate, "MaxRate");
+		this.addSynonym(rate, "InfeedRate");
 
 		rateByEntityType = new ValueListInput("RateByEntityType", "Key Inputs", null);
 		rateByEntityType.setValidRange(0.0d, Double.POSITIVE_INFINITY);

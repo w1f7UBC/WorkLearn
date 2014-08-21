@@ -6,8 +6,8 @@ import java.util.Comparator;
 
 import com.sandwell.JavaSimulation.Entity;
 import com.sandwell.JavaSimulation.ErrorException;
-
 import com.sandwell.JavaSimulation.IntegerInput;
+import com.jaamsim.input.Input;
 import com.jaamsim.input.Keyword;
 import com.sandwell.JavaSimulation3D.DisplayEntity;
 
@@ -31,6 +31,13 @@ public class ROLOSEntity extends DisplayEntity  {
 	
 	public ROLOSEntity() {
 	}
+	
+	@Override
+	public void updateForInput(Input<?> in) {
+		super.updateForInput(in);
+		if(in == priority)
+			this.setInternalPriority(priority.getValue());
+	}
 		
 	@Override
 	public void validate() {
@@ -40,7 +47,6 @@ public class ROLOSEntity extends DisplayEntity  {
 	@Override
 	public void earlyInit() {
 		super.earlyInit();
-		this.setInternalPriority(priority.getValue());
 	}
 
 	/**

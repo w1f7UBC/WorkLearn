@@ -26,7 +26,7 @@ public class TrafficController extends DisplayEntity {
 		DiscreteHandlingLinkedEntity origin = movingEntity.getHeadRoute();
 		DiscreteHandlingLinkedEntity destination = movingEntity.getCurrentDestination();
 		// TODO add logic for planning route i.e. loaded vs. unloaded for passing bulkmaterial or route-type!
-		Route tempRoute = RouteManager.getRoute(origin, destination, movingEntity, null, Route_Type.FASTEST, Double.POSITIVE_INFINITY);
+		Route tempRoute = RouteManager.getRoute(origin, destination, movingEntity, null, Route_Type.FASTEST, false, Double.POSITIVE_INFINITY);
 		if (tempRoute == null){
 			throw new ErrorException("%s tried to travel from %s to %s but there is not any accessible route between the two destinations!",movingEntity.getName(),
 					origin.getName(),destination.getName());
