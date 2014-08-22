@@ -13,21 +13,10 @@ import javax.swing.table.DefaultTableModel;
 import worldwind.WorldWindFrame;
 
 import com.jaamsim.input.Input;
-import com.jaamsim.input.Keyword;
-import com.sandwell.JavaSimulation.StringInput;
 
 public  class InventoryQuery extends Query {
 	public InventoryQuery(){
 		super.getAll().add(this);
-	}
-
-	@Keyword(description = "query statement")
-	private StringInput querystatment;
-	
-	{
-		
-		querystatment = new StringInput("statement","Query property","");
-		this.addInput(querystatment);
 	}
 
 	@Override
@@ -36,7 +25,7 @@ public  class InventoryQuery extends Query {
 	}
 
 	@Override
-	public ResultSet execute(String latitude, String longitude, Boolean draw){
+	public ResultSet execute(String name, String latitude, String longitude, Boolean draw){
 		//System.out.println(latitude + " " + longitude);
 		//for the shape generator/loader in LayerManager class to create the shape show on map
 		//for querying the actual data that is represented in the selected/generated area
@@ -55,7 +44,7 @@ public  class InventoryQuery extends Query {
 					+ "SELECT gis_key"
 					+ " FROM fmu_1km"
 					+ " WHERE st_contains(fmu_1km.geom, ST_GeomFromText('POINT("+longitude+" "+latitude+")', 4269))=true);\"";
-			File file = getLayerManager().sql2shp(longitude+latitude, toDraw);
+			File file = getLayerManager().sql2shp(name, toDraw);
 			if (file!=null){
 				new WorldWindFrame.WorkerThread(file, WorldWindFrame.AppFrame).start();
 			}
@@ -73,7 +62,7 @@ public  class InventoryQuery extends Query {
 	}
 
 	@Override
-	public void printResultContent(ResultSet resultset){
+	public void printResultContent(String name, ResultSet resultset){
 		try {
 	    	ResultSetMetaData metaData = resultset.getMetaData();
 		    // names of columns
@@ -123,7 +112,7 @@ public  class InventoryQuery extends Query {
 		    	}
 			    data.add(vector);
 		    }
-		    displayResultContent(new JTable(new DefaultTableModel(data, columnNames)));		
+		    displayResultContent(name, new JTable(new DefaultTableModel(data, columnNames)));		
 		}catch (SQLException e) {
 			e.printStackTrace();
 			return;

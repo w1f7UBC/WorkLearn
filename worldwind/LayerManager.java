@@ -90,26 +90,4 @@ public class LayerManager {
 		}
 		return null;
 	}
-
-	//Loads shape file found at filePath into the given canvas under the name layer, if layer with same name already exists, it removes that layer.
-	public void addShape(WorldWindowGLCanvas canvas, String filePath, String layer){
-		DefinedShapeLoader loader = new DefinedShapeLoader();
-		Layer toAdd = loader.createLayerFromSource(filePath);
-		toAdd.setPickEnabled(false);
-		toAdd.setName(layer);
-		
-		LayerList layerList = canvas.getModel().getLayers();
-		if (layerList.getLayerByName(layer)!=null){
-			layerList.remove(layerList.getLayerByName(layer));
-		}
-		layerList.add(toAdd);
-	}
-	
-	//removes layer with the given name if it exists
-	public void removeLayer(WorldWindowGLCanvas canvas, String layer){
-		LayerList layerList=canvas.getModel().getLayers();
-		if (layerList.getLayerByName(layer)!=null){
-			layerList.remove(layerList.getLayerByName(layer));
-		}
-	}
 }

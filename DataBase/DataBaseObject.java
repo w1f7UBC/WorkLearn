@@ -8,7 +8,7 @@ import com.sandwell.JavaSimulation.StringInput;
 
 public class DataBaseObject extends Entity {
 	
-	@Keyword(description = "URL",example = "Test URL {jdbc:postgresql://25.141.219.39:5432/fom}")
+	@Keyword(description = "URL",example = "Test URL {jdbc:postgresql://142.103.228.134:5432/fom}")
 	private  StringInput url;
 	private  StringInput username;
 	private StringInput password;
@@ -20,7 +20,7 @@ public class DataBaseObject extends Entity {
 }
 
 {
-		url = new StringInput("url","DataBase Properties","jdbc:postgresql://25.141.219.39:5432/fom");
+		url = new StringInput("url","DataBase Properties","jdbc:postgresql://142.103.228.134:5432/fom");
 		this.addInput(url);
 		username = new StringInput("username","DataBase Properties","sde");
         this.addInput(username);

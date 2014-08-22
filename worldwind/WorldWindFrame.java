@@ -13,6 +13,7 @@ import gov.nasa.worldwind.exception.WWAbsentRequirementException;
 import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.geom.Sector;
 import gov.nasa.worldwind.layers.Layer;
+import gov.nasa.worldwind.layers.LayerList;
 import gov.nasa.worldwind.layers.ViewControlsLayer;
 import gov.nasa.worldwind.layers.ViewControlsSelectListener;
 import gov.nasa.worldwind.util.*;
@@ -30,6 +31,7 @@ import DataBase.Query;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
+import java.sql.ResultSet;
 
 import gov.nasa.worldwind.awt.WorldWindowGLCanvas;
 
@@ -65,9 +67,11 @@ public class WorldWindFrame extends ApplicationTemplate
                 			if (position!=null && queryPanel.getMode()==1){
                 				Query query = queryPanel.getQueryObject();
                 				if (query!=null){
-                					String latitude = position.latitude.toString().split("°")[0];
-                					String longitude = position.longitude.toString().split("°")[0];
-                					query.printResultContent(query.execute(latitude, longitude, true));
+                					String lat = position.latitude.toString().split("°")[0];
+                					String lon = position.longitude.toString().split("°")[0];
+                					String name = query.getName()+"("+lat+","+lon+")";
+                					ResultSet resultset=query.execute(name, lat, lon, true);
+                					query.printResultContent(name, resultset);
                 				}
                 				position=null;
                 			}
@@ -81,8 +85,16 @@ public class WorldWindFrame extends ApplicationTemplate
         public void addShapefileLayer(Layer layer)
         {
             this.getWwd().getModel().getLayers().add(layer);
+            System.out.println(this.getWwd().getModel().getLayers());
         }
 
+        public void removeShapefileLayer(String layer) {
+			LayerList layerList=this.getWwd().getModel().getLayers();
+			if (layerList.getLayerByName(layer)!=null){
+				layerList.remove(layerList.getLayerByName(layer));
+			}
+		}
+        
         public void gotoLayer(Layer layer)
         {
             Sector sector = (Sector) layer.getValue(AVKey.SECTOR);
@@ -91,6 +103,8 @@ public class WorldWindFrame extends ApplicationTemplate
                 ExampleUtil.goTo(this.getWwd(), sector);
             }
         }
+        
+        
         
         @Override
         protected void initialize(boolean includeStatusBar, boolean includeLayerPanel, boolean includeStatsPanel)
@@ -164,7 +178,6 @@ public class WorldWindFrame extends ApplicationTemplate
             WWUtil.alignComponent(null, this, AVKey.CENTER);
             this.setResizable(true);
         }
-
     }
     
     public static class WorkerThread extends Thread
@@ -249,7 +262,6 @@ public class WorldWindFrame extends ApplicationTemplate
             name = WWIO.getFilename(name);
         if (name == null)
             name = "Shapefile";
-
         return name;
     }
 

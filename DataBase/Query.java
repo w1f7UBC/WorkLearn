@@ -1,6 +1,8 @@
 package DataBase;
 
 import java.awt.EventQueue;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.File;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -21,31 +23,47 @@ import com.jaamsim.input.Input;
 import com.jaamsim.input.Keyword;
 import com.sandwell.JavaSimulation.EntityInput;
 import com.sandwell.JavaSimulation.InputErrorException;
+import com.sandwell.JavaSimulation.StringInput;
 import com.sandwell.JavaSimulation3D.DisplayEntity;
 import com.sandwell.JavaSimulation3D.GUIFrame;
 
 public class Query extends DisplayEntity {
+	private LayerManager manager;
 	private static final ArrayList<Query> allInstances;
 	static {
 		allInstances = new ArrayList<Query>();
 	}
-	
 	@Keyword(description = "target databaseobject of the query")
 	private  EntityInput<DataBaseObject> targetDB;
+	@Keyword(description = "target table within database to query off of")
+	private StringInput table;
+	@Keyword(description = "target table within database that describes the queriable area")
+	private StringInput areaTable;
+	@Keyword(description = "Statement that will be used should execute(boolean draw) should be called")
+	private StringInput statement;
 	{
-		targetDB = new EntityInput<>(DataBaseObject.class, "TargetDatabase","Key Inputs", null);
+		targetDB = new EntityInput<>(DataBaseObject.class, "TargetDatabase","Query Properties", null);
 		this.addInput(targetDB);
+		table = new StringInput("TargetTable", "Query Properties", "");
+		this.addInput(table);
+		areaTable = new StringInput("AreaTable", "Query Properties", "");
+		this.addInput(areaTable);
+		statement = new StringInput("Statement", "Query Properties", "");
+		this.addInput(statement);
 	}
-	
-	private String table;
-	private String areaTable;
-	private String statement;
-	private LayerManager manager;
 		
 	public static ArrayList<Query> getAll() {
 		synchronized (allInstances) {
 			return allInstances;
 		}
+	}
+	
+	@Override
+	public void updateForInput(Input<?> in) {
+		super.updateForInput(in);
+		if(in== targetDB)
+			manager = new LayerManager(targetDB.getValue().getURL(), targetDB.getValue().getUserName(), targetDB.getValue().getPassword());
+			
 	}
 	
 	@Override
@@ -59,29 +77,29 @@ public class Query extends DisplayEntity {
 	
 	//change the default statement in this object
 	public void setStatement(String statements){
-		statement=statements;
+		statement.setValueString(statements);
 		return;
 	}
 	
 	public void setTable(String tables){
-		table=tables;
+		table.setValueString(tables);
 		return;
 	}
 	
 	public ResultSet execute(Boolean draw){
 		if (draw==true){
-			File file = manager.sql2shp(table, statement);
+			File file = manager.sql2shp("Statement", statement.getValue());
 			if (file!=null){
 				new WorldWindFrame.WorkerThread(file, WorldWindFrame.AppFrame).start();
 			}
 		}
-		return getResultSet(statement);
+		return getResultSet(statement.getValue());
 	}
 	
 	public ResultSet execute(String name, Boolean draw){
-		String statements="SELECT * FROM " + table + " WHERE name=" + name;
+		String statements="SELECT * FROM " + table.getValue() + " WHERE name=" + name;
 		if (draw==true){
-			File file = manager.sql2shp(areaTable, statements);
+			File file = manager.sql2shp(name, statements);
 			if (file!=null){
 				new WorldWindFrame.WorkerThread(file, WorldWindFrame.AppFrame).start();
 			}
@@ -89,10 +107,10 @@ public class Query extends DisplayEntity {
 		return getResultSet(statements);
 	}
 	
-	public ResultSet execute(String latitude, String longitude, Boolean draw){
-		String statements="SELECT * FROM " + table + "WHERE st_contains("+table+".geom, ST_GeomFromText('POINT("+longitude+" "+latitude+")', 4269)";
+	public ResultSet execute(String name, String latitude, String longitude, Boolean draw){
+		String statements="SELECT * FROM " + table.getValue() + "WHERE st_contains("+table+".geom, ST_GeomFromText('POINT("+longitude+" "+latitude+")', 4269)";
 		if (draw==true){
-			File file = manager.sql2shp(areaTable, statements);
+			File file = manager.sql2shp(name, statements);
 			if (file!=null){
 				new WorldWindFrame.WorkerThread(file, WorldWindFrame.AppFrame).start();
 			}
@@ -101,8 +119,8 @@ public class Query extends DisplayEntity {
 	}
 	
 	public void executeArea(){
-		String statements="SELECT geom FROM " + areaTable;
-		File file = manager.sql2shp(areaTable, statements);
+		String statements="SELECT * FROM " + areaTable;
+		File file = manager.sql2shp(areaTable.getValue(), statements);
 		if (file!=null){
 			new WorldWindFrame.WorkerThread(file, WorldWindFrame.AppFrame).start();
 		}
@@ -119,7 +137,7 @@ public class Query extends DisplayEntity {
 		return null;
     }
 	
-	public void printResultContent(ResultSet restultset){  
+	public void printResultContent(String name, ResultSet restultset){  
 		try{
 			if (restultset!=null){
 			    ResultSetMetaData metaData = restultset.getMetaData();
@@ -138,25 +156,16 @@ public class Query extends DisplayEntity {
 			    	}
 			    	data.add(vector);
 			    }
-			    displayResultContent(new JTable(new DefaultTableModel(data, columnNames)));
+			    displayResultContent(name, new JTable(new DefaultTableModel(data, columnNames)));
 			}
 		} catch (SQLException e) {
 			System.out.println(e);
 			return;
 		}
 	}
-
 	
-	@Override
-	public void updateForInput(Input<?> in) {
-		super.updateForInput(in);
-		if(in== targetDB)
-			manager = new LayerManager(targetDB.getValue().getURL(), targetDB.getValue().getUserName(), targetDB.getValue().getPassword());
-			
-	}
-	
-	public void displayResultContent(final JTable content){
-		EventQueue.invokeLater(new Runnable() {
+	public void displayResultContent(final String name, final JTable content){
+		 EventQueue.invokeLater(new Runnable() {
 			   @Override
 			   public void run() {  
 				   final JFrame dataBaseFrame = new JFrame(); 
@@ -165,8 +174,16 @@ public class Query extends DisplayEntity {
 				   dataBaseFrame.add(dataBasePanel);
 				   dataBaseFrame.setSize(750, 305);
 	               dataBaseFrame.setLocation(1160, 735);
-				   dataBaseFrame.setVisible(true);
 				   dataBaseFrame.setIconImage(GUIFrame.getWindowIcon());
+				   dataBaseFrame.setTitle(name);
+				   dataBaseFrame.setAutoRequestFocus(false);
+				   dataBaseFrame.setVisible(true);
+				   dataBaseFrame.addWindowListener(new WindowAdapter(){
+					   @Override
+					   public void windowClosing(WindowEvent e){
+						   WorldWindFrame.AppFrame.removeShapefileLayer(name);
+					   }
+				   });
 			   }
 		});  
 	}
