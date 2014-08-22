@@ -181,7 +181,7 @@ public class Query extends DisplayEntity {
 				   dataBaseFrame.addWindowListener(new WindowAdapter(){
 					   @Override
 					   public void windowClosing(WindowEvent e){
-						   WorldWindFrame.AppFrame.removeShapefileLayer(name);
+						   WorldWindFrame.AppFrame.removeShapefileLayer(name+".shp");
 					   }
 				   });
 			   }

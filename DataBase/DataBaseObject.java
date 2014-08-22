@@ -16,17 +16,16 @@ public class DataBaseObject extends Entity {
 	private Properties props = new Properties();
     private boolean established = false;
     public  DataBaseObject(){
-	
-}
+    }
 
-{
-		url = new StringInput("url","DataBase Properties","jdbc:postgresql://142.103.228.134:5432/fom");
-		this.addInput(url);
-		username = new StringInput("username","DataBase Properties","sde");
-        this.addInput(username);
-        password = new StringInput("password","DataBase Properties","Fomsummer2014");
-	    this.addInput(password);
-     }
+    {
+    	url = new StringInput("url","DataBase Properties","jdbc:postgresql://142.103.228.134:5432/fom");
+    	this.addInput(url);
+    	username = new StringInput("username","DataBase Properties","sde");
+    	this.addInput(username);
+    	password = new StringInput("password","DataBase Properties","Fomsummer2014");
+    	this.addInput(password);
+    }
     
 	@Override 
 	public void validate(){

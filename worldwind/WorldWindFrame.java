@@ -85,7 +85,6 @@ public class WorldWindFrame extends ApplicationTemplate
         public void addShapefileLayer(Layer layer)
         {
             this.getWwd().getModel().getLayers().add(layer);
-            System.out.println(this.getWwd().getModel().getLayers());
         }
 
         public void removeShapefileLayer(String layer) {
@@ -103,8 +102,6 @@ public class WorldWindFrame extends ApplicationTemplate
                 ExampleUtil.goTo(this.getWwd(), sector);
             }
         }
-        
-        
         
         @Override
         protected void initialize(boolean includeStatusBar, boolean includeLayerPanel, boolean includeStatsPanel)
