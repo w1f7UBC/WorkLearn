@@ -63,7 +63,7 @@ public class LayerManager {
 		//System.out.println(statement);
 		//System.out.println(exe+"\n" + fileDestination+"\n"+ip+"\n"+port+"\n"+user+"\n"+password+"\n"+db);
 		if (destination.exists()){
-			destination.delete();
+			return destination;
 		}
 		Process process;
 		try {

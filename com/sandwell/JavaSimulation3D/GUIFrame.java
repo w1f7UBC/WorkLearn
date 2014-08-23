@@ -66,6 +66,8 @@ import javax.swing.event.ChangeListener;
 import javax.swing.event.MenuEvent;
 import javax.swing.event.MenuListener;
 
+import worldwind.WorldWindFrame;
+
 import com.jaamsim.controllers.RenderManager;
 import com.jaamsim.events.EventErrorListener;
 import com.jaamsim.events.EventManager;
@@ -1520,7 +1522,7 @@ public class GUIFrame extends JFrame implements EventTimeListener, EventErrorLis
 			// Display it
 			splashScreen.setVisible(true);
 */
-
+			WorldWindFrame.initialize();
 			// Begin initializing the rendering system
 			RenderManager.initialize(SAFE_GRAPHICS);
 		}
