@@ -18,5 +18,18 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="resources/jar/worldwind.jar" sourcepath="resources/jar/worldwind.jar"/>
 	<classpathentry kind="lib" path="resources/jar/worldwindx.jar"/>
+	<classpathentry kind="lib" path="Exceljar/commons-codec-1.5.jar"/>
+	<classpathentry kind="lib" path="Exceljar/commons-logging-1.1.jar"/>
+	<classpathentry kind="lib" path="Exceljar/dom4j-1.6.1.jar"/>
+	<classpathentry kind="lib" path="Exceljar/junit-4.11.jar"/>
+	<classpathentry kind="lib" path="Exceljar/log4j-1.2.13.jar"/>
+	<classpathentry kind="lib" path="Exceljar/poi-3.10-FINAL-20140208.jar"/>
+	<classpathentry kind="lib" path="Exceljar/poi-examples-3.10-FINAL-20140208.jar"/>
+	<classpathentry kind="lib" path="Exceljar/poi-excelant-3.10-FINAL-20140208.jar"/>
+	<classpathentry kind="lib" path="Exceljar/poi-ooxml-3.10-FINAL-20140208.jar"/>
+	<classpathentry kind="lib" path="Exceljar/poi-ooxml-schemas-3.10-FINAL-20140208.jar"/>
+	<classpathentry kind="lib" path="Exceljar/poi-scratchpad-3.10-FINAL-20140208.jar"/>
+	<classpathentry kind="lib" path="Exceljar/stax-api-1.0.1.jar"/>
+	<classpathentry kind="lib" path="Exceljar/xmlbeans-2.3.0.jar"/>
 	<classpathentry kind="output" path=""/>
 </classpath>
