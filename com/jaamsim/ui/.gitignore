@@ -64,3 +64,12 @@
 /ObjectSelector$PropertyMenuItem.class
 /ObjectSelector.class
 /ObjectSelector$DataBaseViewer.class
+/ObjectSelector$DataBaseViewer$CenterInViewMenuItem.class
+/ObjectSelector$DataBaseViewer$DeleteMenuItem.class
+/ObjectSelector$DataBaseViewer$DuplicateMenuItem.class
+/ObjectSelector$DataBaseViewer$GraphicsMenuItem.class
+/ObjectSelector$DataBaseViewer$JActionMenuItem.class
+/ObjectSelector$DataBaseViewer$LabelMenuItem.class
+/ObjectSelector$DataBaseViewer$MyKeyListener.class
+/ObjectSelector$DataBaseViewer$MyMouseListener.class
+/ObjectSelector$DataBaseViewer$OutputMenuItem.class

@@ -1,60 +1,69 @@
 package DataBase;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
 import java.util.Properties;
-
 import com.jaamsim.input.Keyword;
 import com.sandwell.JavaSimulation.Entity;
-import com.sandwell.JavaSimulation.EntityInput;
 import com.sandwell.JavaSimulation.StringInput;
-import com.sandwell.JavaSimulation3D.Region;
 
 public class DataBaseObject extends Entity {
-	public DataBaseObject(){
-		
-	}
-	@Keyword(description = "URL",example = "Test URL {jdbc:postgresql://25.141.219.39:5432/fom}")
-public static  StringInput url;
-
-public static  StringInput username;
-public static  StringInput pwd;
-public static Properties props = new Properties();
-
-	{
-		url = new StringInput("url","DataBase Properties","jdbc:postgresql://25.141.219.39:5432/fom");
-		this.addInput(url);
-		username = new StringInput("username","DataBase Properties","sde");
-        this.addInput(username);
-        pwd = new StringInput("password","DataBase Properties","Fomsummer2014");
-	    this.addInput(pwd);
-	}
-
-	public  void Connection() throws SQLException{
-	   
 	
+	@Keyword(description = "URL",example = "Test URL {jdbc:postgresql://142.103.228.134:5432/fom}")
+	private  StringInput url;
+	private  StringInput username;
+	private StringInput password;
+	private int connectionIndex = 0;	
+	private Properties props = new Properties();
+    private boolean established = false;
+    public  DataBaseObject(){
+    }
 
-
+    {
+    	url = new StringInput("url","DataBase Properties","jdbc:postgresql://142.103.228.134:5432/fom");
+    	this.addInput(url);
+    	username = new StringInput("username","DataBase Properties","sde");
+    	this.addInput(username);
+    	password = new StringInput("password","DataBase Properties","Fomsummer2014");
+    	this.addInput(password);
+    }
+    
+	@Override 
+	public void validate(){
+		connectionIndex = Database.Connect(this);
+		established = true;
 	}
+	
 	
 	public Connection getConnection(){
-		return null;
+		if (!established){
+			connectionIndex = Database.Connect(this);
+			established = true;
+		} 
+	    return Database.getConnection(connectionIndex);
+	}
+		
+	public DataBaseObject getDataBaseObject(){
+		return this;
 		
 	}
 	
-	public static String getURL(){
+	public String getURL(){
 		return url.getValue();
 	}
 	
-	public static Properties getProperties(){
-		props.setProperty("user","sde");
-	    props.setProperty("password","Fomsummer2014");
+	public String getUserName(){
+		return username.getValue();
+	}
+	
+	public String getPassword(){
+		return password.getValue();
+	}
+	
+	public Properties getProperties() {
+		props.setProperty("user",username.getValue());
+	    props.setProperty("password",password.getValue());
 		return props;
 	}
-
+	  
 }
 

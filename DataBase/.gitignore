@@ -14,3 +14,16 @@
 /DataBaseObject.class
 /TestingMethod$1.class
 /TestingMethod.class
+/Database.class
+/DataBaseObject$1.class
+/Query$1.class
+/InventoryQuery.class
+<<<<<<< HEAD
+/InventoryQuery$1.class
+=======
+/Excel.class
+/App.class
+/ExcelObject.class
+/ExcelInput.class
+>>>>>>> refs/remotes/origin/database
+/Query$1$1.class

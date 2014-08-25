@@ -1536,11 +1536,6 @@ public class RenderManager implements DragSourceListener {
 	public void focusWindow(int windowID) {
 		renderer.focusWindow(windowID);
 	}
-
-	public void setCursorMode(int mode){
-		//renderer.setCursor(activeWindowID, mode);
-		renderer.setCursor(2, mode);
-	}
 	
 	/**
 	 * Queue up an off screen rendering, this simply passes the call directly to the renderer

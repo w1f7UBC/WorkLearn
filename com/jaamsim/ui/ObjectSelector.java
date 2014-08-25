@@ -39,8 +39,7 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
-import DataBase.TestingMethod;
-import DataBase.QueryObject;
+import DataBase.InventoryQuery;
 
 import com.jaamsim.controllers.RenderManager;
 import com.jaamsim.input.Input;
@@ -401,12 +400,7 @@ static class DataBaseViewer extends MenuItem{
 	}
 	@Override
 	public void action() {
-		try {
-			QueryObject.test();
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		
 	}
 }
 

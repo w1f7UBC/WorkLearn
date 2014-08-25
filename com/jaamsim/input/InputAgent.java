@@ -34,7 +34,6 @@ import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-import DataBase.TestingMethod;
 import com.jaamsim.input.Input.ParseContext;
 import com.jaamsim.ui.ExceptionBox;
 import com.jaamsim.ui.FrameBox;
@@ -666,11 +665,7 @@ public class InputAgent {
     		InputAgent.setLoadFile(gui, temp);
         }
 	}
-    public static void loadDB(GUIFrame guiFrame) throws SQLException {
-		LogBox.logLine("Loading...");
-	//	DataBase.testing();
-	}
-
+    
 	public static void save(GUIFrame gui) {
 		LogBox.logLine("Saving...");
 		if( InputAgent.getConfigFile() != null ) {
