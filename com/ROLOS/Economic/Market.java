@@ -101,9 +101,9 @@ public class Market extends ROLOSEntity {
 		offer.getBuyer().getGeneralManager().reinstateContract(contract);
 
 		// adjust seller and buyers list
-		if(Tester.equalCheckTolerance(0.0d,offer.getSeller().getStockList().getValueFor(product.getValue(), 2)))
+		if(Tester.equalCheckTolerance(0.0d,offer.getSeller().getStockList().getValueFor(product.getValue(), 4)))
 			sellersList.remove(offer.getSeller());
-		if(Tester.equalCheckTolerance(0.0d,offer.getBuyer().getStockList().getValueFor(product.getValue(), 2)))
+		if(Tester.equalCheckTolerance(0.0d,offer.getBuyer().getStockList().getValueFor(product.getValue(), 3)))
 			buyersList.remove(offer.getBuyer());
 		
 	}
@@ -112,23 +112,23 @@ public class Market extends ROLOSEntity {
 		ArrayList<MarketOffer> offersList= new ArrayList<>(5);
 		//populate all offers
 		for(is=0; is< sellersList.size();){
-				if(Tester.equalCheckTolerance(sellersList.get(is).getStockList().getValueFor(this.getProduct(), 2),0.0d)){
+				if(Tester.equalCheckTolerance(sellersList.get(is).getStockList().getValueFor(this.getProduct(), 4),0.0d)){
 				sellersList.remove(is);
 				continue;
 			}
 			for(ib=0; ib< buyersList.size();){
-				if(Tester.equalCheckTolerance(buyersList.get(ib).getStockList().getValueFor(this.getProduct(), 2),0.0d)){
+				if(Tester.equalCheckTolerance(buyersList.get(ib).getStockList().getValueFor(this.getProduct(), 3),0.0d)){
 					buyersList.remove(ib);
 					continue;
 				}
 				// TODO assumes seller is transporting and will remove from buyers list if transportation capacity is maxed out
 				// TODO URGENT! transportation cost cap should be set properly !
-				if (sellersList.get(is).getTransportationManager().getLeastCostTranspotationRoute(product.getValue(), sellersList.get(is), buyersList.get(ib), buyersList.get(ib).getStockList().getValueFor(product.getValue(), 7)) == null){
+				if (sellersList.get(is).getTransportationManager().getLeastCostTranspotationRoute(product.getValue(), sellersList.get(is), buyersList.get(ib), buyersList.get(ib).getStockList().getValueFor(product.getValue(), 9)) == null){
 					buyersList.remove(ib);
 					continue;
 				}else{
 					offersList.add(new MarketOffer(sellersList.get(is), buyersList.get(ib), 
-							buyersList.get(ib).getStockList().getValueFor(product.getValue(), 7)));
+							buyersList.get(ib).getStockList().getValueFor(product.getValue(), 9)));
 					ib++;
 				}
 			}
@@ -142,6 +142,11 @@ public class Market extends ROLOSEntity {
 	// This heuristic market model tries to assign maximum unit offer price, total amount and overall welfare is not considered!
 	public void runSellersMarket(){
 		int is, ib;
+		// TODO Satisfies demand internally if infeed is produced within the facility
+		for(Facility eachBuyer: buyersList){
+			eachBuyer.getOperationsManager().satisfyDemandInternally(product.getValue());
+		}
+			
 		ArrayList<MarketOffer> offersList= setOffers();
 		//Sort offers higher to lowest
 		Collections.sort(offersList);
@@ -151,11 +156,11 @@ public class Market extends ROLOSEntity {
 			//Sellect highest offer
 			tempOffer = offersList.get(0);
 			
-			if(Tester.equalCheckTolerance(tempOffer.getSeller().getStockList().getValueFor(this.getProduct(), 2),0.0d)){
+			if(Tester.equalCheckTolerance(tempOffer.getSeller().getStockList().getValueFor(this.getProduct(), 4),0.0d)){
 				sellersList.remove(tempOffer.getSeller());
 				offersList.remove(0);
 				continue;
-			} else if(Tester.equalCheckTolerance(tempOffer.getBuyer().getStockList().getValueFor(this.getProduct(), 2),0.0d)){
+			} else if(Tester.equalCheckTolerance(tempOffer.getBuyer().getStockList().getValueFor(this.getProduct(), 3),0.0d)){
 				buyersList.remove(tempOffer.getBuyer());
 				offersList.remove(0);
 				continue;
@@ -167,11 +172,11 @@ public class Market extends ROLOSEntity {
 			// set offers amount
 			//TODO offer amount is set here to avoid readjusting offer's amount every time a contract is established
 			tempOffer.setAmount(Tester.min(tempOffer.getSeller().getTransportationManager().getTransportersList().getValueFor(tempOffer.getTransporter(), 0)-tempOffer.getSeller().getTransportationManager().getTransportersList().getValueFor(tempOffer.getTransporter(), 1),
-									tempOffer.getBuyer().getStockList().getValueFor(product.getValue(), 2),
-									tempOffer.getSeller().getStockList().getValueFor(product.getValue(), 2)));
+									tempOffer.getBuyer().getStockList().getValueFor(product.getValue(), 3),
+									tempOffer.getSeller().getStockList().getValueFor(product.getValue(), 4)));
 					
 			this.establishContracts(offersList.get(0));
-			// clear and redo all market offers
+			
 			//TODO use better implementation to keep offers and only change the changed ones
 			offersList.remove(0);			
 		}

@@ -281,12 +281,12 @@ public class Contract extends ROLOSEntity {
 				
 		// assuming a new contract starts ready for scheduling
 		this.activeForScheduling = true;
-		if(Tester.greaterCheckTolerance(buyer.getValue().getStockList().getValueFor(getProduct(), 3)
-				, buyer.getValue().getStockList().getValueFor(getProduct(), 4))){
+		if(Tester.greaterCheckTolerance(buyer.getValue().getStockList().getValueFor(getProduct(), 5)
+				, buyer.getValue().getStockList().getValueFor(getProduct(), 6))){
 			activeBuyer = true;
 		}
 		
-		if(Tester.greaterCheckTolerance(supplier.getValue().getStockList().getValueFor(getProduct(), 4)
+		if(Tester.greaterCheckTolerance(supplier.getValue().getStockList().getValueFor(getProduct(), 6)
 				, 0.0d)){
 			activeSupplier = true;
 		}

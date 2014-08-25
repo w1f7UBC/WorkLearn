@@ -126,7 +126,7 @@ public class FacilityGeneralManager extends FacilityManager {
 	 */
 	public double getContractBalancedAmountToFullfill(Contract contract){
 		BulkMaterial bulkMaterial = contract.getProduct();
-		double totalContractAmounts = this.getFacility().getStockList().getValueFor(bulkMaterial, 1) - this.getFacility().getStockList().getValueFor(bulkMaterial, 2);
+		double totalContractAmounts = this.getFacility().getStockList().getValueFor(bulkMaterial, 2) - this.getFacility().getStockList().getValueFor(bulkMaterial, 4);
 		return contract.getContractAmount()/totalContractAmounts;
 	}
 	
@@ -148,44 +148,17 @@ public class FacilityGeneralManager extends FacilityManager {
 	public void addToContracts(Contract contract, boolean seller){
 		if(seller){
 			supplyContractList.add(contract.getProduct(), contract);
-			this.getFacility().removeFromStocksList(contract.getProduct(), 2, contract.getContractAmount());
+			this.getFacility().removeFromStocksList(contract.getProduct(), 4, contract.getContractAmount());
 
 		}else{
 			demandContractList.add(contract.getProduct(), contract);
-			this.getFacility().removeFromStocksList(contract.getProduct(), 2, contract.getContractAmount());
+			this.getFacility().removeFromStocksList(contract.getProduct(), 3, contract.getContractAmount());
 			//reserve transportation capacity
 			// TODO amount reserved is converted to amount per time unit for the contract's period meaning that a balanced transportation is assumed overtime
 			this.getFacility().getTransportationManager().getTransportersList().add(contract.getTransporterProtoType(), 1, (contract.getContractAmount()/contract.getContractPeriod())*SimulationManager.getPlanningHorizon());
 			
-			// TODO when a contract is established for one of the mutually exclusive processes, unsatisfied demand
-			// for infeeds of all other processes are adjusted
-			// TODO assuming infeed material is unique to the process whose mutually exclusive processes are adjusted
-			//find the infeed in process and adjust stocklist amounts for the mutually exclusive processes
-			for (ArrayList<ProcessingRoute> eachProcessingRoute: this.getFacility().getOperationsManager().getProcessingRoutesList().getValues()) {
-				for (ProcessingRoute each: eachProcessingRoute) {
-					if(each.getProcessor().getHandlingEntityTypeList().contains(contract.getProduct()) &&
-							!this.getFacility().getOperationsManager().getMutuallyExclusiveProcesses(each.getProcessor()).isEmpty()){
-						// TODO assumes mutually exclusive processes use the same throughput schedule
-						double tempAmount = contract.getContractAmount();
-						//TODO assumes only one infeed is used!
-						// amount of primary product potentially produced by the mutually exclusive process
-						tempAmount *= each.getProcessor().getOutfeedRate(each.getProcessor().getPrimaryProduct())/each.getProcessor().getMaxRate(contract.getProduct());
-																		
-						for(ProcessingRoute eachMutuallyExclusiveRoute: this.getFacility().getOperationsManager().getMutuallyExclusiveProcesses(each.getProcessor())){
-							if (each != eachMutuallyExclusiveRoute && Tester.greaterCheckTolerance(this.getFacility().getStockList().getValueFor((BulkMaterial) eachMutuallyExclusiveRoute.getProcessor().getHandlingEntityTypeList()
-												.get(0),2), 0.0d)) {
-								//TODO assumes only one infeed is used!
-								eachMutuallyExclusiveRoute.getProcessor().getFacility().removeFromStocksList(
-											(BulkMaterial) eachMutuallyExclusiveRoute.getProcessor().getHandlingEntityTypeList()
-												.get(0),2,tempAmount* eachMutuallyExclusiveRoute.getProcessor()
-																.getMaxRate((BulkMaterial) eachMutuallyExclusiveRoute.getProcessor().getHandlingEntityTypeList().get(0))
-														/ eachMutuallyExclusiveRoute.getProcessor().getOutfeedRate(
-																		eachMutuallyExclusiveRoute.getProcessor().getPrimaryProduct()));
-							}
-						}
-					}
-				}
-			}
+			//adjust infeed level for other mutually exclusive processes
+			this.getFacility().getOperationsManager().adjustMutuallyExclusiveProcessesDemands(contract.getProduct(), contract.getContractAmount());
 			
 		}
 		

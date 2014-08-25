@@ -54,10 +54,11 @@ public class FacilityFinancialManager extends FacilityManager {
 	/** sets offerprice (including transportation) for alternative infeed material. 
 	 * should be called after production planning and called everytime one of the markets is established
 	 * and contracts are rectified. 
+	 * TODO won't work if same infeed is shared among multiple processing routes!
 	 */
 	public void setOfferPrices(ProcessingRoute processingRoute){
 		for(LogisticsEntity eachMaterial: processingRoute.getProcessor().getHandlingEntityTypeList()){
-			this.getFacility().setStocksList((BulkMaterial) eachMaterial, 7, calcPurchasePowerPrice((BulkMaterial) eachMaterial,processingRoute));
+			this.getFacility().setStocksList((BulkMaterial) eachMaterial, 9, calcPurchasePowerPrice((BulkMaterial) eachMaterial,processingRoute));
 		}
 		//TODO set min selling price?
 	}
@@ -72,7 +73,7 @@ public class FacilityFinancialManager extends FacilityManager {
 		double inputRatio = processingRoute.getCapacityRatio(inputMaterial, processingRoute.getProcessor().getPrimaryProduct());
 		
 		return Tester.greaterCheckTolerance(inputRatio, 0.0d)? 
-				Tester.max(0.0d,this.calcRevenue(inputMaterial,processingRoute)/inputRatio): 0.0d;
+				Tester.max(0.0d,this.calcRevenue(processingRoute)/inputRatio): 0.0d;
 		
 	}
 	
@@ -88,13 +89,13 @@ public class FacilityFinancialManager extends FacilityManager {
 	 * TODO assumes revenue is realized only through the primary product
 	 * @return revenue per unit of primary product (after removing profit margin)
 	 */
-	public double calcRevenue(BulkMaterial inputMaterial, ProcessingRoute processingRoute){
+	public double calcRevenue(ProcessingRoute processingRoute){
 		double revenue;
 		revenue = (1-this.getFacility().getProfitMargin()) *((processingRoute.getProcessor().getPrimaryProduct().getPrice() -
 						processingRoute.getProcessor().getVariableCost(processingRoute.getProcessor().getPrimaryProduct()))-
 				//TODO use more generic definition for fixed cost (e.g. adding individual processes fixed costs)
 						this.getFacility().getFixedCost(getSimTime(), this.getSimTime()+ SimulationManager.getPlanningHorizon())/
-						this.getFacility().getStockList().getValueFor(processingRoute.getProcessor().getPrimaryProduct(), 1));
+						this.getFacility().getStockList().getValueFor(processingRoute.getProcessor().getPrimaryProduct(), 2));
 		
 		return revenue;
 	}

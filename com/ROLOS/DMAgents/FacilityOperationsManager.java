@@ -64,7 +64,7 @@ public class FacilityOperationsManager extends FacilityManager {
 	public void startUp() {
 		super.startUp();
 		this.scheduleProcess(0.0d, 1, new ReflectionTarget(this, "resetPlannedStocks"));
-		
+		this.scheduleProcess(0.0d, 2, new ReflectionTarget(this, "planProduction"));
 		
 	}
 	
@@ -72,6 +72,8 @@ public class FacilityOperationsManager extends FacilityManager {
 		for(BulkMaterial each: this.getFacility().getStockList().getEntityList()){
 			this.getFacility().getStockList().set(each, 1, 0.0d);
 			this.getFacility().getStockList().set(each, 2, 0.0d);
+			this.getFacility().getStockList().set(each, 3, 0.0d);
+			this.getFacility().getStockList().set(each, 4, 0.0d);
 		}
 		// priotiy 1 to activate before market manager
 		this.scheduleProcess(SimulationManager.getPlanningHorizon(), 1, new ReflectionTarget(this, "resetPlannedStocks"));
@@ -112,15 +114,15 @@ public class FacilityOperationsManager extends FacilityManager {
 	public double getReservableCapacityForLoading(BulkMaterial bulkMaterial){
 		Facility tempFacility = this.getFacility();
 		return tempFacility.getStockList().contains(bulkMaterial) ? 
-				tempFacility.getStockList().getValueFor(bulkMaterial, 4)-tempFacility.getStockList().getValueFor(bulkMaterial, 5)+tempFacility.getStockList().getValueFor(bulkMaterial, 6) :
+				tempFacility.getStockList().getValueFor(bulkMaterial, 6)-tempFacility.getStockList().getValueFor(bulkMaterial, 7)+tempFacility.getStockList().getValueFor(bulkMaterial, 8) :
 					0.0d;
 	}
 		
 	public double getReservableCapacityForUnloading(BulkMaterial bulkMaterial){
 		Facility tempFacility = this.getFacility();
 		return tempFacility.getStockList().contains(bulkMaterial) ? 
-				tempFacility.getStockList().getValueFor(bulkMaterial, 3)-tempFacility.getStockList().getValueFor(bulkMaterial, 4)
-				+tempFacility.getStockList().getValueFor(bulkMaterial, 5)- tempFacility.getStockList().getValueFor(bulkMaterial, 6) :
+				tempFacility.getStockList().getValueFor(bulkMaterial, 5)-tempFacility.getStockList().getValueFor(bulkMaterial, 6)
+				+tempFacility.getStockList().getValueFor(bulkMaterial, 7)- tempFacility.getStockList().getValueFor(bulkMaterial, 8) :
 					0.0d;
 	}
 
@@ -343,13 +345,75 @@ public class FacilityOperationsManager extends FacilityManager {
 		processingRoutesList.add(((BulkMaterialProcessor)activeEquipment).getPrimaryProduct(), tempProcessingRoute);
 		((BulkMaterialProcessor)activeEquipment).setProcessingRoute(tempProcessingRoute);
 	}
+	
+	/**
+	 * Tries to internally satisfy demand for infeed from processes that produce that infeed!
+	 */
+	public void satisfyDemandInternally(BulkMaterial infeedMaterial){
+			double internalExchangeAmount = Tester.min(this.getFacility().getStockList().getValueFor(infeedMaterial, 1),
+					this.getFacility().getStockList().getValueFor(infeedMaterial, 2));
+			
+			this.getFacility().removeFromStocksList(infeedMaterial, 3, internalExchangeAmount);
+			this.getFacility().removeFromStocksList(infeedMaterial, 4, internalExchangeAmount);
+			
+			this.adjustMutuallyExclusiveProcessesDemands(infeedMaterial, internalExchangeAmount);
+					
+	}
+	
+	public void adjustMutuallyExclusiveProcessesDemands(BulkMaterial infeedMaterial, double infeedAmount){
+		// TODO when a contract is established for one of the mutually exclusive processes, unsatisfied demand
+		// for infeeds of all other processes are adjusted
+		// TODO assuming infeed material is unique to the process whose mutually exclusive processes are adjusted
+		//find the infeed in process and adjust stocklist amounts for the mutually exclusive processes
+		for (ArrayList<ProcessingRoute> eachProcessingRoute: this.getProcessingRoutesList().getValues()) {
+			for (ProcessingRoute each: eachProcessingRoute) {
+				if(each.getProcessor().getHandlingEntityTypeList().contains(infeedMaterial) &&
+						!this.getMutuallyExclusiveProcesses(each.getProcessor()).isEmpty()){
+					// WARNING! mutually exclusive processes use the same throughput schedule
+					//TODO assumes only one infeed is used!
+					// amount of primary product potentially produced by the mutually exclusive process
+					 double outfeedAmount = infeedAmount* each.getProcessor().getConverstionRate(each.getProcessor().getPrimaryProduct(),infeedMaterial);
+																	
+					for(ProcessingRoute eachMutuallyExclusiveRoute: this.getFacility().getOperationsManager().getMutuallyExclusiveProcesses(each.getProcessor())){
+						if (each != eachMutuallyExclusiveRoute && Tester.greaterCheckTolerance(this.getFacility().getStockList().getValueFor((BulkMaterial) eachMutuallyExclusiveRoute.getProcessor().getHandlingEntityTypeList()
+											.get(0),3), 0.0d)) {
+							//TODO assumes only one infeed is used!
+							eachMutuallyExclusiveRoute.getProcessor().getFacility().removeFromStocksList(
+										(BulkMaterial) eachMutuallyExclusiveRoute.getProcessor().getHandlingEntityTypeList()
+											.get(0),3,outfeedAmount* eachMutuallyExclusiveRoute.getProcessor()
+											.getConverstionRate(((BulkMaterial) eachMutuallyExclusiveRoute.getProcessor().getHandlingEntityTypeList().get(0)),eachMutuallyExclusiveRoute.getProcessor().getPrimaryProduct()));
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	/**
+	 * plans production for all processing routes. It should be run after resetplannedstocks method.
+	 */
+	public void planProduction(){
+		for (BulkMaterial eachProcessingRouteList: processingRoutesList.getKeys()) {
+			for (ProcessingRoute processingRoute: processingRoutesList.get(eachProcessingRouteList)) {
+				if (processingRoute.getLastPlannedTime() != this.getSimTime()) {
+					this.planProduction(processingRoute,
+								this.getSimTime(),this.getSimTime()+ SimulationManager.getPlanningHorizon());
+				}
+				this.getFacility().getFinancialManager().setOfferPrices(processingRoute);
+
+				//TODO set selling prices?								
+			}
+		}
+				
+		this.scheduleProcess(SimulationManager.getPlanningHorizon(), 2, new ReflectionTarget(this, "planProduction"));
+	}
 
 	/**
 	 * Sets target throughput/demand in facility's stocklist for all the products in the 
 	 * processing routes based on the throughput of the production driving product.  
 	 */
 	public void planProduction(ProcessingRoute processingRoute, double startTime, double endTime){
-		// TODO assuming mutually exclusive processing routes have the same throughput
+		// TODO assuming mutually exclusive processing routes have the same throughput capacity
 		double throughput = processingRoute.getProcessor().getThroughput(startTime,endTime);
 		double tempAmount;
 		if(this.getMutuallyExclusiveProcesses(processingRoute.getProcessor()).isEmpty()){
@@ -357,50 +421,47 @@ public class FacilityOperationsManager extends FacilityManager {
 				tempAmount = processingRoute.getCapacityRatio(eachMaterial,
 						processingRoute.getProcessor().getPrimaryProduct()) * throughput;
 				this.getFacility().addToStocksList(eachMaterial, 1, tempAmount);
-				this.getFacility().addToStocksList(eachMaterial, 2, tempAmount);
+				this.getFacility().addToStocksList(eachMaterial, 3, tempAmount);
 				//set purchase price 0
-				this.getFacility().setStocksList(eachMaterial, 8, 0.0d);
+				this.getFacility().setStocksList(eachMaterial, 10, 0.0d);
 			}
 			//TODO all logic assumes that mutually exclusive processes have the same outfeed with similar rates
 			for (BulkMaterial eachMaterial : processingRoute.getOutfeedMaterial()) {
 				tempAmount = processingRoute.getCapacityRatio(eachMaterial,
 						processingRoute.getProcessor().getPrimaryProduct()) * throughput;
-				this.getFacility().addToStocksList(eachMaterial, 1, tempAmount);
 				this.getFacility().addToStocksList(eachMaterial, 2, tempAmount);
+				this.getFacility().addToStocksList(eachMaterial, 4, tempAmount);
 				//set purchase price 0
-				this.getFacility().setStocksList(eachMaterial, 8, 0.0d);
+				this.getFacility().setStocksList(eachMaterial, 10, 0.0d);
 			}
 			processingRoute.setLastPlannedTime(this.getSimTime());
 		}else{
 			
 			//TODO assumes infeeds for mutually exclusive processes are completely different
 			//TODO change to enable having one processing route accept various infeed material!
-			boolean outfeedSet = false;
 			for (ProcessingRoute eachProcessor : this.getMutuallyExclusiveProcesses(processingRoute.getProcessor())) {
 				for (BulkMaterial eachMaterial : eachProcessor.getInfeedMaterial()) {
 					tempAmount = eachProcessor.getCapacityRatio(eachMaterial,
 						eachProcessor.getProcessor().getPrimaryProduct()) * throughput;
 					this.getFacility().addToStocksList(eachMaterial, 1, tempAmount);
-					this.getFacility().addToStocksList(eachMaterial, 2, tempAmount);
+					this.getFacility().addToStocksList(eachMaterial, 3, tempAmount);
 					//set sell price 0
-					this.getFacility().addToStocksList(eachMaterial, 8, 0.0d);
+					this.getFacility().setStocksList(eachMaterial, 10, 0.0d);
 				}
 				//TODO all logic assumes that mutually exclusive processes have the same outfeed with similar throughputs and outfeed (won't allow different 
 				// outputs for different mutually exclusive processes
-				if(!outfeedSet){
-					for (BulkMaterial eachMaterial : eachProcessor.getOutfeedMaterial()) {
-						tempAmount = eachProcessor.getCapacityRatio(eachMaterial,
-								eachProcessor.getProcessor().getPrimaryProduct()) * throughput;
-						this.getFacility().addToStocksList(eachMaterial, 1, tempAmount);
-						this.getFacility().addToStocksList(eachMaterial, 2, tempAmount);
-						//set sell price 0
-						this.getFacility().setStocksList(eachMaterial, 8, 0.0d);
-					}
-					outfeedSet = true;
+				for (BulkMaterial eachMaterial : eachProcessor.getOutfeedMaterial()) {
+					tempAmount = eachProcessor.getCapacityRatio(eachMaterial,
+							eachProcessor.getProcessor().getPrimaryProduct()) * throughput;
+					this.getFacility().setStocksList(eachMaterial, 2, tempAmount);
+					this.getFacility().setStocksList(eachMaterial, 4, tempAmount);
+					//set sell price 0
+					this.getFacility().setStocksList(eachMaterial, 10, 0.0d);
 				}
 				eachProcessor.setLastPlannedTime(this.getSimTime());
 			}
 		}
+		
 	}
 	
 	/**

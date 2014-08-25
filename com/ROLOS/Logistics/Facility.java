@@ -85,7 +85,7 @@ public class Facility extends DiscreteHandlingLinkedEntity {
 		insideFacilityLimits = new HashMapList<String,LogisticsEntity>(5);
 		new TwoLinkedLists<>(4, new DescendingPriotityComparator<BulkMaterial>(ROLOSEntity.class, "getInternalPriority"),0);
 		
-		stocksList = new TwoLinkedLists<>(9, new DescendingPriotityComparator<BulkMaterial>(ROLOSEntity.class, "getInternalPriority"));
+		stocksList = new TwoLinkedLists<>(11, new DescendingPriotityComparator<BulkMaterial>(ROLOSEntity.class, "getInternalPriority"));
 		
 		synchronized (allInstances) {
 			allInstances.add(this);
@@ -193,32 +193,35 @@ public class Facility extends DiscreteHandlingLinkedEntity {
 	/**
 	 * List of feedstock and output materials
 	 * <br> <b> 0- </b> Facility's technical capacity for each material (t or m3 /h)
-	 * <br> <b> 1- </b> Target demand or throughput for the current planning horizon
-	 * <br> <b> 2- </b> Unstatisfied target demand/throughput in contracts (to sell or to buy)
-	 * <br> <b> 3- </b> Total stockpiles capacity for each material
-	 * <br> <b> 4- </b> Total amount in all stockpiles
-	 * <br> <b> 5- </b> Reserved amount for loading scheduled bulk cargos
-	 * <br> <b> 6- </b> Reserved amount for unloading
-	 * <br> <b> 7- </b> Current offer price per unit of material in the current planning horizon
-	 * <br> <b> 8- </b> Average purchase price
+	 * <br> <b> 1- </b> Target demand for the current planning horizon
+	 * <br> <b> 2- </b> Target throughput for the current planning horizon
+	 * <br> <b> 3- </b> Unstatisfied target demand in contracts or internally (to buy)
+	 * <br> <b> 4- </b> Unsold target throughput in contracts (to sell)
+	 * <br> <b> 5- </b> Total stockpiles capacity for each material
+	 * <br> <b> 6- </b> Total amount in all stockpiles
+	 * <br> <b> 7- </b> Reserved amount for loading scheduled bulk cargos
+	 * <br> <b> 8- </b> Reserved amount for unloading
+	 * <br> <b> 9- </b> Current offer price per unit of material in the current planning horizon
+	 * <br> <b> 10- </b> Average purchase price
 	 */
 	public TwoLinkedLists<BulkMaterial> getStockList(){
 		return stocksList;
 	}
 
 	/**
-	 * This method SHOULD NOT be used to add or remove amounts to stocks!
 	 * List of feedstock and output materials
 	 * <br> <b> 0- </b> Facility's technical capacity for each material (t or m3 /h)
-	 * <br> <b> 1- </b> Target demand or throughput for the current planning horizon
-	 * <br> <b> 2- </b> Unstatisfied target demand/throughput in contracts (to sell or to buy)
-	 * <br> <b> 3- </b> Total stockpiles capacity for each material
-	 * <br> <b> 4- </b> Total amount in all stockpiles
-	 * <br> <b> 5- </b> Reserved amount for loading scheduled bulk cargos
-	 * <br> <b> 6- </b> Reserved amount for unloading
-	 * <br> <b> 7- </b> Current offer price per unit of material in the current planning horizon
-	 * <br> <b> 8- </b> Average purchase price
-	*/
+	 * <br> <b> 1- </b> Target demand for the current planning horizon
+	 * <br> <b> 2- </b> Target throughput for the current planning horizon
+	 * <br> <b> 3- </b> Unstatisfied target demand in contracts or internally (to buy)
+	 * <br> <b> 4- </b> Unsold target throughput in contracts (to sell)
+	 * <br> <b> 5- </b> Total stockpiles capacity for each material
+	 * <br> <b> 6- </b> Total amount in all stockpiles
+	 * <br> <b> 7- </b> Reserved amount for loading scheduled bulk cargos
+	 * <br> <b> 8- </b> Reserved amount for unloading
+	 * <br> <b> 9- </b> Current offer price per unit of material in the current planning horizon
+	 * <br> <b> 10- </b> Average purchase price
+	 */
 	public void setStocksList(BulkMaterial bulkMaterial, int valueListIndex, double amount){
 		stocksList.set(bulkMaterial, valueListIndex, amount);
 		if(printStockReport())
@@ -228,26 +231,28 @@ public class Facility extends DiscreteHandlingLinkedEntity {
 	/**
 	 * List of feedstock and output materials
 	 * <br> <b> 0- </b> Facility's technical capacity for each material (t or m3 /h)
-	 * <br> <b> 1- </b> Target demand or throughput for the current planning horizon
-	 * <br> <b> 2- </b> Unstatisfied target demand/throughput in contracts (to sell or to buy)
-	 * <br> <b> 3- </b> Total stockpiles capacity for each material
-	 * <br> <b> 4- </b> Total amount in all stockpiles
-	 * <br> <b> 5- </b> Reserved amount for loading scheduled bulk cargos
-	 * <br> <b> 6- </b> Reserved amount for unloading
-	 * <br> <b> 7- </b> Current offer price per unit of material in the current planning horizon
-	 * <br> <b> 8- </b> Average purchase price
-	*/
+	 * <br> <b> 1- </b> Target demand for the current planning horizon
+	 * <br> <b> 2- </b> Target throughput for the current planning horizon
+	 * <br> <b> 3- </b> Unstatisfied target demand in contracts or internally (to buy)
+	 * <br> <b> 4- </b> Unsold target throughput in contracts (to sell)
+	 * <br> <b> 5- </b> Total stockpiles capacity for each material
+	 * <br> <b> 6- </b> Total amount in all stockpiles
+	 * <br> <b> 7- </b> Reserved amount for loading scheduled bulk cargos
+	 * <br> <b> 8- </b> Reserved amount for unloading
+	 * <br> <b> 9- </b> Current offer price per unit of material in the current planning horizon
+	 * <br> <b> 10- </b> Average purchase price
+	 */
 	public void addToStocksList(BulkMaterial bulkMaterial, int valueListIndex, double amount){
 		// Whether supply contracts have been inactive due to material unavailability
 		boolean activateContracts= false;
-		if(valueListIndex == 4 && Tester.equalCheckTolerance(this.getStockList().getValueFor(bulkMaterial, 4), 0.0d)){
+		if(valueListIndex == 6 && Tester.equalCheckTolerance(this.getStockList().getValueFor(bulkMaterial, 6), 0.0d)){
 			activateContracts = true;
 		}
 		
 		stocksList.add(bulkMaterial, valueListIndex, amount);
 		
-		// inactivate demand contracts if stockpiles filled up
-		if(Tester.greaterOrEqualCheckTolerance(this.getStockList().getValueFor(bulkMaterial, 4), this.getStockList().getValueFor(bulkMaterial, 3))){
+		// inactivate demand contracts if stockpiles are filled up
+		if(Tester.greaterOrEqualCheckTolerance(this.getStockList().getValueFor(bulkMaterial, 6), this.getStockList().getValueFor(bulkMaterial, 5))){
 			for (Contract each : this.getGeneralManager()
 					.getDemandContractsList().get(bulkMaterial)) {
 				each.setFacilityActiveness(false, this);
@@ -270,26 +275,28 @@ public class Facility extends DiscreteHandlingLinkedEntity {
 	/**
 	 * List of feedstock and output materials
 	 * <br> <b> 0- </b> Facility's technical capacity for each material (t or m3 /h)
-	 * <br> <b> 1- </b> Target demand or throughput for the current planning horizon
-	 * <br> <b> 2- </b> Unstatisfied target demand/throughput in contracts (to sell or to buy)
-	 * <br> <b> 3- </b> Total stockpiles capacity for each material
-	 * <br> <b> 4- </b> Total amount in all stockpiles
-	 * <br> <b> 5- </b> Reserved amount for loading scheduled bulk cargos
-	 * <br> <b> 6- </b> Reserved amount for unloading
-	 * <br> <b> 7- </b> Current offer price per unit of material in the current planning horizon
-	 * <br> <b> 8- </b> Average purchase price
-	*/
+	 * <br> <b> 1- </b> Target demand for the current planning horizon
+	 * <br> <b> 2- </b> Target throughput for the current planning horizon
+	 * <br> <b> 3- </b> Unstatisfied target demand in contracts or internally (to buy)
+	 * <br> <b> 4- </b> Unsold target throughput in contracts (to sell)
+	 * <br> <b> 5- </b> Total stockpiles capacity for each material
+	 * <br> <b> 6- </b> Total amount in all stockpiles
+	 * <br> <b> 7- </b> Reserved amount for loading scheduled bulk cargos
+	 * <br> <b> 8- </b> Reserved amount for unloading
+	 * <br> <b> 9- </b> Current offer price per unit of material in the current planning horizon
+	 * <br> <b> 10- </b> Average purchase price
+	 */
 	public void removeFromStocksList(BulkMaterial bulkMaterial, int valueListIndex, double amount){
 		// Whether demand contracts have been inactive due to stockpiles maxing out on capacity
 		boolean activateContracts= false;
-		if(valueListIndex == 4 && Tester.greaterOrEqualCheckTolerance(this.getStockList().getValueFor(bulkMaterial, 4), this.getStockList().getValueFor(bulkMaterial, 3))){
+		if(valueListIndex == 6 && Tester.greaterOrEqualCheckTolerance(this.getStockList().getValueFor(bulkMaterial, 6), this.getStockList().getValueFor(bulkMaterial, 5))){
 			activateContracts = true;
 		}
 		
 		stocksList.remove(bulkMaterial, valueListIndex, amount);
 		
 		// inactivate supply contracts if stockpiles are empty
-		if(Tester.equalCheckTolerance(this.getStockList().getValueFor(bulkMaterial, 4), 0.0d)){
+		if(Tester.equalCheckTolerance(this.getStockList().getValueFor(bulkMaterial, 6), 0.0d)){
 			for (Contract each : this.getGeneralManager()
 					.getSupplyContractsList().get(bulkMaterial)) {
 				each.setFacilityActiveness(false, this);
@@ -317,19 +324,10 @@ public class Facility extends DiscreteHandlingLinkedEntity {
 	@Output(name = "ProductionLevel",
 	 description = "Production level for the current planning horizon.",
 	    unitType = MassFlowUnit.class)
-	public double getProductionLevel(double simTime) {
-		BulkMaterial tempBulkMaterial = this.getOperationsManager().getProcessingRoutesList().getValues().get(0).get(0).getProcessor().getPrimaryProduct();
-		return this.getStockList().getValueFor(tempBulkMaterial, 1);
+	public double getProductionLevel(double simTime, BulkMaterial tempBulkMaterial) {
+		return this.getStockList().getValueFor(tempBulkMaterial, 2);
 	}
 	
-	/* @Output(name = "ProductionLevel",
-	 description = "Production level for the current planning horizon.",
-	    unitType = MassFlowUnit.class)
-	public double getProductionLevel( double simTime ) {
-		BulkMaterial tempBulkMaterial = this.getOperationsManager().getProcessingRoutesList().getValues().get(0).get(0).getProcessor().getPrimaryProduct();
-		return this.getStockList().getValueFor(tempBulkMaterial, 1);
-	}
-	*/
 	//////////////////////////////////////////////////////////////////////////////////////
 	// Report METHODS
 	//////////////////////////////////////////////////////////////////////////////////////
@@ -354,6 +352,10 @@ public class Facility extends DiscreteHandlingLinkedEntity {
 					ReportAgent.getReportPrecision(), 1);
 			stocksReportFile.putDoubleWithDecimalsTabs(stocksList.getValueFor(bulkMaterial, 7),
 					ReportAgent.getReportPrecision(), 1);
+			stocksReportFile.putDoubleWithDecimalsTabs(stocksList.getValueFor(bulkMaterial, 8),
+					ReportAgent.getReportPrecision(), 1);
+			stocksReportFile.putDoubleWithDecimalsTabs(stocksList.getValueFor(bulkMaterial, 9),
+					ReportAgent.getReportPrecision(), 1);
 			
 			stocksReportFile.newLine();
 			stocksReportFile.flush();
@@ -365,8 +367,10 @@ public class Facility extends DiscreteHandlingLinkedEntity {
 		stocksReportFile.putStringTabs("Time", 1);
 		stocksReportFile.putStringTabs("Material", 1);
 		stocksReportFile.putStringTabs("Technical Capacity", 1);
-		stocksReportFile.putStringTabs("Target demand/Throughput", 1);
-		stocksReportFile.putStringTabs("Unsatisfied Amount in Contracts", 1);
+		stocksReportFile.putStringTabs("Target demand", 1);
+		stocksReportFile.putStringTabs("Target Throughput", 1);
+		stocksReportFile.putStringTabs("Unsatisfied Demand Amount in Contracts", 1);
+		stocksReportFile.putStringTabs("Unsold Throughput Amount in Contracts", 1);
 		stocksReportFile.putStringTabs("Total stockpile capacities", 1);
 		stocksReportFile.putStringTabs("Total amount in all stockpiles", 1);
 		stocksReportFile.putStringTabs("Reserved amount for loading", 1);

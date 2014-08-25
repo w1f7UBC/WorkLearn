@@ -238,7 +238,7 @@ public class LoadingBay extends DiscreteHandlingLinkedEntity {
 				}
 			} 	
 			//remove from facilities reserved bulk material list
-			this.getFacility().removeFromStocksList(tempBulkMaterial, 5, tempBulkCargo.getCapacity());
+			this.getFacility().removeFromStocksList(tempBulkMaterial, 7, tempBulkCargo.getCapacity());
 			if(tempBulkCargo.getFacility() != this.getFacility())
 				contract.removeFromReservedForFulfilling(tempBulkCargo.getCapacity());
 		}
@@ -280,7 +280,7 @@ public class LoadingBay extends DiscreteHandlingLinkedEntity {
 				}
 			} 
 			//remove from facilities reserved bulk material list
-			this.getFacility().removeFromStocksList(tempBulkMaterial, 6, reservedAmount);
+			this.getFacility().removeFromStocksList(tempBulkMaterial, 8, reservedAmount);
 			if(tempBulkCargo.getFacility() != this.getFacility())
 				contract.removeFromReservedForFulfilling(tempBulkCargo.getCapacity());
 		}

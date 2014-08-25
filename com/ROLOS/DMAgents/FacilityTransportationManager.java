@@ -22,12 +22,10 @@ import com.ROLOS.Logistics.Stockpile;
 import com.ROLOS.Utils.HashMapList;
 import com.ROLOS.Utils.TwoLinkedLists;
 import com.sandwell.JavaSimulation.BooleanInput;
-import com.sandwell.JavaSimulation.DoubleVector;
 import com.sandwell.JavaSimulation.EntityListInput;
 import com.sandwell.JavaSimulation.InputErrorException;
 import com.jaamsim.input.Input;
 import com.jaamsim.input.Keyword;
-import com.jaamsim.input.ValueListInput;
 import com.sandwell.JavaSimulation.Tester;
 
 
@@ -337,14 +335,14 @@ public class FacilityTransportationManager extends FacilityManager {
 	
 	public void reserveDestinationForDelivery(MovingEntity movingEntity, Fleet fleet, Contract contract){
 		for(BulkMaterial each: movingEntity.getCurrentlyHandlingBulkMaterialList())
-			movingEntity.getDestinationFacility().addToStocksList(each, 6, movingEntity.getCurrentlyHandlingBulkMaterialAmount(each));
+			movingEntity.getDestinationFacility().addToStocksList(each, 8, movingEntity.getCurrentlyHandlingBulkMaterialAmount(each));
 	}
 	
 	public void reserveDestinationForPickUp(MovingEntity movingEntity, Fleet fleet, Contract contract){
 		BulkMaterial bulkMaterial = contract.getProduct();
 		Facility facility = movingEntity.getDestinationFacility();
 		BulkHandlingRoute tempBulkHandlingRoute = facility.getOperationsManager().getBulkHandlingRoute(movingEntity, bulkMaterial, true);
-		facility.addToStocksList(tempBulkHandlingRoute.getInfeedBulkMaterial(), 5, movingEntity.getAcceptingBulkMaterialList().getValueFor(bulkMaterial, 0));
+		facility.addToStocksList(tempBulkHandlingRoute.getInfeedBulkMaterial(), 7, movingEntity.getAcceptingBulkMaterialList().getValueFor(bulkMaterial, 0));
 	}
 	
 	

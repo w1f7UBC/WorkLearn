@@ -254,8 +254,20 @@ public class BulkMaterialProcessor extends BulkHandlingLinkedEntity {
 		return outfeedRateByEntityType.getValue().get(outfeedEntityTypeList.getValue().indexOf(bulkMaterial));
 	}
 	
-	public double getConverstionRate(BulkMaterial bulkMaterial){
-		return this.getOutfeedRate(bulkMaterial)/this.getMaxRate();
+	//TODO figure out conversion rates e.g. outfeed/outfeed or outfeed/infeed (may be in different units!)
+	public double getConverstionRate(BulkMaterial numeratorMaterial, BulkMaterial denominatorMaterial){
+		double numerator, denominator;
+		if(this.getHandlingEntityTypeList().contains(numeratorMaterial))
+			numerator = this.getMaxRate(numeratorMaterial);
+		else
+			numerator = this.getOutfeedRate(numeratorMaterial);
+		
+		if(this.getHandlingEntityTypeList().contains(denominatorMaterial))
+			denominator = this.getMaxRate(denominatorMaterial);
+		else
+			denominator = this.getOutfeedRate(denominatorMaterial);
+		
+		return numerator/denominator;
 	}
 	
 	public ProcessingRoute getProcessingRoute(){

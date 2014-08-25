@@ -39,7 +39,7 @@ public class Stockpile extends BulkMaterialStorage {
 		if(this.getFacility() == null)
 			throw new ErrorException("Facility for %s is not set!", this.getName());
 		
-		this.getFacility().addToStocksList((BulkMaterial) this.getHandlingEntityTypeList().get(0), 3, this.getCapacity());
+		this.getFacility().addToStocksList((BulkMaterial) this.getHandlingEntityTypeList().get(0), 5, this.getCapacity());
 		
 		// populate bulk handling routes
 		LinkedList<LinkedEntity> tempList= new LinkedList<>();
@@ -63,7 +63,7 @@ public class Stockpile extends BulkMaterialStorage {
 			T1 entityToAdd, double amountToAdd) {
 		super.addToCurrentlyHandlingEntityList(entityToAdd, amountToAdd);
 				
-		this.getFacility().addToStocksList((BulkMaterial) entityToAdd.getProtoTypeEntity(), 4, amountToAdd);
+		this.getFacility().addToStocksList((BulkMaterial) entityToAdd.getProtoTypeEntity(), 6, amountToAdd);
 		
 		//disconnect if filled up
 		if(Tester.equalCheckTolerance(this.getRemainingCapacity((BulkMaterial) entityToAdd), 0.0d)){
@@ -108,7 +108,7 @@ public class Stockpile extends BulkMaterialStorage {
 		super.removeFromCurrentlyHandlingEntityList(entityToRemove, amountToRemove);
 		
 		
-		this.getFacility().removeFromStocksList((BulkMaterial) entityToRemove.getProtoTypeEntity(), 4, amountToRemove);
+		this.getFacility().removeFromStocksList((BulkMaterial) entityToRemove.getProtoTypeEntity(), 6, amountToRemove);
 		
 		if(Tester.lessOrEqualCheckTolerance(this.getCurrentlyHandlingAmount(), minReclaimableAmount.getValue())){
 			lastDisconnectedFromLoading = true;
