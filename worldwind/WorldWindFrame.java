@@ -45,7 +45,8 @@ import gov.nasa.worldwind.awt.WorldWindowGLCanvas;
  */
 public class WorldWindFrame extends ApplicationTemplate
 {
-	public static AppFrame AppFrame = null;
+	public static AppFrame AppFrame=null;
+	private static JFrame ControlFrame=null;
 	
     public static class AppFrame extends ApplicationTemplate.AppFrame
     {
@@ -112,22 +113,22 @@ public class WorldWindFrame extends ApplicationTemplate
 
             // Put the pieces together.
             this.getContentPane().add(wwjPanel, BorderLayout.CENTER);
-            if (includeLayerPanel)
-            {
+            ControlFrame=new JFrame();
+            if (includeLayerPanel){
                 this.controlPanel = new JPanel(new BorderLayout(10, 10));
                 this.layerPanel = new LayerPanel(this.getWwd());
                 this.controlPanel.add(this.layerPanel, BorderLayout.WEST);
                 this.queryPanel = new QueryPanel(this.getWwd());
                 this.controlPanel.add(this.queryPanel, BorderLayout.CENTER);
-                JFrame controlFrame = new JFrame();
-                controlFrame.add(this.controlPanel);
-                controlFrame.pack();
-                controlFrame.setSize(750, 305);
-                controlFrame.setLocation(1160, 735);
-                controlFrame.setTitle("WorldView Controller");
-                controlFrame.setIconImage(GUIFrame.getWindowIcon());
-                controlFrame.setVisible(true);
+                ControlFrame.add(this.controlPanel);
+                ControlFrame.pack();
+                ControlFrame.setSize(750, 305);
+                ControlFrame.setLocation(1160, 735);
+                ControlFrame.setTitle("WorldView Controller");
+                ControlFrame.setIconImage(GUIFrame.getWindowIcon());
+                ControlFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
             }
+            this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
             if (includeStatsPanel || System.getProperty("gov.nasa.worldwind.showStatistics") != null)
             {
@@ -331,14 +332,6 @@ public class WorldWindFrame extends ApplicationTemplate
         {
             final AppFrame frame = (AppFrame) appFrameClass.newInstance();
             frame.setTitle(appName);
-            java.awt.EventQueue.invokeLater(new Runnable()
-            {
-                public void run()
-                {
-                    frame.setVisible(true);
-                }
-            });
-
             return frame;
         }
         catch (Exception e)
@@ -351,5 +344,31 @@ public class WorldWindFrame extends ApplicationTemplate
     public static void initialize()
     {
         startClosable("WorldViewer", AppFrame.class);
+    }
+    
+    public static void setViewVisible(final boolean visibility){
+    	if (AppFrame==null && visibility==true){
+    		initialize();
+    	}
+    	java.awt.EventQueue.invokeLater(new Runnable()
+        {
+            public void run()
+            {
+            	AppFrame.setVisible(visibility);
+            }
+        });
+    }
+    
+    public static void setControlVisible(final boolean visibility){
+    	if (ControlFrame==null && visibility==true){
+    		initialize();
+    	}
+    	java.awt.EventQueue.invokeLater(new Runnable()
+        {
+            public void run()
+            {
+            	ControlFrame.setVisible(visibility);
+            }
+        });
     }
 }
