@@ -123,8 +123,9 @@ public class Market extends ROLOSEntity {
 				}
 				// TODO assumes seller is transporting and will remove from buyers list if transportation capacity is maxed out
 				// TODO URGENT! transportation cost cap should be set properly !
+				
 				if (sellersList.get(is).getTransportationManager().getLeastCostTranspotationRoute(product.getValue(), sellersList.get(is), buyersList.get(ib), buyersList.get(ib).getStockList().getValueFor(product.getValue(), 9)) == null){
-					buyersList.remove(ib);
+					ib++;
 					continue;
 				}else{
 					offersList.add(new MarketOffer(sellersList.get(is), buyersList.get(ib), 

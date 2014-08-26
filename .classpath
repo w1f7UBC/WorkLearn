@@ -18,5 +18,18 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="resources/jar/worldwind.jar" sourcepath="resources/jar/worldwind.jar"/>
 	<classpathentry kind="lib" path="resources/jar/worldwindx.jar"/>
+	<classpathentry kind="lib" path="resources/jar/commons-codec-1.5.jar"/>
+	<classpathentry kind="lib" path="resources/jar/commons-logging-1.1.jar"/>
+	<classpathentry kind="lib" path="resources/jar/dom4j-1.6.1.jar"/>
+	<classpathentry kind="lib" path="resources/jar/junit-4.11.jar"/>
+	<classpathentry kind="lib" path="resources/jar/log4j-1.2.13.jar"/>
+	<classpathentry kind="lib" path="resources/jar/poi-3.10-FINAL-20140208.jar"/>
+	<classpathentry kind="lib" path="resources/jar/poi-examples-3.10-FINAL-20140208.jar"/>
+	<classpathentry kind="lib" path="resources/jar/poi-excelant-3.10-FINAL-20140208.jar"/>
+	<classpathentry kind="lib" path="resources/jar/poi-ooxml-3.10-FINAL-20140208.jar"/>
+	<classpathentry kind="lib" path="resources/jar/poi-ooxml-schemas-3.10-FINAL-20140208.jar"/>
+	<classpathentry kind="lib" path="resources/jar/poi-scratchpad-3.10-FINAL-20140208.jar"/>
+	<classpathentry kind="lib" path="resources/jar/stax-api-1.0.1.jar"/>
+	<classpathentry kind="lib" path="resources/jar/xmlbeans-2.3.0.jar"/>
 	<classpathentry kind="output" path=""/>
 </classpath>

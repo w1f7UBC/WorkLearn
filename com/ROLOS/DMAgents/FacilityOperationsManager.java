@@ -353,6 +353,9 @@ public class FacilityOperationsManager extends FacilityManager {
 			double internalExchangeAmount = Tester.min(this.getFacility().getStockList().getValueFor(infeedMaterial, 1),
 					this.getFacility().getStockList().getValueFor(infeedMaterial, 2));
 			
+			if(Tester.equalCheckTolerance(internalExchangeAmount, 0.0d))
+				return;
+			
 			this.getFacility().removeFromStocksList(infeedMaterial, 3, internalExchangeAmount);
 			this.getFacility().removeFromStocksList(infeedMaterial, 4, internalExchangeAmount);
 			
