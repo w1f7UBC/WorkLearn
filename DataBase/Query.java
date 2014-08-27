@@ -172,8 +172,8 @@ public class Query extends DisplayEntity {
 				   final JScrollPane dataBasePanel = new JScrollPane();
 				   dataBasePanel.setViewportView(content);
 				   dataBaseFrame.add(dataBasePanel);
-				   dataBaseFrame.setSize(750, 305);
-	               dataBaseFrame.setLocation(1160, 735);
+	               dataBaseFrame.setLocation(GUIFrame.COL4_START, GUIFrame.LOWER_START);
+	               dataBaseFrame.setSize(GUIFrame.COL4_WIDTH, GUIFrame.LOWER_HEIGHT);
 				   dataBaseFrame.setIconImage(GUIFrame.getWindowIcon());
 				   dataBaseFrame.setTitle(name);
 				   dataBaseFrame.setAutoRequestFocus(false);

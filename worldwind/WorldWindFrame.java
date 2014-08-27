@@ -32,6 +32,10 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
 import java.sql.ResultSet;
+import java.util.logging.ConsoleHandler;
+import java.util.logging.Level;
+import java.util.logging.LogRecord;
+import java.util.logging.Logger;
 
 import gov.nasa.worldwind.awt.WorldWindowGLCanvas;
 
@@ -54,8 +58,8 @@ public class WorldWindFrame extends ApplicationTemplate
     	
         public AppFrame(){
             makeMenu(this);
-            this.setSize(750,610);
-            this.setLocation(1160, 125);
+            this.setLocation(GUIFrame.COL4_START, GUIFrame.TOP_START);
+            this.setSize(GUIFrame.COL4_WIDTH, GUIFrame.VIEW_HEIGHT);
             this.setIconImage(GUIFrame.getWindowIcon());
             final WorldWindowGLCanvas canvas = (WorldWindowGLCanvas) this.getWwd();
             canvas.addMouseListener(new MouseAdapter() {
@@ -122,8 +126,8 @@ public class WorldWindFrame extends ApplicationTemplate
                 this.controlPanel.add(this.queryPanel, BorderLayout.CENTER);
                 ControlFrame.add(this.controlPanel);
                 ControlFrame.pack();
-                ControlFrame.setSize(750, 305);
-                ControlFrame.setLocation(1160, 735);
+                ControlFrame.setLocation(GUIFrame.COL4_START, GUIFrame.LOWER_START);
+        		ControlFrame.setSize(GUIFrame.COL4_WIDTH, GUIFrame.LOWER_HEIGHT);
                 ControlFrame.setTitle("WorldView Controller");
                 ControlFrame.setIconImage(GUIFrame.getWindowIcon());
                 ControlFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -343,7 +347,31 @@ public class WorldWindFrame extends ApplicationTemplate
     
     public static void initialize()
     {
+    	   // Get the World Wind logger by name.
+        Logger logger = Logger.getLogger("gov.nasa.worldwind");
+
+        // Turn off logging to parent handlers of the World Wind handler.
+        logger.setUseParentHandlers(false);
+
+        // Create a console handler (defined below) that we use to write log messages.
+        final ConsoleHandler handler = new MyHandler();
+
+        // Enable all logging levels on both the logger and the handler.
+        logger.setLevel(Level.OFF);
+        handler.setLevel(Level.OFF);
+
+        // Add our handler to the logger
+        logger.addHandler(handler);
         startClosable("WorldViewer", AppFrame.class);
+    }
+    
+    private static class MyHandler extends ConsoleHandler
+    {
+        public void publish(LogRecord logRecord)
+        {
+            // Just redirect the record to ConsoleHandler for printing.
+            super.publish(logRecord);
+        }
     }
     
     public static void setViewVisible(final boolean visibility){

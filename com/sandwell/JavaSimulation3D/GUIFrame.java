@@ -138,9 +138,11 @@ public class GUIFrame extends JFrame implements EventTimeListener, EventErrorLis
 	public static int COL1_WIDTH;
 	public static int COL2_WIDTH;
 	public static int COL3_WIDTH;
+	public static int COL4_WIDTH;
 	public static int COL1_START;
 	public static int COL2_START;
 	public static int COL3_START;
+	public static int COL4_START;
 	public static int HALF_TOP;
 	public static int HALF_BOTTOM;
 	public static int TOP_START;
@@ -1438,13 +1440,15 @@ public class GUIFrame extends JFrame implements EventTimeListener, EventErrorLis
 		Dimension guiSize = GUIFrame.instance().getSize();
 		Rectangle winSize = GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds();
 
-		COL1_WIDTH = 220;
-		COL2_WIDTH = Math.min(520, (winSize.width - COL1_WIDTH) / 2);
-		COL3_WIDTH = Math.min(420, winSize.width - COL1_WIDTH - COL2_WIDTH);
-
+		COL1_WIDTH = 180;
+		COL2_WIDTH = ((winSize.width - COL1_WIDTH)*6/10*6/10);
+		COL3_WIDTH = ((winSize.width - COL1_WIDTH)*4/10*6/10);
+		COL4_WIDTH = winSize.width - COL1_WIDTH - COL2_WIDTH - COL3_WIDTH;
+		
 		COL1_START = 0;
 		COL2_START = COL1_START + COL1_WIDTH;
 		COL3_START = COL2_START + COL2_WIDTH;
+		COL4_START = COL3_START + COL3_WIDTH;
 
 		HALF_TOP = (winSize.height - guiSize.height) / 2;
 		HALF_BOTTOM = (winSize.height - guiSize.height - HALF_TOP);
@@ -1523,7 +1527,7 @@ public class GUIFrame extends JFrame implements EventTimeListener, EventErrorLis
 			// Not a program directive, add to list of config files
 			configFiles.add(each);
 		}
-
+		GUIFrame.calcWindowDefaults();
 		// If not running in batch mode, create the splash screen
 		JWindow splashScreen = null;
 		if (!batch) {
@@ -1569,7 +1573,7 @@ public class GUIFrame extends JFrame implements EventTimeListener, EventErrorLis
 
 		// Show the Control Panel
 		gui.setVisible(true);
-		GUIFrame.calcWindowDefaults();
+		
 
 		// Load the autoload file
 		InputAgent.setRecordEdits(false);
