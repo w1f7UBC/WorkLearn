@@ -85,7 +85,7 @@ public class Facility extends DiscreteHandlingLinkedEntity {
 		insideFacilityLimits = new HashMapList<String,LogisticsEntity>(5);
 		new TwoLinkedLists<>(4, new DescendingPriotityComparator<BulkMaterial>(ROLOSEntity.class, "getInternalPriority"),0);
 		
-		stocksList = new TwoLinkedLists<>(13, new DescendingPriotityComparator<BulkMaterial>(ROLOSEntity.class, "getInternalPriority"));
+		stocksList = new TwoLinkedLists<>(14, new DescendingPriotityComparator<BulkMaterial>(ROLOSEntity.class, "getInternalPriority"));
 		
 		synchronized (allInstances) {
 			allInstances.add(this);
@@ -195,8 +195,8 @@ public class Facility extends DiscreteHandlingLinkedEntity {
 	 * <br> <b> 0- </b> Facility's technical capacity for each material (t or m3 /h)
 	 * <br> <b> 1- </b> Target demand for the current planning horizon
 	 * <br> <b> 2- </b> Target throughput for the current planning horizon
-	 * <br> <b> 3- </b> Unstatisfied target demand in contracts or internally (to buy)
-	 * <br> <b> 4- </b> Unsold target throughput in contracts (to sell)
+	 * <br> <b> 3- </b> Unstatisfied target demand in contracts or internally (infeed)
+	 * <br> <b> 4- </b> sold throughput in contracts (outfeed)
 	 * <br> <b> 5- </b> Total stockpiles capacity for each material
 	 * <br> <b> 6- </b> Total amount in all stockpiles
 	 * <br> <b> 7- </b> Reserved amount for loading scheduled bulk cargos
@@ -205,6 +205,7 @@ public class Facility extends DiscreteHandlingLinkedEntity {
 	 * <br> <b> 10- </b> Average purchase price
 	 * <br> <b> 11- </b> fullfilled supply contracts amount
 	 * <br> <b> 12- </b> fullfilled demand contracts amount
+	 * <br> <b> 13- </b> realized throughput through feedstock supply
 	 */
 	public TwoLinkedLists<BulkMaterial> getStockList(){
 		return stocksList;
@@ -215,8 +216,8 @@ public class Facility extends DiscreteHandlingLinkedEntity {
 	 * <br> <b> 0- </b> Facility's technical capacity for each material (t or m3 /h)
 	 * <br> <b> 1- </b> Target demand for the current planning horizon
 	 * <br> <b> 2- </b> Target throughput for the current planning horizon
-	 * <br> <b> 3- </b> Unstatisfied target demand in contracts or internally (to buy)
-	 * <br> <b> 4- </b> Unsold target throughput in contracts (to sell)
+	 * <br> <b> 3- </b> Unstatisfied target demand in contracts or internally (infeed)
+	 * <br> <b> 4- </b> sold throughput in contracts (outfeed)
 	 * <br> <b> 5- </b> Total stockpiles capacity for each material
 	 * <br> <b> 6- </b> Total amount in all stockpiles
 	 * <br> <b> 7- </b> Reserved amount for loading scheduled bulk cargos
@@ -225,6 +226,7 @@ public class Facility extends DiscreteHandlingLinkedEntity {
 	 * <br> <b> 10- </b> Average purchase price
 	 * <br> <b> 11- </b> fullfilled supply contracts amount
 	 * <br> <b> 12- </b> fullfilled demand contracts amount
+	 * <br> <b> 13- </b> realized throughput through feedstock supply
 	 */
 	public void setStocksList(BulkMaterial bulkMaterial, int valueListIndex, double amount){
 		stocksList.set(bulkMaterial, valueListIndex, amount);
@@ -237,8 +239,8 @@ public class Facility extends DiscreteHandlingLinkedEntity {
 	 * <br> <b> 0- </b> Facility's technical capacity for each material (t or m3 /h)
 	 * <br> <b> 1- </b> Target demand for the current planning horizon
 	 * <br> <b> 2- </b> Target throughput for the current planning horizon
-	 * <br> <b> 3- </b> Unstatisfied target demand in contracts or internally (to buy)
-	 * <br> <b> 4- </b> Unsold target throughput in contracts (to sell)
+	 * <br> <b> 3- </b> Unstatisfied target demand in contracts or internally (infeed)
+	 * <br> <b> 4- </b> sold throughput in contracts (outfeed)
 	 * <br> <b> 5- </b> Total stockpiles capacity for each material
 	 * <br> <b> 6- </b> Total amount in all stockpiles
 	 * <br> <b> 7- </b> Reserved amount for loading scheduled bulk cargos
@@ -247,6 +249,7 @@ public class Facility extends DiscreteHandlingLinkedEntity {
 	 * <br> <b> 10- </b> Average purchase price
 	 * <br> <b> 11- </b> fullfilled supply contracts amount
 	 * <br> <b> 12- </b> fullfilled demand contracts amount
+	 * <br> <b> 13- </b> realized throughput through feedstock supply
 	 */
 	public void addToStocksList(BulkMaterial bulkMaterial, int valueListIndex, double amount){
 		// Whether supply contracts have been inactive due to material unavailability
@@ -292,6 +295,9 @@ public class Facility extends DiscreteHandlingLinkedEntity {
 	 * <br> <b> 8- </b> Reserved amount for unloading
 	 * <br> <b> 9- </b> Current offer price per unit of material in the current planning horizon
 	 * <br> <b> 10- </b> Average purchase price
+	 * <br> <b> 11- </b> fullfilled supply contracts amount
+	 * <br> <b> 12- </b> fullfilled demand contracts amount
+	 * <br> <b> 13- </b> realized throughput through feedstock supply
 	 */
 	public void removeFromStocksList(BulkMaterial bulkMaterial, int valueListIndex, double amount){
 		// Whether demand contracts have been inactive due to stockpiles maxing out on capacity

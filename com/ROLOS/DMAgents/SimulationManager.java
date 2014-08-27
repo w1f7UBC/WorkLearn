@@ -132,8 +132,8 @@ public class SimulationManager extends DisplayEntity {
 		contractsReportFile.putStringTabs("Estimated Transportation Cost", 1);
 		contractsReportFile.putStringTabs("Dedicated Fleet", 1);
 		contractsReportFile.putStringTabs("Transporter Proto Type", 1);
-		contractsReportFile.putStringTabs("Buyer's UnFullfilled Amount", 1);
-		contractsReportFile.putStringTabs("Supplier's UnFullfilled Amount", 1);
+		contractsReportFile.putStringTabs("Buyer's unmet demand", 1);
+		contractsReportFile.putStringTabs("Supplier's sold amount", 1);
 	//	contractsReportFile.putStringTabs("Contract Status", 1);
 		
 		contractsReportFile.newLine();

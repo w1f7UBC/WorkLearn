@@ -2,9 +2,14 @@ package com.ROLOS.Logistics;
 
 import java.util.ArrayList;
 
+import com.ROLOS.DMAgents.SimulationManager;
+import com.jaamsim.events.ReflectionTarget;
 import com.jaamsim.input.ValueInput;
 import com.jaamsim.units.TimeUnit;
+import com.sandwell.JavaSimulation.EntityInput;
+import com.sandwell.JavaSimulation.ErrorException;
 import com.sandwell.JavaSimulation.InputErrorException;
+import com.sandwell.JavaSimulation.TimeSeries;
 import com.jaamsim.input.Keyword;
 import com.sandwell.JavaSimulation.Tester;
 
@@ -15,7 +20,12 @@ import com.sandwell.JavaSimulation.Tester;
 public class EntitySource extends BulkHandlingLinkedEntity {
 
 	private static final ArrayList<EntitySource> allInstances;
-
+	
+	@Keyword(description = "TimeSeries of production levels for the output of this souce (sources only handle one type of product). Units of time series should be in"
+			+ "flow unit (Mass or volume flow unit) meaning throughputs are t/h or m3/h.", 
+			example = "Temiscaming Throughput { WoodChipeProductionSchedule }")
+	private final EntityInput<TimeSeries> throughput;
+	
 	// MaxRate defines generation rate
 	// Capacity defines the maximum amount of bulk material to be generated
 	@Keyword(description = "Generation interval. IAT is used to regulate the speed of generated amount passed to the stockpile."
@@ -31,6 +41,10 @@ public class EntitySource extends BulkHandlingLinkedEntity {
 	}
 
 	{
+
+		throughput = new EntityInput<>(TimeSeries.class, "Throughput", "Key Inputs", null);
+		this.addInput(throughput);
+		
 		generationIAT = new ValueInput("GenerationIAT", "Key Inputs", 3600.0d);
 		generationIAT.setValidRange(0.0d, Double.POSITIVE_INFINITY);
 		generationIAT.setUnitType(TimeUnit.class);
@@ -87,13 +101,23 @@ public class EntitySource extends BulkHandlingLinkedEntity {
 		super.startUp();
 		// TODO make this talk to the generation manager to figure out the
 		// entities to generate
+		this.scheduleProcess(0.0d, 2, new ReflectionTarget(this, "pushSupply",this.getSimTime(),this.getSimTime()+SimulationManager.getPlanningHorizon()));
+
 		this.startProcess("generate");
 	}
 
 	// /////////////////////////////////////////////////////////////////////////////
 	// MAIN METHODS
 	// /////////////////////////////////////////////////////////////////////////////
+	public void pushSupply(double startTime, double endTime){
+		Stockpile stockpile = (Stockpile) this.getOutfeedLinkedEntityList().get(0);
+		double amount = this.getThroughput(startTime, endTime);
+		stockpile.getFacility().getOperationsManager().updateRealizedProduction((BulkMaterial) this.getHandlingEntityTypeList().get(0), amount);
+		
+		this.scheduleProcess(SimulationManager.getPlanningHorizon(), 2, new ReflectionTarget(this, "pushSupply",this.getSimTime(),this.getSimTime()+SimulationManager.getPlanningHorizon()));
 
+	}
+	
 	public void generate() {
 
 		this.setPresentState("Working"); // Generator starts working
@@ -127,7 +151,32 @@ public class EntitySource extends BulkHandlingLinkedEntity {
 	public double getGenerationIAT() {
 		return generationIAT.getValue();
 	}
-	
+
+	/**
+	 * Attention!! Production level should be defined in exact planning periods.
+	 * e.g. if planning is 1 year production levels for end of each year should be defined 
+	 * until the end of simulation run otherwise will will throw an error or result will be unknown!
+	 * @return total production level for the passed time slot. Will not interpolate levels if start time or end time are 
+	 * fractions of the time defined in the time series. i.e. it will add production levels for the 
+	 * starting time one after the start time until the end time.
+	 */
+	public double getThroughput(double startTime, double endTime){
+		if(Tester.greaterCheckTimeStep(endTime, throughput.getValue().getMaxTimeValue()))
+			throw new ErrorException("the production time series defined for %s in facility %s includes production levels until"
+					+ "%f. Try was made to check production level until %f!", 
+					this.getHandlingEntityTypeList().get(0).getName(), this.getName(), throughput.getValue().getMaxTimeValue(),endTime);
+		double timeSlot, currentTime, nextTime;
+		currentTime = startTime/3600.0d;
+		double tempThroughput = 0.0d;
+		nextTime = throughput.getValue().getNextChangeTimeAfterHours(currentTime);
+		while(Tester.lessCheckTimeStep(currentTime, endTime/3600.0d)){
+			timeSlot = Tester.min(nextTime,endTime/3600.0d) - currentTime;
+			tempThroughput += throughput.getValue().getValueForTimeHours(currentTime) * timeSlot*3600.0d;
+			currentTime = nextTime;
+			nextTime = throughput.getValue().getNextChangeTimeAfterHours(currentTime);
+		}		
+		return tempThroughput;
+	}
 	// ////////////////////////////////////////////////////////////////////////////////////
 	// GRAPHICS
 	// ////////////////////////////////////////////////////////////////////////////////////

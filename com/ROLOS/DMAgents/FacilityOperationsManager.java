@@ -39,7 +39,10 @@ public class FacilityOperationsManager extends FacilityManager {
 	
 	private PriorityQueue<BulkHandlingRoute> loadingRoutesList;
 	private PriorityQueue<BulkHandlingRoute> unloadingRoutesList;
-	private HashMapList<BulkMaterial,ProcessingRoute> processingRoutesList;
+	//TODO processing routes based on outfeed (primary product) and feedstock
+	private HashMapList<BulkMaterial,ProcessingRoute> processingRoutesListOutfeed;
+	//TODO it assumes processors only accept one infeed material
+	private HashMapList<BulkMaterial,ProcessingRoute> processingRoutesListInfeed;
 	
 	{
 		mutuallyExclusiveProcesses = new EntityListListInput<>(BulkMaterialProcessor.class, "MutuallyExclusiveProcesses", "Key Inputs", null);
@@ -49,7 +52,8 @@ public class FacilityOperationsManager extends FacilityManager {
 	public FacilityOperationsManager() {
 		loadingRoutesList = new PriorityQueue<>(new DescendingPriotityComparator<BulkHandlingRoute>(BulkHandlingRoute.class, "getRoutePriority"));
 		unloadingRoutesList = new PriorityQueue<>(new DescendingPriotityComparator<BulkHandlingRoute>(BulkHandlingRoute.class, "getRoutePriority"));
-		processingRoutesList = new HashMapList<>(1);
+		processingRoutesListOutfeed = new HashMapList<>(1);
+		processingRoutesListInfeed = new HashMapList<>(1);
 		//set last plannedtime so that production planning is done at the beginning of the run
 	}
 	
@@ -76,6 +80,7 @@ public class FacilityOperationsManager extends FacilityManager {
 			this.getFacility().setStocksList(each, 4, 0.0d);
 			this.getFacility().setStocksList(each, 11, 0.0d);
 			this.getFacility().setStocksList(each, 12, 0.0d);
+			this.getFacility().setStocksList(each, 13, 0.0d);
 		}
 		// priotiy 1 to activate before market manager
 		this.scheduleProcess(SimulationManager.getPlanningHorizon(), 1, new ReflectionTarget(this, "resetPlannedStocks"));
@@ -91,10 +96,19 @@ public class FacilityOperationsManager extends FacilityManager {
 	}
 
 	/**
-	 * TODO right now it is assumed that facilities only have one main process
+	 * @return processing routes list based on their outfeed bulk material
+	 * TODO right now it is assumed that facilities only have one primary product
 	 */
-	public HashMapList<BulkMaterial, ProcessingRoute> getProcessingRoutesList() {
-		return processingRoutesList;
+	public HashMapList<BulkMaterial, ProcessingRoute> getProcessingRoutesListOutfeed() {
+		return processingRoutesListOutfeed;
+	}
+	
+	/**
+	 * @return processing routes list based on their Infeed bulk material
+	 * TODO right now it is assumed that facilities only have one main input feedstock
+	 */
+	public HashMapList<BulkMaterial, ProcessingRoute> getProcessingRoutesListInfeed() {
+		return processingRoutesListInfeed;
 	}
 	
 	public Stockpile getStockpileForLoading(BulkMaterial bulkMaterial){
@@ -337,14 +351,16 @@ public class FacilityOperationsManager extends FacilityManager {
 	}
 	
 	public void configureProcessingRoute(LinkedList<LinkedEntity> list, BulkHandlingLinkedEntity activeEquipment){
-		for(ProcessingRoute each: processingRoutesList.get(((BulkMaterialProcessor)activeEquipment).getPrimaryProduct())){
+		for(ProcessingRoute each: processingRoutesListOutfeed.get(((BulkMaterialProcessor)activeEquipment).getPrimaryProduct())){
 			if(each.getProcessor() == activeEquipment){
 				each.addNewStockPiles(list);
 				return;
 			} 
 		}
 		ProcessingRoute tempProcessingRoute = new ProcessingRoute(list, activeEquipment);
-		processingRoutesList.add(((BulkMaterialProcessor)activeEquipment).getPrimaryProduct(), tempProcessingRoute);
+		processingRoutesListOutfeed.add(((BulkMaterialProcessor)activeEquipment).getPrimaryProduct(), tempProcessingRoute);
+		//TODO assumes processors only have one input
+		processingRoutesListInfeed.add((BulkMaterial)activeEquipment.getHandlingEntityTypeList().get(0), tempProcessingRoute);
 		((BulkMaterialProcessor)activeEquipment).setProcessingRoute(tempProcessingRoute);
 	}
 	
@@ -353,16 +369,27 @@ public class FacilityOperationsManager extends FacilityManager {
 	 */
 	public void satisfyDemandInternally(BulkMaterial infeedMaterial){
 			double internalExchangeAmount = Tester.min(this.getFacility().getStockList().getValueFor(infeedMaterial, 1),
-					this.getFacility().getStockList().getValueFor(infeedMaterial, 2));
+					this.getFacility().getStockList().getValueFor(infeedMaterial, 13));
 			
 			if(Tester.equalCheckTolerance(internalExchangeAmount, 0.0d))
 				return;
 			
 			this.getFacility().removeFromStocksList(infeedMaterial, 3, internalExchangeAmount);
-			this.getFacility().removeFromStocksList(infeedMaterial, 4, internalExchangeAmount);
+			this.getFacility().addToStocksList(infeedMaterial, 4, internalExchangeAmount);
 			
 			this.adjustMutuallyExclusiveProcessesDemands(infeedMaterial, internalExchangeAmount);
 					
+	}
+	
+	/**
+	 * updates realized production based on feedstock supply
+	 * TODO assumes only one processor and infeed per infeed material type exists
+	 */
+	public void updateRealizedProduction(BulkMaterial infeedMaterial, double amount){
+		BulkMaterialProcessor tempProcessor = this.getProcessingRoutesListInfeed().get(infeedMaterial).get(0).getProcessor();
+		for(BulkMaterial eachOutfeed: tempProcessor.getOutfeedEntityTypeList()){
+			this.getFacility().addToStocksList(eachOutfeed, 13, amount*tempProcessor.getConverstionRate(eachOutfeed, infeedMaterial));
+		}
 	}
 	
 	public void adjustMutuallyExclusiveProcessesDemands(BulkMaterial infeedMaterial, double infeedAmount){
@@ -370,7 +397,7 @@ public class FacilityOperationsManager extends FacilityManager {
 		// for infeeds of all other processes are adjusted
 		// TODO assuming infeed material is unique to the process whose mutually exclusive processes are adjusted
 		//find the infeed in process and adjust stocklist amounts for the mutually exclusive processes
-		for (ArrayList<ProcessingRoute> eachProcessingRoute: this.getProcessingRoutesList().getValues()) {
+		for (ArrayList<ProcessingRoute> eachProcessingRoute: this.getProcessingRoutesListOutfeed().getValues()) {
 			for (ProcessingRoute each: eachProcessingRoute) {
 				if(each.getProcessor().getHandlingEntityTypeList().contains(infeedMaterial) &&
 						!this.getMutuallyExclusiveProcesses(each.getProcessor()).isEmpty()){
@@ -398,8 +425,8 @@ public class FacilityOperationsManager extends FacilityManager {
 	 * plans production for all processing routes. It should be run after resetplannedstocks method.
 	 */
 	public void planProduction(){
-		for (BulkMaterial eachProcessingRouteList: processingRoutesList.getKeys()) {
-			for (ProcessingRoute processingRoute: processingRoutesList.get(eachProcessingRouteList)) {
+		for (BulkMaterial eachProcessingRouteList: processingRoutesListOutfeed.getKeys()) {
+			for (ProcessingRoute processingRoute: processingRoutesListOutfeed.get(eachProcessingRouteList)) {
 				if (processingRoute.getLastPlannedTime() != this.getSimTime()) {
 					this.planProduction(processingRoute,
 								this.getSimTime(),this.getSimTime()+ SimulationManager.getPlanningHorizon());
@@ -435,7 +462,7 @@ public class FacilityOperationsManager extends FacilityManager {
 				tempAmount = processingRoute.getCapacityRatio(eachMaterial,
 						processingRoute.getProcessor().getPrimaryProduct()) * throughput;
 				this.getFacility().addToStocksList(eachMaterial, 2, tempAmount);
-				this.getFacility().addToStocksList(eachMaterial, 4, tempAmount);
+			//	this.getFacility().addToStocksList(eachMaterial, 4, tempAmount);
 				//set purchase price 0
 				this.getFacility().setStocksList(eachMaterial, 10, 0.0d);
 			}
@@ -459,7 +486,7 @@ public class FacilityOperationsManager extends FacilityManager {
 					tempAmount = eachProcessor.getCapacityRatio(eachMaterial,
 							eachProcessor.getProcessor().getPrimaryProduct()) * throughput;
 					this.getFacility().setStocksList(eachMaterial, 2, tempAmount);
-					this.getFacility().setStocksList(eachMaterial, 4, tempAmount);
+				//	this.getFacility().setStocksList(eachMaterial, 4, tempAmount);
 					//set sell price 0
 					this.getFacility().setStocksList(eachMaterial, 10, 0.0d);
 				}

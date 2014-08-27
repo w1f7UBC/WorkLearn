@@ -51,7 +51,7 @@ public class FacilityGeneralManager extends FacilityManager {
 		
 		// populate the feedstock and output material list and facility's capacities for each output material based on 
 		// main product's capacity level
-		for (ArrayList<ProcessingRoute> eachProcessingRouteList : this.getFacility().getOperationsManager().getProcessingRoutesList().getValues()) {
+		for (ArrayList<ProcessingRoute> eachProcessingRouteList : this.getFacility().getOperationsManager().getProcessingRoutesListOutfeed().getValues()) {
 			for (ProcessingRoute tempProcessingRoute: eachProcessingRouteList) {
 				for (LogisticsEntity each : tempProcessingRoute.getProcessor()
 						.getHandlingEntityTypeList()) {
@@ -110,8 +110,7 @@ public class FacilityGeneralManager extends FacilityManager {
 	
 	public double getBalancedAmountToFullfill(Contract contract){
 		double totalRemainingSupplyContractsAmount = 
-				this.getFacility().getStockList().getValueFor(contract.getProduct(), 2) -
-				this.getFacility().getStockList().getValueFor(contract.getProduct(), 4)-
+				this.getFacility().getStockList().getValueFor(contract.getProduct(), 13) -
 				this.getFacility().getStockList().getValueFor(contract.getProduct(), 11);
 		
 		double totalAvailable = this.getFacility().getStockList().getValueFor(contract.getProduct(), 6);
@@ -149,7 +148,7 @@ public class FacilityGeneralManager extends FacilityManager {
 	public void addToContracts(Contract contract, boolean seller){
 		if(seller){
 			supplyContractList.add(contract.getProduct(), contract);
-			this.getFacility().removeFromStocksList(contract.getProduct(), 4, contract.getContractAmount());
+			this.getFacility().addToStocksList(contract.getProduct(), 4, contract.getContractAmount());
 
 		}else{
 			demandContractList.add(contract.getProduct(), contract);
@@ -157,6 +156,8 @@ public class FacilityGeneralManager extends FacilityManager {
 			//reserve transportation capacity
 			// TODO amount reserved is converted to amount per time unit for the contract's period meaning that a balanced transportation is assumed overtime
 			this.getFacility().getTransportationManager().getTransportersList().add(contract.getTransporterProtoType(), 1, (contract.getContractAmount()/contract.getContractPeriod())*SimulationManager.getPlanningHorizon());
+			//add to realized production 
+			this.getFacility().getOperationsManager().updateRealizedProduction(contract.getProduct(), contract.getContractAmount());
 			
 			//adjust infeed level for other mutually exclusive processes
 			this.getFacility().getOperationsManager().adjustMutuallyExclusiveProcessesDemands(contract.getProduct(), contract.getContractAmount());
