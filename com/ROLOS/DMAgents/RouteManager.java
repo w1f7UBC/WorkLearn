@@ -116,18 +116,18 @@ public class RouteManager extends DisplayEntity {
 				.getFacilityEntranceBlock(movingEntity, destinationBay);
 
 			//origin to exit block 
-			tempRoute = RouteManager.getRoute(originBay, exit,movingEntity, null, Route_Type.SHORTEST, false, Double.POSITIVE_INFINITY);
+			tempRoute = RouteManager.getRoute(originBay, exit,movingEntity, null, Route_Type.SHORTEST, false, Double.POSITIVE_INFINITY, null);
 			distance += tempRoute.getDijkstraWeight();
 			ArrayList<DiscreteHandlingLinkedEntity> tempRouteSegments = new ArrayList<>(
 				tempRoute.getRouteSegmentsList());
 			
 			//exit to entrance
-			tempRoute = RouteManager.getRoute(exit, entrance,movingEntity, null, Route_Type.SHORTEST, false, Double.POSITIVE_INFINITY);
+			tempRoute = RouteManager.getRoute(exit, entrance,movingEntity, null, Route_Type.SHORTEST, false, Double.POSITIVE_INFINITY, null);
 			distance += tempRoute.getDijkstraWeight();
 			tempRouteSegments.addAll(tempRoute.getRouteSegmentsList());
 
 			//entrance to destination bay
-			tempRoute = RouteManager.getRoute(entrance,destinationBay,movingEntity, null, Route_Type.SHORTEST, false, Double.POSITIVE_INFINITY);
+			tempRoute = RouteManager.getRoute(entrance,destinationBay,movingEntity, null, Route_Type.SHORTEST, false, Double.POSITIVE_INFINITY, null);
 			distance += tempRoute.getDijkstraWeight();
 			tempRouteSegments.addAll(tempRoute.getRouteSegmentsList());
 			
@@ -135,7 +135,7 @@ public class RouteManager extends DisplayEntity {
 			finalRoute.setRoute(tempRouteSegments);
 			routesList.add(routeName, finalRoute);
 		} else{
-			finalRoute = RouteManager.getRoute(originBay, destinationBay, movingEntity, null, Route_Type.SHORTEST, false, Double.POSITIVE_INFINITY);
+			finalRoute = RouteManager.getRoute(originBay, destinationBay, movingEntity, null, Route_Type.SHORTEST, false, Double.POSITIVE_INFINITY, null);
 		}
 		return finalRoute;
 	}
@@ -150,7 +150,8 @@ public class RouteManager extends DisplayEntity {
 	 * existed. null if such route doesn't exist. 
 	 */
 	public static <T extends DiscreteHandlingLinkedEntity> Route getRoute(T origin,
-			T destination, MovingEntity movingEntity, BulkMaterial bulkMaterial, Route_Type routingRule, boolean transshipmentAllowed, double weightCap) {
+			T destination, MovingEntity movingEntity, BulkMaterial bulkMaterial, 
+			Route_Type routingRule, boolean transshipmentAllowed, double weightCap, ArrayList<T> tabuList) {
 		String tempKey = getRouteName(origin, destination, movingEntity);
 		
 		if(unResolvedRoutesList.get(movingEntity).contains(tempKey))
@@ -168,7 +169,7 @@ public class RouteManager extends DisplayEntity {
 		if (tempRoute != null)
 				return tempRoute;
 		else
-			return computeDijkstraPath(origin, destination, movingEntity, bulkMaterial, routingRule,transshipmentAllowed, weightCap);
+			return computeDijkstraPath(origin, destination, movingEntity, bulkMaterial, routingRule,transshipmentAllowed, weightCap, tabuList);
 	}
 
 	// ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -188,10 +189,14 @@ public class RouteManager extends DisplayEntity {
 	 * travel time cap is set to 12 hrs and routes exceed that, they'd get cut off.
 	 */
 	public static <T extends DiscreteHandlingLinkedEntity> Route computeDijkstraPath(
-			T origin, T destination, MovingEntity movingEntity, BulkMaterial bulkMaterial, Route_Type routingRule, boolean transshipmentAllowed, double weightCap) {
+			T origin, T destination, MovingEntity movingEntity, BulkMaterial bulkMaterial, Route_Type routingRule,
+			boolean transshipmentAllowed, double weightCap, ArrayList<T> tabuList) {
 		double destinationWeight = Double.POSITIVE_INFINITY;
 		double weightThroughTransshipment = Double.POSITIVE_INFINITY;
 		Route routeThroughTransshipment = null;
+		ArrayList<T> tempTabuList = new ArrayList<T> (0);
+		if(tabuList != null)
+			tempTabuList.addAll(tabuList);
 		
 		DijkstraComparator dijkstraComparator = new DijkstraComparator();
 		origin.getDijkstraComparatorList().add(dijkstraComparator, null, 0,
@@ -204,7 +209,7 @@ public class RouteManager extends DisplayEntity {
 			double weightThroughU;
 			// Visit each edge exiting u
 			for (LinkedEntity each : u.getNextLinkedEntityList()) {
-				if(each instanceof Transshipment && !transshipmentAllowed)
+				if(each instanceof Transshipment && !transshipmentAllowed || tempTabuList.contains(each))
 					continue;
 				
 				// create a new entry for discrete entity's dijkstra list and
@@ -287,14 +292,18 @@ public class RouteManager extends DisplayEntity {
 										weightThroughU);
 						
 						Route tempRoute = null;
+						
+						// add transshipment to tabulist so it won't visit current tabu list over and over again!
+						tempTabuList.add((T) each);
+						
 						//explore routes from transshipment to destination based on routing rule.
 						if(routingRule == Route_Type.FASTEST)
-							tempRoute = ((Facility)each).getTransportationManager().getFastestTranspotationRoute(bulkMaterial, (T)each, destination, weightCap-weightThroughU);
+							tempRoute = ((Facility)each).getTransportationManager().getFastestTranspotationRoute(bulkMaterial, (T)each, destination, weightCap-weightThroughU, tempTabuList);
 						else if (routingRule == Route_Type.SHORTEST)
-							tempRoute = ((Facility)each).getTransportationManager().getShortestTranspotationRoute(bulkMaterial, (T)each, destination, weightCap-weightThroughU);
+							tempRoute = ((Facility)each).getTransportationManager().getShortestTranspotationRoute(bulkMaterial, (T)each, destination, weightCap-weightThroughU, tempTabuList);
 						// leastcost should be passed on as a per unit of material transportationcost in transshipment
 						else if (routingRule == Route_Type.LEASTCOST)
-							tempRoute = ((Facility)each).getTransportationManager().getLeastCostTranspotationRoute(bulkMaterial, (T)each, destination, weightCap-weightThroughU);
+							tempRoute = ((Facility)each).getTransportationManager().getLeastCostTranspotationRoute(bulkMaterial, (T)each, destination, weightCap-weightThroughU, tempTabuList);
 						
 						// if route through transshipment was found and result is betther than so far, save information for later evaluation of unimodal and intermodal
 						if(tempRoute != null ){

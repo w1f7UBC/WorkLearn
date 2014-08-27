@@ -209,7 +209,7 @@ public class FacilityTransportationManager extends FacilityManager {
 	 * 
 	 * @return least cost per unit transporter that has remaining capacity for transporting bulkMaterial o.w. null
 	 */
-	public <T extends DiscreteHandlingLinkedEntity> Route getLeastCostTranspotationRoute(BulkMaterial bulkMaterial, T origin, T destination, double transportaionCostCap){
+	public <T extends DiscreteHandlingLinkedEntity> Route getLeastCostTranspotationRoute(BulkMaterial bulkMaterial, T origin, T destination, double transportaionCostCap, ArrayList<T> tabuList){
 		double cost = Double.POSITIVE_INFINITY;
 		Route returnEntity = null;
 		Route tempRoute;
@@ -219,7 +219,7 @@ public class FacilityTransportationManager extends FacilityManager {
 		for(MovingEntity each: transportersList.getValue()){
 			if(each.getAcceptingBulkMaterialList().contains(bulkMaterial)){
 				foundMovingEntity = true;
-				tempRoute = RouteManager.getRoute(origin, destination, each, bulkMaterial, Route_Type.LEASTCOST, transshipmentAllowed.getValue(), transportaionCostCap);
+				tempRoute = RouteManager.getRoute(origin, destination, each, bulkMaterial, Route_Type.LEASTCOST, transshipmentAllowed.getValue(), transportaionCostCap,tabuList);
 				if(Tester.greaterOrEqualCheckTolerance(transportationCapacityList.getValueFor(each, 0) - transportationCapacityList.getValueFor(each, 1),0.0d) &&
 					tempRoute != null){
 					tempCost = tempRoute.estimateTransportationCostonRoute(bulkMaterial);
@@ -242,7 +242,7 @@ public class FacilityTransportationManager extends FacilityManager {
 	 * 
 	 * @return least cost per unit transporter that has remaining capacity for transporting bulkMaterial
 	 */
-	public <T extends DiscreteHandlingLinkedEntity> Route getFastestTranspotationRoute(BulkMaterial bulkMaterial,T origin, T destination, double travelTimeCap){
+	public <T extends DiscreteHandlingLinkedEntity> Route getFastestTranspotationRoute(BulkMaterial bulkMaterial,T origin, T destination, double travelTimeCap, ArrayList<T> tabuList){
 		double leastTime = Double.POSITIVE_INFINITY;
 		Route returnEntity = null;
 		Route tempRoute;
@@ -252,7 +252,7 @@ public class FacilityTransportationManager extends FacilityManager {
 		for(MovingEntity each: transportersList.getValue()){
 			if(each.getAcceptingBulkMaterialList().contains(bulkMaterial)){
 				foundMovingEntity = true;
-				tempRoute = RouteManager.getRoute(origin, destination, each, bulkMaterial, Route_Type.FASTEST, transshipmentAllowed.getValue(), travelTimeCap);
+				tempRoute = RouteManager.getRoute(origin, destination, each, bulkMaterial, Route_Type.FASTEST, transshipmentAllowed.getValue(), travelTimeCap, tabuList);
 				if(Tester.greaterCheckTolerance(transportationCapacityList.getValueFor(each, 0) - transportationCapacityList.getValueFor(each, 1),0.0d) &&
 					tempRoute != null){
 					tempTime = tempRoute.estimateTravelTimeonRoute();
@@ -275,7 +275,7 @@ public class FacilityTransportationManager extends FacilityManager {
 	 * 
 	 * @return least cost per unit transporter that has remaining capacity for transporting bulkMaterial
 	 */
-	public <T extends DiscreteHandlingLinkedEntity> Route getShortestTranspotationRoute(BulkMaterial bulkMaterial, T origin, T destination, double distanceCap){
+	public <T extends DiscreteHandlingLinkedEntity> Route getShortestTranspotationRoute(BulkMaterial bulkMaterial, T origin, T destination, double distanceCap,ArrayList<T> tabuList){
 		double length = Double.POSITIVE_INFINITY;
 		Route returnEntity = null;
 		Route tempRoute;
@@ -285,7 +285,7 @@ public class FacilityTransportationManager extends FacilityManager {
 		for(MovingEntity each: transportersList.getValue()){
 			if(each.getAcceptingBulkMaterialList().contains(bulkMaterial)){
 				foundMovingEntity = true;
-				tempRoute = RouteManager.getRoute(origin, destination, each, bulkMaterial, Route_Type.SHORTEST, transshipmentAllowed.getValue(), distanceCap);
+				tempRoute = RouteManager.getRoute(origin, destination, each, bulkMaterial, Route_Type.SHORTEST, transshipmentAllowed.getValue(), distanceCap, tabuList);
 				if(Tester.greaterCheckTolerance(transportationCapacityList.getValueFor(each, 0) - transportationCapacityList.getValueFor(each, 1),0.0d) &&
 					tempRoute != null){
 					tempLength = tempRoute.getLength();

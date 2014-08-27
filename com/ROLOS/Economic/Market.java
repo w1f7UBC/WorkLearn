@@ -124,7 +124,7 @@ public class Market extends ROLOSEntity {
 				// TODO assumes seller is transporting and will remove from buyers list if transportation capacity is maxed out
 				// TODO URGENT! transportation cost cap should be set properly !
 				
-				if (sellersList.get(is).getTransportationManager().getLeastCostTranspotationRoute(product.getValue(), sellersList.get(is), buyersList.get(ib), buyersList.get(ib).getStockList().getValueFor(product.getValue(), 9)) == null){
+				if (sellersList.get(is).getTransportationManager().getLeastCostTranspotationRoute(product.getValue(), sellersList.get(is), buyersList.get(ib), buyersList.get(ib).getStockList().getValueFor(product.getValue(), 9),null) == null){
 					ib++;
 					continue;
 				}else{
@@ -203,7 +203,7 @@ public class Market extends ROLOSEntity {
 			this.buyer = buyer;
 			// TODO this assumes seller always transports
 			// TODO URGENT! add proposer transportaion cost cap!
-			Route tempRoute = seller.getTransportationManager().getLeastCostTranspotationRoute(product.getValue(), seller, buyer, offeredPrice);
+			Route tempRoute = seller.getTransportationManager().getLeastCostTranspotationRoute(product.getValue(), seller, buyer, offeredPrice,null);
 			transporter = tempRoute.getMovingEntitiesList().get(0);
 			estimatedTransportCost = tempRoute.estimateTransportationCostonRoute(product.getValue());
 			marketOfferPrice = offeredPrice - estimatedTransportCost; 
