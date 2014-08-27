@@ -18,6 +18,8 @@ import java.io.File;
 
 import javax.swing.JFrame;
 
+import worldwind.WorldWindFrame;
+
 import com.jaamsim.events.EventManager;
 import com.jaamsim.events.ProcessTarget;
 import com.jaamsim.input.Input;
@@ -122,6 +124,14 @@ public class Simulation extends Entity {
 	@Keyword(description = "Indicates whether the Log Viewer tool should be shown on startup.",
 	         example = "Simulation ShowLogViewer { TRUE }")
 	private static final BooleanInput showLogViewer;
+	
+	@Keyword(description = "Indicates whther the World Viewer view should be shown on startup.", 
+			 example = "Simulation ShowWorldViewer { TRUE }")
+	private static final BooleanInput showWorldViewer;
+	
+	@Keyword(description = "Indicates whther the World Viewer view should be shown on startup.", 
+			 example = "Simulation ShowWorldViewer { TRUE }")
+	private static final BooleanInput showWorldController;
 
 	private static double timeScale; // the scale from discrete to continuous time
 	private static double startTime;
@@ -168,6 +178,8 @@ public class Simulation extends Entity {
 		showOutputViewer = new BooleanInput("ShowOutputViewer", "Key Inputs", false);
 		showPropertyViewer = new BooleanInput("ShowPropertyViewer", "Key Inputs", false);
 		showLogViewer = new BooleanInput("ShowLogViewer", "Key Inputs", false);
+		showWorldViewer = new BooleanInput("ShowWorldViewer","Key Inputs", false);
+		showWorldController = new BooleanInput("showWorldController", "Key Inputs", false);
 
 		// Create clock
 		Clock.setStartDate(2000, 1, 1);
@@ -203,6 +215,8 @@ public class Simulation extends Entity {
 		this.addInput(showOutputViewer);
 		this.addInput(showPropertyViewer);
 		this.addInput(showLogViewer);
+		this.addInput(showWorldViewer);
+		this.addInput(showWorldController);
 	}
 
 	public Simulation() {}
@@ -275,6 +289,16 @@ public class Simulation extends Entity {
 		if (in == showLogViewer) {
 			setWindowVisible(LogBox.getInstance(), showLogViewer.getValue());
 			FrameBox.reSelectEntity();
+			return;
+		}
+		
+		if (in == showWorldViewer) {
+			WorldWindFrame.setViewVisible(showWorldViewer.getValue());
+			return;
+		}
+		
+		if (in == showWorldController) {
+			WorldWindFrame.setControlVisible(showWorldController.getValue());
 			return;
 		}
 	}
@@ -514,6 +538,8 @@ public class Simulation extends Entity {
 		setWindowVisible(OutputBox.getInstance(), showOutputViewer.getValue());
 		setWindowVisible(PropertyBox.getInstance(), showPropertyViewer.getValue());
 		setWindowVisible(LogBox.getInstance(), showLogViewer.getValue());
+		WorldWindFrame.setViewVisible(showWorldViewer.getValue());
+		WorldWindFrame.setControlVisible(showWorldController.getValue());
 	}
 
 	/**
@@ -526,6 +552,8 @@ public class Simulation extends Entity {
 		setWindowVisible(OutputBox.getInstance(), false);
 		setWindowVisible(PropertyBox.getInstance(), false);
 		setWindowVisible(LogBox.getInstance(), false);
+		WorldWindFrame.setViewVisible(false);
+		WorldWindFrame.setControlVisible(false);
 	}
 
 	@Output(name = "Configuration File",

@@ -478,6 +478,7 @@ public class GUIFrame extends JFrame implements EventTimeListener, EventErrorLis
 				InputAgent.processEntity_Keyword_Value(Simulation.getInstance(), "ShowObjectSelector", "TRUE");
 				InputAgent.processEntity_Keyword_Value(Simulation.getInstance(), "ShowInputEditor", "TRUE");
 				InputAgent.processEntity_Keyword_Value(Simulation.getInstance(), "ShowOutputViewer", "TRUE");
+				InputAgent.processEntity_Keyword_Value(Simulation.getInstance(), "ShowWorldController", "TRUE");
 			}
 		} );
 		viewMenu.add( showBasicToolsMenuItem );
@@ -495,6 +496,7 @@ public class GUIFrame extends JFrame implements EventTimeListener, EventErrorLis
 				InputAgent.processEntity_Keyword_Value(Simulation.getInstance(), "ShowOutputViewer", "FALSE");
 				InputAgent.processEntity_Keyword_Value(Simulation.getInstance(), "ShowPropertyViewer", "FALSE");
 				InputAgent.processEntity_Keyword_Value(Simulation.getInstance(), "ShowLogViewer", "FALSE");
+				InputAgent.processEntity_Keyword_Value(Simulation.getInstance(), "ShowWorldController", "FALSE");
 			}
 		} );
 		viewMenu.add( closeAllToolsMenuItem );
@@ -506,7 +508,7 @@ public class GUIFrame extends JFrame implements EventTimeListener, EventErrorLis
 
 			@Override
 			public void actionPerformed( ActionEvent event ) {
-				InputAgent.processEntity_Keyword_Value(Simulation.getInstance(), "ShowModelBuilder", "TRUE");
+				InputAgent.processEntity_Keyword_Value(Simulation.getInstance(), "", "TRUE");
 			}
 		} );
 		viewMenu.add( objectPalletMenuItem );
@@ -570,6 +572,18 @@ public class GUIFrame extends JFrame implements EventTimeListener, EventErrorLis
 			}
 		} );
 		viewMenu.add( logMenuItem );
+		
+		// 9) "World Controller" menu item
+		JMenuItem worldControllerItem = new JMenuItem( "WorldView Controller" );
+		worldControllerItem.setMnemonic( 'W' );
+		worldControllerItem.addActionListener( new ActionListener() {
+
+			@Override
+			public void actionPerformed( ActionEvent event ) {
+				InputAgent.processEntity_Keyword_Value(Simulation.getInstance(), "ShowWorldController", "TRUE");
+			}
+		} );
+		viewMenu.add( worldControllerItem );
 	}
 
 	/**
@@ -937,6 +951,14 @@ public class GUIFrame extends JFrame implements EventTimeListener, EventErrorLis
 			}
 			this.addSeparator();
 			this.add(new ViewDefiner());
+			JMenuItem WorldViewer = new JMenuItem("Show WorldViewer");
+			WorldViewer.addActionListener( new ActionListener() {
+				@Override
+				public void actionPerformed( ActionEvent event ) {
+					WorldWindFrame.setViewVisible(true);
+				}
+			} );
+			this.add(WorldViewer);
 		}
 
 		@Override
