@@ -101,7 +101,7 @@ public class Market extends ROLOSEntity {
 	//	offer.getBuyer().getGeneralManager().reinstateContract(contract);
 
 		// adjust seller and buyers list
-		if(Tester.equalCheckTolerance(0.0d,offer.getSeller().getStockList().getValueFor(product.getValue(), 4)))
+		if(Tester.equalCheckTolerance(offer.getSeller().getStockList().getValueFor(product.getValue(), 13),offer.getSeller().getStockList().getValueFor(product.getValue(), 4)))
 			sellersList.remove(offer.getSeller());
 		if(Tester.equalCheckTolerance(0.0d,offer.getBuyer().getStockList().getValueFor(product.getValue(), 3)))
 			buyersList.remove(offer.getBuyer());
@@ -157,7 +157,7 @@ public class Market extends ROLOSEntity {
 			//Sellect highest offer
 			tempOffer = offersList.get(0);
 			
-			if(Tester.equalCheckTolerance(tempOffer.getSeller().getStockList().getValueFor(this.getProduct(), 4),0.0d)){
+			if(Tester.equalCheckTolerance(tempOffer.getSeller().getStockList().getValueFor(this.getProduct(), 4),tempOffer.getSeller().getStockList().getValueFor(this.getProduct(), 13))){
 				sellersList.remove(tempOffer.getSeller());
 				offersList.remove(0);
 				continue;
@@ -174,6 +174,8 @@ public class Market extends ROLOSEntity {
 			//TODO offer amount is set here to avoid readjusting offer's amount every time a contract is established
 			tempOffer.setAmount(Tester.min(tempOffer.getSeller().getTransportationManager().getTransportersList().getValueFor(tempOffer.getTransporter(), 0)-tempOffer.getSeller().getTransportationManager().getTransportersList().getValueFor(tempOffer.getTransporter(), 1),
 									tempOffer.getBuyer().getStockList().getValueFor(product.getValue(), 3),
+									//amount seller hasn't sold yet
+									tempOffer.getSeller().getStockList().getValueFor(product.getValue(), 13)-
 									tempOffer.getSeller().getStockList().getValueFor(product.getValue(), 4)));
 					
 			this.establishContracts(offersList.get(0));

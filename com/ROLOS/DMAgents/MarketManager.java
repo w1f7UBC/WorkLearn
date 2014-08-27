@@ -15,6 +15,7 @@ public class MarketManager extends ROLOSEntity {
 
 	public static final MarketManager marketManager;
 	private PriorityQueue<Market> marketsList;
+	private HashMapList<BulkMaterial, Market> marketsMap;
 
 	static {
 		marketManager = new MarketManager();
@@ -22,6 +23,7 @@ public class MarketManager extends ROLOSEntity {
 	
 	public MarketManager() {
 		marketsList = new PriorityQueue<>(new DescendingPriotityComparator<Market>(ROLOSEntity.class,"getInternalPriority"));
+		marketsMap = new HashMapList<BulkMaterial, Market> (1);
 	}
 
 	// ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -30,6 +32,7 @@ public class MarketManager extends ROLOSEntity {
 
 	public void addToMarket(Market market){
 		marketsList.add(market);
+		marketsMap.add(market.getProduct(), market);
 	}
 	
 	@Override
@@ -37,6 +40,10 @@ public class MarketManager extends ROLOSEntity {
 		super.startUp();
 		this.scheduleProcess(0.0d, 3, new ReflectionTarget(this, "activateMarkets"));
 
+	}
+	
+	public ArrayList<Market> getMarkets(BulkMaterial bulkMaterial){
+		return marketsMap.get(bulkMaterial);
 	}
 	
 	/**
@@ -51,6 +58,8 @@ public class MarketManager extends ROLOSEntity {
 			
 			// TODO figuring out markets one at a time based on material's internal priority
 			eachMarket.runSellersMarket();
+			
+			
 		}
 		
 		// priotiy 2 to activate after reseting planed inputs from last period and planning production for this period by operations manager
