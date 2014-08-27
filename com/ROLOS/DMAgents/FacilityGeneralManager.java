@@ -108,28 +108,29 @@ public class FacilityGeneralManager extends FacilityManager {
 			contract.setSupplierContractPriority(priority);
 	}
 	
+	public double getBalancedAmountToFullfill(Contract contract){
+		double totalRemainingSupplyContractsAmount = 
+				this.getFacility().getStockList().getValueFor(contract.getProduct(), 2) -
+				this.getFacility().getStockList().getValueFor(contract.getProduct(), 4)-
+				this.getFacility().getStockList().getValueFor(contract.getProduct(), 11);
+		
+		double totalAvailable = this.getFacility().getStockList().getValueFor(contract.getProduct(), 6);
+		double amountToAssign = Tester.min(contract.getUnfulfilledAmount(),totalAvailable * contract.getUnfulfilledAmount()/totalRemainingSupplyContractsAmount);
+		
+		return amountToAssign;
+	}
+	
 	// make fleets waiting for the inactive contract active
 	public void reinstateContract(Contract contract){
+
 		if(!contract.isActive())
-			return;
+				return;
 		
-		this.getFacility().getTransportationManager().scheduleTransportation(contract);
-				
+		// TODO uses a balance transportation when supplier has multiple supply contracts. 
+		this.getFacility().getTransportationManager().scheduleTransportation(contract,this.getBalancedAmountToFullfill(contract));
+						
 	}
-	
-	/**
-	 * Will assign balanced amount so that all contracts will have proportional amount(based on contract amount)
-	 * fullfilled
-	 * @param contract
-	 * @param facility
-	 * @return
-	 */
-	public double getContractBalancedAmountToFullfill(Contract contract){
-		BulkMaterial bulkMaterial = contract.getProduct();
-		double totalContractAmounts = this.getFacility().getStockList().getValueFor(bulkMaterial, 2) - this.getFacility().getStockList().getValueFor(bulkMaterial, 4);
-		return contract.getContractAmount()/totalContractAmounts;
-	}
-	
+		
 	public void voidContract(Contract contract){
 		if(this.equals(contract.getBuyer()))
 			demandContractList.remove(contract.getProduct(), contract);

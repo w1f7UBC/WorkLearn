@@ -30,7 +30,7 @@ public class Stockpile extends BulkMaterialStorage {
 	
 	public Stockpile() {
 		lastDisconnectedFromLoading = true;
-		lastDisconnectedFromUnloading = true;
+		lastDisconnectedFromUnloading = false;
 	}
 		
 	@Override
@@ -81,7 +81,7 @@ public class Stockpile extends BulkMaterialStorage {
 		}
 		
 		// connect if just got material
-		if(lastDisconnectedFromLoading){
+		if(lastDisconnectedFromLoading && Tester.greaterCheckTolerance(amountToAdd , 0.0d)){
  			lastDisconnectedFromLoading = false;
 			//reactivate sink
 			if(sink != null)

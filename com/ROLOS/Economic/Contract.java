@@ -8,6 +8,7 @@ import com.ROLOS.Logistics.BulkMaterial;
 import com.ROLOS.Logistics.Facility;
 import com.ROLOS.Logistics.Fleet;
 import com.ROLOS.Logistics.MovingEntity;
+import com.ROLOS.Logistics.Stockpile;
 import com.jaamsim.input.ValueInput;
 import com.jaamsim.units.TimeUnit;
 import com.sandwell.JavaSimulation.BooleanInput;
@@ -268,10 +269,10 @@ public class Contract extends ROLOSEntity {
 		reservedForFullfilling -= amountToRemove;
 		if(Tester.lessCheckTolerance(fulfilledAmount+reservedForFullfilling,contractAmount.getValue())){
 				activeForScheduling = true;
-				if(this.isActive()){
+		/*		if(this.isActive()){
 					buyer.getValue().getGeneralManager().reinstateContract(this);
 					supplier.getValue().getGeneralManager().reinstateContract(this);
-				}
+				}*/
 		}
 	}
 	
@@ -298,20 +299,24 @@ public class Contract extends ROLOSEntity {
 	public void setFacilityActiveness(boolean active,Facility facility){
 		
 		//TODO add logic for inactivating facility!
-		
+					
 		if(facility.equals(buyer))
 			this.activeBuyer = active;
 		else
 			this.activeSupplier = active;
-		
-		if(active && this.isActive()){
-			buyer.getValue().getGeneralManager().reinstateContract(this);
+
+		if(active && this.isActive())
 			supplier.getValue().getGeneralManager().reinstateContract(this);
-		}
+		
 	}
 	
 	public void addToFulfilledAmount(double fulfilledAmount) {
 		this.fulfilledAmount += fulfilledAmount;
+		
+		// update buyer and supplier's fullfilled contract amounts
+		this.getSupplier().addToStocksList(this.getProduct(), 11, fulfilledAmount);
+		this.getBuyer().addToStocksList(this.getProduct(), 12, fulfilledAmount);
+				
 		if(Tester.greaterOrEqualCheckTolerance(fulfilledAmount, contractAmount.getValue()))
 			this.voidContract();
 	}

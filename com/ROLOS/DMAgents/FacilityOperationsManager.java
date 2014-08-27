@@ -70,10 +70,12 @@ public class FacilityOperationsManager extends FacilityManager {
 	
 	public void resetPlannedStocks(){
 		for(BulkMaterial each: this.getFacility().getStockList().getEntityList()){
-			this.getFacility().getStockList().set(each, 1, 0.0d);
-			this.getFacility().getStockList().set(each, 2, 0.0d);
-			this.getFacility().getStockList().set(each, 3, 0.0d);
-			this.getFacility().getStockList().set(each, 4, 0.0d);
+			this.getFacility().setStocksList(each, 1, 0.0d);
+			this.getFacility().setStocksList(each, 2, 0.0d);
+			this.getFacility().setStocksList(each, 3, 0.0d);
+			this.getFacility().setStocksList(each, 4, 0.0d);
+			this.getFacility().setStocksList(each, 11, 0.0d);
+			this.getFacility().setStocksList(each, 12, 0.0d);
 		}
 		// priotiy 1 to activate before market manager
 		this.scheduleProcess(SimulationManager.getPlanningHorizon(), 1, new ReflectionTarget(this, "resetPlannedStocks"));

@@ -98,7 +98,7 @@ public class Market extends ROLOSEntity {
 
 		//add to facilities' supply and demand contract lists
 		contract.registerContract();
-		offer.getBuyer().getGeneralManager().reinstateContract(contract);
+	//	offer.getBuyer().getGeneralManager().reinstateContract(contract);
 
 		// adjust seller and buyers list
 		if(Tester.equalCheckTolerance(0.0d,offer.getSeller().getStockList().getValueFor(product.getValue(), 4)))

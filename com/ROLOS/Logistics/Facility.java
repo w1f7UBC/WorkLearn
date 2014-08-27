@@ -85,7 +85,7 @@ public class Facility extends DiscreteHandlingLinkedEntity {
 		insideFacilityLimits = new HashMapList<String,LogisticsEntity>(5);
 		new TwoLinkedLists<>(4, new DescendingPriotityComparator<BulkMaterial>(ROLOSEntity.class, "getInternalPriority"),0);
 		
-		stocksList = new TwoLinkedLists<>(11, new DescendingPriotityComparator<BulkMaterial>(ROLOSEntity.class, "getInternalPriority"));
+		stocksList = new TwoLinkedLists<>(13, new DescendingPriotityComparator<BulkMaterial>(ROLOSEntity.class, "getInternalPriority"));
 		
 		synchronized (allInstances) {
 			allInstances.add(this);
@@ -203,6 +203,8 @@ public class Facility extends DiscreteHandlingLinkedEntity {
 	 * <br> <b> 8- </b> Reserved amount for unloading
 	 * <br> <b> 9- </b> Current offer price per unit of material in the current planning horizon
 	 * <br> <b> 10- </b> Average purchase price
+	 * <br> <b> 11- </b> fullfilled supply contracts amount
+	 * <br> <b> 12- </b> fullfilled demand contracts amount
 	 */
 	public TwoLinkedLists<BulkMaterial> getStockList(){
 		return stocksList;
@@ -221,6 +223,8 @@ public class Facility extends DiscreteHandlingLinkedEntity {
 	 * <br> <b> 8- </b> Reserved amount for unloading
 	 * <br> <b> 9- </b> Current offer price per unit of material in the current planning horizon
 	 * <br> <b> 10- </b> Average purchase price
+	 * <br> <b> 11- </b> fullfilled supply contracts amount
+	 * <br> <b> 12- </b> fullfilled demand contracts amount
 	 */
 	public void setStocksList(BulkMaterial bulkMaterial, int valueListIndex, double amount){
 		stocksList.set(bulkMaterial, valueListIndex, amount);
@@ -241,12 +245,15 @@ public class Facility extends DiscreteHandlingLinkedEntity {
 	 * <br> <b> 8- </b> Reserved amount for unloading
 	 * <br> <b> 9- </b> Current offer price per unit of material in the current planning horizon
 	 * <br> <b> 10- </b> Average purchase price
+	 * <br> <b> 11- </b> fullfilled supply contracts amount
+	 * <br> <b> 12- </b> fullfilled demand contracts amount
 	 */
 	public void addToStocksList(BulkMaterial bulkMaterial, int valueListIndex, double amount){
 		// Whether supply contracts have been inactive due to material unavailability
-		boolean activateContracts= false;
-		if(valueListIndex == 6 && Tester.equalCheckTolerance(this.getStockList().getValueFor(bulkMaterial, 6), 0.0d)){
-			activateContracts = true;
+		boolean activateSupplyContracts= false;
+		if(valueListIndex == 6 && Tester.greaterCheckTolerance(amount, 0.0d)
+				&& Tester.equalCheckTolerance(this.getStockList().getValueFor(bulkMaterial, 6), 0.0d)){
+			activateSupplyContracts = true;
 		}
 		
 		stocksList.add(bulkMaterial, valueListIndex, amount);
@@ -260,7 +267,7 @@ public class Facility extends DiscreteHandlingLinkedEntity {
 		}
 		
 		// active facility if just got material
-		if (activateContracts) {
+		if (activateSupplyContracts) {
 			for (Contract each : this.getGeneralManager()
 					.getSupplyContractsList().get(bulkMaterial)) {
 				each.setFacilityActiveness(true, this);
@@ -288,9 +295,10 @@ public class Facility extends DiscreteHandlingLinkedEntity {
 	 */
 	public void removeFromStocksList(BulkMaterial bulkMaterial, int valueListIndex, double amount){
 		// Whether demand contracts have been inactive due to stockpiles maxing out on capacity
-		boolean activateContracts= false;
-		if(valueListIndex == 6 && Tester.greaterOrEqualCheckTolerance(this.getStockList().getValueFor(bulkMaterial, 6), this.getStockList().getValueFor(bulkMaterial, 5))){
-			activateContracts = true;
+		boolean activateDemandContracts= false;
+		if(valueListIndex == 6 && Tester.greaterCheckTolerance(amount, 0.0d) &&
+				Tester.equalCheckTolerance(this.getStockList().getValueFor(bulkMaterial, 6), this.getStockList().getValueFor(bulkMaterial, 5))){
+			activateDemandContracts = true;
 		}
 		
 		stocksList.remove(bulkMaterial, valueListIndex, amount);
@@ -304,7 +312,7 @@ public class Facility extends DiscreteHandlingLinkedEntity {
 		}
 		
 		// active facility
-		if (activateContracts) {
+		if (activateDemandContracts) {
 			for (Contract each : this.getGeneralManager()
 					.getDemandContractsList().get(bulkMaterial)) {
 				each.setFacilityActiveness(true, this);
