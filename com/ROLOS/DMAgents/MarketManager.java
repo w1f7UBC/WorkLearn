@@ -22,7 +22,7 @@ public class MarketManager extends ROLOSEntity {
 	}
 	
 	public MarketManager() {
-		marketsList = new PriorityQueue<>(new DescendingPriotityComparator<Market>(ROLOSEntity.class,"getInternalPriority"));
+		marketsList = new PriorityQueue<>(new AscendingPriotityComparator<Market>(ROLOSEntity.class,"getInternalPriority"));
 		marketsMap = new HashMapList<BulkMaterial, Market> (1);
 	}
 
@@ -63,6 +63,6 @@ public class MarketManager extends ROLOSEntity {
 		}
 		
 		// priotiy 2 to activate after reseting planed inputs from last period and planning production for this period by operations manager
-		this.scheduleProcess(SimulationManager.getPlanningHorizon(), 3, new ReflectionTarget(this, "activateMarkets"));
+		this.scheduleProcess(SimulationManager.getPlanningHorizon(), 4, new ReflectionTarget(this, "activateMarkets"));
 	}
 }

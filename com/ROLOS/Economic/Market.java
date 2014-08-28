@@ -112,7 +112,7 @@ public class Market extends ROLOSEntity {
 		ArrayList<MarketOffer> offersList= new ArrayList<>(5);
 		//populate all offers
 		for(is=0; is< sellersList.size();){
-				if(Tester.equalCheckTolerance(sellersList.get(is).getStockList().getValueFor(this.getProduct(), 4),0.0d)){
+				if(Tester.equalCheckTolerance(sellersList.get(is).getStockList().getValueFor(this.getProduct(), 4),sellersList.get(is).getStockList().getValueFor(this.getProduct(), 13))){
 				sellersList.remove(is);
 				continue;
 			}

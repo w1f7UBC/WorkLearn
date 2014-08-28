@@ -196,7 +196,7 @@ public class Facility extends DiscreteHandlingLinkedEntity {
 	 * <br> <b> 1- </b> Target demand for the current planning horizon
 	 * <br> <b> 2- </b> Target throughput for the current planning horizon
 	 * <br> <b> 3- </b> Unstatisfied target demand in contracts or internally (infeed)
-	 * <br> <b> 4- </b> sold throughput in contracts (outfeed)
+	 * <br> <b> 4- </b> sold throughput in contracts or used internally (outfeed)
 	 * <br> <b> 5- </b> Total stockpiles capacity for each material
 	 * <br> <b> 6- </b> Total amount in all stockpiles
 	 * <br> <b> 7- </b> Reserved amount for loading scheduled bulk cargos
@@ -217,7 +217,7 @@ public class Facility extends DiscreteHandlingLinkedEntity {
 	 * <br> <b> 1- </b> Target demand for the current planning horizon
 	 * <br> <b> 2- </b> Target throughput for the current planning horizon
 	 * <br> <b> 3- </b> Unstatisfied target demand in contracts or internally (infeed)
-	 * <br> <b> 4- </b> sold throughput in contracts (outfeed)
+	 * <br> <b> 4- </b> sold throughput in contracts or used internally (outfeed)
 	 * <br> <b> 5- </b> Total stockpiles capacity for each material
 	 * <br> <b> 6- </b> Total amount in all stockpiles
 	 * <br> <b> 7- </b> Reserved amount for loading scheduled bulk cargos
@@ -240,7 +240,7 @@ public class Facility extends DiscreteHandlingLinkedEntity {
 	 * <br> <b> 1- </b> Target demand for the current planning horizon
 	 * <br> <b> 2- </b> Target throughput for the current planning horizon
 	 * <br> <b> 3- </b> Unstatisfied target demand in contracts or internally (infeed)
-	 * <br> <b> 4- </b> sold throughput in contracts (outfeed)
+	 * <br> <b> 4- </b> sold throughput in contracts or used internally (outfeed)
 	 * <br> <b> 5- </b> Total stockpiles capacity for each material
 	 * <br> <b> 6- </b> Total amount in all stockpiles
 	 * <br> <b> 7- </b> Reserved amount for loading scheduled bulk cargos
@@ -288,7 +288,7 @@ public class Facility extends DiscreteHandlingLinkedEntity {
 	 * <br> <b> 1- </b> Target demand for the current planning horizon
 	 * <br> <b> 2- </b> Target throughput for the current planning horizon
 	 * <br> <b> 3- </b> Unstatisfied target demand in contracts or internally (to buy)
-	 * <br> <b> 4- </b> Unsold target throughput in contracts (to sell)
+	 * <br> <b> 4- </b> Unsold target throughput in contracts or used internally (to sell)
 	 * <br> <b> 5- </b> Total stockpiles capacity for each material
 	 * <br> <b> 6- </b> Total amount in all stockpiles
 	 * <br> <b> 7- </b> Reserved amount for loading scheduled bulk cargos

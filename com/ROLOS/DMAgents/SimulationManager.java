@@ -8,6 +8,7 @@ import com.ROLOS.Logistics.MovingEntity;
 import com.ROLOS.Logistics.ReportAgent;
 import com.ROLOS.Logistics.Route;
 import com.ROLOS.Utils.HandyUtils;
+import com.jaamsim.events.ReflectionTarget;
 import com.jaamsim.input.InputAgent;
 import com.jaamsim.input.ValueInput;
 import com.jaamsim.units.TimeUnit;
@@ -38,6 +39,8 @@ public class SimulationManager extends DisplayEntity {
 		example = "Temiscaming TimeStep { 1 d }")
 	private static final ValueInput timeStep;
 	
+	private static double previousPlanningTime, nextPlanningTime;
+	
 	protected static FileEntity contractsReportFile;      
 	protected static FileEntity transportReportFile;      
 
@@ -67,7 +70,6 @@ public class SimulationManager extends DisplayEntity {
 	@Override
 	public void validate() {
 		super.validate();
-		
 	}
 	
 	@Override
@@ -84,6 +86,21 @@ public class SimulationManager extends DisplayEntity {
 		}
 	}
 	
+	@Override
+	public void startUp() {
+		// TODO Auto-generated method stub
+		super.startUp();
+		this.updatePlanningTimes();
+	}
+	
+	public void updatePlanningTimes(){
+		previousPlanningTime = this.getSimTime();
+		nextPlanningTime = this.getSimTime() + SimulationManager.getPlanningHorizon();
+		
+		this.scheduleProcess(nextPlanningTime, 1, new ReflectionTarget(this, "updatePlanningTimes"));
+
+	}
+	
 	public static double getPlanningHorizon(){
 		return planningHorizon.getValue();
 	}
@@ -91,6 +108,15 @@ public class SimulationManager extends DisplayEntity {
 	public static double getTimeStep(){
 		return timeStep.getValue();
 	}
+	
+	public static double getPreviousPlanningTime(){
+		return previousPlanningTime;
+	}
+	
+	public static double getNextPlanningTime(){
+		return nextPlanningTime;
+	}
+	
 	
 	//////////////////////////////////////////////////////////////////////////////////////
 	// Report METHODS

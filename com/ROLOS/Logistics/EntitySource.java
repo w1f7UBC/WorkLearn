@@ -34,7 +34,7 @@ public class EntitySource extends BulkHandlingLinkedEntity {
 			+ "Default value is 6 min")
 	private final ValueInput generationIAT;
 	
-	private double generatedAmount;
+	private double generatedAmountThisPeriod, generatedAmountToDate;
 
 	static {
 		allInstances = new ArrayList<EntitySource>();
@@ -101,20 +101,22 @@ public class EntitySource extends BulkHandlingLinkedEntity {
 		super.startUp();
 		// TODO make this talk to the generation manager to figure out the
 		// entities to generate
-		this.scheduleProcess(0.0d, 2, new ReflectionTarget(this, "pushSupply",this.getSimTime(),this.getSimTime()+SimulationManager.getPlanningHorizon()));
-
-		this.startProcess("generate");
+		this.scheduleProcess(0.0d, 2, new ReflectionTarget(this, "pushSupply",SimulationManager.getPreviousPlanningTime(),this.getSimTime()+SimulationManager.getNextPlanningTime()));
 	}
 
 	// /////////////////////////////////////////////////////////////////////////////
 	// MAIN METHODS
 	// /////////////////////////////////////////////////////////////////////////////
 	public void pushSupply(double startTime, double endTime){
+		generatedAmountThisPeriod = 0.0d;
+		
 		Stockpile stockpile = (Stockpile) this.getOutfeedLinkedEntityList().get(0);
 		double amount = this.getThroughput(startTime, endTime);
 		stockpile.getFacility().getOperationsManager().updateRealizedProduction((BulkMaterial) this.getHandlingEntityTypeList().get(0), amount);
 		
-		this.scheduleProcess(SimulationManager.getPlanningHorizon(), 2, new ReflectionTarget(this, "pushSupply",this.getSimTime(),this.getSimTime()+SimulationManager.getPlanningHorizon()));
+		this.scheduleProcess(SimulationManager.getPreviousPlanningTime(), 2, new ReflectionTarget(this, "generate"));
+
+		this.scheduleProcess(SimulationManager.getPlanningHorizon(), 2, new ReflectionTarget(this, "pushSupply",SimulationManager.getPreviousPlanningTime(),SimulationManager.getNextPlanningTime()));
 
 	}
 	
@@ -125,23 +127,29 @@ public class EntitySource extends BulkHandlingLinkedEntity {
 		
 		Stockpile stockpile = (Stockpile) this.getOutfeedLinkedEntityList().get(0);
 		BulkMaterial bulkMaterial = (BulkMaterial) this.getHandlingEntityTypeList().get(0);
+		double tempAmount = this.getThroughput(this.getSimTime(), SimulationManager.getNextPlanningTime());
 		
-		while (Tester.greaterCheckTolerance(stockpile.getRemainingCapacity(bulkMaterial), 0.0d)&&
-				Tester.greaterCheckTolerance(this.getCapacity(bulkMaterial),generatedAmount)) {
+		while (Tester.greaterCheckTolerance(tempAmount, generatedAmountThisPeriod) &&
+				Tester.greaterCheckTolerance(stockpile.getRemainingCapacity(bulkMaterial), 0.0d)&&
+				(Tester.greaterCheckTolerance(this.getCapacity(bulkMaterial),generatedAmountToDate))) {
 
 			double dt = this.getGenerationIAT() / 3600.0d; // Set the next generation time
 
 			this.scheduleWait(dt); // Wait until the next generation time
 			
-			double amount = Tester.min(dt*3600.0d*this.getMaxRate(bulkMaterial),stockpile.getRemainingCapacity(bulkMaterial),this.getCapacity(bulkMaterial)-generatedAmount);
+			double amount = Tester.min(dt*3600.0d*this.getMaxRate(bulkMaterial),stockpile.getRemainingCapacity(bulkMaterial),
+					this.getCapacity(bulkMaterial)-generatedAmountToDate,tempAmount-generatedAmountThisPeriod);
+			
 			stockpile.addToCurrentlyHandlingEntityList(bulkMaterial, amount);
-			generatedAmount += amount;
+			generatedAmountThisPeriod += amount;
+			generatedAmountToDate += amount;
 						
 		}
 		
 		// Stop working when finished
 		this.setPresentState("Idle");
 		this.setTriggered(false);
+		
 	}
 
 	// ////////////////////////////////////////////////////////////////////////////////////
@@ -156,18 +164,26 @@ public class EntitySource extends BulkHandlingLinkedEntity {
 	 * Attention!! Production level should be defined in exact planning periods.
 	 * e.g. if planning is 1 year production levels for end of each year should be defined 
 	 * until the end of simulation run otherwise will will throw an error or result will be unknown!
-	 * @return total production level for the passed time slot. Will not interpolate levels if start time or end time are 
+	 * @return infinity if throughput not set!
+	 * total production level for the passed time slot. Will not interpolate levels if start time or end time are 
 	 * fractions of the time defined in the time series. i.e. it will add production levels for the 
-	 * starting time one after the start time until the end time.
+	 * starting time one after the start time until the end time. if the start or end times are greater than max value in the 
+	 * time series, it'll loop?.
 	 */
 	public double getThroughput(double startTime, double endTime){
-		if(Tester.greaterCheckTimeStep(endTime, throughput.getValue().getMaxTimeValue()))
-			throw new ErrorException("the production time series defined for %s in facility %s includes production levels until"
-					+ "%f. Try was made to check production level until %f!", 
-					this.getHandlingEntityTypeList().get(0).getName(), this.getName(), throughput.getValue().getMaxTimeValue(),endTime);
+
 		double timeSlot, currentTime, nextTime;
 		currentTime = startTime/3600.0d;
 		double tempThroughput = 0.0d;
+		
+		if(throughput.getValue() == null){
+			return Double.POSITIVE_INFINITY;
+		}
+		
+		if(Tester.greaterCheckTimeStep(endTime, throughput.getValue().getMaxTimeValue())){
+			
+		}		
+		
 		nextTime = throughput.getValue().getNextChangeTimeAfterHours(currentTime);
 		while(Tester.lessCheckTimeStep(currentTime, endTime/3600.0d)){
 			timeSlot = Tester.min(nextTime,endTime/3600.0d) - currentTime;

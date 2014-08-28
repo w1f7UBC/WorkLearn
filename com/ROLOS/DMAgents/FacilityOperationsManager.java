@@ -387,8 +387,15 @@ public class FacilityOperationsManager extends FacilityManager {
 	 */
 	public void updateRealizedProduction(BulkMaterial infeedMaterial, double amount){
 		BulkMaterialProcessor tempProcessor = this.getProcessingRoutesListInfeed().get(infeedMaterial).get(0).getProcessor();
-		for(BulkMaterial eachOutfeed: tempProcessor.getOutfeedEntityTypeList()){
-			this.getFacility().addToStocksList(eachOutfeed, 13, amount*tempProcessor.getConverstionRate(eachOutfeed, infeedMaterial));
+		
+		this.getFacility().addToStocksList(infeedMaterial,13,amount);
+		if(tempProcessor != null){
+			for(BulkMaterial eachOutfeed: tempProcessor.getOutfeedEntityTypeList()){
+				//TODO sets the realized throughput to the minimum of throughput or realized amount... assuming the first processor returned
+				this.getFacility().setStocksList(eachOutfeed, 13, 
+						Tester.min(this.getFacility().getStockList().getValueFor(eachOutfeed, 2),
+								amount*tempProcessor.getConverstionRate(eachOutfeed, infeedMaterial)+this.getFacility().getStockList().getValueFor(eachOutfeed, 13)));
+			}
 		}
 	}
 	
@@ -410,10 +417,15 @@ public class FacilityOperationsManager extends FacilityManager {
 						if (each != eachMutuallyExclusiveRoute && Tester.greaterCheckTolerance(this.getFacility().getStockList().getValueFor((BulkMaterial) eachMutuallyExclusiveRoute.getProcessor().getHandlingEntityTypeList()
 											.get(0),3), 0.0d)) {
 							//TODO assumes only one infeed is used!
+							double amountToRemove = outfeedAmount* eachMutuallyExclusiveRoute.getProcessor()
+									.getConverstionRate(((BulkMaterial) eachMutuallyExclusiveRoute.getProcessor().getHandlingEntityTypeList().get(0)),eachMutuallyExclusiveRoute.getProcessor().getPrimaryProduct());
+							
+							eachMutuallyExclusiveRoute.getProcessor().getFacility().removeFromStocksList(
+									(BulkMaterial) eachMutuallyExclusiveRoute.getProcessor().getHandlingEntityTypeList()
+										.get(0),1,amountToRemove);
 							eachMutuallyExclusiveRoute.getProcessor().getFacility().removeFromStocksList(
 										(BulkMaterial) eachMutuallyExclusiveRoute.getProcessor().getHandlingEntityTypeList()
-											.get(0),3,outfeedAmount* eachMutuallyExclusiveRoute.getProcessor()
-											.getConverstionRate(((BulkMaterial) eachMutuallyExclusiveRoute.getProcessor().getHandlingEntityTypeList().get(0)),eachMutuallyExclusiveRoute.getProcessor().getPrimaryProduct()));
+											.get(0),3,amountToRemove);
 						}
 					}
 				}
@@ -429,7 +441,7 @@ public class FacilityOperationsManager extends FacilityManager {
 			for (ProcessingRoute processingRoute: processingRoutesListOutfeed.get(eachProcessingRouteList)) {
 				if (processingRoute.getLastPlannedTime() != this.getSimTime()) {
 					this.planProduction(processingRoute,
-								this.getSimTime(),this.getSimTime()+ SimulationManager.getPlanningHorizon());
+							SimulationManager.getPreviousPlanningTime(),SimulationManager.getNextPlanningTime());
 				}
 				this.getFacility().getFinancialManager().setOfferPrices(processingRoute);
 
@@ -462,7 +474,6 @@ public class FacilityOperationsManager extends FacilityManager {
 				tempAmount = processingRoute.getCapacityRatio(eachMaterial,
 						processingRoute.getProcessor().getPrimaryProduct()) * throughput;
 				this.getFacility().addToStocksList(eachMaterial, 2, tempAmount);
-			//	this.getFacility().addToStocksList(eachMaterial, 4, tempAmount);
 				//set purchase price 0
 				this.getFacility().setStocksList(eachMaterial, 10, 0.0d);
 			}
@@ -486,7 +497,6 @@ public class FacilityOperationsManager extends FacilityManager {
 					tempAmount = eachProcessor.getCapacityRatio(eachMaterial,
 							eachProcessor.getProcessor().getPrimaryProduct()) * throughput;
 					this.getFacility().setStocksList(eachMaterial, 2, tempAmount);
-				//	this.getFacility().setStocksList(eachMaterial, 4, tempAmount);
 					//set sell price 0
 					this.getFacility().setStocksList(eachMaterial, 10, 0.0d);
 				}
