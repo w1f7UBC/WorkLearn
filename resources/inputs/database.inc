@@ -15,5 +15,5 @@ Define InventoryQuery { InventoryQueryObject }
 Define ExcelInput{ ExcelInput1 }
 Define ExcelTest{ ExcelTest1 }
 InventoryQueryObject TargetDatabase { InventoryDataBase }
-ExcelTest1 targetexcel{ExcelInput1}
+"ExcelTest1 targetexcel{ExcelInput1}
 
