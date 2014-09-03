@@ -72,8 +72,10 @@ public class WorldWindFrame extends ApplicationTemplate
                 			if (position!=null && queryPanel.getMode()==1){
                 				Query query = queryPanel.getQueryObject();
                 				if (query!=null){
-                					String lat = position.latitude.toString().split("бу")[0];
-                					String lon = position.longitude.toString().split("бу")[0];
+                					String lat = position.latitude.toString();
+                					lat=lat.substring(0, lat.length()-1);
+                					String lon = position.longitude.toString();
+                					lon=lon.substring(0, lon.length()-1);
                 					String name = query.getName()+"("+lat+","+lon+")";
                 					ResultSet resultset=query.execute(name, lat, lon, true);
                 					query.printResultContent(name, resultset);

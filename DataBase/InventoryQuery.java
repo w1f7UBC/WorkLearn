@@ -12,18 +12,7 @@ import javax.swing.table.DefaultTableModel;
 
 import worldwind.WorldWindFrame;
 
-import com.jaamsim.input.Input;
-
 public  class InventoryQuery extends Query {
-	public InventoryQuery(){
-		super.getAll().add(this);
-	}
-
-	@Override
-	public void updateForInput( Input<?> in ) {
-		super.updateForInput( in );
-	}
-
 	@Override
 	public ResultSet execute(String name, String latitude, String longitude, Boolean draw){
 		//System.out.println(latitude + " " + longitude);
@@ -45,6 +34,7 @@ public  class InventoryQuery extends Query {
 					+ " FROM fmu_1km"
 					+ " WHERE st_contains(fmu_1km.geom, ST_GeomFromText('POINT("+longitude+" "+latitude+")', 4269))=true);\"";
 			File file = getLayerManager().sql2shp(name, toDraw);
+			System.out.println("Does this run");
 			if (file!=null){
 				new WorldWindFrame.WorkerThread(file, WorldWindFrame.AppFrame).start();
 			}

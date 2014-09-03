@@ -31,7 +31,6 @@ public class QueryPanel extends JPanel{
 	private int mode=0;
 	
 	public QueryPanel(WorldWindow wwd) {
-        //this.add(makePanel(), BorderLayout.CENTER);
 		super(new BorderLayout(10, 10));
         this.add(this.makePanel(), BorderLayout.CENTER);
         this.add(new FlatWorldPanel(wwd), BorderLayout.SOUTH);

@@ -30,24 +30,24 @@ public class DefinedShapeAttributes
     {
         this.pointAttrs = new PointPlacemarkAttributes[]
             {
-                //this.createPointAttributes(Color.YELLOW),
-                //this.createPointAttributes(Color.BLUE),
+                this.createPointAttributes(Color.YELLOW),
+                this.createPointAttributes(Color.BLUE),
                 this.createPointAttributes(Color.RED),
-                //this.createPointAttributes(Color.GREEN),
-                //this.createPointAttributes(Color.CYAN),
-                //this.createPointAttributes(Color.ORANGE),
-                //this.createPointAttributes(Color.MAGENTA),
+                this.createPointAttributes(Color.GREEN),
+                this.createPointAttributes(Color.CYAN),
+                this.createPointAttributes(Color.ORANGE),
+                this.createPointAttributes(Color.MAGENTA),
             };
 
         this.polylineAttrs = new ShapeAttributes[]
             {
-                //this.createPolylineAttributes(Color.YELLOW),
+                this.createPolylineAttributes(Color.YELLOW),
                 this.createPolylineAttributes(Color.BLUE),
-                //this.createPolylineAttributes(Color.RED),
-                //this.createPolylineAttributes(Color.GREEN),
-                //this.createPolylineAttributes(Color.CYAN),
-                //this.createPolylineAttributes(Color.ORANGE),
-                //this.createPolylineAttributes(Color.MAGENTA),
+                this.createPolylineAttributes(Color.RED),
+                this.createPolylineAttributes(Color.GREEN),
+                this.createPolylineAttributes(Color.CYAN),
+                this.createPolylineAttributes(Color.ORANGE),
+                this.createPolylineAttributes(Color.MAGENTA),
             };
 
         this.polygonAttrs = new ShapeAttributes[]

@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.PriorityQueue;
 
-import DataBase.DataBaseObject;
+import DataBase.Database;
 
 import com.ROLOS.Logistics.BulkMaterial;
 import com.ROLOS.Logistics.DiscreteHandlingLinkedEntity;
@@ -52,14 +52,14 @@ public class RouteManager extends DisplayEntity {
 	@Keyword(description = "the database entity containing routes information. "
 			+ "the code is very specific to the data base format.",
 		     example = "TransportationManager RouteDataBase { Somedatabase }")
-	private static final EntityInput<DataBaseObject> routeDB;
+	private static final EntityInput<Database> routeDB;
 
 	protected static FileEntity managerReportFile;        // The file to store the manager reports
 	
 	static {		
 		// TODO bad implementation! set true to print out the configured or unresolved routes report
 		printManagerReport = new BooleanInput("PrintRoutesReport", "Report", false);
-		routeDB = new EntityInput<DataBaseObject>(DataBaseObject.class, "RouteDataBase", "Key Inputs", null);
+		routeDB = new EntityInput<Database>(Database.class, "RouteDataBase", "Key Inputs", null);
 	}
 	
 	{

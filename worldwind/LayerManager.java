@@ -1,12 +1,7 @@
 package worldwind;
 
-import gov.nasa.worldwind.awt.WorldWindowGLCanvas;
-import gov.nasa.worldwind.layers.Layer;
-import gov.nasa.worldwind.layers.LayerList;
-
 import java.io.File;
 import java.io.IOException;
-
 
 public class LayerManager {
 	//using a 32bit (64bit backwards compatible) pgsql2shp.exe to do the conversion

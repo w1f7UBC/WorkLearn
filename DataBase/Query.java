@@ -21,20 +21,18 @@ import worldwind.WorldWindFrame;
 
 import com.jaamsim.input.Input;
 import com.jaamsim.input.Keyword;
-import com.sandwell.JavaSimulation.EntityInput;
 import com.sandwell.JavaSimulation.InputErrorException;
 import com.sandwell.JavaSimulation.StringInput;
 import com.sandwell.JavaSimulation3D.DisplayEntity;
 import com.sandwell.JavaSimulation3D.GUIFrame;
 
 public class Query extends DisplayEntity {
-	private LayerManager manager;
 	private static final ArrayList<Query> allInstances;
 	static {
 		allInstances = new ArrayList<Query>();
 	}
 	@Keyword(description = "target databaseobject of the query")
-	private  EntityInput<DataBaseObject> targetDB;
+	private  StringInput targetDB;
 	@Keyword(description = "target table within database to query off of")
 	private StringInput table;
 	@Keyword(description = "target table within database that describes the queriable area")
@@ -42,7 +40,7 @@ public class Query extends DisplayEntity {
 	@Keyword(description = "Statement that will be used should execute(boolean draw) should be called")
 	private StringInput statement;
 	{
-		targetDB = new EntityInput<>(DataBaseObject.class, "TargetDatabase","Query Properties", null);
+		targetDB = new StringInput("TargetDatabase","Query Properties", "InventoryDatabase");
 		this.addInput(targetDB);
 		table = new StringInput("TargetTable", "Query Properties", "");
 		this.addInput(table);
@@ -51,19 +49,24 @@ public class Query extends DisplayEntity {
 		statement = new StringInput("Statement", "Query Properties", "");
 		this.addInput(statement);
 	}
+	private Database database=Database.getDatabase(targetDB.getValue());
 		
+    @Override
+	public void updateForInput(Input<?> in) {
+		super.updateForInput(in);
+		if(in==targetDB){
+			database=Database.getDatabase(targetDB.getValue());
+		}
+	}
+    
 	public static ArrayList<Query> getAll() {
 		synchronized (allInstances) {
 			return allInstances;
 		}
 	}
 	
-	@Override
-	public void updateForInput(Input<?> in) {
-		super.updateForInput(in);
-		if(in== targetDB)
-			manager = new LayerManager(targetDB.getValue().getURL(), targetDB.getValue().getUserName(), targetDB.getValue().getPassword());
-			
+	public Query(){
+		getAll().add(this);
 	}
 	
 	@Override
@@ -88,7 +91,7 @@ public class Query extends DisplayEntity {
 	
 	public ResultSet execute(Boolean draw){
 		if (draw==true){
-			File file = manager.sql2shp("Statement", statement.getValue());
+			File file = database.getLayermanager().sql2shp("Statement", statement.getValue());
 			if (file!=null){
 				new WorldWindFrame.WorkerThread(file, WorldWindFrame.AppFrame).start();
 			}
@@ -99,7 +102,7 @@ public class Query extends DisplayEntity {
 	public ResultSet execute(String name, Boolean draw){
 		String statements="SELECT * FROM " + table.getValue() + " WHERE name=" + name;
 		if (draw==true){
-			File file = manager.sql2shp(name, statements);
+			File file = database.getLayermanager().sql2shp(name, statements);
 			if (file!=null){
 				new WorldWindFrame.WorkerThread(file, WorldWindFrame.AppFrame).start();
 			}
@@ -108,9 +111,10 @@ public class Query extends DisplayEntity {
 	}
 	
 	public ResultSet execute(String name, String latitude, String longitude, Boolean draw){
-		String statements="SELECT * FROM " + table.getValue() + "WHERE st_contains("+table+".geom, ST_GeomFromText('POINT("+longitude+" "+latitude+")', 4269)";
+		String statements="SELECT * FROM " + table.getValue() + " WHERE st_contains("+table.getValue()+".shape, ST_GeomFromText('POINT("+longitude+" "+latitude+")', 4269))=true";
+		//System.out.println(statements);
 		if (draw==true){
-			File file = manager.sql2shp(name, statements);
+			File file = database.getLayermanager().sql2shp(name, statements);
 			if (file!=null){
 				new WorldWindFrame.WorkerThread(file, WorldWindFrame.AppFrame).start();
 			}
@@ -120,7 +124,8 @@ public class Query extends DisplayEntity {
 	
 	public void executeArea(){
 		String statements="SELECT * FROM " + areaTable;
-		File file = manager.sql2shp(areaTable.getValue(), statements);
+		//System.out.println(statements);
+		File file = database.getLayermanager().sql2shp(areaTable.getValue(), statements);
 		if (file!=null){
 			new WorldWindFrame.WorkerThread(file, WorldWindFrame.AppFrame).start();
 		}
@@ -128,7 +133,7 @@ public class Query extends DisplayEntity {
 	
 	public ResultSet getResultSet(String statements){
 		try {
-			Statement st = targetDB.getValue().getConnection().createStatement();
+			Statement st = database.getConnection().createStatement();
 			ResultSet resultset = st.executeQuery(statements);
 			return resultset;
 		} catch (SQLException e) {
@@ -189,7 +194,7 @@ public class Query extends DisplayEntity {
 	}
 	
 	public LayerManager getLayerManager(){
-		return manager;
+		return database.getLayermanager();
 	}
 }
 
