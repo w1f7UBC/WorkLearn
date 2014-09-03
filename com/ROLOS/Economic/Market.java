@@ -124,10 +124,15 @@ public class Market extends ROLOSEntity {
 				// TODO assumes seller is transporting and will remove from buyers list if transportation capacity is maxed out
 				// TODO URGENT! transportation cost cap should be set properly !
 				
+				// if it's the first time going through the buyers list, set buyers breakeaven prices!
+				if(is == 0)
+					buyersList.get(ib).getFinancialManager().setFeedstockBreakevenPrice(this.getProduct());
+				
 				if (sellersList.get(is).getTransportationManager().getLeastCostTranspotationRoute(product.getValue(), sellersList.get(is), buyersList.get(ib), buyersList.get(ib).getStockList().getValueFor(product.getValue(), 9),null) == null){
 					ib++;
 					continue;
 				}else{
+										
 					offersList.add(new MarketOffer(sellersList.get(is), buyersList.get(ib), 
 							buyersList.get(ib).getStockList().getValueFor(product.getValue(), 9)));
 					ib++;
@@ -226,7 +231,13 @@ public class Market extends ROLOSEntity {
 		// descending comparator
 		@Override
 		public int compareTo(MarketOffer o) {
-			return this.marketOfferPrice >= o.getMarketOfferPrice() ? -1 : +1;
+			
+			int tempCompare =  Double.compare(o.getMarketOfferPrice(), this.marketOfferPrice);
+			if(tempCompare != 0)
+				return tempCompare;
+			
+			return (this.getEntityNumber() > o.getEntityNumber() ? -1 :
+	               (this.getEntityNumber() == o.getEntityNumber() ? 0 : 1));
 		}
 		
 		public Facility getSeller() {

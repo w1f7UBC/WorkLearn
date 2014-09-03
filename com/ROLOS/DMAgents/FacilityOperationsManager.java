@@ -78,6 +78,7 @@ public class FacilityOperationsManager extends FacilityManager {
 			this.getFacility().setStocksList(each, 2, 0.0d);
 			this.getFacility().setStocksList(each, 3, 0.0d);
 			this.getFacility().setStocksList(each, 4, 0.0d);
+			this.getFacility().setStocksList(each, 9, 0.0d);
 			this.getFacility().setStocksList(each, 11, 0.0d);
 			this.getFacility().setStocksList(each, 12, 0.0d);
 			this.getFacility().setStocksList(each, 13, 0.0d);
@@ -101,6 +102,28 @@ public class FacilityOperationsManager extends FacilityManager {
 	 */
 	public HashMapList<BulkMaterial, ProcessingRoute> getProcessingRoutesListOutfeed() {
 		return processingRoutesListOutfeed;
+	}
+	
+	/**
+	 * TODO assumes only one processor has infeedMaterial
+	 * @param infeedMaterial
+	 * @return the chain of processing routes that receive infeed material processes to outfeed and all the way to the last outfeed.
+	 * (e.g. log to chips- chips to pulp- pulp to paper) 
+	 */
+	public LinkedList<ProcessingRoute> getChainProcessingRoutes(BulkMaterial infeedMaterial){
+		LinkedList<ProcessingRoute> processingRouteList = new LinkedList<ProcessingRoute> ();
+		BulkMaterial tempInfeed = infeedMaterial;
+		ProcessingRoute tempProcessingRoute = this.getFacility().getOperationsManager().getProcessingRoutesListInfeed().get(tempInfeed).isEmpty()? null: this.getFacility().getOperationsManager().getProcessingRoutesListInfeed().get(tempInfeed).get(0);
+
+		while(tempProcessingRoute != null){
+			processingRouteList.addLast(tempProcessingRoute);
+			tempInfeed = tempProcessingRoute.getProcessor().getPrimaryProduct();
+			// TODO assumes only one processing route is handling infeed!
+			tempProcessingRoute = this.getFacility().getOperationsManager().getProcessingRoutesListInfeed().get(tempInfeed).isEmpty()? null: this.getFacility().getOperationsManager().getProcessingRoutesListInfeed().get(tempInfeed).get(0);			
+		}
+		
+		return processingRouteList;
+				
 	}
 	
 	/**
@@ -443,9 +466,6 @@ public class FacilityOperationsManager extends FacilityManager {
 					this.planProduction(processingRoute,
 							SimulationManager.getPreviousPlanningTime(),SimulationManager.getNextPlanningTime());
 				}
-				this.getFacility().getFinancialManager().setOfferPrices(processingRoute);
-
-				//TODO set selling prices?								
 			}
 		}
 				

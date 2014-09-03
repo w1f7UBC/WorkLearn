@@ -177,7 +177,12 @@ public class ROLOSEntity extends DisplayEntity  {
 		
 		@Override
 		public int compare(T o1, T o2) {
-			return Double.compare(this.getPriority(o1), this.getPriority(o2));
+			int tempCompare =  Double.compare(this.getPriority(o1), this.getPriority(o2));
+			if(tempCompare != 0)
+				return tempCompare;
+			
+			return (o1.getEntityNumber() < o2.getEntityNumber() ? -1 :
+	               (o1.getEntityNumber() == o2.getEntityNumber() ? 0 : 1));
 		}		
 	}
 	
@@ -193,7 +198,12 @@ public class ROLOSEntity extends DisplayEntity  {
 		
 		@Override
 		public int compare(T o1, T o2) {
-			return Double.compare(this.getPriority(o2), this.getPriority(o1));
+			int tempCompare = Double.compare(this.getPriority(o2), this.getPriority(o1));
+			if(tempCompare != 0)
+				return tempCompare;
+			
+			return (o1.getEntityNumber() > o2.getEntityNumber() ? -1 :
+	               (o1.getEntityNumber() == o2.getEntityNumber() ? 0 : 1));
 		}		
 	}
 	

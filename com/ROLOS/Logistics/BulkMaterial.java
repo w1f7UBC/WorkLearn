@@ -159,7 +159,7 @@ public class BulkMaterial extends LogisticsEntity {
 	}
 	
 	/**
-	 * @return price or 0 if price not set
+	 * @return price or null if price not set
 	 */
 	public double getPrice(){
 		return price.getValue() != null ? price.getValue().getNextSample(this.getSimTime()) : 0.0d;

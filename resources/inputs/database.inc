@@ -15,8 +15,7 @@ ExcelTest 		JavaClass { DataBase.ExcelTest } 		Palette { 'database' } DefaultDis
 
 Define DatabaseObject { InventoryDatabase }
 Define InventoryQuery { InventoryQueryObject }
-Define ExcelInput { ExcelInput1 }
-Define ExcelTest { ExcelTest1 }
-
-ExcelTest1 targetexcel { ExcelInput1 }
+Define ExcelInput{ ExcelInput1 }
+Define ExcelTest{ ExcelTest1 }
+"ExcelTest1 targetexcel{ExcelInput1}
 
