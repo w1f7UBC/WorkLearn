@@ -110,7 +110,7 @@ public class Facility extends DiscreteHandlingLinkedEntity {
 	@Override
 	public void validate() {
 		super.validate();
-		
+		this.draw();
 	
 	}
 	
@@ -370,6 +370,14 @@ public class Facility extends DiscreteHandlingLinkedEntity {
 					ReportAgent.getReportPrecision(), 1);
 			stocksReportFile.putDoubleWithDecimalsTabs(stocksList.getValueFor(bulkMaterial, 9),
 					ReportAgent.getReportPrecision(), 1);
+		//	stocksReportFile.putDoubleWithDecimalsTabs(stocksList.getValueFor(bulkMaterial, 10),
+		//			ReportAgent.getReportPrecision(), 1);
+			stocksReportFile.putDoubleWithDecimalsTabs(stocksList.getValueFor(bulkMaterial, 11),
+					ReportAgent.getReportPrecision(), 1);
+			stocksReportFile.putDoubleWithDecimalsTabs(stocksList.getValueFor(bulkMaterial, 12),
+					ReportAgent.getReportPrecision(), 1);
+			stocksReportFile.putDoubleWithDecimalsTabs(stocksList.getValueFor(bulkMaterial, 13),
+					ReportAgent.getReportPrecision(), 1);
 			
 			stocksReportFile.newLine();
 			stocksReportFile.flush();
@@ -384,12 +392,15 @@ public class Facility extends DiscreteHandlingLinkedEntity {
 		stocksReportFile.putStringTabs("Target demand", 1);
 		stocksReportFile.putStringTabs("Target Throughput", 1);
 		stocksReportFile.putStringTabs("Unsatisfied Demand Amount in Contracts", 1);
-		stocksReportFile.putStringTabs("Unsold Throughput Amount in Contracts", 1);
+		stocksReportFile.putStringTabs("Sold Throughput Amount in Contracts", 1);
 		stocksReportFile.putStringTabs("Total stockpile capacities", 1);
 		stocksReportFile.putStringTabs("Total amount in all stockpiles", 1);
 		stocksReportFile.putStringTabs("Reserved amount for loading", 1);
 		stocksReportFile.putStringTabs("Reserved amount for unloading", 1);
-		stocksReportFile.putStringTabs("Offer price", 1);
+	//	stocksReportFile.putStringTabs("Average purchase price", 1);
+		stocksReportFile.putStringTabs("Fullfilled supply contracts amount", 1);
+		stocksReportFile.putStringTabs("Fullfilled demand contracts amount ", 1);
+		stocksReportFile.putStringTabs("Realized throughput through feedstock supply", 1);
 		
 		stocksReportFile.newLine();
 		stocksReportFile.flush();	
@@ -439,6 +450,14 @@ public class Facility extends DiscreteHandlingLinkedEntity {
 	// ////////////////////////////////////////////////////////////////////////////////////////////////////
 	// GRAPHICS
 	// ////////////////////////////////////////////////////////////////////////////////////////////////////
+	
+	public void draw(){
+		if(this.getShapeFileQuery() != null){
+			this.getShapeFileQuery().setStatement("'SELECT *  FROM milllocations_30aug2014 WHERE objectid < 20 ;'");
+		this.getShapeFileQuery().execute(true);
+		}
+	}
+	
 	@Override
 	public void updateGraphics(double simTime) {
 		super.updateGraphics(simTime);

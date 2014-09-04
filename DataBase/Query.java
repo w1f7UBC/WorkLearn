@@ -20,6 +20,7 @@ import worldwind.LayerManager;
 import worldwind.WorldWindFrame;
 
 import com.jaamsim.input.Input;
+import com.jaamsim.input.InputAgent;
 import com.jaamsim.input.Keyword;
 import com.sandwell.JavaSimulation.InputErrorException;
 import com.sandwell.JavaSimulation.StringInput;
@@ -80,7 +81,7 @@ public class Query extends DisplayEntity {
 	
 	//change the default statement in this object
 	public void setStatement(String statements){
-		statement.setValueString(statements);
+		InputAgent.processEntity_Keyword_Value(this,statement,statements);
 		return;
 	}
 	
@@ -100,7 +101,7 @@ public class Query extends DisplayEntity {
 	}
 	
 	public ResultSet execute(String name, Boolean draw){
-		String statements="SELECT * FROM " + table.getValue() + " WHERE name=" + name;
+		String statements="SELECT * FROM " + table.getValue() + " WHERE objectid=" + name;
 		if (draw==true){
 			File file = database.getLayermanager().sql2shp(name, statements);
 			if (file!=null){

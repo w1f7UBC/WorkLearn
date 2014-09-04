@@ -4,19 +4,33 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Comparator;
 
+import DataBase.Query;
+
 import com.sandwell.JavaSimulation.Entity;
+import com.sandwell.JavaSimulation.EntityInput;
 import com.sandwell.JavaSimulation.ErrorException;
 import com.sandwell.JavaSimulation.IntegerInput;
 import com.jaamsim.input.Input;
 import com.jaamsim.input.Keyword;
 import com.sandwell.JavaSimulation3D.DisplayEntity;
 
+/**
+ * Rolos entity includes display 
+ * @author Saeed Ghafghazi (email: saeedghaf@gmail.com) - Sep 3, 2014 
+ * 
+ * @modified_by
+ */
 public class ROLOSEntity extends DisplayEntity  {
 
 	@Keyword(description = "priority for when this entity is compared against another of its type to be put in an ordered list. " +
 			"can be changed during the run. Default is 0", 
 			example = "WoodchipTrucks Priority { 5 }")
 	private final IntegerInput priority;
+	
+	@Keyword(description = "priority for when this entity is compared against another of its type to be put in an ordered list. " +
+			"can be changed during the run. Default is 0", 
+			example = "WoodchipTrucks Priority { 5 }")
+	private final EntityInput<Query> worldViewShape;
 	
 	/**
 	 * priority of the entity at the current state; default priority is 0; 
@@ -27,6 +41,9 @@ public class ROLOSEntity extends DisplayEntity  {
 		priority = new IntegerInput("Priority", "Key Inputs", 0);
 		priority.setValidRange(0, Integer.MAX_VALUE);
 		this.addInput(priority);
+		
+		worldViewShape = new EntityInput<Query>(Query.class, "ShapeFileQuery", "Graphics", null);
+		this.addInput(worldViewShape);
 	}
 	
 	public ROLOSEntity() {
@@ -47,6 +64,10 @@ public class ROLOSEntity extends DisplayEntity  {
 	@Override
 	public void earlyInit() {
 		super.earlyInit();
+	}
+	
+	public Query getShapeFileQuery(){
+		return worldViewShape.getValue();
 	}
 
 	/**
