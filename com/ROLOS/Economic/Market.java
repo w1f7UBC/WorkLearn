@@ -90,9 +90,10 @@ public class Market extends ROLOSEntity {
 		// TODO this assumes buyer is always the delivery company
 		// TODO assumes transportation is not modeled for the established contracts through market!
 		InputAgent.processEntity_Keyword_Value(contract, "DeliveryCompany", offer.getBuyer().getName());
-		InputAgent.processEntity_Keyword_Value(contract, "Transporter", offer.getTransporter().getName());
+		InputAgent.processEntity_Keyword_Value(contract, "Transporter", offer.getRoute().getMovingEntitiesList().get(0).getName());
 		InputAgent.processEntity_Keyword_Value(contract, "ContractPeriod", ((Double)SimulationManager.getPlanningHorizon()).toString() + " "+ "s");
 		contract.setContractPrice(offer.getMarketOfferPrice());
+		contract.setAssignedRoute(offer.getRoute());
 		contract.setEstimatedTransportCost(offer.getEstimatedTransportCost());
 		contract.setFlag(Entity.FLAG_GENERATED);
 
@@ -177,7 +178,8 @@ public class Market extends ROLOSEntity {
 			
 			// set offers amount
 			//TODO offer amount is set here to avoid readjusting offer's amount every time a contract is established
-			tempOffer.setAmount(Tester.min(tempOffer.getSeller().getTransportationManager().getTransportersList().getValueFor(tempOffer.getTransporter(), 0)-tempOffer.getSeller().getTransportationManager().getTransportersList().getValueFor(tempOffer.getTransporter(), 1),
+			MovingEntity tempTransporter = tempOffer.getRoute().getMovingEntitiesList().get(0);
+			tempOffer.setAmount(Tester.min(tempOffer.getSeller().getTransportationManager().getTransportersList().getValueFor(tempTransporter, 0)-tempOffer.getSeller().getTransportationManager().getTransportersList().getValueFor(tempTransporter, 1),
 									tempOffer.getBuyer().getStockList().getValueFor(product.getValue(), 3),
 									//amount seller hasn't sold yet
 									tempOffer.getSeller().getStockList().getValueFor(product.getValue(), 13)-
@@ -202,7 +204,7 @@ public class Market extends ROLOSEntity {
 	
 	public class MarketOffer extends ROLOSEntity implements Comparable<MarketOffer>{
 		private Facility seller, buyer;
-		private MovingEntity transporter;
+		private Route route;
 		
 		private double amount, marketOfferPrice, estimatedTransportCost;
 		public MarketOffer(Facility seller, Facility buyer, double offeredPrice) {
@@ -210,14 +212,13 @@ public class Market extends ROLOSEntity {
 			this.buyer = buyer;
 			// TODO this assumes seller always transports
 			// TODO URGENT! add proposer transportaion cost cap!
-			Route tempRoute = seller.getTransportationManager().getLeastCostTranspotationRoute(product.getValue(), seller, buyer, offeredPrice,null);
-			transporter = tempRoute.getMovingEntitiesList().get(0);
-			estimatedTransportCost = tempRoute.estimateTransportationCostonRoute(product.getValue());
+			route = seller.getTransportationManager().getLeastCostTranspotationRoute(product.getValue(), seller, buyer, offeredPrice,null);
+			estimatedTransportCost = route.estimateTransportationCostonRoute(product.getValue());
 			marketOfferPrice = offeredPrice - estimatedTransportCost; 
 		}
 		
-		public MovingEntity getTransporter(){
-			return transporter;
+		public Route getRoute(){
+			return route;
 		}
 		
 		public double getEstimatedTransportCost(){

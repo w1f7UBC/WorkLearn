@@ -453,7 +453,7 @@ public class Facility extends DiscreteHandlingLinkedEntity {
 	
 	public void draw(){
 		if(this.getShapeFileQuery() != null){
-			this.getShapeFileQuery().setStatement("'SELECT *  FROM milllocations_30aug2014 WHERE objectid < 20 ;'");
+			this.getShapeFileQuery().setStatement("'SELECT *  FROM milllocations_30aug2014 WHERE objectid < 100 ;'");
 		this.getShapeFileQuery().execute(true);
 		}
 	}

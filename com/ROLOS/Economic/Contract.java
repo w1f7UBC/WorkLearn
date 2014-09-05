@@ -8,7 +8,7 @@ import com.ROLOS.Logistics.BulkMaterial;
 import com.ROLOS.Logistics.Facility;
 import com.ROLOS.Logistics.Fleet;
 import com.ROLOS.Logistics.MovingEntity;
-import com.ROLOS.Logistics.Stockpile;
+import com.ROLOS.Logistics.Route;
 import com.jaamsim.input.ValueInput;
 import com.jaamsim.units.TimeUnit;
 import com.sandwell.JavaSimulation.BooleanInput;
@@ -77,6 +77,7 @@ public class Contract extends ROLOSEntity {
 	private int buyerContractPriority;		// Default is 5
 	private double estimatedTransportCost; // estimated transportation cost per unit of product from supplier to buyer
 	private double price;					// price per unit of product, transportation excluded 
+	private Route assignedRoute;			// the route assigned to this contract
 	
 	static {
 		allInstances = new ArrayList<Contract>();
@@ -184,6 +185,10 @@ public class Contract extends ROLOSEntity {
 	public BulkMaterial getProduct() {
 		return product.getValue();
 	}
+	
+	public Route getAssignedRoute(){
+		return assignedRoute;
+	}
 
 	public double getContractPeriod() {
 		return contractPeriodInput.getValue();
@@ -257,6 +262,10 @@ public class Contract extends ROLOSEntity {
 
 	public void setContractPrice(double price){
 		this.price = price;
+	}
+	
+	public void setAssignedRoute (Route route){
+		this.assignedRoute = route;
 	}
 	
 	public void reserveForFulfilling(double amountToReserve){

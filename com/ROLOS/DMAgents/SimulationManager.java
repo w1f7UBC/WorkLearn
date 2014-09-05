@@ -136,10 +136,12 @@ public class SimulationManager extends DisplayEntity {
 			contractsReportFile.putDoubleWithDecimalsTabs(contract.getEstimatedTransportCost(),
 							ReportAgent.getReportPrecision(), 1);
 			contractsReportFile.putStringTabs(HandyUtils.arraylistToString(contract.getDedicatedFleetsList()), 1);
-			contractsReportFile.putStringTabs(contract.getTransporterProtoType().getName(), 1);
+			contractsReportFile.putStringTabs(HandyUtils.arraylistToString(new ArrayList<>(contract.getAssignedRoute().getRouteSegmentsList())), 1);
 			contractsReportFile.putDoubleWithDecimalsTabs(contract.getBuyer().getStockList().getValueFor(contract.getProduct(), 3),
 					ReportAgent.getReportPrecision(), 1);
 			contractsReportFile.putDoubleWithDecimalsTabs(contract.getSupplier().getStockList().getValueFor(contract.getProduct(), 4),
+					ReportAgent.getReportPrecision(), 1);
+			contractsReportFile.putDoubleWithDecimalsTabs(contract.getSupplier().getStockList().getValueFor(contract.getProduct(), 13),
 					ReportAgent.getReportPrecision(), 1);
 			contractsReportFile.newLine();
 			contractsReportFile.flush();
@@ -157,9 +159,10 @@ public class SimulationManager extends DisplayEntity {
 		contractsReportFile.putStringTabs("Unit Price", 1);
 		contractsReportFile.putStringTabs("Estimated Transportation Cost", 1);
 		contractsReportFile.putStringTabs("Dedicated Fleet", 1);
-		contractsReportFile.putStringTabs("Transporter Proto Type", 1);
+		contractsReportFile.putStringTabs("Contract Route", 1);
 		contractsReportFile.putStringTabs("Buyer's unmet demand", 1);
 		contractsReportFile.putStringTabs("Supplier's sold amount", 1);
+		contractsReportFile.putStringTabs("Supplier's actual throughput", 1);
 	//	contractsReportFile.putStringTabs("Contract Status", 1);
 		
 		contractsReportFile.newLine();
