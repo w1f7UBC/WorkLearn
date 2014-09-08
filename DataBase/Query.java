@@ -16,6 +16,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 
+import worldwind.DefinedShapeAttributes;
 import worldwind.LayerManager;
 import worldwind.WorldWindFrame;
 
@@ -51,7 +52,7 @@ public class Query extends DisplayEntity {
 		this.addInput(statement);
 	}
 	private Database database=Database.getDatabase(targetDB.getValue());
-		
+
     @Override
 	public void updateForInput(Input<?> in) {
 		super.updateForInput(in);
@@ -59,17 +60,17 @@ public class Query extends DisplayEntity {
 			database=Database.getDatabase(targetDB.getValue());
 		}
 	}
-    
+
 	public static ArrayList<Query> getAll() {
 		synchronized (allInstances) {
 			return allInstances;
 		}
 	}
-	
+
 	public Query(){
 		getAll().add(this);
 	}
-	
+
 	@Override
 	public void validate() {
 		super.validate();
@@ -78,60 +79,60 @@ public class Query extends DisplayEntity {
 			throw new InputErrorException( "The keyword targetDB must be set." );
 		}
 	}
-	
+
 	//change the default statement in this object
 	public void setStatement(String statements){
 		InputAgent.processEntity_Keyword_Value(this,statement,statements);
 		return;
 	}
-	
+
 	public void setTable(String tables){
 		table.setValueString(tables);
 		return;
 	}
-	
-	public ResultSet execute(Boolean draw){
+
+	public ResultSet execute(Boolean draw, DefinedShapeAttributes attributes){
 		if (draw==true){
 			File file = database.getLayermanager().sql2shp("Statement", statement.getValue());
 			if (file!=null){
-				new WorldWindFrame.WorkerThread(file, WorldWindFrame.AppFrame).start();
+				new WorldWindFrame.WorkerThread(file, WorldWindFrame.AppFrame, attributes).start();
 			}
 		}
 		return getResultSet(statement.getValue());
 	}
-	
-	public ResultSet execute(String name, Boolean draw){
+
+	public ResultSet execute(String name, Boolean draw, DefinedShapeAttributes attributes){
 		String statements="SELECT * FROM " + table.getValue() + " WHERE objectid=" + name;
 		if (draw==true){
 			File file = database.getLayermanager().sql2shp(name, statements);
 			if (file!=null){
-				new WorldWindFrame.WorkerThread(file, WorldWindFrame.AppFrame).start();
+				new WorldWindFrame.WorkerThread(file, WorldWindFrame.AppFrame, attributes).start();
 			}
 		}
 		return getResultSet(statements);
 	}
-	
-	public ResultSet execute(String name, String latitude, String longitude, Boolean draw){
+
+	public ResultSet execute(String name, String latitude, String longitude, Boolean draw, DefinedShapeAttributes attributes){
 		String statements="SELECT * FROM " + table.getValue() + " WHERE st_contains("+table.getValue()+".shape, ST_GeomFromText('POINT("+longitude+" "+latitude+")', 4269))=true";
 		//System.out.println(statements);
 		if (draw==true){
 			File file = database.getLayermanager().sql2shp(name, statements);
 			if (file!=null){
-				new WorldWindFrame.WorkerThread(file, WorldWindFrame.AppFrame).start();
+				new WorldWindFrame.WorkerThread(file, WorldWindFrame.AppFrame, attributes).start();
 			}
 		}
 		return getResultSet(statements);
 	}
-	
-	public void executeArea(){
+
+	public void executeArea(DefinedShapeAttributes attributes){
 		String statements="SELECT * FROM " + areaTable;
 		//System.out.println(statements);
 		File file = database.getLayermanager().sql2shp(areaTable.getValue(), statements);
 		if (file!=null){
-			new WorldWindFrame.WorkerThread(file, WorldWindFrame.AppFrame).start();
+			new WorldWindFrame.WorkerThread(file, WorldWindFrame.AppFrame, attributes).start();
 		}
 	}
-	
+
 	public ResultSet getResultSet(String statements){
 		try {
 			Statement st = database.getConnection().createStatement();
@@ -142,8 +143,8 @@ public class Query extends DisplayEntity {
 		}
 		return null;
     }
-	
-	public void printResultContent(String name, ResultSet restultset){  
+
+	public void printResultContent(String name, ResultSet restultset){
 		try{
 			if (restultset!=null){
 			    ResultSetMetaData metaData = restultset.getMetaData();
@@ -169,12 +170,12 @@ public class Query extends DisplayEntity {
 			return;
 		}
 	}
-	
+
 	public void displayResultContent(final String name, final JTable content){
 		 EventQueue.invokeLater(new Runnable() {
 			   @Override
-			   public void run() {  
-				   final JFrame dataBaseFrame = new JFrame(); 
+			   public void run() {
+				   final JFrame dataBaseFrame = new JFrame();
 				   final JScrollPane dataBasePanel = new JScrollPane();
 				   dataBasePanel.setViewportView(content);
 				   dataBaseFrame.add(dataBasePanel);
@@ -191,12 +192,12 @@ public class Query extends DisplayEntity {
 					   }
 				   });
 			   }
-		});  
+		});
 	}
-	
+
 	public LayerManager getLayerManager(){
 		return database.getLayermanager();
 	}
 }
 
-	
+

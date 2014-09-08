@@ -51,11 +51,11 @@ public class WorldWindFrame extends ApplicationTemplate
 {
 	public static AppFrame AppFrame=null;
 	private static JFrame ControlFrame=null;
-	
+
     public static class AppFrame extends ApplicationTemplate.AppFrame
     {
     	private QueryPanel queryPanel;
-    	
+
         public AppFrame(){
             makeMenu(this);
             this.setLocation(GUIFrame.COL4_START, GUIFrame.TOP_START);
@@ -77,7 +77,7 @@ public class WorldWindFrame extends ApplicationTemplate
                 					String lon = position.longitude.toString();
                 					lon=lon.substring(0, lon.length()-1);
                 					String name = query.getName()+"("+lat+","+lon+")";
-                					ResultSet resultset=query.execute(name, lat, lon, true);
+                					ResultSet resultset=query.execute(name, lat, lon, true, new DefinedShapeAttributes());
                 					query.printResultContent(name, resultset);
                 				}
                 				position=null;
@@ -88,7 +88,7 @@ public class WorldWindFrame extends ApplicationTemplate
              });
             AppFrame=this;
         }
-        
+
         public void addShapefileLayer(Layer layer)
         {
             this.getWwd().getModel().getLayers().add(layer);
@@ -100,7 +100,7 @@ public class WorldWindFrame extends ApplicationTemplate
 				layerList.remove(layerList.getLayerByName(layer));
 			}
 		}
-        
+
         public void gotoLayer(Layer layer)
         {
             Sector sector = (Sector) layer.getValue(AVKey.SECTOR);
@@ -109,7 +109,7 @@ public class WorldWindFrame extends ApplicationTemplate
                 ExampleUtil.goTo(this.getWwd(), sector);
             }
         }
-        
+
         @Override
         protected void initialize(boolean includeStatusBar, boolean includeLayerPanel, boolean includeStatsPanel)
         {
@@ -150,7 +150,8 @@ public class WorldWindFrame extends ApplicationTemplate
             // Register a rendering exception listener that's notified when exceptions occur during rendering.
             this.wwjPanel.getWwd().addRenderingExceptionListener(new RenderingExceptionListener()
             {
-                public void exceptionThrown(Throwable t)
+                @Override
+				public void exceptionThrown(Throwable t)
                 {
                     if (t instanceof WWAbsentRequirementException)
                     {
@@ -183,19 +184,22 @@ public class WorldWindFrame extends ApplicationTemplate
             this.setResizable(true);
         }
     }
-    
+
     public static class WorkerThread extends Thread
     {
         protected Object shpSource;
         protected AppFrame appFrame;
+        private final DefinedShapeAttributes attr;
 
-        public WorkerThread(Object shpSource, AppFrame appFrame)
+        public WorkerThread(Object shpSource, AppFrame appFrame, DefinedShapeAttributes attributes)
         {
             this.shpSource = shpSource;
             this.appFrame = appFrame;
+            this.attr = attributes;
         }
-        
-        public void run()
+
+        @Override
+		public void run()
         {
             SwingUtilities.invokeLater(new Runnable()
             {
@@ -217,7 +221,8 @@ public class WorldWindFrame extends ApplicationTemplate
                 final Layer finalSHPLayer = shpLayer;
                 SwingUtilities.invokeLater(new Runnable()
                 {
-                    public void run()
+                    @Override
+					public void run()
                     {
                         appFrame.addShapefileLayer(finalSHPLayer);
                         appFrame.gotoLayer(finalSHPLayer);
@@ -232,7 +237,8 @@ public class WorldWindFrame extends ApplicationTemplate
             {
                 SwingUtilities.invokeLater(new Runnable()
                 {
-                    public void run()
+                    @Override
+					public void run()
                     {
                         appFrame.setCursor(null);
                     }
@@ -251,7 +257,7 @@ public class WorldWindFrame extends ApplicationTemplate
             }
             else
             {
-                DefinedShapeLoader loader = new DefinedShapeLoader();
+                DefinedShapeLoader loader = new DefinedShapeLoader(new DefinedShapeAttributes());
                 layer = loader.createLayerFromSource(this.shpSource);
                 layer.setPickEnabled(false);
                 return layer;
@@ -283,7 +289,8 @@ public class WorldWindFrame extends ApplicationTemplate
 
         JMenuItem openFileMenuItem = new JMenuItem(new AbstractAction("Open File...")
         {
-            public void actionPerformed(ActionEvent actionEvent)
+            @Override
+			public void actionPerformed(ActionEvent actionEvent)
             {
                 try
                 {
@@ -292,7 +299,7 @@ public class WorldWindFrame extends ApplicationTemplate
                     {
                         for (File file : fileChooser.getSelectedFiles())
                         {
-                            new WorkerThread(file, appFrame).start();
+                            new WorkerThread(file, appFrame, new DefinedShapeAttributes()).start();
                         }
                     }
                 }
@@ -307,14 +314,15 @@ public class WorldWindFrame extends ApplicationTemplate
 
         JMenuItem openURLMenuItem = new JMenuItem(new AbstractAction("Open URL...")
         {
-            public void actionPerformed(ActionEvent actionEvent)
+            @Override
+			public void actionPerformed(ActionEvent actionEvent)
             {
                 try
                 {
                     String status = JOptionPane.showInputDialog(appFrame, "URL");
                     if (!WWUtil.isEmpty(status))
                     {
-                        new WorkerThread(status.trim(), appFrame).start();
+                        new WorkerThread(status.trim(), appFrame, new DefinedShapeAttributes()).start();
                     }
                 }
                 catch (Exception e)
@@ -326,7 +334,7 @@ public class WorldWindFrame extends ApplicationTemplate
 
         fileMenu.add(openURLMenuItem);
     }
-    
+
     public static AppFrame startClosable(String appName, Class appFrameClass)
     {
         if (Configuration.isMacOS() && appName != null)
@@ -346,7 +354,7 @@ public class WorldWindFrame extends ApplicationTemplate
             return null;
         }
     }
-    
+
     public static void initialize()
     {
     	   // Get the World Wind logger by name.
@@ -366,36 +374,39 @@ public class WorldWindFrame extends ApplicationTemplate
         logger.addHandler(handler);
         startClosable("WorldViewer", AppFrame.class);
     }
-    
+
     private static class MyHandler extends ConsoleHandler
     {
-        public void publish(LogRecord logRecord)
+        @Override
+		public void publish(LogRecord logRecord)
         {
             // Just redirect the record to ConsoleHandler for printing.
             super.publish(logRecord);
         }
     }
-    
+
     public static void setViewVisible(final boolean visibility){
     	if (AppFrame==null && visibility==true){
     		initialize();
     	}
     	java.awt.EventQueue.invokeLater(new Runnable()
         {
-            public void run()
+            @Override
+			public void run()
             {
             	AppFrame.setVisible(visibility);
             }
         });
     }
-    
+
     public static void setControlVisible(final boolean visibility){
     	if (ControlFrame==null && visibility==true){
     		initialize();
     	}
     	java.awt.EventQueue.invokeLater(new Runnable()
         {
-            public void run()
+            @Override
+			public void run()
             {
             	ControlFrame.setVisible(visibility);
             }

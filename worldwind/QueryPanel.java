@@ -29,7 +29,7 @@ public class QueryPanel extends JPanel{
 
 	private JList<String> querySelector;
 	private int mode=0;
-	
+
 	public QueryPanel(WorldWindow wwd) {
 		super(new BorderLayout(10, 10));
         this.add(this.makePanel(), BorderLayout.CENTER);
@@ -41,9 +41,9 @@ public class QueryPanel extends JPanel{
         JPanel selectorPanel=new JPanel(new BorderLayout());
         final DefaultListModel<String> selection=new DefaultListModel<String>();
         querySelector=new JList<String>(selection);
-        JScrollPane listScroller = new JScrollPane(querySelector); 
+        JScrollPane listScroller = new JScrollPane(querySelector);
         JPanel buttonPanel = new JPanel(new GridLayout(0, 1, 0, 0));
-        
+
         JButton refresh = new JButton("Refresh Queriables");
         refresh.addMouseListener(new MouseAdapter() {
             @Override
@@ -58,26 +58,27 @@ public class QueryPanel extends JPanel{
             }
         });
         buttonPanel.add(refresh);
-        
+
         JButton queryArea = new JButton("Plot queriables if exist");
         queryArea.addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
             	if (querySelector.getSelectedValue()!=null){
             		if (querySelector.getSelectedValue()!="none"){
-            			getQueryObject().executeArea();
+            			getQueryObject().executeArea(new DefinedShapeAttributes());
             		}
             	}
             }
         });
         buttonPanel.add(queryArea);
-        
+
         JPanel radioButtonPanel = new JPanel(new GridLayout(0, 2, 0, 0));
         JRadioButton noneRadioButton = new JRadioButton("None");
         noneRadioButton.setSelected(true);
         noneRadioButton.addActionListener(new ActionListener()
         {
-            public void actionPerformed(ActionEvent event)
+            @Override
+			public void actionPerformed(ActionEvent event)
             {
             	mode=0;
             }
@@ -86,7 +87,8 @@ public class QueryPanel extends JPanel{
         JRadioButton pointRadioButton = new JRadioButton("Point");
         pointRadioButton.addActionListener(new ActionListener()
         {
-            public void actionPerformed(ActionEvent event)
+            @Override
+			public void actionPerformed(ActionEvent event)
             {
             	mode=1;
             }
@@ -95,7 +97,7 @@ public class QueryPanel extends JPanel{
         ButtonGroup group = new ButtonGroup();
         group.add(noneRadioButton);
         group.add(pointRadioButton);
-        
+
         selectorPanel.add(listScroller, BorderLayout.CENTER);
         selectorPanel.add(buttonPanel, BorderLayout.WEST);
         selectorPanel.add(radioButtonPanel, BorderLayout.SOUTH);
@@ -107,7 +109,7 @@ public class QueryPanel extends JPanel{
 	public int getMode(){
 		return mode;
 	}
-	
+
 	public Query getQueryObject(){
 		if (querySelector.getSelectedValue()=="None"){
 			return null;
