@@ -101,8 +101,15 @@ public class Query extends DisplayEntity {
 		return getResultSet(statement.getValue());
 	}
 
-	public ResultSet execute(String name, Boolean draw, DefinedShapeAttributes attributes){
-		String statements="SELECT * FROM " + table.getValue() + " WHERE objectid=" + name;
+	public ResultSet execute(String name, String columnName, ArrayList<String> uniqueIdentifiers, Boolean draw, DefinedShapeAttributes attributes){
+		if (uniqueIdentifiers.size()==0){
+			return null;
+		}
+		String statements="SELECT * FROM " + table.getValue() + " WHERE " + columnName +"=" + uniqueIdentifiers.get(0);
+		for(int x=1; x<uniqueIdentifiers.size(); x++){
+			statements+=" or " + columnName +"=" + uniqueIdentifiers.get(x);
+		}
+		System.out.println(statements);
 		if (draw==true){
 			File file = database.getLayermanager().sql2shp(name, statements);
 			if (file!=null){

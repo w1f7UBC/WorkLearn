@@ -24,7 +24,7 @@ public class DefinedShapeAttributes
 
 	//initialize with specific settings
     public DefinedShapeAttributes(Color4d color, int thickness, double opacity){
-    	colorRGB = new Color((float)color.r, (float)color.b, (float)color.g);
+    	colorRGB = new Color((float)color.r, (float)color.g, (float)color.b);
     	thick = thickness;
     	alpha = opacity;
     }
