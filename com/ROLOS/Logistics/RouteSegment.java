@@ -39,14 +39,6 @@ public class RouteSegment extends DiscreteHandlingLinkedEntity implements HasScr
            "make up the arrow.  When two coordinates are given it is assumed that z = 0." ,
             example = "Conveyor1  Points { { 6.7 2.2 m } { 4.9 2.2 m } { 4.9 3.4 m } }")
 	private final Vec3dListInput pointsInput;
-
-	@Keyword(description = "The width of the Arrow line segments in pixels.",
-	         example = "Road1 Width { 1 }")
-	private final ValueInput widthInput;
-
-	@Keyword(description = "The colour of the arrow, defined using a colour keyword or RGB values.",
-	         example = "Road1 Color { black }")
-	private final ColourInput colorInput;
 	
 	@Keyword(description = "Maximum speed for this route segment.", 
 			example = "Road1 SpeedLimit { 100 km/h } ")
@@ -92,13 +84,6 @@ public class RouteSegment extends DiscreteHandlingLinkedEntity implements HasScr
 		pointsInput.setUnitType(DistanceUnit.class);
 		this.addInput(pointsInput);
 
-		widthInput = new ValueInput("Width", "Basic Graphics", 1.0d);
-		widthInput.setValidRange(1.0d, Double.POSITIVE_INFINITY);
-		this.addInput(widthInput);
-
-		colorInput = new ColourInput("Colour", "Basic Graphics", ColourInput.BLACK);
-		this.addInput(colorInput);
-		
 		speedLimit = new ValueInput("SpeedLimit", "Key Inputs", Double.POSITIVE_INFINITY);
 		speedLimit.setValidRange(0.0d, Double.POSITIVE_INFINITY);
 		this.addInput(speedLimit);
@@ -399,8 +384,8 @@ public class RouteSegment extends DiscreteHandlingLinkedEntity implements HasScr
 			cachedPointInfo[0] = pi;
 
 			pi.points = pointsInput.getValue();
-			pi.color = colorInput.getValue();
-			pi.width = widthInput.getValue().intValue();
+			pi.color = this.getColor();
+			pi.width = this.getWidth();
 			if (pi.width < 1) pi.width = 1;
 		}
 		return cachedPointInfo;

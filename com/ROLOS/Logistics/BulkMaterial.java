@@ -11,7 +11,6 @@ import com.jaamsim.units.DensityUnit;
 import com.jaamsim.units.EnergyDensityUnit;
 import com.jaamsim.units.MassUnit;
 import com.jaamsim.units.VolumeUnit;
-import com.sandwell.JavaSimulation.ColourInput;
 import com.sandwell.JavaSimulation.EntityInput;
 import com.sandwell.JavaSimulation.ErrorException;
 import com.jaamsim.input.Keyword;
@@ -55,11 +54,7 @@ public class BulkMaterial extends LogisticsEntity {
 	@Keyword(description = "Density of the bulk material. ",
 	         example = "WoodChips Density { 0.4 g/cm3 } or Argon Density { 1.78 g/L } ")
 	private final SampleInput density;
-	
-	@Keyword(description = "The colour of the bulk material in its representation.",
-	         example = "Woodchip Color { tan }")
-	private final ColourInput colorInput;
-	
+		
 	@Keyword(description = "Dry Density of the bulk material. ",
 	         example = "WoodChips Density { 0.4 g/cm3 } or Argon Density { 1.78 g/L } ")
 	private final SampleInput dryDensity;
@@ -106,9 +101,6 @@ public class BulkMaterial extends LogisticsEntity {
 		energyDensity.setUnitType(EnergyDensityUnit.class);
 		this.addInput(energyDensity);
 		
-		colorInput = new ColourInput("Colour", "Basic Graphics", ColourInput.BLACK);
-		this.addInput(colorInput);
-			
 	}
 	
 	public BulkMaterial() {
@@ -134,10 +126,6 @@ public class BulkMaterial extends LogisticsEntity {
 	// GETTER AND SETTER METHODS
 	//////////////////////////////////////////////////////////////////////////////////////
 
-	public String getColour(){
-		return colorInput.getValueString();
-	}
-	
 	public BulkMaterial getProcessableFrom(){
 		return processableFrom;		
 	}

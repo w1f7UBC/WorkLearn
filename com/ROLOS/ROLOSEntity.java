@@ -6,12 +6,16 @@ import java.util.Comparator;
 
 import DataBase.Query;
 
+import com.sandwell.JavaSimulation.ColourInput;
 import com.sandwell.JavaSimulation.Entity;
 import com.sandwell.JavaSimulation.EntityInput;
 import com.sandwell.JavaSimulation.ErrorException;
 import com.sandwell.JavaSimulation.IntegerInput;
+import com.ROLOS.Logistics.Facility;
 import com.jaamsim.input.Input;
 import com.jaamsim.input.Keyword;
+import com.jaamsim.input.ValueInput;
+import com.jaamsim.math.Color4d;
 import com.sandwell.JavaSimulation3D.DisplayEntity;
 
 /**
@@ -27,10 +31,23 @@ public class ROLOSEntity extends DisplayEntity  {
 			example = "WoodchipTrucks Priority { 5 }")
 	private final IntegerInput priority;
 	
-	@Keyword(description = "priority for when this entity is compared against another of its type to be put in an ordered list. " +
-			"can be changed during the run. Default is 0", 
-			example = "WoodchipTrucks Priority { 5 }")
-	private final EntityInput<Query> worldViewShape;
+	@Keyword(description = "Query that contains the shape file for showing this entity.", 
+			example = "Sawmills ShapeFileQuery { FacilityShapes }")
+	private final EntityInput<Query> worldViewShapeFile;
+	
+	@Keyword(description = "The colour of this entity. This color will be used both in Jaamsim viewer and in Worldviewer."
+			+ "Default is black.",
+	         example = "Road1 Color { black }")
+	private final ColourInput colorInput;
+	
+	@Keyword(description = "The width of worldviewer objects or lines as in route segments in pixels.",
+	         example = "Road1 Width { 1 }")
+	private final IntegerInput widthInput;
+	
+	@Keyword(description = "The opacity of this entity in worldviewer. Sclae is between 0 and 1."
+			+ "Default is 0.03",
+	         example = "Road1 Opacity { 0.1 }")
+	private final ValueInput opacity;
 	
 	/**
 	 * priority of the entity at the current state; default priority is 0; 
@@ -42,8 +59,19 @@ public class ROLOSEntity extends DisplayEntity  {
 		priority.setValidRange(0, Integer.MAX_VALUE);
 		this.addInput(priority);
 		
-		worldViewShape = new EntityInput<Query>(Query.class, "ShapeFileQuery", "Graphics", null);
-		this.addInput(worldViewShape);
+		worldViewShapeFile = new EntityInput<Query>(Query.class, "ShapeFileQuery", "Graphics", null);
+		this.addInput(worldViewShapeFile);
+		
+		colorInput = new ColourInput("Colour", "Basic Graphics", ColourInput.BLACK);
+		this.addInput(colorInput);
+
+		widthInput = new IntegerInput("Width", "Basic Graphics", 1 );
+		widthInput.setValidRange(1, Integer.MAX_VALUE);
+		this.addInput(widthInput);
+		
+		opacity = new ValueInput("Opacity", "Basic Graphics", 0.03d);
+		opacity.setValidRange(0.0d, 1.0d);
+		this.addInput(opacity);
 	}
 	
 	public ROLOSEntity() {
@@ -54,6 +82,10 @@ public class ROLOSEntity extends DisplayEntity  {
 		super.updateForInput(in);
 		if(in == priority)
 			this.setInternalPriority(priority.getValue());
+		
+		if(in == colorInput && this.getClass().equals(Facility.class)){
+			
+		}
 	}
 		
 	@Override
@@ -67,9 +99,25 @@ public class ROLOSEntity extends DisplayEntity  {
 	}
 	
 	public Query getShapeFileQuery(){
-		return worldViewShape.getValue();
+		return worldViewShapeFile.getValue();
+	}
+	
+	public Color4d getColor(){
+		return colorInput.getValue();
+	}
+	
+	public ColourInput getColorInput(){
+		return colorInput;
 	}
 
+	public int getWidth(){
+		return widthInput.getValue();
+	}
+	
+	public double getOpacity(){
+		return opacity.getValue();
+	}
+	
 	/**
 	 * Internal priority can be thought of as natural priority (ordering) of entities. Other types of
 	 * priority can be defined and accessed from within each object through ascending and descending priority comparators 

@@ -2,6 +2,8 @@ package com.ROLOS.Logistics;
 
 import java.util.ArrayList;
 
+import worldwind.DefinedShapeAttributes;
+
 import com.ROLOS.ROLOSEntity;
 import com.ROLOS.DMAgents.FacilityFinancialManager;
 import com.ROLOS.DMAgents.FacilityGeneralManager;
@@ -17,8 +19,8 @@ import com.jaamsim.units.MassFlowUnit;
 import com.sandwell.JavaSimulation.BooleanInput;
 import com.sandwell.JavaSimulation.FileEntity;
 import com.jaamsim.input.Input;
-
 import com.jaamsim.input.Keyword;
+import com.jaamsim.math.Color4d;
 import com.sandwell.JavaSimulation.Tester;
 
 /**
@@ -26,9 +28,12 @@ import com.sandwell.JavaSimulation.Tester;
  * next available route or loading bay is planned.  
  */
 public class Facility extends DiscreteHandlingLinkedEntity {
-//
-	private static final ArrayList<Facility> allInstances;
 
+	private static final ArrayList<Facility> allInstances;
+	
+	//TODO poor implementation. find a more consistent way for maping objects coloring scheme
+	// private static final HashMapList<Color4d, Facility> colorScheme;
+	
 	@Keyword(description = "If TRUE, then statistics for all stocks will be printed for this facility"
 			+ "everytime something is added or removed.",
      example = "Temiscaming PrintStocksReport { TRUE }")
@@ -65,6 +70,7 @@ public class Facility extends DiscreteHandlingLinkedEntity {
 	
 	static {
 		allInstances = new ArrayList<Facility>(2);
+	//	colorScheme = new HashMapList<Color4d, Facility>();
 	}
 	
 	{
@@ -110,8 +116,7 @@ public class Facility extends DiscreteHandlingLinkedEntity {
 	@Override
 	public void validate() {
 		super.validate();
-		this.draw();
-	
+			
 	}
 	
 	@Override
@@ -147,7 +152,7 @@ public class Facility extends DiscreteHandlingLinkedEntity {
 	//////////////////////////////////////////////////////////////////////////////////////////////////////
 	// ADDER and SETTER METHODS
 	//////////////////////////////////////////////////////////////////////////////////////////////////////
-		
+			
 	public void setDormant(boolean dormant){
 		this.dormant = dormant;
 		this.setPresentState("Dormant");	
@@ -451,12 +456,12 @@ public class Facility extends DiscreteHandlingLinkedEntity {
 	// GRAPHICS
 	// ////////////////////////////////////////////////////////////////////////////////////////////////////
 	
-	public void draw(){
+	/*public void draw(){
 		if(this.getShapeFileQuery() != null){
 			this.getShapeFileQuery().setStatement("'SELECT *  FROM milllocations_30aug2014 WHERE objectid < 100 ;'");
-		this.getShapeFileQuery().execute(true);
+		this.getShapeFileQuery().execute(true, new DefinedShapeAttributes(sdaf));
 		}
-	}
+	}*/
 	
 	@Override
 	public void updateGraphics(double simTime) {

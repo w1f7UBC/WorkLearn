@@ -20,6 +20,7 @@ import worldwind.DefinedShapeAttributes;
 import worldwind.LayerManager;
 import worldwind.WorldWindFrame;
 
+import com.ROLOS.ROLOSEntity;
 import com.jaamsim.input.Input;
 import com.jaamsim.input.InputAgent;
 import com.jaamsim.input.Keyword;
@@ -35,12 +36,19 @@ public class Query extends DisplayEntity {
 	}
 	@Keyword(description = "target databaseobject of the query")
 	private  StringInput targetDB;
+	
 	@Keyword(description = "target table within database to query off of")
 	private StringInput table;
+	
 	@Keyword(description = "target table within database that describes the queriable area")
 	private StringInput areaTable;
+	
 	@Keyword(description = "Statement that will be used should execute(boolean draw) should be called")
 	private StringInput statement;
+	
+	@Keyword(description = "The column name where shapefile appear")
+	private StringInput shapefileColumn;
+	
 	{
 		targetDB = new StringInput("TargetDatabase","Query Properties", "InventoryDatabase");
 		this.addInput(targetDB);
@@ -50,6 +58,9 @@ public class Query extends DisplayEntity {
 		this.addInput(areaTable);
 		statement = new StringInput("Statement", "Query Properties", "");
 		this.addInput(statement);
+		
+		shapefileColumn = new StringInput("ShapeFileColumn", "Query Properties", "");
+		this.addInput(shapefileColumn);
 	}
 	private Database database=Database.getDatabase(targetDB.getValue());
 
@@ -101,24 +112,24 @@ public class Query extends DisplayEntity {
 		return getResultSet(statement.getValue());
 	}
 
-	public ResultSet execute(String name, String columnName, ArrayList<String> uniqueIdentifiers, Boolean draw, DefinedShapeAttributes attributes){
-		if (uniqueIdentifiers.size()==0){
+	public ResultSet execute(String layerName, ArrayList<? extends ROLOSEntity> drawableEntities, Boolean draw, DefinedShapeAttributes attributes){
+		if (drawableEntities.size()==0){
 			return null;
 		}
-		String statements="SELECT * FROM " + table.getValue() + " WHERE " + columnName +"=" + uniqueIdentifiers.get(0);
-		for(int x=1; x<uniqueIdentifiers.size(); x++){
-			statements+=" or " + columnName +"=" + uniqueIdentifiers.get(x);
+		String statements="SELECT * FROM " + table.getValue() + " WHERE " + shapefileColumn.getValue() +"= '" + drawableEntities.get(0).getName() +"'";
+		for(int x=1; x<drawableEntities.size(); x++){
+			statements+=" or " + shapefileColumn.getValue() +"= '" + drawableEntities.get(x).getName() + "'";
 		}
 		System.out.println(statements);
-		if (draw==true){
-			File file = database.getLayermanager().sql2shp(name, statements);
+		if (draw==true && WorldWindFrame.AppFrame != null){
+			File file = database.getLayermanager().sql2shp(layerName, statements);
 			if (file!=null){
 				new WorldWindFrame.WorkerThread(file, WorldWindFrame.AppFrame, attributes).start();
 			}
 		}
 		return getResultSet(statements);
 	}
-
+	
 	public ResultSet execute(String name, String latitude, String longitude, Boolean draw, DefinedShapeAttributes attributes){
 		String statements="SELECT * FROM " + table.getValue() + " WHERE st_contains("+table.getValue()+".shape, ST_GeomFromText('POINT("+longitude+" "+latitude+")', 4269))=true";
 		//System.out.println(statements);
