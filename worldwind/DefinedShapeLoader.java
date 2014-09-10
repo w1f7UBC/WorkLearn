@@ -5,31 +5,30 @@ import gov.nasa.worldwind.render.ShapeAttributes;
 import gov.nasa.worldwindx.examples.util.ShapefileLoader;
 
 public class DefinedShapeLoader extends ShapefileLoader {
-	DefinedShapeAttributes attribute=new DefinedShapeAttributes();
+
+	private final PointPlacemarkAttributes nextPointAttributes;
+	private final ShapeAttributes nextPolylineAttributes;
+	private final ShapeAttributes nextPolygonAttributes;
+
+	public DefinedShapeLoader(DefinedShapeAttributes attr){
+		super();
+		nextPointAttributes=attr.nextPointAttributes();
+		nextPolylineAttributes=attr.nextPolylineAttributes();
+		nextPolygonAttributes=attr.nextPolygonAttributes();
+	}
+
 	@Override
-    protected PointPlacemarkAttributes nextPointAttributes()
-    {
-        synchronized (attribute)
-        {
-            return attribute.nextPointAttributes();
-        }
+    protected PointPlacemarkAttributes nextPointAttributes(){
+		return nextPointAttributes;
     }
 
 	@Override
-    protected ShapeAttributes nextPolylineAttributes()
-    {
-        synchronized (attribute)
-        {
-            return attribute.nextPolylineAttributes();
-        }
+    protected ShapeAttributes nextPolylineAttributes(){
+		return nextPolylineAttributes;
     }
 
 	@Override
-    protected ShapeAttributes nextPolygonAttributes()
-    {
-        synchronized (attribute)
-        {
-            return attribute.nextPolygonAttributes();
-        }
+    protected ShapeAttributes nextPolygonAttributes(){
+		return nextPolygonAttributes;
     }
 }

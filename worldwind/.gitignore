@@ -42,6 +42,7 @@
 /WorldWindFrame$AppFrame$3.class
 /WorldWindFrame$4.class
 /WorldWindFrame$MyHandler.class
+<<<<<<< HEAD
 /BulkDownload$AppFrame.class
 /BulkDownload.class
 /ViewControls$AppFrame.class
@@ -84,3 +85,6 @@
 /ControlPanel$3.class
 /ControlPanel$4.class
 /ControlPanel.class
+=======
+/ShapeAttributes.class
+>>>>>>> refs/remotes/origin/master

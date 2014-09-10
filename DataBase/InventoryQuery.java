@@ -10,12 +10,13 @@ import java.util.Vector;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 
+import worldwind.DefinedShapeAttributes;
 import worldwind.WorldWindFrame;
 import worldwind.WorldWindFrame.WorkerThread;
 
 public  class InventoryQuery extends Query {
 	@Override
-	public ResultSet execute(String name, String latitude, String longitude, Boolean draw, Boolean zoom){
+	public ResultSet execute(String name, String latitude, String longitude, Boolean draw, Boolean zoom, DefinedShapeAttributes attributes){
 		//System.out.println(latitude + " " + longitude);
 		//for the shape generator/loader in LayerManager class to create the shape show on map
 		//for querying the actual data that is represented in the selected/generated area
@@ -36,7 +37,7 @@ public  class InventoryQuery extends Query {
 					+ " WHERE st_contains(fmu_1km.geom, ST_GeomFromText('POINT("+longitude+" "+latitude+")', 4269))=true);\"";
 			File file = getLayerManager().sql2shp(name, toDraw);
 			if (file!=null){
-				Thread thread=new WorldWindFrame.WorkerThread(file, WorldWindFrame.AppFrame, zoom);
+				Thread thread=new WorldWindFrame.WorkerThread(file, WorldWindFrame.AppFrame, zoom, attributes);
 				thread.start();
 				try {
 					thread.join();
@@ -48,13 +49,14 @@ public  class InventoryQuery extends Query {
 		}
 		return resultset;
 	}
-	
+
 	@Override
-	public void executeArea(Boolean zoom){
+
+	public void executeArea(Boolean zoom, DefinedShapeAttributes attributes){
 		String statements="SELECT geom FROM ab_ten;";
 		File file = getLayerManager().sql2shp("ab_ten_area", statements);
 		if (file!=null){
-			Thread thread=new WorldWindFrame.WorkerThread(file, WorldWindFrame.AppFrame, zoom);
+			Thread thread=new WorldWindFrame.WorkerThread(file, WorldWindFrame.AppFrame, zoom, attributes);
 			thread.start();
 			try {
 				thread.join();
@@ -87,7 +89,7 @@ public  class InventoryQuery extends Query {
 		    	String volume  =" ";
 		    	String biomass =" ";
 		    	Vector<Object> vector = new Vector<Object>();
-		    	for (int columnIndex = 1; columnIndex <= columnCount;columnIndex++ ){   
+		    	for (int columnIndex = 1; columnIndex <= columnCount;columnIndex++ ){
 		    		if(resultset.getMetaData().getColumnName(columnIndex).contains("giskey")||
 		    				resultset.getMetaData().getColumnName(columnIndex).contains("si_1")||
 	    			resultset.getMetaData().getColumnName(columnIndex).contains("primspec")||
@@ -112,11 +114,11 @@ public  class InventoryQuery extends Query {
 			    for(int columnIndex = 1; columnIndex <= columnCount;columnIndex++){
 			    	if(resultset.getMetaData().getColumnName(columnIndex).contains(volume)||resultset.getMetaData().getColumnName(columnIndex).contains(biomass)   ){
 			    		vector.add(resultset.getObject(columnIndex));
-			    	} 
+			    	}
 		    	}
 			    data.add(vector);
 		    }
-		    displayResultContent(name, new JTable(new DefaultTableModel(data, columnNames)));		
+		    displayResultContent(name, new JTable(new DefaultTableModel(data, columnNames)));
 		}catch (SQLException e) {
 			e.printStackTrace();
 			return;

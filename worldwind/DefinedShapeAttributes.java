@@ -10,97 +10,68 @@ import gov.nasa.worldwind.util.WWUtil;
 
 import java.awt.*;
 
+import com.jaamsim.math.Color4d;
+
 /**
  * @author dcollins
  * @version $Id: RandomShapeAttributes.java 1171 2013-02-11 21:45:02Z dcollins $
  */
 public class DefinedShapeAttributes
 {
-    protected int attrIndex = 0;
-    protected PointPlacemarkAttributes[] pointAttrs;
-    protected ShapeAttributes[] polylineAttrs;
-    protected ShapeAttributes[] polygonAttrs;
+	private Color colorRGB=Color.CYAN;
+	private int thick=3;
+	private double alpha=0.03;
 
-    public DefinedShapeAttributes()
-    {
-        this.initialize();
+	//initialize with specific settings
+    public DefinedShapeAttributes(Color4d color, int thickness, double opacity){
+    	colorRGB = new Color((float)color.r, (float)color.g, (float)color.b);
+    	thick = thickness;
+    	alpha = opacity;
     }
 
-    protected void initialize()
-    {
-        this.pointAttrs = new PointPlacemarkAttributes[]
-            {
-                this.createPointAttributes(Color.YELLOW),
-                this.createPointAttributes(Color.BLUE),
-                this.createPointAttributes(Color.RED),
-                this.createPointAttributes(Color.GREEN),
-                this.createPointAttributes(Color.CYAN),
-                this.createPointAttributes(Color.ORANGE),
-                this.createPointAttributes(Color.MAGENTA),
-            };
-
-        this.polylineAttrs = new ShapeAttributes[]
-            {
-                this.createPolylineAttributes(Color.YELLOW),
-                this.createPolylineAttributes(Color.BLUE),
-                this.createPolylineAttributes(Color.RED),
-                this.createPolylineAttributes(Color.GREEN),
-                this.createPolylineAttributes(Color.CYAN),
-                this.createPolylineAttributes(Color.ORANGE),
-                this.createPolylineAttributes(Color.MAGENTA),
-            };
-
-        this.polygonAttrs = new ShapeAttributes[]
-            {
-                this.createPolygonAttributes(Color.YELLOW),
-                this.createPolygonAttributes(Color.BLUE),
-                this.createPolygonAttributes(Color.RED),
-                this.createPolygonAttributes(Color.GREEN),
-                this.createPolygonAttributes(Color.CYAN),
-                this.createPolygonAttributes(Color.ORANGE),
-                this.createPolygonAttributes(Color.MAGENTA),
-            };
+    //initialize with default settings
+    public DefinedShapeAttributes(){
     }
 
     public PointPlacemarkAttributes nextPointAttributes()
     {
-        return this.pointAttrs[this.attrIndex++ % this.pointAttrs.length];
+        return this.createPointAttributes();
     }
 
     public ShapeAttributes nextPolylineAttributes()
     {
-        return this.polylineAttrs[this.attrIndex++ % this.polylineAttrs.length];
+        return this.createPolylineAttributes();
     }
 
     public ShapeAttributes nextPolygonAttributes()
     {
-        return this.polygonAttrs[this.attrIndex++ % this.polygonAttrs.length];
+        return this.createPolygonAttributes();
     }
 
-    protected PointPlacemarkAttributes createPointAttributes(Color color)
+    private PointPlacemarkAttributes createPointAttributes()
     {
         PointPlacemarkAttributes attrs = new PointPlacemarkAttributes();
         attrs.setUsePointAsDefaultImage(true);
-        attrs.setLineMaterial(new Material(color));
-        attrs.setScale(10d);
+        attrs.setLineMaterial(new Material(colorRGB));
+        attrs.setScale((double)thick);
         return attrs;
     }
 
-    protected ShapeAttributes createPolylineAttributes(Color color)
+    private ShapeAttributes createPolylineAttributes()
     {
         ShapeAttributes attrs = new BasicShapeAttributes();
-        attrs.setOutlineMaterial(new Material(color));
-        attrs.setOutlineWidth(1.5);
+        attrs.setOutlineMaterial(new Material(colorRGB));
+        attrs.setOutlineWidth(thick);
         return attrs;
     }
 
-    protected ShapeAttributes createPolygonAttributes(Color color)
+    private ShapeAttributes createPolygonAttributes()
     {
         ShapeAttributes attrs = new BasicShapeAttributes();
-        attrs.setInteriorMaterial(new Material(color));
-        attrs.setOutlineMaterial(new Material(WWUtil.makeColorBrighter(color)));
-        attrs.setInteriorOpacity(0.03);
-        attrs.setOutlineWidth(3);
+        attrs.setInteriorMaterial(new Material(colorRGB));
+        attrs.setOutlineMaterial(new Material(WWUtil.makeColorBrighter(colorRGB)));
+        attrs.setInteriorOpacity(alpha);
+        attrs.setOutlineWidth(thick);
         return attrs;
     }
 }

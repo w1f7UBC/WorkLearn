@@ -2,12 +2,17 @@ package com.ROLOS.DMAgents;
 
 import java.util.ArrayList;
 
+import worldwind.DefinedShapeAttributes;
+import worldwind.WorldWindFrame;
+
 import com.ROLOS.Economic.Contract;
 import com.ROLOS.Logistics.BulkMaterial;
+import com.ROLOS.Logistics.Facility;
 import com.ROLOS.Logistics.MovingEntity;
 import com.ROLOS.Logistics.ReportAgent;
 import com.ROLOS.Logistics.Route;
 import com.ROLOS.Utils.HandyUtils;
+import com.ROLOS.Utils.HashMapList;
 import com.jaamsim.events.ReflectionTarget;
 import com.jaamsim.input.InputAgent;
 import com.jaamsim.input.ValueInput;
@@ -15,6 +20,7 @@ import com.jaamsim.units.TimeUnit;
 import com.sandwell.JavaSimulation.BooleanInput;
 import com.sandwell.JavaSimulation.FileEntity;
 import com.jaamsim.input.Keyword;
+import com.jaamsim.math.Color4d;
 import com.sandwell.JavaSimulation3D.DisplayEntity;
 
 public class SimulationManager extends DisplayEntity {
@@ -70,6 +76,21 @@ public class SimulationManager extends DisplayEntity {
 	@Override
 	public void validate() {
 		super.validate();
+		
+		//TODO bad implementation for showing facilities with different color. refactor when overriding shapefile based on input is figured out
+		if(WorldWindFrame.AppFrame != null){
+			//Populate colors list
+			HashMapList<Color4d, Facility> colorScheme = new HashMapList<Color4d, Facility>();
+			for(Facility facility: Facility.getAll()){
+				colorScheme.add(facility.getColor(), facility);
+			}
+			//Show objects
+			for(Color4d eachColor: colorScheme.getKeys()){
+				Facility tempFacility = colorScheme.get(eachColor).get(0);
+				tempFacility.getShapeFileQuery().execute(tempFacility.getColorInput().getValueString()+"Facilities", colorScheme.get(eachColor), true, true, 
+						new DefinedShapeAttributes(eachColor, tempFacility.getWidth(), tempFacility.getOpacity()));
+			}
+		}
 	}
 	
 	@Override
@@ -136,10 +157,12 @@ public class SimulationManager extends DisplayEntity {
 			contractsReportFile.putDoubleWithDecimalsTabs(contract.getEstimatedTransportCost(),
 							ReportAgent.getReportPrecision(), 1);
 			contractsReportFile.putStringTabs(HandyUtils.arraylistToString(contract.getDedicatedFleetsList()), 1);
-			contractsReportFile.putStringTabs(contract.getTransporterProtoType().getName(), 1);
+			contractsReportFile.putStringTabs(HandyUtils.arraylistToString(new ArrayList<>(contract.getAssignedRoute().getRouteSegmentsList())), 1);
 			contractsReportFile.putDoubleWithDecimalsTabs(contract.getBuyer().getStockList().getValueFor(contract.getProduct(), 3),
 					ReportAgent.getReportPrecision(), 1);
 			contractsReportFile.putDoubleWithDecimalsTabs(contract.getSupplier().getStockList().getValueFor(contract.getProduct(), 4),
+					ReportAgent.getReportPrecision(), 1);
+			contractsReportFile.putDoubleWithDecimalsTabs(contract.getSupplier().getStockList().getValueFor(contract.getProduct(), 13),
 					ReportAgent.getReportPrecision(), 1);
 			contractsReportFile.newLine();
 			contractsReportFile.flush();
@@ -157,9 +180,10 @@ public class SimulationManager extends DisplayEntity {
 		contractsReportFile.putStringTabs("Unit Price", 1);
 		contractsReportFile.putStringTabs("Estimated Transportation Cost", 1);
 		contractsReportFile.putStringTabs("Dedicated Fleet", 1);
-		contractsReportFile.putStringTabs("Transporter Proto Type", 1);
+		contractsReportFile.putStringTabs("Contract Route", 1);
 		contractsReportFile.putStringTabs("Buyer's unmet demand", 1);
 		contractsReportFile.putStringTabs("Supplier's sold amount", 1);
+		contractsReportFile.putStringTabs("Supplier's actual throughput", 1);
 	//	contractsReportFile.putStringTabs("Contract Status", 1);
 		
 		contractsReportFile.newLine();
