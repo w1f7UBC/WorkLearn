@@ -16,8 +16,8 @@
 	<classpathentry kind="lib" path="resources/jar/postgresql-9.3-1101.jdbc4.jar"/>
 	<classpathentry kind="lib" path="resources/jar/postgresql-9.3-1101.jdbc41.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="resources/jar/worldwind.jar" sourcepath="resources/jar/worldwind.jar"/>
-	<classpathentry kind="lib" path="resources/jar/worldwindx.jar"/>
+	<classpathentry kind="lib" path="resources/jar/worldwind.jar" sourcepath="/WorldWind"/>
+	<classpathentry kind="lib" path="resources/jar/worldwindx.jar" sourcepath="/WorldWind"/>
 	<classpathentry kind="lib" path="resources/jar/commons-codec-1.5.jar"/>
 	<classpathentry kind="lib" path="resources/jar/commons-logging-1.1.jar"/>
 	<classpathentry kind="lib" path="resources/jar/dom4j-1.6.1.jar"/>

@@ -18,16 +18,17 @@ import javax.swing.table.DefaultTableModel;
 
 import worldwind.LayerManager;
 import worldwind.WorldWindFrame;
+import worldwind.WorldWindFrame.WorkerThread;
 
 import com.jaamsim.input.Input;
 import com.jaamsim.input.InputAgent;
 import com.jaamsim.input.Keyword;
+import com.sandwell.JavaSimulation.Entity;
 import com.sandwell.JavaSimulation.InputErrorException;
 import com.sandwell.JavaSimulation.StringInput;
-import com.sandwell.JavaSimulation3D.DisplayEntity;
 import com.sandwell.JavaSimulation3D.GUIFrame;
 
-public class Query extends DisplayEntity {
+public class Query extends Entity {
 	private static final ArrayList<Query> allInstances;
 	static {
 		allInstances = new ArrayList<Query>();
@@ -81,54 +82,82 @@ public class Query extends DisplayEntity {
 	
 	//change the default statement in this object
 	public void setStatement(String statements){
-		InputAgent.processEntity_Keyword_Value(this,statement,statements);
+		InputAgent.processEntity_Keyword_Value(this, statement, statements);
 		return;
 	}
 	
 	public void setTable(String tables){
-		table.setValueString(tables);
+		InputAgent.processEntity_Keyword_Value(this, table, tables);
 		return;
 	}
 	
-	public ResultSet execute(Boolean draw){
+	public ResultSet execute(Boolean draw, Boolean zoom){
 		if (draw==true){
 			File file = database.getLayermanager().sql2shp("Statement", statement.getValue());
 			if (file!=null){
-				new WorldWindFrame.WorkerThread(file, WorldWindFrame.AppFrame).start();
+				Thread thread=new WorldWindFrame.WorkerThread(file, WorldWindFrame.AppFrame, zoom);
+				thread.start();
+				try {
+					thread.join();
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 		}
 		return getResultSet(statement.getValue());
 	}
 	
-	public ResultSet execute(String name, Boolean draw){
+	public ResultSet execute(String name, Boolean draw, Boolean zoom){
 		String statements="SELECT * FROM " + table.getValue() + " WHERE objectid=" + name;
 		if (draw==true){
 			File file = database.getLayermanager().sql2shp(name, statements);
 			if (file!=null){
-				new WorldWindFrame.WorkerThread(file, WorldWindFrame.AppFrame).start();
+				Thread thread=new WorldWindFrame.WorkerThread(file, WorldWindFrame.AppFrame, zoom);
+				thread.start();
+				try {
+					thread.join();
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 		}
 		return getResultSet(statements);
 	}
 	
-	public ResultSet execute(String name, String latitude, String longitude, Boolean draw){
+	public ResultSet execute(String name, String latitude, String longitude, Boolean draw, Boolean zoom){
 		String statements="SELECT * FROM " + table.getValue() + " WHERE st_contains("+table.getValue()+".shape, ST_GeomFromText('POINT("+longitude+" "+latitude+")', 4269))=true";
 		//System.out.println(statements);
 		if (draw==true){
 			File file = database.getLayermanager().sql2shp(name, statements);
 			if (file!=null){
-				new WorldWindFrame.WorkerThread(file, WorldWindFrame.AppFrame).start();
+				WorkerThread thread =new WorldWindFrame.WorkerThread(file, WorldWindFrame.AppFrame, zoom);
+				thread.start();
+				try {
+					thread.join();
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 		}
 		return getResultSet(statements);
 	}
 	
-	public void executeArea(){
+	public void executeArea(Boolean zoom){
 		String statements="SELECT * FROM " + areaTable;
 		//System.out.println(statements);
 		File file = database.getLayermanager().sql2shp(areaTable.getValue(), statements);
 		if (file!=null){
-			new WorldWindFrame.WorkerThread(file, WorldWindFrame.AppFrame).start();
+			Thread thread=new WorldWindFrame.WorkerThread(file, WorldWindFrame.AppFrame, zoom);
+			thread.start();
+			try {
+				thread.join();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 	}
 	

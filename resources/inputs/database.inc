@@ -1,19 +1,23 @@
 
 Define ObjectType {
-					DatabaseObject
+					Database
 			    	Query
                     InventoryQuery 
 					ExcelInput
 					ExcelTest
+					TestEntity
+					WorldView
 					}
 					
-DatabaseObject	JavaClass { DataBase.Database }		 	Palette { 'database' } DefaultDisplayModel { Circle }
-Query 			JavaClass { DataBase.Query } 			Palette { 'database' } DefaultDisplayModel { Circle }
-InventoryQuery 	JavaClass { DataBase.InventoryQuery } 	Palette { 'database' } DefaultDisplayModel { Circle }
-ExcelInput 		JavaClass { DataBase.ExcelInput } 		Palette { 'database' } DefaultDisplayModel { Circle }
-ExcelTest 		JavaClass { DataBase.ExcelTest } 		Palette { 'database' } DefaultDisplayModel { Circle }
+Database		JavaClass { DataBase.Database }			Palette { 'database' } 
+Query 			JavaClass { DataBase.Query } 			Palette { 'database' } 
+InventoryQuery 	JavaClass { DataBase.InventoryQuery } 	Palette { 'database' } 
+ExcelInput 		JavaClass { DataBase.ExcelInput } 		Palette { 'database' } 			DefaultDisplayModel { Circle }
+ExcelTest 		JavaClass { DataBase.ExcelTest } 		Palette { 'database' } 			DefaultDisplayModel { Circle }
+TestEntity		JavaClass { DataBase.TestEntity }			
+WorldView	 	JavaClass { worldwind.WorldView }		Palette { 'Graphics Objects' } 	DragAndDrop { FALSE }
 
-Define DatabaseObject { InventoryDatabase }
+Define Database { InventoryDatabase }
 Define InventoryQuery { InventoryQueryObject }
 Define ExcelInput{ ExcelInput1 }
 Define ExcelTest{ ExcelTest1 }

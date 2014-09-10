@@ -65,7 +65,7 @@ public class QueryPanel extends JPanel{
             public void mousePressed(MouseEvent e) {
             	if (querySelector.getSelectedValue()!=null){
             		if (querySelector.getSelectedValue()!="none"){
-            			getQueryObject().executeArea();
+            			getQueryObject().executeArea(true);
             		}
             	}
             }

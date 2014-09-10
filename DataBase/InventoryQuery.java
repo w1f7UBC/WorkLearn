@@ -11,10 +11,11 @@ import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 
 import worldwind.WorldWindFrame;
+import worldwind.WorldWindFrame.WorkerThread;
 
 public  class InventoryQuery extends Query {
 	@Override
-	public ResultSet execute(String name, String latitude, String longitude, Boolean draw){
+	public ResultSet execute(String name, String latitude, String longitude, Boolean draw, Boolean zoom){
 		//System.out.println(latitude + " " + longitude);
 		//for the shape generator/loader in LayerManager class to create the shape show on map
 		//for querying the actual data that is represented in the selected/generated area
@@ -34,20 +35,33 @@ public  class InventoryQuery extends Query {
 					+ " FROM fmu_1km"
 					+ " WHERE st_contains(fmu_1km.geom, ST_GeomFromText('POINT("+longitude+" "+latitude+")', 4269))=true);\"";
 			File file = getLayerManager().sql2shp(name, toDraw);
-			System.out.println("Does this run");
 			if (file!=null){
-				new WorldWindFrame.WorkerThread(file, WorldWindFrame.AppFrame).start();
+				Thread thread=new WorldWindFrame.WorkerThread(file, WorldWindFrame.AppFrame, zoom);
+				thread.start();
+				try {
+					thread.join();
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 		}
 		return resultset;
 	}
 	
 	@Override
-	public void executeArea(){
+	public void executeArea(Boolean zoom){
 		String statements="SELECT geom FROM ab_ten;";
 		File file = getLayerManager().sql2shp("ab_ten_area", statements);
 		if (file!=null){
-			new WorldWindFrame.WorkerThread(file, WorldWindFrame.AppFrame).start();
+			Thread thread=new WorldWindFrame.WorkerThread(file, WorldWindFrame.AppFrame, zoom);
+			thread.start();
+			try {
+				thread.join();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 	}
 

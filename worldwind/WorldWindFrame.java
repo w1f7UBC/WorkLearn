@@ -77,7 +77,7 @@ public class WorldWindFrame extends ApplicationTemplate
                 					String lon = position.longitude.toString();
                 					lon=lon.substring(0, lon.length()-1);
                 					String name = query.getName()+"("+lat+","+lon+")";
-                					ResultSet resultset=query.execute(name, lat, lon, true);
+                					ResultSet resultset=query.execute(name, lat, lon, true, true);
                 					query.printResultContent(name, resultset);
                 				}
                 				position=null;
@@ -188,11 +188,13 @@ public class WorldWindFrame extends ApplicationTemplate
     {
         protected Object shpSource;
         protected AppFrame appFrame;
-
-        public WorkerThread(Object shpSource, AppFrame appFrame)
+        protected Boolean zoom;
+        
+        public WorkerThread(Object shpSource, AppFrame appFrame, Boolean zoom)
         {
             this.shpSource = shpSource;
             this.appFrame = appFrame;
+            this.zoom = zoom;
         }
         
         public void run()
@@ -215,12 +217,15 @@ public class WorldWindFrame extends ApplicationTemplate
 
                 // Schedule a task on the EDT to add the parsed shapefile layer to a layer
                 final Layer finalSHPLayer = shpLayer;
+                final Boolean zoom = this.zoom;
                 SwingUtilities.invokeLater(new Runnable()
                 {
                     public void run()
                     {
-                        appFrame.addShapefileLayer(finalSHPLayer);
-                        appFrame.gotoLayer(finalSHPLayer);
+                    	appFrame.addShapefileLayer(finalSHPLayer);
+                    	if (zoom==true){
+                    	appFrame.gotoLayer(finalSHPLayer);
+                    	}
                     }
                 });
             }
@@ -292,7 +297,7 @@ public class WorldWindFrame extends ApplicationTemplate
                     {
                         for (File file : fileChooser.getSelectedFiles())
                         {
-                            new WorkerThread(file, appFrame).start();
+                            new WorkerThread(file, appFrame, true).start();
                         }
                     }
                 }
@@ -314,7 +319,7 @@ public class WorldWindFrame extends ApplicationTemplate
                     String status = JOptionPane.showInputDialog(appFrame, "URL");
                     if (!WWUtil.isEmpty(status))
                     {
-                        new WorkerThread(status.trim(), appFrame).start();
+                        new WorkerThread(status.trim(), appFrame, true).start();
                     }
                 }
                 catch (Exception e)
@@ -349,22 +354,24 @@ public class WorldWindFrame extends ApplicationTemplate
     
     public static void initialize()
     {
-    	   // Get the World Wind logger by name.
-        Logger logger = Logger.getLogger("gov.nasa.worldwind");
-
-        // Turn off logging to parent handlers of the World Wind handler.
-        logger.setUseParentHandlers(false);
-
-        // Create a console handler (defined below) that we use to write log messages.
-        final ConsoleHandler handler = new MyHandler();
-
-        // Enable all logging levels on both the logger and the handler.
-        logger.setLevel(Level.OFF);
-        handler.setLevel(Level.OFF);
-
-        // Add our handler to the logger
-        logger.addHandler(handler);
-        startClosable("WorldViewer", AppFrame.class);
+    	if (AppFrame==null){
+	    	   // Get the World Wind logger by name.
+	        Logger logger = Logger.getLogger("gov.nasa.worldwind");
+	
+	        // Turn off logging to parent handlers of the World Wind handler.
+	        logger.setUseParentHandlers(false);
+	
+	        // Create a console handler (defined below) that we use to write log messages.
+	        final ConsoleHandler handler = new MyHandler();
+	
+	        // Enable all logging levels on both the logger and the handler.
+	        logger.setLevel(Level.OFF);
+	        handler.setLevel(Level.OFF);
+	
+	        // Add our handler to the logger
+	        logger.addHandler(handler);
+	        startClosable("WorldViewer", AppFrame.class);
+    	}
     }
     
     private static class MyHandler extends ConsoleHandler

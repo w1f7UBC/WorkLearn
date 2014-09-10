@@ -125,12 +125,8 @@ public class Simulation extends Entity {
 	         example = "Simulation ShowLogViewer { TRUE }")
 	private static final BooleanInput showLogViewer;
 	
-	@Keyword(description = "Indicates whther the World Viewer view should be shown on startup.", 
-			 example = "Simulation ShowWorldViewer { TRUE }")
-	private static final BooleanInput showWorldViewer;
-	
-	@Keyword(description = "Indicates whther the World Viewer view should be shown on startup.", 
-			 example = "Simulation ShowWorldViewer { TRUE }")
+	@Keyword(description = "Indicates whether the WorldController should be shown on startup.", 
+			 example = "Simulation ShowWorldController { TRUE }")
 	private static final BooleanInput showWorldController;
 
 	private static double timeScale; // the scale from discrete to continuous time
@@ -178,7 +174,6 @@ public class Simulation extends Entity {
 		showOutputViewer = new BooleanInput("ShowOutputViewer", "Key Inputs", false);
 		showPropertyViewer = new BooleanInput("ShowPropertyViewer", "Key Inputs", false);
 		showLogViewer = new BooleanInput("ShowLogViewer", "Key Inputs", false);
-		showWorldViewer = new BooleanInput("ShowWorldViewer","Key Inputs", false);
 		showWorldController = new BooleanInput("showWorldController", "Key Inputs", false);
 
 		// Create clock
@@ -215,7 +210,6 @@ public class Simulation extends Entity {
 		this.addInput(showOutputViewer);
 		this.addInput(showPropertyViewer);
 		this.addInput(showLogViewer);
-		this.addInput(showWorldViewer);
 		this.addInput(showWorldController);
 	}
 
@@ -292,11 +286,6 @@ public class Simulation extends Entity {
 			return;
 		}
 		
-		if (in == showWorldViewer) {
-			WorldWindFrame.setViewVisible(showWorldViewer.getValue());
-			return;
-		}
-		
 		if (in == showWorldController) {
 			WorldWindFrame.setControlVisible(showWorldController.getValue());
 			return;
@@ -324,6 +313,8 @@ public class Simulation extends Entity {
 		showOutputViewer.reset();
 		showPropertyViewer.reset();
 		showLogViewer.reset();
+		WorldWindFrame.setControlVisible(false);
+		WorldWindFrame.setViewVisible(false);
 
 		// Create clock
 		Clock.setStartDate(2000, 1, 1);
@@ -538,7 +529,6 @@ public class Simulation extends Entity {
 		setWindowVisible(OutputBox.getInstance(), showOutputViewer.getValue());
 		setWindowVisible(PropertyBox.getInstance(), showPropertyViewer.getValue());
 		setWindowVisible(LogBox.getInstance(), showLogViewer.getValue());
-		WorldWindFrame.setViewVisible(showWorldViewer.getValue());
 		WorldWindFrame.setControlVisible(showWorldController.getValue());
 	}
 
@@ -552,7 +542,6 @@ public class Simulation extends Entity {
 		setWindowVisible(OutputBox.getInstance(), false);
 		setWindowVisible(PropertyBox.getInstance(), false);
 		setWindowVisible(LogBox.getInstance(), false);
-		WorldWindFrame.setViewVisible(false);
 		WorldWindFrame.setControlVisible(false);
 	}
 

@@ -1548,7 +1548,6 @@ public class GUIFrame extends JFrame implements EventTimeListener, EventErrorLis
 			// Display it
 			splashScreen.setVisible(true);
 */
-			WorldWindFrame.initialize();
 			// Begin initializing the rendering system
 			RenderManager.initialize(SAFE_GRAPHICS);
 		}

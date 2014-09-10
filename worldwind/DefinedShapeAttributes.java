@@ -82,7 +82,7 @@ public class DefinedShapeAttributes
         PointPlacemarkAttributes attrs = new PointPlacemarkAttributes();
         attrs.setUsePointAsDefaultImage(true);
         attrs.setLineMaterial(new Material(color));
-        attrs.setScale(7d);
+        attrs.setScale(10d);
         return attrs;
     }
 
