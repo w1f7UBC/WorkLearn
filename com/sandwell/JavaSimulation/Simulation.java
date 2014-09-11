@@ -18,6 +18,7 @@ import java.io.File;
 
 import javax.swing.JFrame;
 
+import worldwind.QueryFrame;
 import worldwind.WorldWindFrame;
 
 import com.jaamsim.events.EventManager;
@@ -124,8 +125,8 @@ public class Simulation extends Entity {
 	@Keyword(description = "Indicates whether the Log Viewer tool should be shown on startup.",
 	         example = "Simulation ShowLogViewer { TRUE }")
 	private static final BooleanInput showLogViewer;
-	
-	@Keyword(description = "Indicates whether the WorldController should be shown on startup.", 
+
+	@Keyword(description = "Indicates whether the WorldController should be shown on startup.",
 			 example = "Simulation ShowWorldController { TRUE }")
 	private static final BooleanInput showWorldController;
 
@@ -285,9 +286,9 @@ public class Simulation extends Entity {
 			FrameBox.reSelectEntity();
 			return;
 		}
-		
+
 		if (in == showWorldController) {
-			WorldWindFrame.setControlVisible(showWorldController.getValue());
+			QueryFrame.setControlVisible(showWorldController.getValue());
 			return;
 		}
 	}
@@ -313,7 +314,7 @@ public class Simulation extends Entity {
 		showOutputViewer.reset();
 		showPropertyViewer.reset();
 		showLogViewer.reset();
-		WorldWindFrame.setControlVisible(false);
+		QueryFrame.setControlVisible(false);
 		WorldWindFrame.setViewVisible(false);
 
 		// Create clock
@@ -529,7 +530,7 @@ public class Simulation extends Entity {
 		setWindowVisible(OutputBox.getInstance(), showOutputViewer.getValue());
 		setWindowVisible(PropertyBox.getInstance(), showPropertyViewer.getValue());
 		setWindowVisible(LogBox.getInstance(), showLogViewer.getValue());
-		WorldWindFrame.setControlVisible(showWorldController.getValue());
+		QueryFrame.setControlVisible(showWorldController.getValue());
 	}
 
 	/**
@@ -542,7 +543,7 @@ public class Simulation extends Entity {
 		setWindowVisible(OutputBox.getInstance(), false);
 		setWindowVisible(PropertyBox.getInstance(), false);
 		setWindowVisible(LogBox.getInstance(), false);
-		WorldWindFrame.setControlVisible(false);
+		QueryFrame.setControlVisible(false);
 	}
 
 	@Output(name = "Configuration File",
