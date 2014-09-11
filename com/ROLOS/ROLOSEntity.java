@@ -69,7 +69,7 @@ public class ROLOSEntity extends DisplayEntity  {
 		widthInput.setValidRange(1, Integer.MAX_VALUE);
 		this.addInput(widthInput);
 		
-		opacity = new ValueInput("Opacity", "Basic Graphics", 0.03d);
+		opacity = new ValueInput("Opacity", "Basic Graphics", 0.01d);
 		opacity.setValidRange(0.0d, 1.0d);
 		this.addInput(opacity);
 	}

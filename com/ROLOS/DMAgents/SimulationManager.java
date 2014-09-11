@@ -87,7 +87,8 @@ public class SimulationManager extends DisplayEntity {
 			//Show objects
 			for(Color4d eachColor: colorScheme.getKeys()){
 				Facility tempFacility = colorScheme.get(eachColor).get(0);
-				tempFacility.getShapeFileQuery().execute(tempFacility.getColorInput().getValueString()+"Facilities", colorScheme.get(eachColor), true, true, 
+				if(tempFacility.getShapeFileQuery() != null)				
+					tempFacility.getShapeFileQuery().execute(tempFacility.getColorInput().getValueString()+"Facilities", colorScheme.get(eachColor), true, false, 
 						new DefinedShapeAttributes(eachColor, tempFacility.getWidth(), tempFacility.getOpacity()));
 			}
 		}

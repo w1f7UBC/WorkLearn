@@ -108,6 +108,7 @@ public class Market extends ROLOSEntity {
 			buyersList.remove(offer.getBuyer());
 		
 	}
+	
 	public ArrayList<MarketOffer> setOffers(){
 		int is, ib;
 		ArrayList<MarketOffer> offersList= new ArrayList<>(5);

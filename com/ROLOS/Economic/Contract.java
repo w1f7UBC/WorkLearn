@@ -2,13 +2,20 @@ package com.ROLOS.Economic;
 
 import java.util.ArrayList;
 
+import worldwind.DefinedShapeAttributes;
+import worldwind.WorldWindFrame;
+
 import com.ROLOS.ROLOSEntity;
 import com.ROLOS.DMAgents.SimulationManager;
 import com.ROLOS.Logistics.BulkMaterial;
+import com.ROLOS.Logistics.DiscreteHandlingLinkedEntity;
 import com.ROLOS.Logistics.Facility;
 import com.ROLOS.Logistics.Fleet;
 import com.ROLOS.Logistics.MovingEntity;
 import com.ROLOS.Logistics.Route;
+import com.ROLOS.Logistics.RouteEntity;
+import com.ROLOS.Logistics.RouteSegment;
+import com.ROLOS.Utils.HashMapList;
 import com.jaamsim.input.ValueInput;
 import com.jaamsim.units.TimeUnit;
 import com.sandwell.JavaSimulation.BooleanInput;
@@ -16,6 +23,7 @@ import com.sandwell.JavaSimulation.EntityInput;
 import com.sandwell.JavaSimulation.ErrorException;
 import com.jaamsim.input.Input;
 import com.jaamsim.input.Keyword;
+import com.jaamsim.math.Color4d;
 import com.sandwell.JavaSimulation.StringInput;
 import com.sandwell.JavaSimulation.Tester;
 
@@ -302,6 +310,22 @@ public class Contract extends ROLOSEntity {
 		}
 		
 		SimulationManager.printContractReport(this);
+		
+		//TODO bad implementation for showing routes of active contracts. refactor when overriding shapefile based on input is figured out
+		if(WorldWindFrame.AppFrame != null){
+			//Populate routesegment/entity list to be drawn
+			ArrayList<DiscreteHandlingLinkedEntity> routesList = new ArrayList<DiscreteHandlingLinkedEntity>(1);
+			Color4d tempColor = this.getProduct().getColor();
+			int tempWidth = (int) (3 * this.getContractAmount() / this.getSupplier().getStockList().getValueFor(getProduct(), 13));
+			for(DiscreteHandlingLinkedEntity eachSegment: this.getAssignedRoute().getRouteSegmentsList()){
+				if(eachSegment instanceof RouteSegment || eachSegment instanceof RouteEntity){
+					routesList.add(eachSegment);
+				}
+			}
+			if(routesList.get(0).getShapeFileQuery() != null)
+				routesList.get(0).getShapeFileQuery().execute(routesList.get(0).getName()+this.getName(), routesList, true, false, 
+					new DefinedShapeAttributes(tempColor, tempWidth, routesList.get(0).getOpacity()));
+		}
 
 	}
 	
