@@ -1,6 +1,5 @@
 package worldwind;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -29,15 +28,15 @@ public class WorldView extends Entity {
 		this.addInput(showWindow);
 	}
 	private Map<Double, Vec3d> cameraInputMap;
-	
+
 	public WorldView(){
 		WorldWindFrame.initialize();
 	}
-	
+
     public void goTo(double lat, double lon, double zoom){
     	WorldWindFrame.AppFrame.getWwd().getView().goTo(Position.fromDegrees(lat, lon), zoom);
     }
-	
+
     @Override
     public void startUp() {
     	Set<Double> set = cameraInputMap.keySet();
@@ -58,7 +57,7 @@ public class WorldView extends Entity {
         	this.scheduleProcess(target.getTime(), 3, new ReflectionTarget(this, "goTo", target.getValue().x, target.getValue().y, target.getValue().z));
     	}*/
     }
-    
+
 	@Override
 	public void updateForInput(Input<?> in) {
 		super.updateForInput(in);
@@ -72,5 +71,5 @@ public class WorldView extends Entity {
 			WorldWindFrame.setViewVisible(showWindow.getValue());
 		}
 	}
-    
+
 }

@@ -50,12 +50,9 @@ import gov.nasa.worldwind.awt.WorldWindowGLCanvas;
 public class WorldWindFrame extends ApplicationTemplate
 {
 	public static AppFrame AppFrame=null;
-	private static JFrame ControlFrame=null;
 
     public static class AppFrame extends ApplicationTemplate.AppFrame
     {
-    	private QueryPanel queryPanel;
-
         public AppFrame(){
             makeMenu(this);
             this.setLocation(GUIFrame.COL4_START, GUIFrame.TOP_START);
@@ -66,11 +63,11 @@ public class WorldWindFrame extends ApplicationTemplate
                 @Override
                 public void mousePressed(MouseEvent e) {
                 	Position position = canvas.getCurrentPosition();
-                	if (e!=null){
+                	if (e!=null && QueryFrame.HostFrame!=null){
                 		if(e.getButton()==3){
                 	        //if cursor mode is set to 1 and WorldWind actually returns a position
-                			if (position!=null && queryPanel.getMode()==1){
-                				Query query = queryPanel.getQueryObject();
+                			if (position!=null && QueryFrame.getMode()==1){
+                				Query query = QueryFrame.getQueryObject();
                 				if (query!=null){
                 					String lat = position.latitude.toString();
                 					lat=lat.substring(0, lat.length()-1);
@@ -119,21 +116,6 @@ public class WorldWindFrame extends ApplicationTemplate
 
             // Put the pieces together.
             this.getContentPane().add(wwjPanel, BorderLayout.CENTER);
-            ControlFrame=new JFrame();
-            if (includeLayerPanel){
-                this.controlPanel = new JPanel(new BorderLayout(10, 10));
-                this.layerPanel = new LayerPanel(this.getWwd());
-                this.controlPanel.add(this.layerPanel, BorderLayout.WEST);
-                this.queryPanel = new QueryPanel(this.getWwd());
-                this.controlPanel.add(this.queryPanel, BorderLayout.CENTER);
-                ControlFrame.add(this.controlPanel);
-                ControlFrame.pack();
-                ControlFrame.setLocation(GUIFrame.COL4_START, GUIFrame.LOWER_START);
-        		ControlFrame.setSize(GUIFrame.COL4_WIDTH, GUIFrame.LOWER_HEIGHT);
-                ControlFrame.setTitle("WorldView Controller");
-                ControlFrame.setIconImage(GUIFrame.getWindowIcon());
-                ControlFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-            }
             this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
             if (includeStatsPanel || System.getProperty("gov.nasa.worldwind.showStatistics") != null)
@@ -211,7 +193,6 @@ public class WorldWindFrame extends ApplicationTemplate
                     appFrame.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
                 }
             });
-
             try
             {
                 Layer shpLayer = this.parse();
@@ -365,17 +346,17 @@ public class WorldWindFrame extends ApplicationTemplate
     	if (AppFrame==null){
 	    	   // Get the World Wind logger by name.
 	        Logger logger = Logger.getLogger("gov.nasa.worldwind");
-	
+
 	        // Turn off logging to parent handlers of the World Wind handler.
 	        logger.setUseParentHandlers(false);
-	
+
 	        // Create a console handler (defined below) that we use to write log messages.
 	        final ConsoleHandler handler = new MyHandler();
-	
+
 	        // Enable all logging levels on both the logger and the handler.
 	        logger.setLevel(Level.OFF);
 	        handler.setLevel(Level.OFF);
-	
+
 	        // Add our handler to the logger
 	        logger.addHandler(handler);
 	        startClosable("WorldViewer", AppFrame.class);
@@ -402,20 +383,6 @@ public class WorldWindFrame extends ApplicationTemplate
 			public void run()
             {
             	AppFrame.setVisible(visibility);
-            }
-        });
-    }
-
-    public static void setControlVisible(final boolean visibility){
-    	if (ControlFrame==null && visibility==true){
-    		initialize();
-    	}
-    	java.awt.EventQueue.invokeLater(new Runnable()
-        {
-            @Override
-			public void run()
-            {
-            	ControlFrame.setVisible(visibility);
             }
         });
     }

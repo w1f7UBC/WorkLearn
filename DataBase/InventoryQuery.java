@@ -12,7 +12,6 @@ import javax.swing.table.DefaultTableModel;
 
 import worldwind.DefinedShapeAttributes;
 import worldwind.WorldWindFrame;
-import worldwind.WorldWindFrame.WorkerThread;
 
 public  class InventoryQuery extends Query {
 	@Override

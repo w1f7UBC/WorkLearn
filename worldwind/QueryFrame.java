@@ -13,6 +13,7 @@ import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
+import javax.swing.JFrame;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
@@ -20,20 +21,38 @@ import javax.swing.JScrollPane;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.TitledBorder;
 
+import com.sandwell.JavaSimulation3D.GUIFrame;
+
 import DataBase.Query;
-import gov.nasa.worldwind.WorldWindow;
+
 import gov.nasa.worldwindx.examples.FlatWorldPanel;
+import gov.nasa.worldwindx.examples.LayerPanel;
 
+public class QueryFrame extends JPanel {
 
-public class QueryPanel extends JPanel{
+	public static JFrame HostFrame=null;
+	private static JList<String> querySelector;
+	private static int mode=0;
 
-	private JList<String> querySelector;
-	private int mode=0;
-
-	public QueryPanel(WorldWindow wwd) {
+	private QueryFrame() {
 		super(new BorderLayout(10, 10));
+		if (WorldWindFrame.AppFrame==null){
+			WorldWindFrame.initialize();
+		}
         this.add(this.makePanel(), BorderLayout.CENTER);
-        this.add(new FlatWorldPanel(wwd), BorderLayout.SOUTH);
+        this.add(new FlatWorldPanel(WorldWindFrame.AppFrame.getWwd()), BorderLayout.SOUTH);
+        JPanel controlPanel = new JPanel(new BorderLayout(10, 10));
+        LayerPanel layerPanel = new LayerPanel(WorldWindFrame.AppFrame.getWwd());
+        controlPanel.add(layerPanel, BorderLayout.WEST);
+        controlPanel.add(this, BorderLayout.CENTER);
+        HostFrame=new JFrame();
+        HostFrame.add(controlPanel);
+        HostFrame.pack();
+        HostFrame.setLocation(GUIFrame.COL4_START, GUIFrame.LOWER_START);
+        HostFrame.setSize(GUIFrame.COL4_WIDTH, GUIFrame.LOWER_HEIGHT);
+      	HostFrame.setTitle("WorldView Controller");
+       	HostFrame.setIconImage(GUIFrame.getWindowIcon());
+        HostFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 	}
 
 	private JPanel makePanel()
@@ -94,6 +113,7 @@ public class QueryPanel extends JPanel{
             }
         });
         radioButtonPanel.add(pointRadioButton);
+
         ButtonGroup group = new ButtonGroup();
         group.add(noneRadioButton);
         group.add(pointRadioButton);
@@ -106,11 +126,11 @@ public class QueryPanel extends JPanel{
         return selectorPanel;
     }
 
-	public int getMode(){
+	public static int getMode(){
 		return mode;
 	}
 
-	public Query getQueryObject(){
+	public static Query getQueryObject(){
 		if (querySelector.getSelectedValue()=="None"){
 			return null;
 		}
@@ -123,4 +143,24 @@ public class QueryPanel extends JPanel{
 		}
 		return null;
 	}
+
+	public static void initialize(){
+		if (HostFrame==null){
+			new QueryFrame();
+		}
+	}
+
+	public static void setControlVisible(final boolean visibility){
+    	if (HostFrame==null && visibility==true){
+    		QueryFrame.initialize();
+    	}
+    	java.awt.EventQueue.invokeLater(new Runnable()
+        {
+            @Override
+			public void run()
+            {
+            	QueryFrame.HostFrame.setVisible(visibility);
+            }
+        });
+    }
 }
