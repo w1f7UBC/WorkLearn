@@ -222,7 +222,7 @@ public class FacilityTransportationManager extends FacilityManager {
 				tempRoute = RouteManager.getRoute(origin, destination, each, bulkMaterial, Route_Type.LEASTCOST, transshipmentAllowed.getValue(), transportaionCostCap,tabuList);
 				if(Tester.greaterOrEqualCheckTolerance(transportationCapacityList.getValueFor(each, 0) - transportationCapacityList.getValueFor(each, 1),0.0d) &&
 					tempRoute != null){
-					tempCost = tempRoute.estimateTransportationCostonRoute(bulkMaterial);
+					tempCost = tempRoute.estimateTransportationCostonRoute(bulkMaterial, true);
 					if(tempCost < cost ){
 						cost = tempCost;
 						returnEntity = tempRoute;	

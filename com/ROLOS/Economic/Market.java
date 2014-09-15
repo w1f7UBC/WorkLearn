@@ -214,7 +214,7 @@ public class Market extends ROLOSEntity {
 			// TODO this assumes seller always transports
 			// TODO URGENT! add proposer transportaion cost cap!
 			route = seller.getTransportationManager().getLeastCostTranspotationRoute(product.getValue(), seller, buyer, offeredPrice,null);
-			estimatedTransportCost = route.estimateTransportationCostonRoute(product.getValue());
+			estimatedTransportCost = route.estimateTransportationCostonRoute(product.getValue(),true);
 			marketOfferPrice = offeredPrice - estimatedTransportCost; 
 		}
 		

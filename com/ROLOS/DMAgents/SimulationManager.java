@@ -3,6 +3,7 @@ package com.ROLOS.DMAgents;
 import java.util.ArrayList;
 
 import worldwind.DefinedShapeAttributes;
+import worldwind.WorldView;
 import worldwind.WorldWindFrame;
 
 import com.ROLOS.Economic.Contract;
@@ -49,6 +50,9 @@ public class SimulationManager extends DisplayEntity {
 	
 	protected static FileEntity contractsReportFile;      
 	protected static FileEntity transportReportFile;      
+	
+	//TODO move to a worldwind class. layers to remove at the begining of the planning time!
+	private static final ArrayList<String> removeableWorldViewLayers;
 
 	static {
 		planningHorizon = new ValueInput("PlanningHorizon", "Key Inputs", 31536000.0d);
@@ -60,6 +64,9 @@ public class SimulationManager extends DisplayEntity {
 		printContractsReport = new BooleanInput("PrintContractsReport", "Report", false);
 		
 		printTransportReport = new BooleanInput("PrintTransportReport", "Report", false);
+		
+		removeableWorldViewLayers = new ArrayList<String>(1);
+
 	}
 	
 	{
@@ -88,7 +95,7 @@ public class SimulationManager extends DisplayEntity {
 			for(Color4d eachColor: colorScheme.getKeys()){
 				Facility tempFacility = colorScheme.get(eachColor).get(0);
 				if(tempFacility.getShapeFileQuery() != null)				
-					tempFacility.getShapeFileQuery().execute(tempFacility.getColorInput().getValueString()+"Facilities", colorScheme.get(eachColor), true, false, 
+					tempFacility.getShapeFileQuery().execute(tempFacility.getColorInput().getValueString()+"Facilities", colorScheme.get(eachColor), true, true, 
 						new DefinedShapeAttributes(eachColor, tempFacility.getWidth(), tempFacility.getOpacity()));
 			}
 		}
@@ -119,8 +126,18 @@ public class SimulationManager extends DisplayEntity {
 		previousPlanningTime = this.getSimTime();
 		nextPlanningTime = this.getSimTime() + SimulationManager.getPlanningHorizon();
 		
+		// remove the removable layers and empty the list
+		if(WorldWindFrame.AppFrame != null){
+			for(String eachLayer: removeableWorldViewLayers){
+				WorldWindFrame.AppFrame.removeShapefileLayer(eachLayer);
+			}
+			removeableWorldViewLayers.clear();
+		}		
 		this.scheduleProcess(nextPlanningTime, 1, new ReflectionTarget(this, "updatePlanningTimes"));
-
+	}
+	
+	public static ArrayList<String> getRemoveablebleWorldWindLayers(){
+		return removeableWorldViewLayers;
 	}
 	
 	public static double getPlanningHorizon(){

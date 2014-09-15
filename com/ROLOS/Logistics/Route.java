@@ -107,10 +107,11 @@ public class Route {
 	}
 	
 	/**
-	 * TODO add logic to use cost structure passed in the movingEntity and etc to calculate transportation cost 
+	 * TODO add logic to use cost structure passed in the movingEntity and etc to calculate transportation cost
+	 * @param twoWay whether to include cost of travelling back empty on the route (assuming the exact same route is used for traveling back!) 
 	 * @return $ per unit of bulkMaterial transported from origin to destination of the passed route. 
 	 */
-	public double estimateTransportationCostonRoute(BulkMaterial bulkMaterial){
+	public double estimateTransportationCostonRoute(BulkMaterial bulkMaterial, boolean twoWay){
 		double unitCost = 0.0d;
 		if(routeType == Route_Type.LEASTCOST)
 			unitCost = dijkstraWeight;
@@ -129,7 +130,7 @@ public class Route {
 		
 		// print transportation cost report
 		SimulationManager.printTransportationCostReport(movingEntitiesList, this, bulkMaterial, unitCost);
-		return unitCost;
+		return twoWay ? 2*unitCost : unitCost;
 					
 	}
 	
