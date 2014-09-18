@@ -311,7 +311,7 @@ public class WorldWindFrame extends ApplicationTemplate
                     {
                         AppFrame.addColladaLayer(layer);
                         if (zoom==true){
-                        	AppFrame.getWwd().getView().goTo(position, 1000);
+                        	AppFrame.getWwd().getView().goTo(position, 100000);
                         }
                     }
                 });
