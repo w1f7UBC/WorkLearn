@@ -46,4 +46,5 @@ LoaderBaseModel ColladaFile { '<res>/ROLOS_resources/Shapes/LoaderBase.dae' }
 
 Define ColladaModel { WoodChipperModel }
 WoodChipperModel ColladaFile { '<res>/ROLOS_resources/Shapes/AutoSave_cone.dae' }
+WoodChipperModel ModelScale { 5 5 5 }
 

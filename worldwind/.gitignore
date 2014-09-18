@@ -99,3 +99,14 @@
 /QueryFrame$3.class
 /QueryFrame$4.class
 /QueryFrame$5.class
+/ColladaViewer$AppFrame.class
+/ColladaViewer$WorkerThread.class
+/ColladaViewer.class
+/ColladaViewer$WorkerThread$1.class
+/ColladaMovingModel$AppFrame.class
+/ColladaMovingModel.class
+/ColladaMovingModel$AppFrame$1.class
+/WorldWindFrame$WorkerThread$ColladaThread$1.class
+/WorldWindFrame$WorkerThread$ColladaThread.class
+/WorldWindFrame$ColladaThread$1.class
+/WorldWindFrame$ColladaThread.class

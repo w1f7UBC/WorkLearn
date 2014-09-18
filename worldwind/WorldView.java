@@ -47,15 +47,6 @@ public class WorldView extends Entity {
     		//System.out.println(time + " " + location);
     		this.scheduleProcess(time, 3, new ReflectionTarget(this, "goTo", location.x, location.y, location.z));
     	}
-
-    	/*
-    	Iterator<WorldWindCameraInput> iterator = cameraInputList.iterator();
-    	while (iterator.hasNext()){
-    		WorldWindCameraInput target = iterator.next();
-			System.out.println(target.getTime() + " " + target.getValue().x+ " " + target.getValue().y+ " " + target.getValue().z);
-
-        	this.scheduleProcess(target.getTime(), 3, new ReflectionTarget(this, "goTo", target.getValue().x, target.getValue().y, target.getValue().z));
-    	}*/
     }
 
 	@Override

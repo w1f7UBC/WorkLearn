@@ -68,7 +68,7 @@ public abstract class DisplayModel extends Entity {
 		modelScale = new Vec3dInput( "ModelScale", "Basic Graphics", new Vec3d(1, 1, 1));
 		modelScale.setValidRange( 0.0001, 10000);
 		this.addInput( modelScale);
-
+		
 	}
 
 	public DisplayModel() {}

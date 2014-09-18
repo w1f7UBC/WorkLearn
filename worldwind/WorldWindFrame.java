@@ -6,19 +6,23 @@
 package worldwind;
 
 import gov.nasa.worldwind.Configuration;
+import gov.nasa.worldwind.WorldWind;
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.event.RenderingExceptionListener;
 import gov.nasa.worldwind.event.SelectListener;
 import gov.nasa.worldwind.exception.WWAbsentRequirementException;
 import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.geom.Sector;
+import gov.nasa.worldwind.geom.Vec4;
 import gov.nasa.worldwind.layers.Layer;
 import gov.nasa.worldwind.layers.LayerList;
+import gov.nasa.worldwind.layers.RenderableLayer;
 import gov.nasa.worldwind.layers.ViewControlsLayer;
 import gov.nasa.worldwind.layers.ViewControlsSelectListener;
+import gov.nasa.worldwind.ogc.collada.ColladaRoot;
+import gov.nasa.worldwind.ogc.collada.impl.ColladaController;
 import gov.nasa.worldwind.util.*;
 import gov.nasa.worldwindx.examples.ApplicationTemplate;
-import gov.nasa.worldwindx.examples.LayerPanel;
 import gov.nasa.worldwindx.examples.util.*;
 
 import javax.swing.*;
@@ -97,6 +101,11 @@ public class WorldWindFrame extends ApplicationTemplate
 				layerList.remove(layerList.getLayerByName(layer));
 			}
 		}
+        
+        public void addColladaLayer(RenderableLayer layer)
+        {
+            this.getWwd().getModel().getLayers().add(layer);
+        }
 
         public void gotoLayer(Layer layer)
         {
@@ -250,6 +259,69 @@ public class WorldWindFrame extends ApplicationTemplate
             }
         }
     }
+    
+    /** A <code>Thread</code> that loads a COLLADA file and displays it in an <code>AppFrame</code>. */
+    public static class ColladaThread extends Thread
+    {
+        /** Indicates the source of the COLLADA file loaded by this thread. Initialized during construction. */
+        protected Object colladaSource;
+        /** Geographic position of the COLLADA model. */
+        protected Position position;
+        protected Boolean zoom;
+        protected Vec4 scale;
+
+        /**
+         * Creates a new worker thread from a specified <code>colladaSource</code> and <code>appFrame</code>.
+         *
+         * @param colladaSource the source of the COLLADA file to load. May be a {@link java.io.File}, a {@link
+         *                      java.net.URL}, or an {@link java.io.InputStream}, or a {@link String} identifying a file
+         *                      path or URL.
+         * @param position      the geographic position of the COLLADA model.
+         * @param appFrame      the <code>AppFrame</code> in which to display the COLLADA source.
+         */
+        public ColladaThread(Object colladaSource, Position position, Vec4 scale, Boolean zoom)
+        {
+            this.colladaSource = colladaSource;
+            this.position = position;
+            this.zoom = zoom;
+            this.scale = scale;
+        }
+
+        /**
+         * Loads this worker thread's COLLADA source into a new <code>{@link gov.nasa.worldwind.ogc.collada.ColladaRoot}</code>,
+         * then adds the new <code>ColladaRoot</code> to this worker thread's <code>AppFrame</code>.
+         */
+        public void run()
+        {
+            try
+            {
+                final ColladaRoot colladaRoot = ColladaRoot.createAndParse(this.colladaSource);
+                colladaRoot.setPosition(this.position);
+                colladaRoot.setAltitudeMode(WorldWind.CLAMP_TO_GROUND);
+                colladaRoot.setModelScale(scale);
+                // Create a ColladaController to adapt the ColladaRoot to the World Wind renderable interface.
+                ColladaController colladaController = new ColladaController(colladaRoot);
+                // Adds a new layer containing the ColladaRoot to the end of the WorldWindow's layer list.
+                final RenderableLayer layer = new RenderableLayer();
+                layer.addRenderable(colladaController);
+                // Schedule a task on the EDT to add the parsed document to a layer
+                SwingUtilities.invokeLater(new Runnable()
+                {
+                    public void run()
+                    {
+                        AppFrame.addColladaLayer(layer);
+                        if (zoom==true){
+                        	AppFrame.getWwd().getView().goTo(position, 1000);
+                        }
+                    }
+                });
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+            }
+        }
+    }
 
     protected static String formName(Object source)
     {
@@ -360,7 +432,10 @@ public class WorldWindFrame extends ApplicationTemplate
 	        // Add our handler to the logger
 	        logger.addHandler(handler);
 	        startClosable("WorldViewer", AppFrame.class);
-    	}
+	        LayerList controls = WorldWindFrame.AppFrame.getWwd().getModel().getLayers();
+	        controls.getLayerByName("MS Virtual Earth Aerial").setEnabled(true);
+	        controls.getLayerByName("Bing Imagery").setEnabled(true);
+    	}//MS Virtual Earth Aerial, Bing Imagery
     }
 
     private static class MyHandler extends ConsoleHandler
