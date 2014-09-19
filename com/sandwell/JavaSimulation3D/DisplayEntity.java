@@ -663,7 +663,7 @@ public Vec3d getPositionInput(){
 		if (in == wvPositionInput || in == wvSizeInput){
 			if (wvShow.getValue()==true){
 				if (displayModelList!=null){
-					ColladaModel target = (ColladaModel)displayModelList.getDefaultValue().get(0);
+					ColladaModel target = (ColladaModel) getDisplayModelList().get(0);
 					File uri = new File(target.getColladaFile());
 					//System.out.println(uri);
 					Vec3d pos = wvPositionInput.getValue();

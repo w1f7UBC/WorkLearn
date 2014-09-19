@@ -18,6 +18,7 @@ import javax.swing.table.DefaultTableModel;
 
 import worldwind.DefinedShapeAttributes;
 import worldwind.LayerManager;
+import worldwind.QueryFrame;
 import worldwind.WorldWindFrame;
 import worldwind.WorldWindFrame.WorkerThread;
 
@@ -146,8 +147,13 @@ public class Query extends Entity {
 	}
 	
 	public ResultSet execute(String name, String latitude, String longitude, Boolean draw, Boolean zoom, DefinedShapeAttributes attributes){
-		String statements="SELECT * FROM " + table.getValue() + " WHERE st_contains("+table.getValue()+".shape, ST_GeomFromText('POINT("+longitude+" "+latitude+")', 4269))=true";
-		//System.out.println(statements);
+		String statements="";
+		if(QueryFrame.getMode()==2){
+		 statements="SELECT DISTINCT * FROM " + areaTable.getValue() + " WHERE st_distance(ST_Transform("+areaTable.getValue()+".shape,26986), ST_Transform(ST_GeomFromText('POINT("+longitude+" "+latitude+")', 4269),26986))<"+QueryFrame.getSliderValue()*1000;
+		}
+		else if(QueryFrame.getMode()==3){
+		 statements="SELECT * FROM "+ areaTable.getValue() + " ORDER BY "+ areaTable.getValue() +".shape <->  ST_GeomFromText('POINT("+longitude+" "+latitude+")', 4269) LIMIT 1";
+			}
 		if (draw==true){
 			File file = database.getLayermanager().sql2shp(name, statements);
 			if (file!=null){
