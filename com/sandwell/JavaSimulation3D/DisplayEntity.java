@@ -659,7 +659,8 @@ public Vec3d getPositionInput(){
 			clearBindings(); // Clear this on any change, and build it lazily later
 		}
 		
-		if (in == wvShow){
+		//TODO delete old shapes/layers
+		if (in == wvPositionInput || in == wvSizeInput){
 			if (wvShow.getValue()==true){
 				if (displayModelList!=null){
 					ColladaModel target = (ColladaModel)displayModelList.getDefaultValue().get(0);

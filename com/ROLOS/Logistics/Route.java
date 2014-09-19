@@ -129,7 +129,7 @@ public class Route {
 		}
 		
 		// print transportation cost report
-		SimulationManager.printTransportationCostReport(movingEntitiesList, this, bulkMaterial, unitCost);
+		SimulationManager.printTransportationCostReport(this, bulkMaterial, unitCost);
 		return twoWay ? 2*unitCost : unitCost;
 					
 	}

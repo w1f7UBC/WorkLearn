@@ -137,6 +137,10 @@ public class Group extends Entity {
 	// ACCESSING
 	// ******************************************************************************************
 
+	public Class<?> getType(){
+		return type;
+	}
+	
 	public ArrayList<Entity> getList() {
 		return list;
 	}

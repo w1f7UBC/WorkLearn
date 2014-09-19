@@ -46,8 +46,7 @@ public class FacilityTransportationManager extends FacilityManager {
 	private HashMapList<MovingEntity,MovingEntity> unassignedMovingEntityList;
 	private HashMapList<Contract,MovingEntity> inactiveContractsList;
 		
-	{
-		
+	{		
 		transportersList = new EntityListInput<>(MovingEntity.class, "Transporters", "Key Inputs", new ArrayList<MovingEntity>(0));
 		this.addInput(transportersList);
 		
@@ -97,24 +96,27 @@ public class FacilityTransportationManager extends FacilityManager {
 		else{
 			// if transportation is not modeled, and if contract is active, remove material from supplier's 
 			// stockpile(s) and add to buyer's stock pile(s)
-			double tempAmount = amount;
+			
 			double assignedAmount;
 			Stockpile supplierPile, buyerPile;
-			while (Tester.greaterCheckTolerance(tempAmount, 0.0d) && contract.isActive()){
-				supplierPile = contract.getSupplier().getOperationsManager().getStockpileForLoading(contract.getProduct());
-				buyerPile = contract.getBuyer().getOperationsManager().getStockpileForUnLoading(contract.getProduct());
+			supplierPile = contract.getSupplier().getOperationsManager().getStockpileForLoading(contract.getProduct());
+			buyerPile = contract.getBuyer().getOperationsManager().getStockpileForUnLoading(contract.getProduct());
 				
-				if(supplierPile == null || buyerPile == null)
-					return;
+			if(supplierPile == null || buyerPile == null)
+				return;
 				
-				assignedAmount = Tester.min(tempAmount, supplierPile.getCurrentlyHandlingAmount(),
-									buyerPile.getRemainingCapacity(contract.getProduct()));
-				// do transaction between piles and contract
-				supplierPile.removeFromCurrentlyHandlingEntityList(contract.getProduct(), assignedAmount);
-				buyerPile.addToCurrentlyHandlingEntityList(contract.getProduct(), assignedAmount);
-				contract.addToFulfilledAmount(assignedAmount);	
-				tempAmount -= assignedAmount;
-			}
+			assignedAmount = Tester.min(amount, supplierPile.getCurrentlyHandlingAmount(),
+								buyerPile.getRemainingCapacity(contract.getProduct()));
+			// do transaction between piles and contract
+			supplierPile.removeFromCurrentlyHandlingEntityList(contract.getProduct(), assignedAmount);
+			contract.getSupplier().addToStocksList(contract.getProduct(), 16, assignedAmount);
+				
+			contract.getBuyer().addToStocksList(contract.getProduct(), 15, assignedAmount);
+			buyerPile.addToCurrentlyHandlingEntityList(contract.getProduct(), assignedAmount);
+				
+			contract.addToFulfilledAmount(assignedAmount);	
+			
+			
 		}
 	}
 	

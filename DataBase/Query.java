@@ -128,7 +128,7 @@ public class Query extends Entity {
 		for(int x=1; x<drawableEntities.size(); x++){
 			statements+=" or " + shapefileColumn.getValue() +"= '" + drawableEntities.get(x).getName() + "'";
 		}
-		System.out.println(statements);
+		// System.out.println(statements);
 		if (draw==true && WorldWindFrame.AppFrame != null){
 			File file = database.getLayermanager().sql2shp(layerName, statements);
 			if (file!=null){

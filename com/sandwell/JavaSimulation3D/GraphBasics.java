@@ -86,8 +86,8 @@ public abstract class GraphBasics extends DisplayEntity {
 	         example = "Graph1 XAxisLabelFormat { %.1fs }")
 	private final FormatInput xAxisLabelFormat;
 
-	@Keyword(description = "A list of values between XAxisStart and XAxisEnd at which to insert vertical gridlines.",
-	         example = "Graph1 XLines { -48 -40 -32 -24 -16 -8 0 h }")
+	@Keyword(description = "A list of values beGraph1 XLines { -48 -40 -32 -24 -16 -8 0 h }tween XAxisStart and XAxisEnd at which to insert vertical gridlines.",
+	         example = "")
 	private final ValueListInput xLines;
 
 	@Keyword(description = "The color of the vertical gridlines (or a list corresponding to the colour of each " +

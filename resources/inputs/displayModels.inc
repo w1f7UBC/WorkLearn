@@ -26,6 +26,9 @@ Sphere		ColladaFile		{ '<res>/shapes/Sphere.dae' }
 Define ColladaModel { Truck3D }
 Truck3D ColladaFile { '<res>/ROLOS_resources/Shapes/Sin t_tulo.dae' }
 
+Define ColladaModel { BuildingTan }
+BuildingTan ColladaFile { '<res>/ROLOS_resources/Shapes/garagetan.dae' }
+
 Define ColladaModel { Cargo3D }
 Cargo3D ColladaFile { '<res>/ROLOS_resources/Shapes/WoodchipTrailer.dae' }
 
@@ -46,5 +49,5 @@ LoaderBaseModel ColladaFile { '<res>/ROLOS_resources/Shapes/LoaderBase.dae' }
 
 Define ColladaModel { WoodChipperModel }
 WoodChipperModel ColladaFile { '<res>/ROLOS_resources/Shapes/AutoSave_cone.dae' }
-WoodChipperModel ModelScale { 5 5 5 }
+
 

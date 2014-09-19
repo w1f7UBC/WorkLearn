@@ -221,6 +221,7 @@ public class BulkMaterialProcessor extends BulkHandlingLinkedEntity {
 			// add outfeed material to outfeed piles
 			for(Stockpile each:outfeedPiles){
 				tempMaterial = (BulkMaterial) each.getHandlingEntityTypeList().get(0);
+				this.getFacility().addToStocksList(tempMaterial, 14, this.getOutfeedRate(tempMaterial) * dt);
 				each.addToCurrentlyHandlingEntityList(tempMaterial, this.getOutfeedRate(tempMaterial) * dt);
 				each.setLastContentUpdateTime(this.getSimTime());
 			}
