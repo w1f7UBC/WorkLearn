@@ -51,6 +51,12 @@ public class Query extends Entity {
 	@Keyword(description = "The column name where shapefile appear")
 	private StringInput shapefileColumn;
 	
+	@Keyword(description = "The column name where latitude information is recoreded")
+	private StringInput latitudeColumn;
+	
+	@Keyword(description = "The column name where longitude information is recoreded")
+	private StringInput longitudeColumn;
+	
 	{
 		targetDB = new StringInput("TargetDatabase","Query Properties", "InventoryDatabase");
 		this.addInput(targetDB);
@@ -61,8 +67,14 @@ public class Query extends Entity {
 		statement = new StringInput("Statement", "Query Properties", "");
 		this.addInput(statement);
 		
-		shapefileColumn = new StringInput("ShapeFileColumn", "Query Properties", "");
+		shapefileColumn = new StringInput("NameColumn", "Query Properties", "");
 		this.addInput(shapefileColumn);
+		
+		latitudeColumn = new StringInput("LatitudeColumn", "Query Properties", "latitude");
+		this.addInput(latitudeColumn);
+		
+		longitudeColumn = new StringInput("LongitudeColumn", "Query Properties", "longitude");
+		this.addInput(longitudeColumn);
 	}
 	private Database database=Database.getDatabase(targetDB.getValue());
 
@@ -120,7 +132,7 @@ public class Query extends Entity {
 		}
 		return getResultSet(statement.getValue());
 	}
-
+		
 	public ResultSet execute(String layerName, ArrayList<? extends ROLOSEntity> drawableEntities, Boolean draw, Boolean zoom, DefinedShapeAttributes attributes){
 		if (drawableEntities.size()==0){
 			return null;
@@ -184,6 +196,37 @@ public class Query extends Entity {
 				e.printStackTrace();
 			}
 		}
+	}
+	
+	/**
+	 * updates position based on lat longs passed on in the shapefile database
+	 * @param entitiesList list of entities to update
+	 * @param draw whether to try and draw the 3D representation of these entities in WorldWind
+	 * @return 
+	 */
+	public ResultSet updatePosition(ArrayList<? extends ROLOSEntity> entitiesList, Boolean draw){
+		if (entitiesList.size()==0){
+			return null;
+		}
+		String statements="SELECT " + shapefileColumn.getValue()+ ", "+ latitudeColumn.getValue() + ", " + longitudeColumn.getValue() +" FROM " + 
+				table.getValue() + " WHERE " + shapefileColumn.getValue() +"= '" + entitiesList.get(0).getName() +"'";
+		for(int x=1; x<entitiesList.size(); x++){
+			statements+=" or " + shapefileColumn.getValue() +"= '" + entitiesList.get(x).getName() + "'";
+		}
+		// System.out.println(statements);
+		ResultSet tempResultSet = this.getResultSet(statements);
+		try {
+			if (tempResultSet!=null){
+				String 
+				while(tempResultSet.next()){
+					InputAgent.processEntity_Keyword_Value(this, targetInput, val);
+				}
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return getResultSet(statements);
 	}
 
 	public ResultSet getResultSet(String statements){

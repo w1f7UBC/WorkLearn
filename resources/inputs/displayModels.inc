@@ -26,8 +26,26 @@ Sphere		ColladaFile		{ '<res>/shapes/Sphere.dae' }
 Define ColladaModel { Truck3D }
 Truck3D ColladaFile { '<res>/ROLOS_resources/Shapes/Sin t_tulo.dae' }
 
-Define ColladaModel { BuildingTan }
-BuildingTan ColladaFile { '<res>/ROLOS_resources/Shapes/garagetan.dae' }
+Define ColladaModel { BuildingYellow }
+BuildingYellow ColladaFile { '<res>/ROLOS_resources/Shapes/FactoryBuliding.dae' }
+
+Define ColladaModel { BuildingPurple }
+BuildingPurple ColladaFile { '<res>/ROLOS_resources/Shapes/FactoryBuliding_Purple.dae' }
+
+Define ColladaModel { BuildingBlue }
+BuildingBlue ColladaFile { '<res>/ROLOS_resources/Shapes/FactoryBuliding_Blue.dae' }
+
+Define ColladaModel { BuildingPink }
+BuildingPink ColladaFile { '<res>/ROLOS_resources/Shapes/FactoryBuliding_Pink.dae' }
+
+Define ColladaModel { BuildingGreen }
+BuildingGreen ColladaFile { '<res>/ROLOS_resources/Shapes/FactoryBuliding_Green.dae' }
+
+Define ColladaModel { BuildingWhite }
+BuildingWhite ColladaFile { '<res>/ROLOS_resources/Shapes/FactoryBuliding_White.dae' }
+
+Define ColladaModel { BuildingSkyBlue }
+BuildingSkyBlue ColladaFile { '<res>/ROLOS_resources/Shapes/FactoryBuliding_SkyBlue.dae' }
 
 Define ColladaModel { Cargo3D }
 Cargo3D ColladaFile { '<res>/ROLOS_resources/Shapes/WoodchipTrailer.dae' }

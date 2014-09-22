@@ -660,21 +660,17 @@ public Vec3d getPositionInput(){
 		}
 		
 		//TODO delete old shapes/layers
-		if (in == wvPositionInput || in == wvSizeInput){
-			if (wvShow.getValue()==true){
-				if (displayModelList!=null){
-					ColladaModel target = (ColladaModel) getDisplayModelList().get(0);
-					File uri = new File(target.getColladaFile());
-					//System.out.println(uri);
-					Vec3d pos = wvPositionInput.getValue();
-					//System.out.println(pos.x + " " + pos.y + " " + pos.z);
-					Position position = Position.fromDegrees(pos.x, pos.y, pos.z);
-					Vec3d scale = wvSizeInput.getValue();
-					Vec4 actualScale = new Vec4(scale.x, scale.y, scale.z);
-					Thread thread = new WorldWindFrame.ColladaThread(uri, position,  actualScale, true);
-					thread.start();
-				}
-			}
+		if (in == wvShow && wvShow.getValue()==true && displayModelList!=null){
+			ColladaModel target = (ColladaModel) getDisplayModelList().get(0);
+			File uri = new File(target.getColladaFile());
+			//System.out.println(uri);
+			Vec3d pos = wvPositionInput.getValue();
+			//System.out.println(pos.x + " " + pos.y + " " + pos.z);
+			Position position = Position.fromDegrees(pos.x, pos.y, pos.z);
+			Vec3d scale = wvSizeInput.getValue();
+			Vec4 actualScale = new Vec4(scale.x, scale.y, scale.z);
+			Thread thread = new WorldWindFrame.ColladaThread(uri, position,  actualScale, false);
+			thread.start();
 		}
 	}
 

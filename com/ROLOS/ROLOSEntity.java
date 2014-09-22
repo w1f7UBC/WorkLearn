@@ -59,7 +59,7 @@ public class ROLOSEntity extends DisplayEntity  {
 		priority.setValidRange(0, Integer.MAX_VALUE);
 		this.addInput(priority);
 		
-		worldViewShapeFile = new EntityInput<Query>(Query.class, "ShapeFileQuery", "Graphics", null);
+		worldViewShapeFile = new EntityInput<Query>(Query.class, "ShapeFileQuery", "Basic Graphics", null);
 		this.addInput(worldViewShapeFile);
 		
 		colorInput = new ColourInput("Colour", "Basic Graphics", ColourInput.BLACK);
