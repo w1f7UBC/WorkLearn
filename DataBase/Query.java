@@ -10,6 +10,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.Locale;
 import java.util.Vector;
 
@@ -80,7 +81,8 @@ public class Query extends Entity {
 		this.addInput(longitudeColumn);
 	}
 	private Database database=Database.getDatabase(targetDB.getValue());
-
+	private ArrayList<JFrame> resultFrames;
+	
     @Override
 	public void updateForInput(Input<?> in) {
 		super.updateForInput(in);
@@ -324,12 +326,35 @@ public class Query extends Entity {
 						   WorldWindFrame.AppFrame.removeShapefileLayer(name+".shp");
 					   }
 				   });
+				   dataBaseFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+				   resultFrames.add(dataBaseFrame);
 			   }
 		});
 	}
 
 	public LayerManager getLayerManager(){
 		return database.getLayermanager();
+	}
+	
+	public ArrayList<JFrame> getResultFrames(){
+		return resultFrames;
+	}
+	
+	public boolean deleteAllResultFrames(){
+		resultFrames=new ArrayList<JFrame>();
+		return true;
+	}
+	
+	public boolean deleteResultFrame(String name){
+		Iterator<JFrame> iterator =  resultFrames.iterator();
+		while (iterator.hasNext()){
+			JFrame target = iterator.next();
+			if (target.getName()==name){
+				target.dispose();
+				return true;
+			}
+		}
+		return false;
 	}
 }
 
