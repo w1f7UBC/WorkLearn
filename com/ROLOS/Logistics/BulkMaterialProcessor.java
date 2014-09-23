@@ -17,6 +17,7 @@ import com.jaamsim.units.VolumeUnit;
 import com.sandwell.JavaSimulation.EntityInput;
 import com.sandwell.JavaSimulation.EntityListInput;
 import com.sandwell.JavaSimulation.ErrorException;
+import com.sandwell.JavaSimulation.InputErrorException;
 import com.jaamsim.input.Input;
 import com.jaamsim.input.Keyword;
 import com.sandwell.JavaSimulation.Tester;
@@ -103,6 +104,9 @@ public class BulkMaterialProcessor extends BulkHandlingLinkedEntity {
 	public void validate() {
 		super.validate();
 		
+		if(outfeedEntityTypeList != null)
+			if(outfeedRateByEntityType.getValue() == null || outfeedRateByEntityType.getValue().size() != outfeedEntityTypeList.getValue().size())
+				throw new InputErrorException("Outfeedrate list and outfeed entity list should be same size for %s!", this.getName());
 	}
 	
 	@Override
@@ -221,6 +225,7 @@ public class BulkMaterialProcessor extends BulkHandlingLinkedEntity {
 			// add outfeed material to outfeed piles
 			for(Stockpile each:outfeedPiles){
 				tempMaterial = (BulkMaterial) each.getHandlingEntityTypeList().get(0);
+				this.getFacility().addToStocksList(tempMaterial, 14, this.getOutfeedRate(tempMaterial) * dt);
 				each.addToCurrentlyHandlingEntityList(tempMaterial, this.getOutfeedRate(tempMaterial) * dt);
 				each.setLastContentUpdateTime(this.getSimTime());
 			}
@@ -251,6 +256,9 @@ public class BulkMaterialProcessor extends BulkHandlingLinkedEntity {
 	}
 	
 	public double getOutfeedRate(BulkMaterial bulkMaterial){
+		if(!outfeedEntityTypeList.getValue().contains(bulkMaterial))
+			throw new InputErrorException("%s does not outfeed %s!"	, this.getName(), bulkMaterial.getName());
+		
 		return outfeedRateByEntityType.getValue().get(outfeedEntityTypeList.getValue().indexOf(bulkMaterial));
 	}
 	

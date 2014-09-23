@@ -25,12 +25,17 @@ public class HandyUtils {
 				returnString = returnString+arrayList.get(i).toString()+",";
 			else if (arrayList.get(i) instanceof Entity)
 				returnString = returnString+((Entity) arrayList.get(i)).getName()+",";
+			else if (arrayList.get(i) instanceof String)
+				returnString = returnString+arrayList.get(i)+",";
+
 		}
 		
 		if (arrayList.get(i) instanceof Number)
 			returnString = returnString+arrayList.get(i).toString()+"}";
 		else if (arrayList.get(i) instanceof Entity)
 			returnString = returnString+((Entity) arrayList.get(i)).getName()+"}";
+		else if (arrayList.get(i) instanceof String)
+			returnString = returnString+arrayList.get(i)+"}";
 		return returnString;
 	}
 	

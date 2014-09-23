@@ -5,6 +5,8 @@ import java.util.LinkedList;
 
 
 
+
+import com.jaamsim.events.ReflectionTarget;
 import com.sandwell.JavaSimulation.InputErrorException;
 import com.sandwell.JavaSimulation.Tester;
 
@@ -81,8 +83,7 @@ public class ProcessingRoute extends LogisticsEntity {
 		//TODO see if this prevents from starting before startup
 		if(incrementedAmount > 0 && this.isConnected() && Tester.greaterCheckTimeStep(this.getSimTime(), 0.0d)){
 			this.connectRoute();
-			processor.startProcess("doProcessing",this);
-			
+			this.scheduleProcess(0.0d, 10, new ReflectionTarget(processor, "doProcessing",this));			
 		}
 	}
 
@@ -171,7 +172,7 @@ public class ProcessingRoute extends LogisticsEntity {
 		super.startUp();
 		if(this.isConnected()){
 			this.connectRoute();
-			processor.doProcessing(this);
+			this.scheduleProcess(0.0d, 10, new ReflectionTarget(processor, "doProcessing",this));			
 		}
 			
 	}

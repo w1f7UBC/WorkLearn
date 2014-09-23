@@ -98,6 +98,7 @@ public class SimulationManager extends DisplayEntity {
 					tempFacility.getShapeFileQuery().execute(tempFacility.getColorInput().getValueString()+"Facilities", colorScheme.get(eachColor), true, true, 
 						new DefinedShapeAttributes(eachColor, tempFacility.getWidth(), tempFacility.getOpacity()));
 			}
+			Facility.getAll().get(0).getShapeFileQuery().updatePosition(Facility.getAll());
 		}
 	}
 	
@@ -162,25 +163,25 @@ public class SimulationManager extends DisplayEntity {
 	//////////////////////////////////////////////////////////////////////////////////////
 	public static void printContractReport(Contract contract){
 		if (printContractsReport.getValue()) {
-			contractsReportFile.putDoubleWithDecimalsTabs(contract.getSimTime(),
+			contractsReportFile.putDoubleWithDecimalsTabs(contract.getSimTime()/3600,
 					ReportAgent.getReportPrecision(), 1);
 			contractsReportFile.putStringTabs(contract.getName(), 1);
 			contractsReportFile.putStringTabs(contract.getProduct().getName(), 1);
 			contractsReportFile.putStringTabs(contract.getSupplier().getName(), 1);
 			contractsReportFile.putStringTabs(contract.getBuyer().getName(), 1);
-			contractsReportFile.putDoubleWithDecimalsTabs(contract.getContractAmount(),
+			contractsReportFile.putDoubleWithDecimalsTabs(contract.getContractAmount()/1000,
 					ReportAgent.getReportPrecision(), 1);
-			contractsReportFile.putDoubleWithDecimalsTabs(contract.getContractPrice(),
+			contractsReportFile.putDoubleWithDecimalsTabs(contract.getContractPrice()*1000,
 					ReportAgent.getReportPrecision(), 1);
-			contractsReportFile.putDoubleWithDecimalsTabs(contract.getEstimatedTransportCost(),
+			contractsReportFile.putDoubleWithDecimalsTabs(contract.getEstimatedTransportCost()*1000,
 							ReportAgent.getReportPrecision(), 1);
 			contractsReportFile.putStringTabs(HandyUtils.arraylistToString(contract.getDedicatedFleetsList()), 1);
 			contractsReportFile.putStringTabs(HandyUtils.arraylistToString(new ArrayList<>(contract.getAssignedRoute().getRouteSegmentsList())), 1);
-			contractsReportFile.putDoubleWithDecimalsTabs(contract.getBuyer().getStockList().getValueFor(contract.getProduct(), 3),
+			contractsReportFile.putDoubleWithDecimalsTabs(contract.getBuyer().getStockList().getValueFor(contract.getProduct(), 3)/1000,
 					ReportAgent.getReportPrecision(), 1);
-			contractsReportFile.putDoubleWithDecimalsTabs(contract.getSupplier().getStockList().getValueFor(contract.getProduct(), 4),
+			contractsReportFile.putDoubleWithDecimalsTabs(contract.getSupplier().getStockList().getValueFor(contract.getProduct(), 4)/1000,
 					ReportAgent.getReportPrecision(), 1);
-			contractsReportFile.putDoubleWithDecimalsTabs(contract.getSupplier().getStockList().getValueFor(contract.getProduct(), 13),
+			contractsReportFile.putDoubleWithDecimalsTabs(contract.getSupplier().getStockList().getValueFor(contract.getProduct(), 13)/1000,
 					ReportAgent.getReportPrecision(), 1);
 			contractsReportFile.newLine();
 			contractsReportFile.flush();
@@ -208,27 +209,30 @@ public class SimulationManager extends DisplayEntity {
 		contractsReportFile.flush();	
 		
 		// Print units
-		contractsReportFile.putStringTabs("(s)", 5);
-		contractsReportFile.putStringTabs("(kg)", 1);
-		contractsReportFile.putStringTabs("($/kg)", 1);
-		contractsReportFile.putStringTabs("($/kg)", 3);
-		contractsReportFile.putStringTabs("(kg)", 1);
+		contractsReportFile.putStringTabs("(h)", 5);
+		contractsReportFile.putStringTabs("(tonne)", 1);
+		contractsReportFile.putStringTabs("($/tonne)", 1);
+		contractsReportFile.putStringTabs("($/tonne)", 3);
+		contractsReportFile.putStringTabs("(tonne)", 1);
+		contractsReportFile.putStringTabs("(tonne)", 1);
+		contractsReportFile.putStringTabs("(tonne)", 1);
 
 		contractsReportFile.newLine();
 		contractsReportFile.flush();	
 	}
 	
-	public static void printTransportationCostReport(ArrayList<MovingEntity> movingEntitiesList, Route route, BulkMaterial bulkMaterial, double unitCost){
+	public static void printTransportationCostReport(Route route, BulkMaterial bulkMaterial, double unitCost){
 		if (printTransportReport.getValue()) {
-			transportReportFile.putDoubleWithDecimalsTabs(bulkMaterial.getSimTime(),
+			transportReportFile.putDoubleWithDecimalsTabs(bulkMaterial.getSimTime()/3600,
 					ReportAgent.getReportPrecision(), 1);
 			transportReportFile.putStringTabs(route.getOrigin().getName(), 1);
 			transportReportFile.putStringTabs(route.getDestination().getName(), 1);
-			transportReportFile.putStringTabs(movingEntitiesList.toString(), 1);
+			transportReportFile.putStringTabs(route.getRouteSegmentsList().toString(), 1);
+			transportReportFile.putStringTabs(route.getMovingEntitiesList().toString(), 1);
 			transportReportFile.putStringTabs(bulkMaterial.getName(), 1);
-			transportReportFile.putDoubleWithDecimalsTabs(route.getDijkstraWeight(),
+			transportReportFile.putDoubleWithDecimalsTabs(route.getLength()/1000,
 					ReportAgent.getReportPrecision(), 1);
-			transportReportFile.putDoubleWithDecimalsTabs(unitCost,
+			transportReportFile.putDoubleWithDecimalsTabs(unitCost*1000,
 					ReportAgent.getReportPrecision(), 1);
 			transportReportFile.newLine();
 			transportReportFile.flush();
@@ -239,6 +243,7 @@ public class SimulationManager extends DisplayEntity {
 		transportReportFile.putStringTabs("Time", 1);
 		transportReportFile.putStringTabs("Origin", 1);
 		transportReportFile.putStringTabs("Destination", 1);
+		transportReportFile.putStringTabs("Route Segments List", 1);
 		transportReportFile.putStringTabs("Moving Entities List", 1);
 		transportReportFile.putStringTabs("Bulk Material", 1);
 		transportReportFile.putStringTabs("Distance", 1);
@@ -248,9 +253,9 @@ public class SimulationManager extends DisplayEntity {
 		transportReportFile.flush();	
 		
 		// Print units
-		transportReportFile.putStringTabs("(s)", 5);
-		transportReportFile.putStringTabs("(m)", 1);
-		transportReportFile.putStringTabs("($/kg)", 1);
+		transportReportFile.putStringTabs("(h)", 6);
+		transportReportFile.putStringTabs("(km)", 1);
+		transportReportFile.putStringTabs("($/tonne)", 1);
 
 		transportReportFile.newLine();
 		transportReportFile.flush();	

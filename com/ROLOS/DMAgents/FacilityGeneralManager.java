@@ -110,7 +110,7 @@ public class FacilityGeneralManager extends FacilityManager {
 	
 	public double getBalancedAmountToFullfill(Contract contract){
 		double totalRemainingSupplyContractsAmount = 
-				this.getFacility().getStockList().getValueFor(contract.getProduct(), 13) -
+				this.getFacility().getStockList().getValueFor(contract.getProduct(), 4) -
 				this.getFacility().getStockList().getValueFor(contract.getProduct(), 11);
 		
 		double totalAvailable = this.getFacility().getStockList().getValueFor(contract.getProduct(), 6);
@@ -121,13 +121,12 @@ public class FacilityGeneralManager extends FacilityManager {
 	
 	// make fleets waiting for the inactive contract active
 	public void reinstateContract(Contract contract){
-
-		if(!contract.isActive())
-				return;
 		
+		if(!contract.isActive())
+			return;
+	
 		// TODO uses a balance transportation when supplier has multiple supply contracts. 
-		this.getFacility().getTransportationManager().scheduleTransportation(contract,this.getBalancedAmountToFullfill(contract));
-						
+		this.getFacility().getTransportationManager().scheduleTransportation(contract,this.getBalancedAmountToFullfill(contract));						
 	}
 		
 	public void voidContract(Contract contract){

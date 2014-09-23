@@ -69,7 +69,7 @@ public class DisplayEntity extends Entity {
 
 	@Keyword(description = "The size of the object in { x, y, z } coordinates. If only the x and y coordinates are given " +
             "then the z dimension is assumed to be zero.",
-     example = "Object1 WVSize { 15 12 0 m }")
+     example = "Object1 WVSize { 15 12 0 }")
 	private final Vec3dInput wvSizeInput;
 	
 	@Keyword(description = "Euler angles defining the rotation of the object.",
@@ -515,6 +515,10 @@ public Vec3d getPositionInput(){
 
 		return cent;
 	}
+	
+	public String getWVShowString(){
+		return wvShow.getValueString();
+	}
 
 	/**
 	 *  Returns the extent for the DisplayEntity
@@ -659,21 +663,18 @@ public Vec3d getPositionInput(){
 			clearBindings(); // Clear this on any change, and build it lazily later
 		}
 		
-		if (in == wvShow){
-			if (wvShow.getValue()==true){
-				if (displayModelList!=null){
-					ColladaModel target = (ColladaModel) getDisplayModelList().get(0);
-					File uri = new File(target.getColladaFile());
-					//System.out.println(uri);
-					Vec3d pos = wvPositionInput.getValue();
-					//System.out.println(pos.x + " " + pos.y + " " + pos.z);
-					Position position = Position.fromDegrees(pos.x, pos.y, pos.z);
-					Vec3d scale = wvSizeInput.getValue();
-					Vec4 actualScale = new Vec4(scale.x, scale.y, scale.z);
-					Thread thread = new WorldWindFrame.ColladaThread(uri, position,  actualScale, true);
-					thread.start();
-				}
-			}
+		//TODO delete old shapes/layers
+		if (in == wvPositionInput && wvShow.getValue()==true && displayModelList!=null){
+			ColladaModel target = (ColladaModel) getDisplayModelList().get(0);
+			File uri = new File(target.getColladaFile());
+			//System.out.println(uri);
+			Vec3d pos = wvPositionInput.getValue();
+			//System.out.println(pos.x + " " + pos.y + " " + pos.z);
+			Position position = Position.fromDegrees(pos.x, pos.y, pos.z);
+			Vec3d scale = wvSizeInput.getValue();
+			Vec4 actualScale = new Vec4(scale.x, scale.y, scale.z);
+			Thread thread = new WorldWindFrame.ColladaThread(uri, position,  actualScale, false);
+			thread.start();
 		}
 	}
 

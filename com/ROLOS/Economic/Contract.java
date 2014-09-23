@@ -16,6 +16,7 @@ import com.ROLOS.Logistics.Route;
 import com.ROLOS.Logistics.RouteEntity;
 import com.ROLOS.Logistics.RouteSegment;
 import com.ROLOS.Utils.HashMapList;
+import com.jaamsim.events.ReflectionTarget;
 import com.jaamsim.input.ValueInput;
 import com.jaamsim.units.TimeUnit;
 import com.sandwell.JavaSimulation.BooleanInput;
@@ -311,12 +312,14 @@ public class Contract extends ROLOSEntity {
 		
 		SimulationManager.printContractReport(this);
 		
+		this.scheduleProcess(this.getContractPeriod(), 1, new ReflectionTarget(this, "voidContract"));
+		
 		//TODO bad implementation for showing routes of active contracts. refactor when overriding shapefile based on input is figured out
 		if(WorldWindFrame.AppFrame != null){
 			//Populate routesegment/entity list to be drawn
 			ArrayList<DiscreteHandlingLinkedEntity> routesList = new ArrayList<DiscreteHandlingLinkedEntity>(1);
 			Color4d tempColor = this.getProduct().getColor();
-			int tempWidth = (int) (3 * this.getContractAmount() / this.getSupplier().getStockList().getValueFor(getProduct(), 13));
+			int tempWidth = (int) (2.5 * this.getContractAmount() / this.getSupplier().getStockList().getValueFor(getProduct(), 13));
 			for(DiscreteHandlingLinkedEntity eachSegment: this.getAssignedRoute().getRouteSegmentsList()){
 				if(eachSegment instanceof RouteSegment || eachSegment instanceof RouteEntity){
 					routesList.add(eachSegment);
@@ -367,8 +370,8 @@ public class Contract extends ROLOSEntity {
 	
 	public void voidContract(){
 		buyer.getValue().getGeneralManager().voidContract(this);
-	// TODO just call back moving entities and keep dormant fleet and contracts
-			supplier.getValue().getGeneralManager().voidContract(this);
+		// TODO just call back moving entities and keep dormant fleet and contracts
+		supplier.getValue().getGeneralManager().voidContract(this);
 		activeBuyer= false;
 		activeForScheduling = false;
 		activeSupplier= false;

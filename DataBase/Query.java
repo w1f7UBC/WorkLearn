@@ -10,6 +10,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Locale;
 import java.util.Vector;
 
 import javax.swing.JFrame;
@@ -24,6 +25,7 @@ import worldwind.WorldWindFrame;
 import worldwind.WorldWindFrame.WorkerThread;
 
 import com.ROLOS.ROLOSEntity;
+import com.ROLOS.Utils.HandyUtils;
 import com.jaamsim.input.Input;
 import com.jaamsim.input.InputAgent;
 import com.jaamsim.input.Keyword;
@@ -52,6 +54,12 @@ public class Query extends Entity {
 	@Keyword(description = "The column name where shapefile appear")
 	private StringInput shapefileColumn;
 	
+	@Keyword(description = "The column name where latitude information is recoreded")
+	private StringInput latitudeColumn;
+	
+	@Keyword(description = "The column name where longitude information is recoreded")
+	private StringInput longitudeColumn;
+	
 	{
 		targetDB = new StringInput("TargetDatabase","Query Properties", "InventoryDatabase");
 		this.addInput(targetDB);
@@ -62,8 +70,14 @@ public class Query extends Entity {
 		statement = new StringInput("Statement", "Query Properties", "");
 		this.addInput(statement);
 		
-		shapefileColumn = new StringInput("ShapeFileColumn", "Query Properties", "");
+		shapefileColumn = new StringInput("NameColumn", "Query Properties", "");
 		this.addInput(shapefileColumn);
+		
+		latitudeColumn = new StringInput("LatitudeColumn", "Query Properties", "latitude");
+		this.addInput(latitudeColumn);
+		
+		longitudeColumn = new StringInput("LongitudeColumn", "Query Properties", "longitude");
+		this.addInput(longitudeColumn);
 	}
 	private Database database=Database.getDatabase(targetDB.getValue());
 
@@ -121,7 +135,7 @@ public class Query extends Entity {
 		}
 		return getResultSet(statement.getValue());
 	}
-
+		
 	public ResultSet execute(String layerName, ArrayList<? extends ROLOSEntity> drawableEntities, Boolean draw, Boolean zoom, DefinedShapeAttributes attributes){
 		if (drawableEntities.size()==0){
 			return null;
@@ -130,7 +144,7 @@ public class Query extends Entity {
 		for(int x=1; x<drawableEntities.size(); x++){
 			statements+=" or " + shapefileColumn.getValue() +"= '" + drawableEntities.get(x).getName() + "'";
 		}
-		System.out.println(statements);
+		// System.out.println(statements);
 		if (draw==true && WorldWindFrame.AppFrame != null){
 			File file = database.getLayermanager().sql2shp(layerName, statements);
 			if (file!=null){
@@ -203,6 +217,53 @@ public class Query extends Entity {
 				e.printStackTrace();
 			}
 		}
+	}
+	
+	/**
+	 * updates position based on lat longs passed on in the shapefile database. Will draw the entity if its WVShow is set to true.
+	 * @param entitiesList list of entities to update
+	 * @return 
+	 */
+	public ResultSet updatePosition(ArrayList<? extends ROLOSEntity> entitiesList){
+		if (entitiesList.size()==0){
+			return null;
+		}
+		
+		String statements="SELECT " + shapefileColumn.getValue()+ ", "+ latitudeColumn.getValue() + ", " + longitudeColumn.getValue() +" FROM " + 
+				table.getValue() + " WHERE " + shapefileColumn.getValue() +"= '" + entitiesList.get(0).getName() +"'";
+		for(int x=1; x<entitiesList.size(); x++){
+			statements+=" or " + shapefileColumn.getValue() +"= '" + entitiesList.get(x).getName() + "'";
+		}
+		// System.out.println(statements);
+		ResultSet tempResultSet = this.getResultSet(statements);
+		
+		//map of entitieslist to pass on the entity
+		ArrayList<String> entitiesNames = new ArrayList<String>();
+		for(ROLOSEntity each: entitiesList)
+			entitiesNames.add(each.getName());
+		
+		try {
+			if (tempResultSet!=null){
+				
+				while(tempResultSet.next()){
+					ROLOSEntity tempEntity=null;
+					if(entitiesNames.contains(tempResultSet.getObject(1).toString())){
+						int index = entitiesNames.indexOf(tempResultSet.getObject(1).toString());
+						tempEntity = entitiesList.get(index);
+						entitiesNames.remove(index);
+					}
+					if(tempEntity != null)
+						InputAgent.processEntity_Keyword_Value(tempEntity, "WVPosition", String.format((Locale)null, "%s %s 0", tempResultSet.getObject(2).toString(), tempResultSet.getObject(3).toString()));
+				}
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		if(!entitiesNames.isEmpty())
+			System.out.println(String.format("Shapefiles database %s didn't include any of these entities: %s!", table.getValue(),HandyUtils.arraylistToString(entitiesNames)));
+		
+		return getResultSet(statements);
 	}
 
 	public ResultSet getResultSet(String statements){

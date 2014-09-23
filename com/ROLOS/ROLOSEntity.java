@@ -2,6 +2,7 @@ package com.ROLOS;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Comparator;
 
 import DataBase.Query;
@@ -25,6 +26,7 @@ import com.sandwell.JavaSimulation3D.DisplayEntity;
  * @modified_by
  */
 public class ROLOSEntity extends DisplayEntity  {
+	private static final ArrayList<ROLOSEntity> allInstances;
 
 	@Keyword(description = "priority for when this entity is compared against another of its type to be put in an ordered list. " +
 			"can be changed during the run. Default is 0", 
@@ -52,14 +54,18 @@ public class ROLOSEntity extends DisplayEntity  {
 	/**
 	 * priority of the entity at the current state; default priority is 0; 
 	 */
-	private int internalPriority;											
+	private int internalPriority;		
+	
+	static {
+		allInstances = new ArrayList<ROLOSEntity>();
+	}
 	
 	{
 		priority = new IntegerInput("Priority", "Key Inputs", 0);
 		priority.setValidRange(0, Integer.MAX_VALUE);
 		this.addInput(priority);
 		
-		worldViewShapeFile = new EntityInput<Query>(Query.class, "ShapeFileQuery", "Graphics", null);
+		worldViewShapeFile = new EntityInput<Query>(Query.class, "ShapeFileQuery", "Basic Graphics", null);
 		this.addInput(worldViewShapeFile);
 		
 		colorInput = new ColourInput("Colour", "Basic Graphics", ColourInput.BLACK);
@@ -75,6 +81,24 @@ public class ROLOSEntity extends DisplayEntity  {
 	}
 	
 	public ROLOSEntity() {
+		synchronized (allInstances) {
+			allInstances.add(this);
+		}
+		
+	}
+	
+	public static ArrayList<? extends ROLOSEntity> getAll() {
+		synchronized (allInstances) {
+			return allInstances;
+		}
+	}
+
+	@Override
+	public void kill() {
+		super.kill();
+		synchronized (allInstances) {
+			allInstances.remove(this);
+		}
 	}
 	
 	@Override
@@ -91,6 +115,7 @@ public class ROLOSEntity extends DisplayEntity  {
 	@Override
 	public void validate() {
 		super.validate();
+		
 	}
 	
 	@Override
