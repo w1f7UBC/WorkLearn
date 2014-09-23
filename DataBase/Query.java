@@ -341,7 +341,11 @@ public class Query extends Entity {
 	}
 	
 	public boolean deleteAllResultFrames(){
-		resultFrames=new ArrayList<JFrame>();
+		Iterator<JFrame> iterator =  resultFrames.iterator();
+		while (iterator.hasNext()){
+			JFrame target = iterator.next();
+			target.dispose();
+		}
 		return true;
 	}
 	

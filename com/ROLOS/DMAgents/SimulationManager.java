@@ -1,10 +1,19 @@
 package com.ROLOS.DMAgents;
 
+import gov.nasa.worldwind.WorldWind;
+import gov.nasa.worldwind.geom.Angle;
+import gov.nasa.worldwind.geom.Position;
+import gov.nasa.worldwind.ogc.kml.impl.KMLUtil;
+import gov.nasa.worldwind.view.firstperson.BasicFlyView;
+import gov.nasa.worldwind.view.firstperson.FlyToFlyViewAnimator;
+import gov.nasa.worldwind.view.orbit.BasicOrbitView;
+
 import java.util.ArrayList;
 
 import worldwind.DefinedShapeAttributes;
 import worldwind.WorldView;
 import worldwind.WorldWindFrame;
+import DataBase.Query;
 
 import com.ROLOS.Economic.Contract;
 import com.ROLOS.Logistics.BulkMaterial;
@@ -14,11 +23,13 @@ import com.ROLOS.Logistics.ReportAgent;
 import com.ROLOS.Logistics.Route;
 import com.ROLOS.Utils.HandyUtils;
 import com.ROLOS.Utils.HashMapList;
+import com.jaamsim.events.ConditionalHandle;
 import com.jaamsim.events.ReflectionTarget;
 import com.jaamsim.input.InputAgent;
 import com.jaamsim.input.ValueInput;
 import com.jaamsim.units.TimeUnit;
 import com.sandwell.JavaSimulation.BooleanInput;
+import com.sandwell.JavaSimulation.ErrorException;
 import com.sandwell.JavaSimulation.FileEntity;
 import com.jaamsim.input.Keyword;
 import com.jaamsim.math.Color4d;
@@ -95,11 +106,11 @@ public class SimulationManager extends DisplayEntity {
 			for(Color4d eachColor: colorScheme.getKeys()){
 				Facility tempFacility = colorScheme.get(eachColor).get(0);
 				if(tempFacility.getShapeFileQuery() != null)				
-					tempFacility.getShapeFileQuery().execute(tempFacility.getColorInput().getValueString()+"Facilities", colorScheme.get(eachColor), true, true, 
+					tempFacility.getShapeFileQuery().execute(tempFacility.getColorInput().getValueString()+"Facilities", colorScheme.get(eachColor), false, false, 
 						new DefinedShapeAttributes(eachColor, tempFacility.getWidth(), tempFacility.getOpacity()));
 			}
 			Facility.getAll().get(0).getShapeFileQuery().updatePosition(Facility.getAll());
-		}
+    	}
 	}
 	
 	@Override
@@ -121,6 +132,76 @@ public class SimulationManager extends DisplayEntity {
 		// TODO Auto-generated method stub
 		super.startUp();
 		this.updatePlanningTimes();
+		
+		// TODO DELETE!!!! hardcoded video capture!
+		BasicOrbitView view = (BasicOrbitView) WorldWindFrame.AppFrame.getWwd().getView();
+
+		// zoom on to BC
+		view.goTo(Position.fromDegrees(52.42, -125.24), 2400000);
+		
+		//first wait before zooming onto Anheim mill
+		synchronized (this) {
+			try {
+				this.wait(10000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+
+		// save the initial view positions
+		Position initPosition = view.getCenterPosition();
+		Angle initHeadingAngle = view.getHeading();
+		Angle initPitchAngle = view.getPitch();
+		double initZoom = view.getZoom();
+		
+		view.addPanToAnimator(initPosition, initPosition, initHeadingAngle, new Angle(Angle.fromDegrees(-60)), initPitchAngle, new Angle(Angle.fromDegrees(80)), initZoom, 20000, 5000, true);
+		// wait for the panning to finish
+		synchronized (this) {
+			try {
+				this.wait(10000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+				
+		Query sawmillTable=null;
+		Query inventoryTable = null;
+		for(Query each: Query.getAll()){
+			if(each.getName().equalsIgnoreCase("SawmillQuery"))
+				sawmillTable = each;
+			else if(each.getName().equalsIgnoreCase("AnaheimInventory"))
+				inventoryTable = each;
+		}
+		
+		sawmillTable.printResultContent("SawmillTable", sawmillTable.execute(false, false, null));
+		// wait for the sawmill table
+		synchronized (this) {
+			try {
+				this.wait(3000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		// sawmillTable.deleteAllResultFrames();
+
+		inventoryTable.printResultContent("AnaheimInventory", inventoryTable.execute(true, true, new DefinedShapeAttributes()));
+		// wait for the sawmill table
+		synchronized (this) {
+			try {
+				this.wait(3000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		
+		// move back to the original view
+		view.addPanToAnimator(view.getCenterPosition(), initPosition, view.getHeading(), initHeadingAngle, view.getPitch(), initPitchAngle, view.getZoom(), initZoom, 6000, false);
+				
+		
 	}
 	
 	public void updatePlanningTimes(){
