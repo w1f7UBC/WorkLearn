@@ -9,6 +9,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Locale;
 import java.util.Vector;
 
 import javax.swing.JFrame;
@@ -23,6 +24,7 @@ import worldwind.WorldWindFrame;
 import worldwind.WorldWindFrame.WorkerThread;
 
 import com.ROLOS.ROLOSEntity;
+import com.ROLOS.Utils.HandyUtils;
 import com.jaamsim.input.Input;
 import com.jaamsim.input.InputAgent;
 import com.jaamsim.input.Keyword;
@@ -199,15 +201,15 @@ public class Query extends Entity {
 	}
 	
 	/**
-	 * updates position based on lat longs passed on in the shapefile database
+	 * updates position based on lat longs passed on in the shapefile database. Will draw the entity if its WVShow is set to true.
 	 * @param entitiesList list of entities to update
-	 * @param draw whether to try and draw the 3D representation of these entities in WorldWind
 	 * @return 
 	 */
-	public ResultSet updatePosition(ArrayList<? extends ROLOSEntity> entitiesList, Boolean draw){
+	public ResultSet updatePosition(ArrayList<? extends ROLOSEntity> entitiesList){
 		if (entitiesList.size()==0){
 			return null;
 		}
+		
 		String statements="SELECT " + shapefileColumn.getValue()+ ", "+ latitudeColumn.getValue() + ", " + longitudeColumn.getValue() +" FROM " + 
 				table.getValue() + " WHERE " + shapefileColumn.getValue() +"= '" + entitiesList.get(0).getName() +"'";
 		for(int x=1; x<entitiesList.size(); x++){
@@ -215,17 +217,33 @@ public class Query extends Entity {
 		}
 		// System.out.println(statements);
 		ResultSet tempResultSet = this.getResultSet(statements);
+		
+		//map of entitieslist to pass on the entity
+		ArrayList<String> entitiesNames = new ArrayList<String>();
+		for(ROLOSEntity each: entitiesList)
+			entitiesNames.add(each.getName());
+		
 		try {
 			if (tempResultSet!=null){
-				String 
+				
 				while(tempResultSet.next()){
-					InputAgent.processEntity_Keyword_Value(this, targetInput, val);
+					ROLOSEntity tempEntity=null;
+					if(entitiesNames.contains(tempResultSet.getObject(1).toString())){
+						int index = entitiesNames.indexOf(tempResultSet.getObject(1).toString());
+						tempEntity = entitiesList.get(index);
+						entitiesNames.remove(index);
+					}
+					if(tempEntity != null)
+						InputAgent.processEntity_Keyword_Value(tempEntity, "WVPosition", String.format((Locale)null, "%s %s 0", tempResultSet.getObject(2).toString(), tempResultSet.getObject(3).toString()));
 				}
 			}
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		if(!entitiesNames.isEmpty())
+			System.out.println(String.format("Shapefiles database %s didn't include any of these entities: %s!", table.getValue(),HandyUtils.arraylistToString(entitiesNames)));
+		
 		return getResultSet(statements);
 	}
 

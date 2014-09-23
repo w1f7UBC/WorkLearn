@@ -38,6 +38,9 @@ BuildingBlue ColladaFile { '<res>/ROLOS_resources/Shapes/FactoryBuliding_Blue.da
 Define ColladaModel { BuildingPink }
 BuildingPink ColladaFile { '<res>/ROLOS_resources/Shapes/FactoryBuliding_Pink.dae' }
 
+Define ColladaModel { BuildingRed }
+BuildingRed ColladaFile { '<res>/ROLOS_resources/Shapes/FactoryBuliding_Red.dae' }
+
 Define ColladaModel { BuildingGreen }
 BuildingGreen ColladaFile { '<res>/ROLOS_resources/Shapes/FactoryBuliding_Green.dae' }
 
@@ -46,6 +49,9 @@ BuildingWhite ColladaFile { '<res>/ROLOS_resources/Shapes/FactoryBuliding_White.
 
 Define ColladaModel { BuildingSkyBlue }
 BuildingSkyBlue ColladaFile { '<res>/ROLOS_resources/Shapes/FactoryBuliding_SkyBlue.dae' }
+
+Define ColladaModel { FactoryPink }
+FactoryPink ColladaFile { '<res>/ROLOS_resources/Shapes/FactoryPink.dae' }
 
 Define ColladaModel { Cargo3D }
 Cargo3D ColladaFile { '<res>/ROLOS_resources/Shapes/WoodchipTrailer.dae' }

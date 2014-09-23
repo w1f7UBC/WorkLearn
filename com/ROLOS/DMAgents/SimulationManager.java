@@ -98,6 +98,7 @@ public class SimulationManager extends DisplayEntity {
 					tempFacility.getShapeFileQuery().execute(tempFacility.getColorInput().getValueString()+"Facilities", colorScheme.get(eachColor), true, true, 
 						new DefinedShapeAttributes(eachColor, tempFacility.getWidth(), tempFacility.getOpacity()));
 			}
+			Facility.getAll().get(0).getShapeFileQuery().updatePosition(Facility.getAll());
 		}
 	}
 	
