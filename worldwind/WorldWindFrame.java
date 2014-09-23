@@ -254,7 +254,7 @@ public class WorldWindFrame extends ApplicationTemplate
             {
                 DefinedShapeLoader loader = new DefinedShapeLoader(attr);
                 layer = loader.createLayerFromSource(this.shpSource);
-                layer.setPickEnabled(true);
+                layer.setPickEnabled(false);
                 return layer;
             }
         }

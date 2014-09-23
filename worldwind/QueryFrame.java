@@ -27,7 +27,10 @@ import javax.swing.border.TitledBorder;
 import com.sandwell.JavaSimulation3D.GUIFrame;
 
 import DataBase.Query;
-
+import gov.nasa.worldwind.animation.Animator;
+import gov.nasa.worldwind.geom.Angle;
+import gov.nasa.worldwind.view.firstperson.BasicFlyView;
+import gov.nasa.worldwind.view.orbit.BasicOrbitView;
 import gov.nasa.worldwindx.examples.FlatWorldPanel;
 import gov.nasa.worldwindx.examples.LayerPanel;
 
@@ -78,6 +81,15 @@ public class QueryFrame extends JPanel {
             	while(iterator.hasNext()){
             		selection.addElement(iterator.next().getName());
             	}
+            	//unrelated code but i need it for later
+            	/*
+            	BasicOrbitView test;
+            	test = (BasicOrbitView) WorldWindFrame.AppFrame.getWwd().getView();
+            	
+            	Angle test1 = Angle.fromDegrees(30);
+            	Angle test2 = Angle.fromDegrees(60);
+            	test.addHeadingPitchAnimator(test.getHeading(), test1, test.getPitch(), test2);
+            	*/
             }
         });
         buttonPanel.add(refresh);
