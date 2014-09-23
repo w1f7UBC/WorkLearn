@@ -1,5 +1,6 @@
 package DataBase;
 
+import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -147,20 +148,38 @@ public class Query extends Entity {
 	}
 	
 	public ResultSet execute(String name, String latitude, String longitude, Boolean draw, Boolean zoom, DefinedShapeAttributes attributes){
-		String statements="";
+		String radius_statements ="",statements="";
+		/*
+		 *  RADIUS SEARCH
+		 */
 		if(QueryFrame.getMode()==2){
 		 statements="SELECT DISTINCT * FROM " + areaTable.getValue() + " WHERE st_distance(ST_Transform("+areaTable.getValue()+".shape,26986), ST_Transform(ST_GeomFromText('POINT("+longitude+" "+latitude+")', 4269),26986))<"+QueryFrame.getSliderValue()*1000;
+		 radius_statements="SELECT ST_Buffer(ST_MakePoint("+longitude+","+ latitude+")::geography, "+QueryFrame.getSliderValue()*1000+")";
+		 //color of circle
+		 attributes.setColor(Color.red);
 		}
+		/*
+		 *  CLOSEST POINT
+		 */
 		else if(QueryFrame.getMode()==3){
 		 statements="SELECT * FROM "+ areaTable.getValue() + " ORDER BY "+ areaTable.getValue() +".shape <->  ST_GeomFromText('POINT("+longitude+" "+latitude+")', 4269) LIMIT 1";
 			}
 		if (draw==true){
-			File file = database.getLayermanager().sql2shp(name, statements);
+			File file=null;
+			if(QueryFrame.getMode()==2){
+				 file = database.getLayermanager().sql2shp(name, radius_statements);
+			}
+			else if(QueryFrame.getMode()==3)
+			{
+				 file = database.getLayermanager().sql2shp(name, statements);
+			}
 			if (file!=null){
+				
 				WorkerThread thread =new WorldWindFrame.WorkerThread(file, WorldWindFrame.AppFrame, zoom, attributes);
 				thread.start();
 				try {
 					thread.join();
+					
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();

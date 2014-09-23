@@ -70,7 +70,7 @@ public class WorldWindFrame extends ApplicationTemplate
                 	if (e!=null && QueryFrame.HostFrame!=null){
                 		if(e.getButton()==3){
                 	        //if cursor mode is set to 1 and WorldWind actually returns a position
-                			if (position!=null && QueryFrame.getMode()!=1){
+                			if (position!=null && QueryFrame.getMode()!=0){
                 				Query query = QueryFrame.getQueryObject();
                 				if (query!=null){
                 					String lat = position.latitude.toString();
@@ -254,7 +254,7 @@ public class WorldWindFrame extends ApplicationTemplate
             {
                 DefinedShapeLoader loader = new DefinedShapeLoader(attr);
                 layer = loader.createLayerFromSource(this.shpSource);
-                layer.setPickEnabled(false);
+                layer.setPickEnabled(true);
                 return layer;
             }
         }
