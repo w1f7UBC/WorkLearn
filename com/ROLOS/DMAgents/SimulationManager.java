@@ -132,74 +132,98 @@ public class SimulationManager extends DisplayEntity {
 		// TODO Auto-generated method stub
 		super.startUp();
 		this.updatePlanningTimes();
-		
+
 		// TODO DELETE!!!! hardcoded video capture!
-		BasicOrbitView view = (BasicOrbitView) WorldWindFrame.AppFrame.getWwd().getView();
-
-		// zoom on to BC
-		view.goTo(Position.fromDegrees(52.42, -125.24), 2400000);
-		
-		//first wait before zooming onto Anheim mill
-		synchronized (this) {
-			try {
-				this.wait(10000);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+		boolean captureVideo = false;
+		if (captureVideo) {
+			//first wait before zooming onto Anheim mill
+			synchronized (this) {
+				try {
+					this.wait(10000);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
-		}
-
-		// save the initial view positions
-		Position initPosition = view.getCenterPosition();
-		Angle initHeadingAngle = view.getHeading();
-		Angle initPitchAngle = view.getPitch();
-		double initZoom = view.getZoom();
-		
-		view.addPanToAnimator(initPosition, initPosition, initHeadingAngle, new Angle(Angle.fromDegrees(-60)), initPitchAngle, new Angle(Angle.fromDegrees(80)), initZoom, 20000, 5000, true);
-		// wait for the panning to finish
-		synchronized (this) {
-			try {
-				this.wait(10000);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+			// TODO DELETE!!!! hardcoded video capture!
+			BasicOrbitView view = (BasicOrbitView) WorldWindFrame.AppFrame
+					.getWwd().getView();
+			// zoom on to BC
+			view.goTo(Position.fromDegrees(52.42, -125.24), 2400000);
+			//first wait before zooming onto Anheim mill
+			synchronized (this) {
+				try {
+					this.wait(10000);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
-		}
-				
-		Query sawmillTable=null;
-		Query inventoryTable = null;
-		for(Query each: Query.getAll()){
-			if(each.getName().equalsIgnoreCase("SawmillQuery"))
-				sawmillTable = each;
-			else if(each.getName().equalsIgnoreCase("AnaheimInventory"))
-				inventoryTable = each;
-		}
-		
-		sawmillTable.printResultContent("SawmillTable", sawmillTable.execute(false, false, null));
-		// wait for the sawmill table
-		synchronized (this) {
-			try {
-				this.wait(3000);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+			// save the initial view positions
+			Position initPosition = view.getCenterPosition();
+			Angle initHeadingAngle = view.getHeading();
+			Angle initPitchAngle = view.getPitch();
+			double initZoom = view.getZoom();
+			view.addPanToAnimator(initPosition, initPosition, initHeadingAngle,
+					new Angle(Angle.fromDegrees(-60)), initPitchAngle,
+					new Angle(Angle.fromDegrees(80)), initZoom, 20000, 5000,
+					true);
+			// wait for the panning to finish
+			synchronized (this) {
+				try {
+					this.wait(10000);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
-		}
-		// sawmillTable.deleteAllResultFrames();
-
-		inventoryTable.printResultContent("AnaheimInventory", inventoryTable.execute(true, true, new DefinedShapeAttributes()));
-		// wait for the sawmill table
-		synchronized (this) {
-			try {
-				this.wait(3000);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+			Query sawmillTable = null;
+			Query inventoryTable = null;
+			for (Query each : Query.getAll()) {
+				if (each.getName().equalsIgnoreCase("SawmillQuery"))
+					sawmillTable = each;
+				else if (each.getName().equalsIgnoreCase("AnaheimInventory"))
+					inventoryTable = each;
 			}
+			sawmillTable.printResultContent("SawmillTable",
+					sawmillTable.execute(false, false, null));
+			// wait for the panning to finish
+			synchronized (this) {
+				try {
+					this.wait(3000);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			Query.deleteAllResultFrames();
+			// wait for the sawmill table
+			synchronized (this) {
+				try {
+					this.wait(3000);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			// sawmillTable.deleteAllResultFrames();
+			inventoryTable.printResultContent("AnaheimInventory",
+					inventoryTable.execute(true, true,
+							new DefinedShapeAttributes()));
+			// wait for the sawmill table
+			synchronized (this) {
+				try {
+					this.wait(3000);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			// move back to the original view
+			view.addPanToAnimator(view.getCenterPosition(), initPosition,
+					view.getHeading(), initHeadingAngle, view.getPitch(),
+					initPitchAngle, view.getZoom(), initZoom, 6000, false);
 		}
-		
-		// move back to the original view
-		view.addPanToAnimator(view.getCenterPosition(), initPosition, view.getHeading(), initHeadingAngle, view.getPitch(), initPitchAngle, view.getZoom(), initZoom, 6000, false);
 				
 		
 	}
