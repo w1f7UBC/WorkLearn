@@ -81,7 +81,7 @@ public class QueryFrame extends JPanel {
             		selection.addElement(iterator.next().getName());
             	}
             	//more unrelated code
-            	//Query.deleteAllResultFrames();
+            	Query.deleteAllResultFrames();
             	//unrelated code but i need it for later
             	/*
             	BasicOrbitView test;

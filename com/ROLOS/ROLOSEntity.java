@@ -164,6 +164,7 @@ public class ROLOSEntity extends DisplayEntity  {
 	@Override
 	public void validate() {
 		super.validate();
+		
 	}
 	
 	@Override
