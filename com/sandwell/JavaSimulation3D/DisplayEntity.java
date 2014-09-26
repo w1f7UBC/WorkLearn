@@ -66,11 +66,6 @@ public class DisplayEntity extends Entity {
 	                "then the z dimension is assumed to be zero.",
 	         example = "Object1 Size { 15 12 0 m }")
 	private final Vec3dInput sizeInput;
-
-	@Keyword(description = "The size of the object in { x, y, z } coordinates. If only the x and y coordinates are given " +
-            "then the z dimension is assumed to be zero.",
-     example = "Object1 WVSize { 15 12 0 }")
-	private final Vec3dInput wvSizeInput;
 	
 	@Keyword(description = "Euler angles defining the rotation of the object.",
 	         example = "Object1 Orientation { 0 0 90 deg }")
@@ -114,15 +109,6 @@ public class DisplayEntity extends Entity {
 	@Keyword(description = "If TRUE, the object can be positioned interactively using the GUI.",
 	         example = "Object1 Movable { FALSE }")
 	private final BooleanInput movable;
-	
-	@Keyword(description = "The point in the region at which the alignment point of the object is positioned.",
-	         example = "Object1 WVPosition { -3.922 -1.830 0.000 m }")
-	private final Vec3dInput wvPositionInput;
-
-	@Keyword(description = "If TRUE, the object is displayed in the simulation view windows.",
-	         example = "Object1 WVShow { FALSE }")
-	private final BooleanInput wvShow;
-	
 
 	private ArrayList<DisplayModelBinding> modelBindings;
 
@@ -222,9 +208,6 @@ public class DisplayEntity extends Entity {
 		sizeInput = new Vec3dInput("Size", "Basic Graphics", new Vec3d(1.0d, 1.0d, 1.0d));
 		sizeInput.setUnitType(DistanceUnit.class);
 		this.addInput(sizeInput);
-		
-		wvSizeInput = new Vec3dInput("WVSize", "Basic Graphics", new Vec3d(1.0d, 1.0d, 1.0d));
-		this.addInput(wvSizeInput);
 
 		orientationInput = new Vec3dInput("Orientation", "Basic Graphics", new Vec3d());
 		orientationInput.setUnitType(AngleUnit.class);
@@ -251,12 +234,6 @@ public class DisplayEntity extends Entity {
 		this.addInput(movable);
 
 		tags = new TagSet();
-		
-		wvPositionInput = new Vec3dInput("WVPosition", "Basic Graphics", new Vec3d());
-		this.addInput(wvPositionInput);
-		
-		wvShow = new BooleanInput("WVShow", "Basic Graphics", false);
-		this.addInput(wvShow);
 	}
 
 	/**
@@ -515,10 +492,6 @@ public Vec3d getPositionInput(){
 
 		return cent;
 	}
-	
-	public String getWVShowString(){
-		return wvShow.getValueString();
-	}
 
 	/**
 	 *  Returns the extent for the DisplayEntity
@@ -661,20 +634,6 @@ public Vec3d getPositionInput(){
 
 		if (in == displayModelList) {
 			clearBindings(); // Clear this on any change, and build it lazily later
-		}
-		
-		//TODO delete old shapes/layers
-		if (in == wvPositionInput && wvShow.getValue()==true && displayModelList!=null){
-			ColladaModel target = (ColladaModel) getDisplayModelList().get(0);
-			File uri = new File(target.getColladaFile());
-			//System.out.println(uri);
-			Vec3d pos = wvPositionInput.getValue();
-			//System.out.println(pos.x + " " + pos.y + " " + pos.z);
-			Position position = Position.fromDegrees(pos.x, pos.y, pos.z);
-			Vec3d scale = wvSizeInput.getValue();
-			Vec4 actualScale = new Vec4(scale.x, scale.y, scale.z);
-			Thread thread = new WorldWindFrame.ColladaThread(uri, position,  actualScale, false);
-			thread.start();
 		}
 	}
 
