@@ -1,22 +1,31 @@
 package com.ROLOS;
 
+import gov.nasa.worldwind.geom.Position;
+import gov.nasa.worldwind.geom.Vec4;
+
+import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Comparator;
 
+import worldwind.WorldWindFrame;
 import DataBase.Query;
 
+import com.sandwell.JavaSimulation.BooleanInput;
 import com.sandwell.JavaSimulation.ColourInput;
 import com.sandwell.JavaSimulation.Entity;
 import com.sandwell.JavaSimulation.EntityInput;
 import com.sandwell.JavaSimulation.ErrorException;
 import com.sandwell.JavaSimulation.IntegerInput;
+import com.sandwell.JavaSimulation.Vec3dInput;
 import com.ROLOS.Logistics.Facility;
+import com.jaamsim.DisplayModels.ColladaModel;
 import com.jaamsim.input.Input;
 import com.jaamsim.input.Keyword;
 import com.jaamsim.input.ValueInput;
 import com.jaamsim.math.Color4d;
+import com.jaamsim.math.Vec3d;
 import com.sandwell.JavaSimulation3D.DisplayEntity;
 
 /**
@@ -28,6 +37,7 @@ import com.sandwell.JavaSimulation3D.DisplayEntity;
 public class ROLOSEntity extends DisplayEntity  {
 	private static final ArrayList<ROLOSEntity> allInstances;
 
+	//SHAPES
 	@Keyword(description = "priority for when this entity is compared against another of its type to be put in an ordered list. " +
 			"can be changed during the run. Default is 0", 
 			example = "WoodchipTrucks Priority { 5 }")
@@ -51,6 +61,21 @@ public class ROLOSEntity extends DisplayEntity  {
 	         example = "Road1 Opacity { 0.1 }")
 	private final ValueInput opacity;
 	
+	
+	//COLLADAS
+	@Keyword(description = "The size of the object in { x, y, z } coordinates. If only the x and y coordinates are given " +
+            "then the z dimension is assumed to be zero.",
+     example = "Object1 WVSize { 15 12 0 }")
+	private final Vec3dInput wvSizeInput;
+	
+	@Keyword(description = "The point in the region at which the alignment point of the object is positioned.",
+	         example = "Object1 WVPosition { -3.922 -1.830 0.000 m }")
+	private final Vec3dInput wvPositionInput;
+	
+	@Keyword(description = "If TRUE, the object is displayed in the simulation view windows.",
+	         example = "Object1 WVShow { FALSE }")
+	private final BooleanInput wvShow;
+	
 	/**
 	 * priority of the entity at the current state; default priority is 0; 
 	 */
@@ -61,6 +86,7 @@ public class ROLOSEntity extends DisplayEntity  {
 	}
 	
 	{
+		//SHAPES
 		priority = new IntegerInput("Priority", "Key Inputs", 0);
 		priority.setValidRange(0, Integer.MAX_VALUE);
 		this.addInput(priority);
@@ -78,6 +104,16 @@ public class ROLOSEntity extends DisplayEntity  {
 		opacity = new ValueInput("Opacity", "Basic Graphics", 0.01d);
 		opacity.setValidRange(0.0d, 1.0d);
 		this.addInput(opacity);
+		
+		//COLLADAS
+		wvSizeInput = new Vec3dInput("WVSize", "Basic Graphics", new Vec3d(1.0d, 1.0d, 1.0d));
+		this.addInput(wvSizeInput);
+		
+		wvPositionInput = new Vec3dInput("WVPosition", "Basic Graphics", new Vec3d());
+		this.addInput(wvPositionInput);
+		
+		wvShow = new BooleanInput("WVShow", "Basic Graphics", false);
+		this.addInput(wvShow);
 	}
 	
 	public ROLOSEntity() {
@@ -110,6 +146,19 @@ public class ROLOSEntity extends DisplayEntity  {
 		if(in == colorInput && this.getClass().equals(Facility.class)){
 			
 		}
+		//TODO delete old shapes/layers
+		if (in == wvPositionInput && wvShow.getValue()==true && this.getDisplayModelList()!=null){
+			ColladaModel target = (ColladaModel) getDisplayModelList().get(0);
+			File uri = new File(target.getColladaFile());
+			//System.out.println(uri);
+			Vec3d pos = wvPositionInput.getValue();
+			//System.out.println(pos.x + " " + pos.y + " " + pos.z);
+			Position position = Position.fromDegrees(pos.x, pos.y, pos.z);
+			Vec3d scale = wvSizeInput.getValue();
+			Vec4 actualScale = new Vec4(scale.x, scale.y, scale.z);
+			Thread thread = new WorldWindFrame.ColladaThread(uri, position,  actualScale, false);
+			thread.start();
+		}
 	}
 		
 	@Override
@@ -141,6 +190,10 @@ public class ROLOSEntity extends DisplayEntity  {
 	
 	public double getOpacity(){
 		return opacity.getValue();
+	}
+	
+	public String getWVShowString(){
+		return wvShow.getValueString();
 	}
 	
 	/**
@@ -300,6 +353,4 @@ public class ROLOSEntity extends DisplayEntity  {
 	               (o1.getEntityNumber() == o2.getEntityNumber() ? 0 : 1));
 		}		
 	}
-	
-
 }

@@ -37,8 +37,10 @@ import com.sandwell.JavaSimulation3D.GUIFrame;
 
 public class Query extends Entity {
 	private static final ArrayList<Query> allInstances;
+	private static ArrayList<JFrame> resultFrames;
 	static {
 		allInstances = new ArrayList<Query>();
+		resultFrames = new ArrayList<JFrame>();
 	}
 	@Keyword(description = "target databaseobject of the query")
 	private  StringInput targetDB;
@@ -81,7 +83,7 @@ public class Query extends Entity {
 		this.addInput(longitudeColumn);
 	}
 	private Database database=Database.getDatabase(targetDB.getValue());
-	private ArrayList<JFrame> resultFrames;
+	
 	
     @Override
 	public void updateForInput(Input<?> in) {
@@ -310,14 +312,13 @@ public class Query extends Entity {
 		 EventQueue.invokeLater(new Runnable() {
 			   @Override
 			   public void run() {
-				   final JFrame dataBaseFrame = new JFrame();
+				   final JFrame dataBaseFrame = new JFrame(name);
 				   final JScrollPane dataBasePanel = new JScrollPane();
 				   dataBasePanel.setViewportView(content);
 				   dataBaseFrame.add(dataBasePanel);
 	               dataBaseFrame.setLocation(GUIFrame.COL4_START, GUIFrame.LOWER_START);
 	               dataBaseFrame.setSize(GUIFrame.COL4_WIDTH, GUIFrame.LOWER_HEIGHT);
 				   dataBaseFrame.setIconImage(GUIFrame.getWindowIcon());
-				   dataBaseFrame.setTitle(name);
 				   dataBaseFrame.setAutoRequestFocus(false);
 				   dataBaseFrame.setVisible(true);
 				   dataBaseFrame.addWindowListener(new WindowAdapter(){
@@ -336,25 +337,27 @@ public class Query extends Entity {
 		return database.getLayermanager();
 	}
 	
-	public ArrayList<JFrame> getResultFrames(){
+	public static ArrayList<JFrame> getResultFrames(){
 		return resultFrames;
 	}
 	
-	public boolean deleteAllResultFrames(){
+	public static boolean deleteAllResultFrames(){
 		Iterator<JFrame> iterator =  resultFrames.iterator();
 		while (iterator.hasNext()){
 			JFrame target = iterator.next();
+			WorldWindFrame.AppFrame.removeShapefileLayer(target.getTitle()+".shp");
 			target.setVisible(false);
 			target.dispose();
 		}
 		return true;
 	}
 	
-	public boolean deleteResultFrame(String name){
+	public static boolean deleteResultFrame(String name){
 		Iterator<JFrame> iterator =  resultFrames.iterator();
 		while (iterator.hasNext()){
 			JFrame target = iterator.next();
 			if (target.getName()==name){
+				WorldWindFrame.AppFrame.removeShapefileLayer(target.getTitle()+".shp");
 				target.setVisible(false);
 				target.dispose();
 				return true;
