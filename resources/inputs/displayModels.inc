@@ -29,6 +29,24 @@ Truck3D ColladaFile { '<res>/ROLOS_resources/Shapes/Sin t_tulo.dae' }
 Define ColladaModel { BuildingYellow }
 BuildingYellow ColladaFile { '<res>/ROLOS_resources/Shapes/FactoryBuliding.dae' }
 
+Define ColladaModel { SawmillFacility }
+SawmillFacility ColladaFile { '<res>/ROLOS_resources/Shapes/SawmillFacility.dae' }
+
+Define ColladaModel { BioenergyFacility }
+BioenergyFacility ColladaFile { '<res>/ROLOS_resources/Shapes/BioenergyFacility.dae' }
+
+Define ColladaModel { OSBFacility }
+OSBFacility ColladaFile { '<res>/ROLOS_resources/Shapes/OSBFacility.dae' }
+
+Define ColladaModel { PulpmillFacility }
+PulpmillFacility ColladaFile { '<res>/ROLOS_resources/Shapes/PulpmillFacility.dae' }
+Define ColladaModel { PelletFacility }
+PelletFacility ColladaFile { '<res>/ROLOS_resources/Shapes/PelletFacility.dae' }
+
+
+Define ColladaModel { PlywoodFacility }
+PlywoodFacility ColladaFile { '<res>/ROLOS_resources/Shapes/PlywoodFacility.dae' }
+
 Define ColladaModel { BuildingPurple }
 BuildingPurple ColladaFile { '<res>/ROLOS_resources/Shapes/FactoryBuliding_Purple.dae' }
 
