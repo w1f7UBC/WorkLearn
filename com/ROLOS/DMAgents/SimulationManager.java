@@ -187,7 +187,16 @@ public class SimulationManager extends DisplayEntity {
 			}
 			sawmillTable.printResultContent("SawmillTable",
 					sawmillTable.execute(false, false, null));
-			sawmillTable.deleteAllResultFrames();
+			// wait for the panning to finish
+			synchronized (this) {
+				try {
+					this.wait(3000);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			Query.deleteAllResultFrames();
 			// wait for the sawmill table
 			synchronized (this) {
 				try {

@@ -248,13 +248,13 @@ public class Query extends Entity {
 		
 		try {
 			if (tempResultSet!=null){
-				
 				while(tempResultSet.next()){
 					ROLOSEntity tempEntity=null;
 					if(entitiesNames.contains(tempResultSet.getObject(1).toString())){
 						int index = entitiesNames.indexOf(tempResultSet.getObject(1).toString());
 						tempEntity = entitiesList.get(index);
 						entitiesNames.remove(index);
+						entitiesList.remove(tempEntity);
 					}
 					if(tempEntity != null)
 						InputAgent.processEntity_Keyword_Value(tempEntity, "WVPosition", String.format((Locale)null, "%s %s 0", tempResultSet.getObject(2).toString(), tempResultSet.getObject(3).toString()));
