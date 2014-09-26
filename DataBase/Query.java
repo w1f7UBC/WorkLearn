@@ -344,6 +344,7 @@ public class Query extends Entity {
 		Iterator<JFrame> iterator =  resultFrames.iterator();
 		while (iterator.hasNext()){
 			JFrame target = iterator.next();
+			target.setVisible(false);
 			target.dispose();
 		}
 		return true;
@@ -354,6 +355,7 @@ public class Query extends Entity {
 		while (iterator.hasNext()){
 			JFrame target = iterator.next();
 			if (target.getName()==name){
+				target.setVisible(false);
 				target.dispose();
 				return true;
 			}
