@@ -29,6 +29,7 @@ import gov.nasa.worldwindx.examples.util.*;
 import javax.swing.*;
 import javax.swing.filechooser.*;
 
+import com.jaamsim.math.Vec3d;
 import com.sandwell.JavaSimulation3D.GUIFrame;
 
 import DataBase.Query;
@@ -271,8 +272,8 @@ public class WorldWindFrame extends ApplicationTemplate
         protected Object colladaSource;
         protected Boolean zoom;
         /** Geographic position of the COLLADA model. */
-        protected ArrayList<Position> position;
-        protected ArrayList<Vec4> scale;
+        protected ArrayList<Vec3d> position;
+        protected ArrayList<Vec3d> scale;
 
         /**
          * Creates a new worker thread from a specified <code>colladaSource</code> and <code>appFrame</code>.
@@ -283,18 +284,19 @@ public class WorldWindFrame extends ApplicationTemplate
          * @param position      the geographic position of the COLLADA model.
          * @param appFrame      the <code>AppFrame</code> in which to display the COLLADA source.
          */
-        public ColladaThread(Object colladaSource, Position position, Vec4 scale, Boolean zoom)
+        public ColladaThread(Object colladaSource, Vec3d position, Vec3d scale, Boolean zoom)
         {
             this.colladaSource = colladaSource;
             this.zoom = zoom;
-            this.position = new ArrayList<Position>();
+            this.position = new ArrayList<Vec3d>();
             this.position.add(position);
-            this.scale = new ArrayList<Vec4>();
+            this.scale = new ArrayList<Vec3d>();
             this.scale.add(scale);
         }
         
-        public ColladaThread(Object colladaSource, ArrayList<Position> position, ArrayList<Vec4> scale, Boolean zoom)
+        public ColladaThread(Object colladaSource, ArrayList<Vec3d> position, ArrayList<Vec3d> scale, Boolean zoom)
         {
+        	this.colladaSource = colladaSource;
         	this.position=position;
         	this.scale=scale;
         	this.zoom=zoom;
@@ -308,24 +310,27 @@ public class WorldWindFrame extends ApplicationTemplate
         {
             try
             {
-                final ColladaRoot colladaRoot = ColladaRoot.createAndParse(this.colladaSource);
-                colladaRoot.setAltitudeMode(WorldWind.CLAMP_TO_GROUND);
+             //   final ColladaRoot colladaRoot = null;
                 final RenderableLayer layer = new RenderableLayer();
-                Iterator<Position> posIterator = this.position.iterator();
-                Iterator<Vec4> scaleIterator = this.scale.iterator();
+                Iterator<Vec3d> posIterator = this.position.iterator();
+                Iterator<Vec3d> scaleIterator = this.scale.iterator();
                 double x=0;
                 double y=0;
                 int count=0;
                 while(posIterator.hasNext() && scaleIterator.hasNext()){
-                	ColladaRoot colladaCopy = colladaRoot;
-                	Position target = posIterator.next();
-                	String tempX=target.latitude.toDecimalDegreesString(15);
-                	String tempY=target.longitude.toDecimalDegreesString(15);
+                	ColladaRoot colladaCopy = ColladaRoot.createAndParse(this.colladaSource);
+                	colladaCopy.setAltitudeMode(WorldWind.CLAMP_TO_GROUND);
+                	Vec3d target = posIterator.next();
+        			Position position = Position.fromDegrees(target.x, target.y, target.z);
+                	String tempX=position.latitude.toDecimalDegreesString(15);
+                	String tempY=position.longitude.toDecimalDegreesString(15);
                 	x+=Double.valueOf(tempX.substring(0, tempX.length()-1));
                 	y+=Double.valueOf(tempY.substring(0, tempY.length()-1));
                 	count+=1;
-                	colladaCopy.setPosition(target);
-                	colladaCopy.setModelScale(scaleIterator.next());
+                	colladaCopy.setPosition(position);
+                	target = scaleIterator.next();
+        			Vec4 actualScale = new Vec4(target.x, target.y, target.z);
+                	colladaCopy.setModelScale(actualScale);
                 	// Create a ColladaController to adapt the ColladaRoot to the World Wind renderable interface.
                     ColladaController colladaController = new ColladaController(colladaCopy);
                     // Adds a new layer containing the ColladaRoot to the end of the WorldWindow's layer list.

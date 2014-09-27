@@ -117,7 +117,9 @@ public class Facility extends DiscreteHandlingLinkedEntity {
 	@Override
 	public void validate() {
 		super.validate();
-			
+		
+		// TODO only adds facilities for showing as group in the ROLOSEntity's display model list
+		this.addToWVDisplayModelList();
 	}
 	
 	@Override

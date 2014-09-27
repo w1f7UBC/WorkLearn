@@ -20,7 +20,9 @@ import com.sandwell.JavaSimulation.ErrorException;
 import com.sandwell.JavaSimulation.IntegerInput;
 import com.sandwell.JavaSimulation.Vec3dInput;
 import com.ROLOS.Logistics.Facility;
+import com.ROLOS.Utils.HashMapList;
 import com.jaamsim.DisplayModels.ColladaModel;
+import com.jaamsim.DisplayModels.DisplayModel;
 import com.jaamsim.input.Input;
 import com.jaamsim.input.Keyword;
 import com.jaamsim.input.ValueInput;
@@ -37,6 +39,11 @@ import com.sandwell.JavaSimulation3D.DisplayEntity;
 public class ROLOSEntity extends DisplayEntity  {
 	private static final ArrayList<ROLOSEntity> allInstances;
 
+	private static boolean drawnColladas = false;
+	
+	// map of displaymodels used for drawing as a group in worldwind 
+	private static final HashMapList<DisplayModel,ROLOSEntity> wvDisplayModelGroups;
+	
 	//SHAPES
 	@Keyword(description = "priority for when this entity is compared against another of its type to be put in an ordered list. " +
 			"can be changed during the run. Default is 0", 
@@ -83,6 +90,7 @@ public class ROLOSEntity extends DisplayEntity  {
 	
 	static {
 		allInstances = new ArrayList<ROLOSEntity>();
+		wvDisplayModelGroups = new HashMapList<DisplayModel, ROLOSEntity>();
 	}
 	
 	{
@@ -143,7 +151,7 @@ public class ROLOSEntity extends DisplayEntity  {
 		if(in == priority)
 			this.setInternalPriority(priority.getValue());
 		
-		if(in == colorInput && this.getClass().equals(Facility.class)){
+		/*if(in == colorInput && this.getClass().equals(Facility.class)){
 			
 		}
 		//TODO delete old shapes/layers
@@ -158,7 +166,7 @@ public class ROLOSEntity extends DisplayEntity  {
 			Vec4 actualScale = new Vec4(scale.x, scale.y, scale.z);
 			Thread thread = new WorldWindFrame.ColladaThread(uri, position,  actualScale, false);
 			thread.start();
-		}
+		}*/
 	}
 		
 	@Override
@@ -169,6 +177,39 @@ public class ROLOSEntity extends DisplayEntity  {
 	@Override
 	public void earlyInit() {
 		super.earlyInit();
+		
+		if (WorldWindFrame.AppFrame != null && !drawnColladas) {
+			for (DisplayModel eachDisplaymodel : wvDisplayModelGroups.getKeys()) {
+				try {
+					ColladaModel target = (ColladaModel) eachDisplaymodel;
+					File uri = new File(target.getColladaFile());
+					ArrayList<Vec3d> positionList = new ArrayList<Vec3d>();
+					ArrayList<Vec3d> scaleList = new ArrayList<Vec3d>();
+					for (ROLOSEntity eachEntity : wvDisplayModelGroups
+							.get(eachDisplaymodel)) {
+						positionList.add(eachEntity.getWVPositionInput());
+						scaleList.add(eachEntity.getWVSizeInput());
+					}
+					Thread thread = new WorldWindFrame.ColladaThread(uri, positionList, scaleList,
+							false);
+					thread.start();
+					try {
+						thread.join();
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				} catch (ClassCastException e) {
+					// TODO: handle exception
+				}
+			}
+			drawnColladas = true;
+		}
+	}
+	
+	public void addToWVDisplayModelList(){
+		for(DisplayModel each: this.getDisplayModelList())
+			wvDisplayModelGroups.add(each, this);
 	}
 	
 	public Query getShapeFileQuery(){
@@ -193,6 +234,14 @@ public class ROLOSEntity extends DisplayEntity  {
 	
 	public String getWVShowString(){
 		return wvShow.getValueString();
+	}
+	
+	public Vec3d getWVPositionInput(){
+		return wvPositionInput.getValue();
+	}
+	
+	public Vec3d getWVSizeInput(){
+		return wvSizeInput.getValue();
 	}
 	
 	/**

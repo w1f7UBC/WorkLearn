@@ -134,7 +134,7 @@ public class SimulationManager extends DisplayEntity {
 		this.updatePlanningTimes();
 
 		// TODO DELETE!!!! hardcoded video capture!
-		boolean captureVideo = false;
+		boolean captureVideo = true;
 		if (captureVideo) {
 			//first wait before zooming onto Anheim mill
 			synchronized (this) {
