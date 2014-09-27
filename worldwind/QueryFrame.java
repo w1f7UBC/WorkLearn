@@ -14,23 +14,18 @@ import javax.swing.ButtonGroup;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JSlider;
-import javax.swing.SwingConstants;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.TitledBorder;
 
 import com.sandwell.JavaSimulation3D.GUIFrame;
 
 import DataBase.Query;
-import gov.nasa.worldwind.animation.Animator;
-import gov.nasa.worldwind.geom.Angle;
-import gov.nasa.worldwind.view.firstperson.BasicFlyView;
-import gov.nasa.worldwind.view.orbit.BasicOrbitView;
+
 import gov.nasa.worldwindx.examples.FlatWorldPanel;
 import gov.nasa.worldwindx.examples.LayerPanel;
 
@@ -133,7 +128,6 @@ public class QueryFrame extends JPanel {
         radioButtonPanel.add(pointRadioButton);
  
         JRadioButton closestPointRadioButton = new JRadioButton("Closest Point");
-        closestPointRadioButton.setSelected(true);
         closestPointRadioButton.addActionListener(new ActionListener()
         {
             @Override
@@ -145,7 +139,6 @@ public class QueryFrame extends JPanel {
         radioButtonPanel.add(closestPointRadioButton);
         
         JRadioButton radiusRadioButton = new JRadioButton("Radius(km)");
-        radiusRadioButton.setSelected(true);
         radiusRadioButton.addActionListener(new ActionListener()
         {
             @Override
@@ -177,10 +170,20 @@ public class QueryFrame extends JPanel {
         selectorPanel.setToolTipText("Set query target");
         return selectorPanel;
     }
+	
+	public static void setSliderValue(int value){
+		slider.setValue(value);
+	}
+	
 	public static int getSliderValue()
 	{
 		return slider.getValue();
 	}
+	
+	public static void setMode(int setMode){
+		mode=setMode;
+	}
+	
 	public static int getMode(){
 		return mode;
 	}

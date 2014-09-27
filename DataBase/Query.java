@@ -185,7 +185,17 @@ public class Query extends Entity {
 		if (draw==true){
 			File file=null;
 			if(QueryFrame.getMode()==2){
-				 file = database.getLayermanager().sql2shp(name, radius_statements);
+				File circle = database.getLayermanager().sql2shp(name+"circle", radius_statements);
+				WorkerThread prethread =new WorldWindFrame.WorkerThread(circle, WorldWindFrame.AppFrame, zoom, new DefinedShapeAttributes());
+				prethread.start();
+				try {
+					prethread.join();
+					
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				file = database.getLayermanager().sql2shp(name, statements);
 			}
 			else if(QueryFrame.getMode()==3)
 			{
