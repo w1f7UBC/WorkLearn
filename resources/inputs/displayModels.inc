@@ -47,6 +47,24 @@ PelletFacility ColladaFile { '<res>/ROLOS_resources/Shapes/PelletFacility.dae' }
 Define ColladaModel { PlywoodFacility }
 PlywoodFacility ColladaFile { '<res>/ROLOS_resources/Shapes/PlywoodFacility.dae' }
 
+Define ColladaModel { SawmillFacilitySimple }
+SawmillFacilitySimple ColladaFile { '<res>/ROLOS_resources/Shapes/SawmillFacility-simple.dae' }
+
+Define ColladaModel { BioenergyFacilitySimple }
+BioenergyFacilitySimple ColladaFile { '<res>/ROLOS_resources/Shapes/BioenergyFacility-simple.dae' }
+
+Define ColladaModel { OSBFacilitySimple }
+OSBFacilitySimple ColladaFile { '<res>/ROLOS_resources/Shapes/OSBFacility-simple.dae' }
+
+Define ColladaModel { PulpmillFacilitySimple }
+PulpmillFacilitySimple ColladaFile { '<res>/ROLOS_resources/Shapes/PulpmillFacility-simple.dae' }
+Define ColladaModel { PelletFacilitySimple }
+PelletFacilitySimple ColladaFile { '<res>/ROLOS_resources/Shapes/PelletFacility-simple.dae' }
+
+
+Define ColladaModel { PlywoodFacilitySimple }
+PlywoodFacilitySimple ColladaFile { '<res>/ROLOS_resources/Shapes/PlywoodFacility-simple.dae' }
+
 Define ColladaModel { BuildingPurple }
 BuildingPurple ColladaFile { '<res>/ROLOS_resources/Shapes/FactoryBuliding_Purple.dae' }
 
@@ -92,4 +110,20 @@ LoaderBaseModel ColladaFile { '<res>/ROLOS_resources/Shapes/LoaderBase.dae' }
 Define ColladaModel { WoodChipperModel }
 WoodChipperModel ColladaFile { '<res>/ROLOS_resources/Shapes/AutoSave_cone.dae' }
 
+Define ImageModel { SawmillIcon }
+SawmillIcon ImageFile { '<res>/ROLOS_resources/Shapes/Saw-2D.png' }
 
+Define ImageModel { PulpmillIcon }
+PulpmillIcon ImageFile { '<res>/ROLOS_resources/Shapes/Pulp-2D.png' }
+
+Define ImageModel { BioenergyIcon }
+BioenergyIcon ImageFile { '<res>/ROLOS_resources/Shapes/Bioenergy-2D.png' }
+
+Define ImageModel { OSBIcon }
+OSBIcon ImageFile { '<res>/ROLOS_resources/Shapes/OSB-2D.png' }
+
+Define ImageModel { PelletIcon }
+PelletIcon ImageFile { '<res>/ROLOS_resources/Shapes/Pellet-2D.png' }
+
+Define ImageModel { PlyIcon }
+PlyIcon ImageFile { '<res>/ROLOS_resources/Shapes/Plywood-2D.png' }
