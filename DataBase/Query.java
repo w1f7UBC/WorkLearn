@@ -171,7 +171,11 @@ public class Query extends Entity {
 		 *  RADIUS SEARCH
 		 */
 		if(QueryFrame.getMode()==2){
-		 statements="SELECT DISTINCT * FROM " + areaTable.getValue() + " WHERE st_distance(ST_Transform("+areaTable.getValue()+".shape,26986), ST_Transform(ST_GeomFromText('POINT("+longitude+" "+latitude+")', 4269),26986))<"+QueryFrame.getSliderValue()*1000;
+			// TODO bad implementation! hacky way of passing selection statement!
+		 statements="SELECT concat(spec_cd_1,'(', round(spec_pct_1,0), '%)', case when round(spec_pct_2,0) > 0 then "
+		 		+ "('-' || spec_cd_2||'('||round(spec_pct_2,0)|| '%)') end) as Species_Percent,"+
+       "proj_age_2,   lvlsp1_125, site_index, proj_ht_2, proj_ht_1, proj_age_1, poly_area, bark_biom, brnch_biom, "
+       + "wstem_biom, folg_biom FROM " + areaTable.getValue() + " WHERE st_distance(ST_Transform("+areaTable.getValue()+".shape,26986), ST_Transform(ST_GeomFromText('POINT("+longitude+" "+latitude+")', 4269),26986))<"+QueryFrame.getSliderValue()*1000;
 		 radius_statements="SELECT ST_Buffer(ST_MakePoint("+longitude+","+ latitude+")::geography, "+QueryFrame.getSliderValue()*1000+")";
 		 //color of circle
 		 attributes.setColor(Color.red);

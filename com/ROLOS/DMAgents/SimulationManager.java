@@ -1,35 +1,27 @@
 package com.ROLOS.DMAgents;
 
-import gov.nasa.worldwind.WorldWind;
 import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.Position;
-import gov.nasa.worldwind.ogc.kml.impl.KMLUtil;
-import gov.nasa.worldwind.view.firstperson.BasicFlyView;
-import gov.nasa.worldwind.view.firstperson.FlyToFlyViewAnimator;
 import gov.nasa.worldwind.view.orbit.BasicOrbitView;
 
 import java.util.ArrayList;
 
 import worldwind.DefinedShapeAttributes;
-import worldwind.WorldView;
+import worldwind.QueryFrame;
 import worldwind.WorldWindFrame;
 import DataBase.Query;
 
 import com.ROLOS.Economic.Contract;
 import com.ROLOS.Logistics.BulkMaterial;
 import com.ROLOS.Logistics.Facility;
-import com.ROLOS.Logistics.MovingEntity;
 import com.ROLOS.Logistics.ReportAgent;
 import com.ROLOS.Logistics.Route;
 import com.ROLOS.Utils.HandyUtils;
 import com.ROLOS.Utils.HashMapList;
-import com.jaamsim.events.ConditionalHandle;
 import com.jaamsim.events.ReflectionTarget;
-import com.jaamsim.input.InputAgent;
 import com.jaamsim.input.ValueInput;
 import com.jaamsim.units.TimeUnit;
 import com.sandwell.JavaSimulation.BooleanInput;
-import com.sandwell.JavaSimulation.ErrorException;
 import com.sandwell.JavaSimulation.FileEntity;
 import com.jaamsim.input.Keyword;
 import com.jaamsim.math.Color4d;
@@ -207,9 +199,12 @@ public class SimulationManager extends DisplayEntity {
 				}
 			}
 			// sawmillTable.deleteAllResultFrames();
-			inventoryTable.printResultContent("AnaheimInventory",
-					inventoryTable.execute(true, true,
+			QueryFrame.setMode(2);
+			QueryFrame.setSliderValue(3);
+			inventoryTable.printResultContent("InventoryTable", 
+					inventoryTable.execute("InventoryTable", "52.42", "-125.24", true, true, 
 							new DefinedShapeAttributes()));
+			
 			// wait for the sawmill table
 			synchronized (this) {
 				try {
