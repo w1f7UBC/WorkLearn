@@ -51,18 +51,6 @@ public class SankeyInfo extends Entity {
 		if(outputName.equals("TotalProduction") || outputName.equals("TotalReceived")
 				|| outputName.equals("PeriodProduction") || outputName.equals("SatisfiedDemand"))
 			out.setUnitType(tracedProduct.getValue().getEntityUnit());
-		
-		else if (outputName.equals("Price")){
-			if(tracedProduct.getValue().getEntityUnit().equals(MassUnit.class)){
-				out.setUnitType(CostPerMassUnit.class);
-			}
-			else if (tracedProduct.getValue().getEntityUnit().equals(VolumeUnit.class)){
-				out.setUnitType(CostPerVolumeUnit.class);
-			}
-			else {
-				out.setUnitType(CostPerEnergyUnit.class);
-			}
-		}
 		return out;
 	}
 	
@@ -115,10 +103,4 @@ public class SankeyInfo extends Entity {
 		return tempAmount;
 	}
 	
-	@Output(name = "Price", 
-			description = "Price of the bulkmaterial for the current period.", 
-			unitType = UserSpecifiedUnit.class)
-	public double getPrice(double simTime) {
-		return tracedProduct.getValue().getPrice();
-	}
 }

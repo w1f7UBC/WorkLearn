@@ -3,6 +3,8 @@ package com.ROLOS.Logistics;
 import com.jaamsim.DisplayModels.DisplayModel;
 import com.jaamsim.Samples.SampleInput;
 import com.jaamsim.input.InputAgent;
+import com.jaamsim.input.Output;
+import com.jaamsim.input.OutputHandle;
 import com.jaamsim.math.Vec3d;
 import com.jaamsim.units.CostPerEnergyUnit;
 import com.jaamsim.units.CostPerMassUnit;
@@ -10,6 +12,8 @@ import com.jaamsim.units.CostPerVolumeUnit;
 import com.jaamsim.units.DensityUnit;
 import com.jaamsim.units.EnergyDensityUnit;
 import com.jaamsim.units.MassUnit;
+import com.jaamsim.units.Unit;
+import com.jaamsim.units.UserSpecifiedUnit;
 import com.jaamsim.units.VolumeUnit;
 import com.sandwell.JavaSimulation.EntityInput;
 import com.sandwell.JavaSimulation.ErrorException;
@@ -307,6 +311,30 @@ public class BulkMaterial extends LogisticsEntity {
 				((BulkHandlingLinkedEntity)currentlyHandledBy).setCurrentContentDisplayEntity(null);
 			}	
 		}
+	}
+	
+	@Override
+	public OutputHandle getOutputHandle(String outputName) {
+		OutputHandle out = super.getOutputHandle(outputName);
+		if (outputName.equals("Price")){
+			if(this.getEntityUnit().equals(MassUnit.class)){
+				out.setUnitType(CostPerMassUnit.class);
+			}
+			else if (this.getEntityUnit().equals(VolumeUnit.class)){
+				out.setUnitType(CostPerVolumeUnit.class);
+			}
+			else {
+				out.setUnitType(CostPerEnergyUnit.class);
+			}
+		}
+		return out;
+	}
+	
+	@Output(name = "Price", 
+			description = "Price of the bulkmaterial for the current period.", 
+			unitType = UserSpecifiedUnit.class)
+	public double getPrice(double simTime) {
+		return this.getPrice();
 	}
 	
 }
