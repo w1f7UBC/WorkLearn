@@ -360,7 +360,7 @@ public class Query extends Entity {
 		Iterator<JFrame> iterator =  resultFrames.iterator();
 		while (iterator.hasNext()){
 			JFrame target = iterator.next();
-
+			WorldWindFrame.AppFrame.removeShapefileLayer(target.getTitle()+"circle.shp");
 			WorldWindFrame.AppFrame.removeShapefileLayer(target.getTitle()+".shp");
 			target.setVisible(false);
 			target.dispose();
@@ -373,7 +373,7 @@ public class Query extends Entity {
 		while (iterator.hasNext()){
 			JFrame target = iterator.next();
 			if (target.getName()==name){
-
+				WorldWindFrame.AppFrame.removeShapefileLayer(target.getTitle()+"circle.shp");
 				WorldWindFrame.AppFrame.removeShapefileLayer(target.getTitle()+".shp");
 				target.setVisible(false);
 				target.dispose();

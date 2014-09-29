@@ -335,6 +335,9 @@ public class WorldWindFrame extends ApplicationTemplate
                     ColladaController colladaController = new ColladaController(colladaCopy);
                     // Adds a new layer containing the ColladaRoot to the end of the WorldWindow's layer list.
                     layer.addRenderable(colladaController);
+                    layer.setPickEnabled(false);
+                    //layer.setMaxActiveAltitude(arg0);
+                    //layer.setMinActiveAltitude(arg0);
                 }
                 final double lat = (x/count);
                 final double lon = (y/count);
