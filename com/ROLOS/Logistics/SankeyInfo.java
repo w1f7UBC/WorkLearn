@@ -3,7 +3,12 @@ package com.ROLOS.Logistics;
 import com.jaamsim.input.Keyword;
 import com.jaamsim.input.Output;
 import com.jaamsim.input.OutputHandle;
+import com.jaamsim.units.CostPerEnergyUnit;
+import com.jaamsim.units.CostPerMassUnit;
+import com.jaamsim.units.CostPerVolumeUnit;
+import com.jaamsim.units.MassUnit;
 import com.jaamsim.units.UserSpecifiedUnit;
+import com.jaamsim.units.VolumeUnit;
 import com.sandwell.JavaSimulation.Entity;
 import com.sandwell.JavaSimulation.EntityInput;
 import com.sandwell.JavaSimulation.Group;
@@ -43,8 +48,21 @@ public class SankeyInfo extends Entity {
 	@Override
 	public OutputHandle getOutputHandle(String outputName) {
 		OutputHandle out = super.getOutputHandle(outputName);
-		if( out.getUnitType() == UserSpecifiedUnit.class )
+		if(outputName.equals("TotalProduction") || outputName.equals("TotalReceived")
+				|| outputName.equals("PeriodProduction") || outputName.equals("SatisfiedDemand"))
 			out.setUnitType(tracedProduct.getValue().getEntityUnit());
+		
+		else if (outputName.equals("Price")){
+			if(tracedProduct.getValue().getEntityUnit().equals(MassUnit.class)){
+				out.setUnitType(CostPerMassUnit.class);
+			}
+			else if (tracedProduct.getValue().getEntityUnit().equals(VolumeUnit.class)){
+				out.setUnitType(CostPerVolumeUnit.class);
+			}
+			else {
+				out.setUnitType(CostPerEnergyUnit.class);
+			}
+		}
 		return out;
 	}
 	
@@ -60,6 +78,31 @@ public class SankeyInfo extends Entity {
 		return tempAmount;
 	}
 	
+	@Output(name = "PeriodProduction", 
+			description = "The total production of tracedproduct during the current period.", 
+			unitType = UserSpecifiedUnit.class)
+	public double getPeriodProduction(double simTime) {
+		double tempAmount = 0.0d;
+		for (Entity eachFacility : facilityGroup.getValue().getList()) {
+			tempAmount += ((Facility) eachFacility).getStockList().getValueFor(
+					tracedProduct.getValue(), 13);
+		}
+		return tempAmount;
+	}
+	
+	@Output(name = "SatisfiedDemand", 
+			description = "The total demand of tracedproduct satisfied during the current period.", 
+			unitType = UserSpecifiedUnit.class)
+	public double getSatisfiedDemand(double simTime) {
+		double tempAmount = 0.0d;
+		for (Entity eachFacility : facilityGroup.getValue().getList()) {
+			tempAmount += ((Facility) eachFacility).getStockList().getValueFor(
+					tracedProduct.getValue(), 1)-((Facility) eachFacility).getStockList().getValueFor(
+							tracedProduct.getValue(), 3);
+		}
+		return tempAmount;
+	}
+	
 	@Output(name = "TotalReceived", 
 			description = "The total tracedproduct that all facilitygroup facilities received at present time.", 
 			unitType = UserSpecifiedUnit.class)
@@ -71,5 +114,11 @@ public class SankeyInfo extends Entity {
 		}
 		return tempAmount;
 	}
-
+	
+	@Output(name = "Price", 
+			description = "Price of the bulkmaterial for the current period.", 
+			unitType = UserSpecifiedUnit.class)
+	public double getPrice(double simTime) {
+		return tracedProduct.getValue().getPrice();
+	}
 }

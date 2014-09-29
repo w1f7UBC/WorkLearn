@@ -319,7 +319,7 @@ public class Contract extends ROLOSEntity {
 			//Populate routesegment/entity list to be drawn
 			ArrayList<DiscreteHandlingLinkedEntity> routesList = new ArrayList<DiscreteHandlingLinkedEntity>(1);
 			Color4d tempColor = this.getProduct().getColor();
-			int tempWidth = (int) (2.5 * this.getContractAmount() / this.getSupplier().getStockList().getValueFor(getProduct(), 13));
+			int tempWidth = (int) (3 * this.getContractAmount() / this.getSupplier().getStockList().getValueFor(getProduct(), 13));
 			for(DiscreteHandlingLinkedEntity eachSegment: this.getAssignedRoute().getRouteSegmentsList()){
 				if(eachSegment instanceof RouteSegment || eachSegment instanceof RouteEntity){
 					routesList.add(eachSegment);
@@ -329,7 +329,17 @@ public class Contract extends ROLOSEntity {
 				String layerName = routesList.get(0).getName()+this.getName();
 				SimulationManager.getRemoveablebleWorldWindLayers().add(layerName+".shp");
 				routesList.get(0).getShapeFileQuery().execute(layerName, routesList, true, false, 
-					new DefinedShapeAttributes(tempColor, tempWidth, routesList.get(0).getOpacity()));
+					new DefinedShapeAttributes(tempColor, tempWidth, this.getProduct().getOpacity()));
+			}
+			
+			// wait for a little bit after showing each route
+			synchronized (this) {
+				try {
+					this.wait(100);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 		}
 

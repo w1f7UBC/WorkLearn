@@ -62,8 +62,8 @@ public class WorldWindFrame extends ApplicationTemplate
     {
         public AppFrame(){
             makeMenu(this);
-            this.setLocation(GUIFrame.COL4_START, GUIFrame.TOP_START);
-            this.setSize(GUIFrame.COL4_WIDTH, GUIFrame.VIEW_HEIGHT);
+            this.setLocation(GUIFrame.COL2_START, 0);
+            this.setSize(GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds().width-GUIFrame.COL3_START,GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds().height);
             this.setIconImage(GUIFrame.getWindowIcon());
             final WorldWindowGLCanvas canvas = (WorldWindowGLCanvas) this.getWwd();
             canvas.addMouseListener(new MouseAdapter() {

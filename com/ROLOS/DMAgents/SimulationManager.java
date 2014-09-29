@@ -128,10 +128,10 @@ public class SimulationManager extends DisplayEntity {
 		// TODO DELETE!!!! hardcoded video capture!
 		boolean captureVideo = true;
 		if (captureVideo) {
-			//first wait before zooming onto Anheim mill
+			//wait to load colladas
 			synchronized (this) {
 				try {
-					this.wait(10000);
+					this.wait(1000);
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -141,34 +141,72 @@ public class SimulationManager extends DisplayEntity {
 			BasicOrbitView view = (BasicOrbitView) WorldWindFrame.AppFrame
 					.getWwd().getView();
 			// zoom on to BC
-			view.goTo(Position.fromDegrees(52.42, -125.24), 2400000);
+			Position initPosition = view.getCenterPosition();
+			Angle initHeadingAngle = view.getHeading();
+			Angle initPitchAngle = view.getPitch();
+			double initZoom = view.getZoom();
+			Position bcPosition = Position.fromDegrees(54, -123.2);
+			Angle bcHeadingAngle = view.getHeading();
+			Angle bcPitchAngle = view.getPitch();
+			double bcZoom = 1500000;
+			view.addPanToAnimator(initPosition, bcPosition, initHeadingAngle,
+					initHeadingAngle, initPitchAngle,
+					initPitchAngle, initZoom, 1500000, 10000,
+					true);
 			//first wait before zooming onto Anheim mill
 			synchronized (this) {
 				try {
-					this.wait(10000);
+					this.wait(11000);
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
 			// save the initial view positions
-			Position initPosition = view.getCenterPosition();
-			Angle initHeadingAngle = view.getHeading();
-			Angle initPitchAngle = view.getPitch();
-			double initZoom = view.getZoom();
-			view.addPanToAnimator(initPosition, initPosition, initHeadingAngle,
-					new Angle(Angle.fromDegrees(-60)), initPitchAngle,
-					new Angle(Angle.fromDegrees(80)), initZoom, 20000, 5000,
+			initPosition = view.getCenterPosition();
+			initHeadingAngle = view.getHeading();
+			initPitchAngle = view.getPitch();
+			initZoom = view.getZoom();
+			
+			//zoom past sawmill icon
+			view.addPanToAnimator(initPosition, Position.fromDegrees(52.42, -125.24), initHeadingAngle,
+					initHeadingAngle, initPitchAngle,
+					initPitchAngle, initZoom, 18000, 5000,
 					true);
 			// wait for the panning to finish
 			synchronized (this) {
 				try {
-					this.wait(10000);
+					this.wait(5000);
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
+			// save the initial view positions
+			initPosition = view.getCenterPosition();
+			initHeadingAngle = view.getHeading();
+			initPitchAngle = view.getPitch();
+			initZoom = view.getZoom();
+			
+			view.addPanToAnimator(initPosition, initPosition, initHeadingAngle,
+					new Angle(Angle.fromDegrees(-60)), initPitchAngle,
+					new Angle(Angle.fromDegrees(80)), initZoom, 5000, 5000,
+					true);
+			// wait for the panning to finish
+			synchronized (this) {
+				try {
+					this.wait(6000);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			// save the initial view positions
+			initPosition = view.getCenterPosition();
+			initHeadingAngle = view.getHeading();
+			initPitchAngle = view.getPitch();
+			initZoom = view.getZoom();
+			
 			Query sawmillTable = null;
 			Query inventoryTable = null;
 			for (Query each : Query.getAll()) {
@@ -192,7 +230,7 @@ public class SimulationManager extends DisplayEntity {
 			// wait for the sawmill table
 			synchronized (this) {
 				try {
-					this.wait(3000);
+					this.wait(1000);
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -201,23 +239,39 @@ public class SimulationManager extends DisplayEntity {
 			// sawmillTable.deleteAllResultFrames();
 			QueryFrame.setMode(2);
 			QueryFrame.setSliderValue(3);
+			view.addPanToAnimator(initPosition, Position.fromDegrees(52.39, -125.222), initHeadingAngle,
+					new Angle(Angle.fromDegrees(-20)), initPitchAngle,
+					new Angle(Angle.fromDegrees(50)), initZoom, 10000, 5000,
+					true);
 			inventoryTable.printResultContent("InventoryTable", 
-					inventoryTable.execute("InventoryTable", "52.42", "-125.24", true, true, 
+					inventoryTable.execute("InventoryTable", "52.42", "-125.24", true, false, 
 							new DefinedShapeAttributes()));
 			
 			// wait for the sawmill table
 			synchronized (this) {
 				try {
-					this.wait(3000);
+					this.wait(10000);
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
+			
+			Query.deleteAllResultFrames();
+			// wait for the sawmill table
+			synchronized (this) {
+				try {
+					this.wait(1000);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			
 			// move back to the original view
-			view.addPanToAnimator(view.getCenterPosition(), initPosition,
-					view.getHeading(), initHeadingAngle, view.getPitch(),
-					initPitchAngle, view.getZoom(), initZoom, 6000, false);
+			view.addPanToAnimator(view.getCenterPosition(), bcPosition,
+					view.getHeading(), bcHeadingAngle, view.getPitch(),
+					bcPitchAngle, view.getZoom(), bcZoom, 6000, false);
 		}
 				
 		

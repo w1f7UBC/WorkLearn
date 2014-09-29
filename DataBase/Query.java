@@ -2,6 +2,7 @@ package DataBase;
 
 import java.awt.Color;
 import java.awt.EventQueue;
+import java.awt.GraphicsEnvironment;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
@@ -172,10 +173,10 @@ public class Query extends Entity {
 		 */
 		if(QueryFrame.getMode()==2){
 			// TODO bad implementation! hacky way of passing selection statement!
-		 statements="SELECT concat(spec_cd_1,'(', round(spec_pct_1,0), '%)', case when round(spec_pct_2,0) > 0 then "
-		 		+ "('-' || spec_cd_2||'('||round(spec_pct_2,0)|| '%)') end) as Species_Percent,"+
-       "proj_age_2,   lvlsp1_125, site_index, proj_ht_2, proj_ht_1, proj_age_1, poly_area, bark_biom, brnch_biom, "
-       + "wstem_biom, folg_biom FROM " + areaTable.getValue() + " WHERE st_distance(ST_Transform("+areaTable.getValue()+".shape,26986), ST_Transform(ST_GeomFromText('POINT("+longitude+" "+latitude+")', 4269),26986))<"+QueryFrame.getSliderValue()*1000;
+		 statements="SELECT objectid_1 as Stand_ID, round(site_index,1) as Site_index, round(poly_area,1) as Area, concat(spec_cd_1,'(', round(spec_pct_1,0), '%)', case when round(spec_pct_2,0) > 0 then "
+		 		+ "('-' || spec_cd_2||'('||round(spec_pct_2,0)|| '%)') end) as Species_Pct,"+
+       "round(proj_ht_1,1) as Avg_Height, round(proj_age_1,1) as Avg_Age, round(lvlsp1_125,1) as merchant_vol, round(dvltot_125,1) as dead_vol, round(wstem_biom,1) as stemwood_biomass, round(bark_biom,1) as Bark_biomass, round(brnch_biom,1) as Branch_biomass, "
+       + "round(folg_biom,1) as Foliage_biomass FROM " + areaTable.getValue() + " WHERE st_distance(ST_Transform("+areaTable.getValue()+".shape,26986), ST_Transform(ST_GeomFromText('POINT("+longitude+" "+latitude+")', 4269),26986))<"+QueryFrame.getSliderValue()*1000;
 		 radius_statements="SELECT ST_Buffer(ST_MakePoint("+longitude+","+ latitude+")::geography, "+QueryFrame.getSliderValue()*1000+")";
 		 //color of circle
 		 attributes.setColor(Color.red);
@@ -330,8 +331,8 @@ public class Query extends Entity {
 				   final JScrollPane dataBasePanel = new JScrollPane();
 				   dataBasePanel.setViewportView(content);
 				   dataBaseFrame.add(dataBasePanel);
-	               dataBaseFrame.setLocation(GUIFrame.COL4_START, GUIFrame.LOWER_START);
-	               dataBaseFrame.setSize(GUIFrame.COL4_WIDTH, GUIFrame.LOWER_HEIGHT);
+	               dataBaseFrame.setLocation(GUIFrame.COL2_START, GUIFrame.LOWER_START);
+	               dataBaseFrame.setSize(GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds().width-GUIFrame.COL2_START, GUIFrame.VIEW_HEIGHT);
 				   dataBaseFrame.setIconImage(GUIFrame.getWindowIcon());
 				   dataBaseFrame.setAutoRequestFocus(false);
 				   dataBaseFrame.setVisible(true);
