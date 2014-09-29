@@ -176,7 +176,7 @@ public class Query extends Entity {
 		 statements="SELECT objectid_1 as Stand_ID, round(site_index,1) as Site_index, round(poly_area,1) as Area, concat(spec_cd_1,'(', round(spec_pct_1,0), '%)', case when round(spec_pct_2,0) > 0 then "
 		 		+ "('-' || spec_cd_2||'('||round(spec_pct_2,0)|| '%)') end) as Species_Pct,"+
        "round(proj_ht_1,1) as Avg_Height, round(proj_age_1,1) as Avg_Age, round(lvlsp1_125,1) as merchant_vol, round(dvltot_125,1) as dead_vol, round(wstem_biom,1) as stemwood_biomass, round(bark_biom,1) as Bark_biomass, round(brnch_biom,1) as Branch_biomass, "
-       + "round(folg_biom,1) as Foliage_biomass FROM " + areaTable.getValue() + " WHERE st_distance(ST_Transform("+areaTable.getValue()+".shape,26986), ST_Transform(ST_GeomFromText('POINT("+longitude+" "+latitude+")', 4269),26986))<"+QueryFrame.getSliderValue()*1000;
+       + "round(folg_biom,1) as Foliage_biomass, shape FROM " + areaTable.getValue() + " WHERE st_distance(ST_Transform("+areaTable.getValue()+".shape,26986), ST_Transform(ST_GeomFromText('POINT("+longitude+" "+latitude+")', 4269),26986))<"+QueryFrame.getSliderValue()*1000;
 		 radius_statements="SELECT ST_Buffer(ST_MakePoint("+longitude+","+ latitude+")::geography, "+QueryFrame.getSliderValue()*1000+")";
 		 //color of circle
 		 attributes.setColor(Color.red);
