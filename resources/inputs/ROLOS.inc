@@ -31,8 +31,11 @@ Define ObjectType {
                     ParkBlock
                     TimeSeries
                     Delay
+                    SankyInfo
+                    XYGraph
                   }
 Group                       JavaClass { com.sandwell.JavaSimulation.Group               } Palette { 'ROLOS' } DragAndDrop 			{ FALSE 	}
+XYGraph                     JavaClass { com.sandwell.JavaSimulation3D.XYGraph               } Palette { 'ROLOS' } DragAndDrop 			{ TRUE 	}
 TimeSeries                  JavaClass { com.sandwell.JavaSimulation.TimeSeries          } Palette { 'ROLOS' } DragAndDrop 	{ FALSE 	}
 FacilityGeneralManager      JavaClass { com.ROLOS.DMAgents.FacilityGeneralManager       } Palette { 'ROLOS' } DragAndDrop 			{ FALSE 	}
 FacilityOperationsManager   JavaClass { com.ROLOS.DMAgents.FacilityOperationsManager    } Palette { 'ROLOS' } DragAndDrop 	{ FALSE 	}
@@ -62,6 +65,7 @@ LoadingBay                  JavaClass { com.ROLOS.Logistics.LoadingBay          
 Delay                       JavaClass { com.ROLOS.Logistics.Delay                       } Palette { 'ROLOS' } DragAndDrop 	{ FALSE 	}
 EntitySource                JavaClass { com.ROLOS.Logistics.EntitySource                       } Palette { 'ROLOS' } DragAndDrop 	{ FALSE 	}
 EntitySink                  JavaClass { com.ROLOS.Logistics.EntitySink                       } Palette { 'ROLOS' } DragAndDrop 	{ FALSE 	}
+SankyInfo                  JavaClass { com.ROLOS.Logistics.SankeyInfo                       } Palette { 'ROLOS' } DragAndDrop 	{ FALSE 	}
 
 Define ReportAgent { Report }
 Define SimulationManager { PlanningManager }

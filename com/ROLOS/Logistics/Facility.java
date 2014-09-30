@@ -12,6 +12,7 @@ import com.ROLOS.DMAgents.FacilityTransportationManager;
 import com.ROLOS.Economic.Contract;
 import com.ROLOS.Utils.HashMapList;
 import com.ROLOS.Utils.TwoLinkedLists;
+import com.jaamsim.events.ReflectionTarget;
 import com.jaamsim.input.InputAgent;
 import com.jaamsim.input.Output;
 import com.jaamsim.input.ValueInput;
@@ -91,7 +92,7 @@ public class Facility extends DiscreteHandlingLinkedEntity {
 		insideFacilityLimits = new HashMapList<String,LogisticsEntity>(5);
 		new TwoLinkedLists<>(4, new DescendingPriotityComparator<BulkMaterial>(ROLOSEntity.class, "getInternalPriority"),0);
 		
-		stocksList = new TwoLinkedLists<>(14, new DescendingPriotityComparator<BulkMaterial>(ROLOSEntity.class, "getInternalPriority"));
+		stocksList = new TwoLinkedLists<>(17, new DescendingPriotityComparator<BulkMaterial>(ROLOSEntity.class, "getInternalPriority"));
 		
 		synchronized (allInstances) {
 			allInstances.add(this);
@@ -116,7 +117,9 @@ public class Facility extends DiscreteHandlingLinkedEntity {
 	@Override
 	public void validate() {
 		super.validate();
-			
+		
+		// TODO only adds facilities for showing as group in the ROLOSEntity's display model list
+		this.addToWVDisplayModelList();
 	}
 	
 	@Override
@@ -211,6 +214,9 @@ public class Facility extends DiscreteHandlingLinkedEntity {
 	 * <br> <b> 11- </b> fullfilled supply contracts amount
 	 * <br> <b> 12- </b> fullfilled demand contracts amount
 	 * <br> <b> 13- </b> realized throughput through feedstock supply
+	 * <br> <b> 14- </b> Total amount produced (by processors)
+	 * <br> <b> 15- </b> Total amount received (from suppliers)
+	 * <br> <b> 16- </b> Total amount shipped (to buyers)
 	 */
 	public TwoLinkedLists<BulkMaterial> getStockList(){
 		return stocksList;
@@ -232,6 +238,9 @@ public class Facility extends DiscreteHandlingLinkedEntity {
 	 * <br> <b> 11- </b> fullfilled supply contracts amount
 	 * <br> <b> 12- </b> fullfilled demand contracts amount
 	 * <br> <b> 13- </b> realized throughput through feedstock supply
+	 * <br> <b> 14- </b> Total amount produced (by processors)
+	 * <br> <b> 15- </b> Total amount received (from suppliers)
+	 * <br> <b> 16- </b> Total amount shipped (to buyers)
 	 */
 	public void setStocksList(BulkMaterial bulkMaterial, int valueListIndex, double amount){
 		stocksList.set(bulkMaterial, valueListIndex, amount);
@@ -255,12 +264,15 @@ public class Facility extends DiscreteHandlingLinkedEntity {
 	 * <br> <b> 11- </b> fullfilled supply contracts amount
 	 * <br> <b> 12- </b> fullfilled demand contracts amount
 	 * <br> <b> 13- </b> realized throughput through feedstock supply
+	 * <br> <b> 14- </b> Total amount produced (by processors)
+	 * <br> <b> 15- </b> Total amount received (from suppliers)
+	 * <br> <b> 16- </b> Total amount shipped (to buyers)
 	 */
 	public void addToStocksList(BulkMaterial bulkMaterial, int valueListIndex, double amount){
 		// Whether supply contracts have been inactive due to material unavailability
 		boolean activateSupplyContracts= false;
 		if(valueListIndex == 6 && Tester.greaterCheckTolerance(amount, 0.0d)
-				&& Tester.equalCheckTolerance(this.getStockList().getValueFor(bulkMaterial, 6), 0.0d)){
+				){
 			activateSupplyContracts = true;
 		}
 		
@@ -270,21 +282,23 @@ public class Facility extends DiscreteHandlingLinkedEntity {
 		if(Tester.greaterOrEqualCheckTolerance(this.getStockList().getValueFor(bulkMaterial, 6), this.getStockList().getValueFor(bulkMaterial, 5))){
 			for (Contract each : this.getGeneralManager()
 					.getDemandContractsList().get(bulkMaterial)) {
-				each.setFacilityActiveness(false, this);
+				this.scheduleProcess(0.0d, PRIO_DEFAULT, new ReflectionTarget(each, "updatePlanningTimes",false,this));
 			}
 		}
 		
 		// active facility if just got material
 		if (activateSupplyContracts) {
+			if(printStockReport())
+				this.printStocksReport(bulkMaterial);
 			for (Contract each : this.getGeneralManager()
 					.getSupplyContractsList().get(bulkMaterial)) {
+				
 				each.setFacilityActiveness(true, this);
 			}
 		}	
 		
 		if(printStockReport())
 			this.printStocksReport(bulkMaterial);
-
 	}
 
 	/**
@@ -303,6 +317,9 @@ public class Facility extends DiscreteHandlingLinkedEntity {
 	 * <br> <b> 11- </b> fullfilled supply contracts amount
 	 * <br> <b> 12- </b> fullfilled demand contracts amount
 	 * <br> <b> 13- </b> realized throughput through feedstock supply
+	 * <br> <b> 14- </b> Total amount produced (by processors)
+	 * <br> <b> 15- </b> Total amount received (from suppliers)
+	 * <br> <b> 16- </b> Total amount shipped (to buyers)
 	 */
 	public void removeFromStocksList(BulkMaterial bulkMaterial, int valueListIndex, double amount){
 		// Whether demand contracts have been inactive due to stockpiles maxing out on capacity
@@ -326,14 +343,14 @@ public class Facility extends DiscreteHandlingLinkedEntity {
 		if (activateDemandContracts) {
 			for (Contract each : this.getGeneralManager()
 					.getDemandContractsList().get(bulkMaterial)) {
+				if(printStockReport())
+					this.printStocksReport(bulkMaterial);
 				each.setFacilityActiveness(true, this);
 			}
 		}
 
 		if(printStockReport())
 			this.printStocksReport(bulkMaterial);
-		
-		
 	}
 	
 	//////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -352,36 +369,42 @@ public class Facility extends DiscreteHandlingLinkedEntity {
 	//////////////////////////////////////////////////////////////////////////////////////
 	public void printStocksReport(BulkMaterial bulkMaterial){
 		if (this.printStockReport() && stocksReportFile != null) {
-			stocksReportFile.putDoubleWithDecimalsTabs(this.getSimTime(),
+			stocksReportFile.putDoubleWithDecimalsTabs(this.getSimTime()/3600,
 					ReportAgent.getReportPrecision(), 1);
 			stocksReportFile.putStringTabs(bulkMaterial.getName(), 1);
-			stocksReportFile.putDoubleWithDecimalsTabs(stocksList.getValueFor(bulkMaterial, 0),
+			stocksReportFile.putDoubleWithDecimalsTabs(stocksList.getValueFor(bulkMaterial, 0)/1000,
 					ReportAgent.getReportPrecision(), 1);
-			stocksReportFile.putDoubleWithDecimalsTabs(stocksList.getValueFor(bulkMaterial, 1),
+			stocksReportFile.putDoubleWithDecimalsTabs(stocksList.getValueFor(bulkMaterial, 1)/1000,
 					ReportAgent.getReportPrecision(), 1);
-			stocksReportFile.putDoubleWithDecimalsTabs(stocksList.getValueFor(bulkMaterial, 2),
+			stocksReportFile.putDoubleWithDecimalsTabs(stocksList.getValueFor(bulkMaterial, 2)/1000,
 					ReportAgent.getReportPrecision(), 1);
-			stocksReportFile.putDoubleWithDecimalsTabs(stocksList.getValueFor(bulkMaterial, 3),
+			stocksReportFile.putDoubleWithDecimalsTabs(stocksList.getValueFor(bulkMaterial, 3)/1000,
 					ReportAgent.getReportPrecision(), 1);
-			stocksReportFile.putDoubleWithDecimalsTabs(stocksList.getValueFor(bulkMaterial, 4),
+			stocksReportFile.putDoubleWithDecimalsTabs(stocksList.getValueFor(bulkMaterial, 4)/1000,
 					ReportAgent.getReportPrecision(), 1);
-			stocksReportFile.putDoubleWithDecimalsTabs(stocksList.getValueFor(bulkMaterial, 5),
+			stocksReportFile.putDoubleWithDecimalsTabs(stocksList.getValueFor(bulkMaterial, 5)/1000,
 					ReportAgent.getReportPrecision(), 1);
-			stocksReportFile.putDoubleWithDecimalsTabs(stocksList.getValueFor(bulkMaterial, 6),
+			stocksReportFile.putDoubleWithDecimalsTabs(stocksList.getValueFor(bulkMaterial, 6)/1000,
 					ReportAgent.getReportPrecision(), 1);
-			stocksReportFile.putDoubleWithDecimalsTabs(stocksList.getValueFor(bulkMaterial, 7),
+			stocksReportFile.putDoubleWithDecimalsTabs(stocksList.getValueFor(bulkMaterial, 7)/1000,
 					ReportAgent.getReportPrecision(), 1);
-			stocksReportFile.putDoubleWithDecimalsTabs(stocksList.getValueFor(bulkMaterial, 8),
+			stocksReportFile.putDoubleWithDecimalsTabs(stocksList.getValueFor(bulkMaterial, 8)/1000,
 					ReportAgent.getReportPrecision(), 1);
-			stocksReportFile.putDoubleWithDecimalsTabs(stocksList.getValueFor(bulkMaterial, 9),
+			stocksReportFile.putDoubleWithDecimalsTabs(stocksList.getValueFor(bulkMaterial, 9)*1000,
 					ReportAgent.getReportPrecision(), 1);
-		//	stocksReportFile.putDoubleWithDecimalsTabs(stocksList.getValueFor(bulkMaterial, 10),
-		//			ReportAgent.getReportPrecision(), 1);
-			stocksReportFile.putDoubleWithDecimalsTabs(stocksList.getValueFor(bulkMaterial, 11),
+			stocksReportFile.putDoubleWithDecimalsTabs(stocksList.getValueFor(bulkMaterial, 10)*1000,
 					ReportAgent.getReportPrecision(), 1);
-			stocksReportFile.putDoubleWithDecimalsTabs(stocksList.getValueFor(bulkMaterial, 12),
+			stocksReportFile.putDoubleWithDecimalsTabs(stocksList.getValueFor(bulkMaterial, 11)/1000,
 					ReportAgent.getReportPrecision(), 1);
-			stocksReportFile.putDoubleWithDecimalsTabs(stocksList.getValueFor(bulkMaterial, 13),
+			stocksReportFile.putDoubleWithDecimalsTabs(stocksList.getValueFor(bulkMaterial, 12)/1000,
+					ReportAgent.getReportPrecision(), 1);
+			stocksReportFile.putDoubleWithDecimalsTabs(stocksList.getValueFor(bulkMaterial, 13)/1000,
+					ReportAgent.getReportPrecision(), 1);
+			stocksReportFile.putDoubleWithDecimalsTabs(stocksList.getValueFor(bulkMaterial, 14)/1000,
+					ReportAgent.getReportPrecision(), 1);
+			stocksReportFile.putDoubleWithDecimalsTabs(stocksList.getValueFor(bulkMaterial, 15)/1000,
+					ReportAgent.getReportPrecision(), 1);
+			stocksReportFile.putDoubleWithDecimalsTabs(stocksList.getValueFor(bulkMaterial, 16)/1000,
 					ReportAgent.getReportPrecision(), 1);
 			
 			stocksReportFile.newLine();
@@ -400,26 +423,38 @@ public class Facility extends DiscreteHandlingLinkedEntity {
 		stocksReportFile.putStringTabs("Sold Throughput Amount in Contracts", 1);
 		stocksReportFile.putStringTabs("Total stockpile capacities", 1);
 		stocksReportFile.putStringTabs("Total amount in all stockpiles", 1);
-		stocksReportFile.putStringTabs("Reserved amount for loading", 1);
-		stocksReportFile.putStringTabs("Reserved amount for unloading", 1);
-	//	stocksReportFile.putStringTabs("Average purchase price", 1);
-		stocksReportFile.putStringTabs("Fullfilled supply contracts amount", 1);
-		stocksReportFile.putStringTabs("Fullfilled demand contracts amount ", 1);
+		stocksReportFile.putStringTabs("Reserved for loading", 1);
+		stocksReportFile.putStringTabs("Reserved for unloading", 1);
+		stocksReportFile.putStringTabs("Current offer price per", 1);
+		stocksReportFile.putStringTabs("Average purchase price", 1);
+		stocksReportFile.putStringTabs("Fullfilled supply", 1);
+		stocksReportFile.putStringTabs("Fullfilled demand", 1);
 		stocksReportFile.putStringTabs("Realized throughput through feedstock supply", 1);
+		stocksReportFile.putStringTabs("Total produced (by processors)", 1);
+		stocksReportFile.putStringTabs("Total received (from suppliers)", 1);
+		stocksReportFile.putStringTabs("Total shipped (to buyers)", 1);
 		
 		stocksReportFile.newLine();
 		stocksReportFile.flush();	
 		
 		// Print units
-		stocksReportFile.putStringTabs("(s)", 2);
-		stocksReportFile.putStringTabs("(kg)", 1);
-		stocksReportFile.putStringTabs("(kg)", 1);
-		stocksReportFile.putStringTabs("(kg)", 1);
-		stocksReportFile.putStringTabs("(kg)", 1);
-		stocksReportFile.putStringTabs("(kg)", 1);
-		stocksReportFile.putStringTabs("(kg)", 1);
-		stocksReportFile.putStringTabs("(kg)", 1);
-		stocksReportFile.putStringTabs("($/kg)", 1);
+		stocksReportFile.putStringTabs("(h)", 2);
+		stocksReportFile.putStringTabs("(tonne)", 1);
+		stocksReportFile.putStringTabs("(tonne)", 1);
+		stocksReportFile.putStringTabs("(tonne)", 1);
+		stocksReportFile.putStringTabs("(tonne)", 1);
+		stocksReportFile.putStringTabs("(tonne)", 1);
+		stocksReportFile.putStringTabs("(tonne)", 1);
+		stocksReportFile.putStringTabs("(tonne)", 1);
+		stocksReportFile.putStringTabs("(tonne)", 1);
+		stocksReportFile.putStringTabs("(tonne)", 1);
+		stocksReportFile.putStringTabs("($/tonne)", 1);
+		stocksReportFile.putStringTabs("($/tonne)", 1);
+		stocksReportFile.putStringTabs("(tonne)", 1);
+		stocksReportFile.putStringTabs("(tonne)", 1);
+		stocksReportFile.putStringTabs("(tonne)", 1);
+		stocksReportFile.putStringTabs("(tonne)", 1);
+		stocksReportFile.putStringTabs("(tonne)", 1);
 
 		stocksReportFile.newLine();
 		stocksReportFile.flush();	

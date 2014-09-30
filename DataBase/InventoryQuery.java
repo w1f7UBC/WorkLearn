@@ -11,10 +11,22 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 
+import com.jaamsim.input.Keyword;
+import com.sandwell.JavaSimulation.StringInput;
+
 import worldwind.DefinedShapeAttributes;
 import worldwind.WorldWindFrame;
 
 public  class InventoryQuery extends Query {
+	
+	//@Keyword(description = "target table within database that describes the queriable area")
+	private StringInput areaTable;
+	
+	{
+	areaTable = new StringInput("AreaTable", "Query Properties", "ab_ten");
+	this.getEditableInputs().set(5, areaTable);
+	}
+	
 	@Override
 	public ResultSet execute(String name, String latitude, String longitude, Boolean draw, Boolean zoom, DefinedShapeAttributes attributes){
 		//System.out.println(latitude + " " + longitude);
@@ -53,8 +65,8 @@ public  class InventoryQuery extends Query {
 	@Override
 
 	public void executeArea(Boolean zoom, DefinedShapeAttributes attributes){
-		String statements="SELECT geom FROM ab_ten;";
-		File file = getLayerManager().sql2shp("ab_ten_area", statements);
+		String statements="SELECT * FROM " + this.areaTable;
+		File file = getLayerManager().sql2shp(this.areaTable.getValue(), statements);
 		if (file!=null){
 			Thread thread=new WorldWindFrame.WorkerThread(file, WorldWindFrame.AppFrame, zoom, attributes);
 			thread.start();

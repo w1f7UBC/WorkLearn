@@ -28,6 +28,7 @@ import gov.nasa.worldwindx.examples.util.*;
 import javax.swing.*;
 import javax.swing.filechooser.*;
 
+import com.jaamsim.math.Vec3d;
 import com.sandwell.JavaSimulation3D.GUIFrame;
 
 import DataBase.Query;
@@ -36,6 +37,8 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
 import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
@@ -59,8 +62,8 @@ public class WorldWindFrame extends ApplicationTemplate
     {
         public AppFrame(){
             makeMenu(this);
-            this.setLocation(GUIFrame.COL4_START, GUIFrame.TOP_START);
-            this.setSize(GUIFrame.COL4_WIDTH, GUIFrame.VIEW_HEIGHT);
+            this.setLocation(GUIFrame.COL2_START, 0);
+            this.setSize(GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds().width-GUIFrame.COL3_START,GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds().height);
             this.setIconImage(GUIFrame.getWindowIcon());
             final WorldWindowGLCanvas canvas = (WorldWindowGLCanvas) this.getWwd();
             canvas.addMouseListener(new MouseAdapter() {
@@ -70,7 +73,7 @@ public class WorldWindFrame extends ApplicationTemplate
                 	if (e!=null && QueryFrame.HostFrame!=null){
                 		if(e.getButton()==3){
                 	        //if cursor mode is set to 1 and WorldWind actually returns a position
-                			if (position!=null && QueryFrame.getMode()!=1){
+                			if (position!=null && QueryFrame.getMode()!=0){
                 				Query query = QueryFrame.getQueryObject();
                 				if (query!=null){
                 					String lat = position.latitude.toString();
@@ -265,10 +268,11 @@ public class WorldWindFrame extends ApplicationTemplate
     {
         /** Indicates the source of the COLLADA file loaded by this thread. Initialized during construction. */
         protected Object colladaSource;
-        /** Geographic position of the COLLADA model. */
-        protected Position position;
         protected Boolean zoom;
-        protected Vec4 scale;
+        /** Geographic position of the COLLADA model. */
+        protected ArrayList<Vec3d> position;
+        protected ArrayList<Vec3d> scale;
+        
 
         /**
          * Creates a new worker thread from a specified <code>colladaSource</code> and <code>appFrame</code>.
@@ -279,13 +283,24 @@ public class WorldWindFrame extends ApplicationTemplate
          * @param position      the geographic position of the COLLADA model.
          * @param appFrame      the <code>AppFrame</code> in which to display the COLLADA source.
          */
-        public ColladaThread(Object colladaSource, Position position, Vec4 scale, Boolean zoom)
+        public ColladaThread(Object colladaSource, Vec3d position, Vec3d scale, Boolean zoom)
         {
             this.colladaSource = colladaSource;
-            this.position = position;
             this.zoom = zoom;
-            this.scale = scale;
+            this.position = new ArrayList<Vec3d>();
+            this.position.add(position);
+            this.scale = new ArrayList<Vec3d>();
+            this.scale.add(scale);
+
         }
+
+        public ColladaThread(Object colladaSource, ArrayList<Vec3d> position, ArrayList<Vec3d> scale, Boolean zoom)
+        {
+        	this.colladaSource = colladaSource;
+        	this.position=position;
+        	this.scale=scale;
+        	this.zoom=zoom;
+        } 
 
         /**
          * Loads this worker thread's COLLADA source into a new <code>{@link gov.nasa.worldwind.ogc.collada.ColladaRoot}</code>,
@@ -295,15 +310,37 @@ public class WorldWindFrame extends ApplicationTemplate
         {
             try
             {
-                final ColladaRoot colladaRoot = ColladaRoot.createAndParse(this.colladaSource);
-                colladaRoot.setPosition(this.position);
-                colladaRoot.setAltitudeMode(WorldWind.CLAMP_TO_GROUND);
-                colladaRoot.setModelScale(scale);
-                // Create a ColladaController to adapt the ColladaRoot to the World Wind renderable interface.
-                ColladaController colladaController = new ColladaController(colladaRoot);
-                // Adds a new layer containing the ColladaRoot to the end of the WorldWindow's layer list.
+             //   final ColladaRoot colladaRoot = null;
                 final RenderableLayer layer = new RenderableLayer();
-                layer.addRenderable(colladaController);
+                Iterator<Vec3d> posIterator = this.position.iterator();
+                Iterator<Vec3d> scaleIterator = this.scale.iterator();
+                double x=0;
+                double y=0;
+                int count=0;
+                while(posIterator.hasNext() && scaleIterator.hasNext()){
+                	ColladaRoot colladaCopy = ColladaRoot.createAndParse(this.colladaSource);
+                	colladaCopy.setAltitudeMode(WorldWind.CLAMP_TO_GROUND);
+                	Vec3d target = posIterator.next();
+        			Position position = Position.fromDegrees(target.x, target.y, target.z);
+                	String tempX=position.latitude.toDecimalDegreesString(15);
+                	String tempY=position.longitude.toDecimalDegreesString(15);
+                	x+=Double.valueOf(tempX.substring(0, tempX.length()-1));
+                	y+=Double.valueOf(tempY.substring(0, tempY.length()-1));
+                	count+=1;
+                	colladaCopy.setPosition(position);
+                	target = scaleIterator.next();
+        			Vec4 actualScale = new Vec4(target.x, target.y, target.z);
+                	colladaCopy.setModelScale(actualScale);
+                	// Create a ColladaController to adapt the ColladaRoot to the World Wind renderable interface.
+                    ColladaController colladaController = new ColladaController(colladaCopy);
+                    // Adds a new layer containing the ColladaRoot to the end of the WorldWindow's layer list.
+                    layer.addRenderable(colladaController);
+                    layer.setPickEnabled(false);
+                    //layer.setMaxActiveAltitude(10000);
+                    //layer.setMinActiveAltitude(arg0);
+                }
+                final double lat = (x/count);
+                final double lon = (y/count);
                 // Schedule a task on the EDT to add the parsed document to a layer
                 SwingUtilities.invokeLater(new Runnable()
                 {
@@ -311,7 +348,7 @@ public class WorldWindFrame extends ApplicationTemplate
                     {
                         AppFrame.addColladaLayer(layer);
                         if (zoom==true){
-                        	AppFrame.getWwd().getView().goTo(position, 100000);
+                        	AppFrame.getWwd().getView().goTo(Position.fromDegrees(lat, lon), 100000);
                         }
                     }
                 });

@@ -92,6 +92,7 @@ public class Market extends ROLOSEntity {
 		InputAgent.processEntity_Keyword_Value(contract, "DeliveryCompany", offer.getBuyer().getName());
 		InputAgent.processEntity_Keyword_Value(contract, "Transporter", offer.getRoute().getMovingEntitiesList().get(0).getName());
 		InputAgent.processEntity_Keyword_Value(contract, "ContractPeriod", ((Double)SimulationManager.getPlanningHorizon()).toString() + " "+ "s");
+		
 		contract.setContractPrice(offer.getMarketOfferPrice());
 		contract.setAssignedRoute(offer.getRoute());
 		contract.setEstimatedTransportCost(offer.getEstimatedTransportCost());

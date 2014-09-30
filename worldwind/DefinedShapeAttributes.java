@@ -74,4 +74,8 @@ public class DefinedShapeAttributes
         attrs.setOutlineWidth(thick);
         return attrs;
     }
+    public void setColor(Color c)
+    {
+    	this.colorRGB=c;
+    }
 }

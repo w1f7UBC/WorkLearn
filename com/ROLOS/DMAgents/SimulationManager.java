@@ -1,21 +1,24 @@
 package com.ROLOS.DMAgents;
 
+import gov.nasa.worldwind.geom.Angle;
+import gov.nasa.worldwind.geom.Position;
+import gov.nasa.worldwind.view.orbit.BasicOrbitView;
+
 import java.util.ArrayList;
 
 import worldwind.DefinedShapeAttributes;
-import worldwind.WorldView;
+import worldwind.QueryFrame;
 import worldwind.WorldWindFrame;
+import DataBase.Query;
 
 import com.ROLOS.Economic.Contract;
 import com.ROLOS.Logistics.BulkMaterial;
 import com.ROLOS.Logistics.Facility;
-import com.ROLOS.Logistics.MovingEntity;
 import com.ROLOS.Logistics.ReportAgent;
 import com.ROLOS.Logistics.Route;
 import com.ROLOS.Utils.HandyUtils;
 import com.ROLOS.Utils.HashMapList;
 import com.jaamsim.events.ReflectionTarget;
-import com.jaamsim.input.InputAgent;
 import com.jaamsim.input.ValueInput;
 import com.jaamsim.units.TimeUnit;
 import com.sandwell.JavaSimulation.BooleanInput;
@@ -95,10 +98,11 @@ public class SimulationManager extends DisplayEntity {
 			for(Color4d eachColor: colorScheme.getKeys()){
 				Facility tempFacility = colorScheme.get(eachColor).get(0);
 				if(tempFacility.getShapeFileQuery() != null)				
-					tempFacility.getShapeFileQuery().execute(tempFacility.getColorInput().getValueString()+"Facilities", colorScheme.get(eachColor), true, true, 
+					tempFacility.getShapeFileQuery().execute(tempFacility.getColorInput().getValueString()+"Facilities", colorScheme.get(eachColor), false, false, 
 						new DefinedShapeAttributes(eachColor, tempFacility.getWidth(), tempFacility.getOpacity()));
 			}
-		}
+			Facility.getAll().get(0).getShapeFileQuery().updatePosition(Facility.getAll());
+    	}
 	}
 	
 	@Override
@@ -120,6 +124,166 @@ public class SimulationManager extends DisplayEntity {
 		// TODO Auto-generated method stub
 		super.startUp();
 		this.updatePlanningTimes();
+
+		// TODO DELETE!!!! hardcoded video capture!
+		boolean captureVideo = true;
+		if (captureVideo) {
+			//wait to load colladas
+			synchronized (this) {
+				try {
+					this.wait(1000);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			// TODO DELETE!!!! hardcoded video capture!
+			BasicOrbitView view = (BasicOrbitView) WorldWindFrame.AppFrame
+					.getWwd().getView();
+			// zoom on to BC
+			Position initPosition = view.getCenterPosition();
+			Angle initHeadingAngle = view.getHeading();
+			Angle initPitchAngle = view.getPitch();
+			double initZoom = view.getZoom();
+			Position bcPosition = Position.fromDegrees(54, -123.2);
+			Angle bcHeadingAngle = view.getHeading();
+			Angle bcPitchAngle = view.getPitch();
+			double bcZoom = 1500000;
+			view.addPanToAnimator(initPosition, bcPosition, initHeadingAngle,
+					initHeadingAngle, initPitchAngle,
+					initPitchAngle, initZoom, 1500000, 90000,
+					true);
+			//first wait before zooming onto Anheim mill
+			synchronized (this) {
+				try {
+					this.wait(95000);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			// save the initial view positions
+			initPosition = view.getCenterPosition();
+			initHeadingAngle = view.getHeading();
+			initPitchAngle = view.getPitch();
+			initZoom = view.getZoom();
+			
+			//zoom past sawmill icon
+			view.addPanToAnimator(initPosition, Position.fromDegrees(52.42, -125.24), initHeadingAngle,
+					initHeadingAngle, initPitchAngle,
+					initPitchAngle, initZoom, 18000, 90000,
+					true);
+			// wait for the panning to finish
+			synchronized (this) {
+				try {
+					this.wait(90000);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			// save the initial view positions
+			initPosition = view.getCenterPosition();
+			initHeadingAngle = view.getHeading();
+			initPitchAngle = view.getPitch();
+			initZoom = view.getZoom();
+			
+			view.addPanToAnimator(initPosition, initPosition, initHeadingAngle,
+					new Angle(Angle.fromDegrees(-60)), initPitchAngle,
+					new Angle(Angle.fromDegrees(80)), initZoom, 5000, 90000,
+					true);
+			// wait for the panning to finish
+			synchronized (this) {
+				try {
+					this.wait(95000);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			// save the initial view positions
+			initPosition = view.getCenterPosition();
+			initHeadingAngle = view.getHeading();
+			initPitchAngle = view.getPitch();
+			initZoom = view.getZoom();
+			
+			Query sawmillTable = null;
+			Query inventoryTable = null;
+			for (Query each : Query.getAll()) {
+				if (each.getName().equalsIgnoreCase("SawmillQuery"))
+					sawmillTable = each;
+				else if (each.getName().equalsIgnoreCase("AnaheimInventory"))
+					inventoryTable = each;
+			}
+			sawmillTable.printResultContent("SawmillTable",
+					sawmillTable.execute(false, false, null), false);
+			// wait for the panning to finish
+			synchronized (this) {
+				try {
+					this.wait(10000);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			Query.deleteAllResultFrames();
+			// wait for the sawmill table
+			synchronized (this) {
+				try {
+					this.wait(1000);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			// sawmillTable.deleteAllResultFrames();
+			QueryFrame.setMode(2);
+			QueryFrame.setSliderValue(3);
+			view.addPanToAnimator(initPosition, Position.fromDegrees(52.39, -125.222), initHeadingAngle,
+					new Angle(Angle.fromDegrees(-20)), initPitchAngle,
+					new Angle(Angle.fromDegrees(50)), initZoom, 10000, 90000,
+					true);
+			inventoryTable.printResultContent("InventoryTable", 
+					inventoryTable.execute("InventoryTable", "52.42", "-125.24", true, false, 
+							new DefinedShapeAttributes()), false);
+			
+			// wait for the sawmill table
+			synchronized (this) {
+				try {
+					this.wait(95000);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			
+			Query.deleteAllResultFrames();
+			// wait for the sawmill table
+			synchronized (this) {
+				try {
+					this.wait(1000);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			
+			// move back to the original view
+			view.addPanToAnimator(view.getCenterPosition(), bcPosition,
+					view.getHeading(), bcHeadingAngle, view.getPitch(),
+					bcPitchAngle, view.getZoom(), bcZoom, 90000, false);
+		}
+		
+		// wait for the zoom out
+		synchronized (this) {
+			try {
+				this.wait(90000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		
 	}
 	
 	public void updatePlanningTimes(){
@@ -162,25 +326,25 @@ public class SimulationManager extends DisplayEntity {
 	//////////////////////////////////////////////////////////////////////////////////////
 	public static void printContractReport(Contract contract){
 		if (printContractsReport.getValue()) {
-			contractsReportFile.putDoubleWithDecimalsTabs(contract.getSimTime(),
+			contractsReportFile.putDoubleWithDecimalsTabs(contract.getSimTime()/3600,
 					ReportAgent.getReportPrecision(), 1);
 			contractsReportFile.putStringTabs(contract.getName(), 1);
 			contractsReportFile.putStringTabs(contract.getProduct().getName(), 1);
 			contractsReportFile.putStringTabs(contract.getSupplier().getName(), 1);
 			contractsReportFile.putStringTabs(contract.getBuyer().getName(), 1);
-			contractsReportFile.putDoubleWithDecimalsTabs(contract.getContractAmount(),
+			contractsReportFile.putDoubleWithDecimalsTabs(contract.getContractAmount()/1000,
 					ReportAgent.getReportPrecision(), 1);
-			contractsReportFile.putDoubleWithDecimalsTabs(contract.getContractPrice(),
+			contractsReportFile.putDoubleWithDecimalsTabs(contract.getContractPrice()*1000,
 					ReportAgent.getReportPrecision(), 1);
-			contractsReportFile.putDoubleWithDecimalsTabs(contract.getEstimatedTransportCost(),
+			contractsReportFile.putDoubleWithDecimalsTabs(contract.getEstimatedTransportCost()*1000,
 							ReportAgent.getReportPrecision(), 1);
 			contractsReportFile.putStringTabs(HandyUtils.arraylistToString(contract.getDedicatedFleetsList()), 1);
 			contractsReportFile.putStringTabs(HandyUtils.arraylistToString(new ArrayList<>(contract.getAssignedRoute().getRouteSegmentsList())), 1);
-			contractsReportFile.putDoubleWithDecimalsTabs(contract.getBuyer().getStockList().getValueFor(contract.getProduct(), 3),
+			contractsReportFile.putDoubleWithDecimalsTabs(contract.getBuyer().getStockList().getValueFor(contract.getProduct(), 3)/1000,
 					ReportAgent.getReportPrecision(), 1);
-			contractsReportFile.putDoubleWithDecimalsTabs(contract.getSupplier().getStockList().getValueFor(contract.getProduct(), 4),
+			contractsReportFile.putDoubleWithDecimalsTabs(contract.getSupplier().getStockList().getValueFor(contract.getProduct(), 4)/1000,
 					ReportAgent.getReportPrecision(), 1);
-			contractsReportFile.putDoubleWithDecimalsTabs(contract.getSupplier().getStockList().getValueFor(contract.getProduct(), 13),
+			contractsReportFile.putDoubleWithDecimalsTabs(contract.getSupplier().getStockList().getValueFor(contract.getProduct(), 13)/1000,
 					ReportAgent.getReportPrecision(), 1);
 			contractsReportFile.newLine();
 			contractsReportFile.flush();
@@ -208,27 +372,30 @@ public class SimulationManager extends DisplayEntity {
 		contractsReportFile.flush();	
 		
 		// Print units
-		contractsReportFile.putStringTabs("(s)", 5);
-		contractsReportFile.putStringTabs("(kg)", 1);
-		contractsReportFile.putStringTabs("($/kg)", 1);
-		contractsReportFile.putStringTabs("($/kg)", 3);
-		contractsReportFile.putStringTabs("(kg)", 1);
+		contractsReportFile.putStringTabs("(h)", 5);
+		contractsReportFile.putStringTabs("(tonne)", 1);
+		contractsReportFile.putStringTabs("($/tonne)", 1);
+		contractsReportFile.putStringTabs("($/tonne)", 3);
+		contractsReportFile.putStringTabs("(tonne)", 1);
+		contractsReportFile.putStringTabs("(tonne)", 1);
+		contractsReportFile.putStringTabs("(tonne)", 1);
 
 		contractsReportFile.newLine();
 		contractsReportFile.flush();	
 	}
 	
-	public static void printTransportationCostReport(ArrayList<MovingEntity> movingEntitiesList, Route route, BulkMaterial bulkMaterial, double unitCost){
+	public static void printTransportationCostReport(Route route, BulkMaterial bulkMaterial, double unitCost){
 		if (printTransportReport.getValue()) {
-			transportReportFile.putDoubleWithDecimalsTabs(bulkMaterial.getSimTime(),
+			transportReportFile.putDoubleWithDecimalsTabs(bulkMaterial.getSimTime()/3600,
 					ReportAgent.getReportPrecision(), 1);
 			transportReportFile.putStringTabs(route.getOrigin().getName(), 1);
 			transportReportFile.putStringTabs(route.getDestination().getName(), 1);
-			transportReportFile.putStringTabs(movingEntitiesList.toString(), 1);
+			transportReportFile.putStringTabs(route.getRouteSegmentsList().toString(), 1);
+			transportReportFile.putStringTabs(route.getMovingEntitiesList().toString(), 1);
 			transportReportFile.putStringTabs(bulkMaterial.getName(), 1);
-			transportReportFile.putDoubleWithDecimalsTabs(route.getDijkstraWeight(),
+			transportReportFile.putDoubleWithDecimalsTabs(route.getLength()/1000,
 					ReportAgent.getReportPrecision(), 1);
-			transportReportFile.putDoubleWithDecimalsTabs(unitCost,
+			transportReportFile.putDoubleWithDecimalsTabs(unitCost*1000,
 					ReportAgent.getReportPrecision(), 1);
 			transportReportFile.newLine();
 			transportReportFile.flush();
@@ -239,6 +406,7 @@ public class SimulationManager extends DisplayEntity {
 		transportReportFile.putStringTabs("Time", 1);
 		transportReportFile.putStringTabs("Origin", 1);
 		transportReportFile.putStringTabs("Destination", 1);
+		transportReportFile.putStringTabs("Route Segments List", 1);
 		transportReportFile.putStringTabs("Moving Entities List", 1);
 		transportReportFile.putStringTabs("Bulk Material", 1);
 		transportReportFile.putStringTabs("Distance", 1);
@@ -248,9 +416,9 @@ public class SimulationManager extends DisplayEntity {
 		transportReportFile.flush();	
 		
 		// Print units
-		transportReportFile.putStringTabs("(s)", 5);
-		transportReportFile.putStringTabs("(m)", 1);
-		transportReportFile.putStringTabs("($/kg)", 1);
+		transportReportFile.putStringTabs("(h)", 6);
+		transportReportFile.putStringTabs("(km)", 1);
+		transportReportFile.putStringTabs("($/tonne)", 1);
 
 		transportReportFile.newLine();
 		transportReportFile.flush();	

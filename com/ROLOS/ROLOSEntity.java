@@ -1,21 +1,33 @@
 package com.ROLOS;
 
+import gov.nasa.worldwind.geom.Position;
+import gov.nasa.worldwind.geom.Vec4;
+
+import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Comparator;
 
+import worldwind.WorldWindFrame;
 import DataBase.Query;
 
+import com.sandwell.JavaSimulation.BooleanInput;
 import com.sandwell.JavaSimulation.ColourInput;
 import com.sandwell.JavaSimulation.Entity;
 import com.sandwell.JavaSimulation.EntityInput;
 import com.sandwell.JavaSimulation.ErrorException;
 import com.sandwell.JavaSimulation.IntegerInput;
+import com.sandwell.JavaSimulation.Vec3dInput;
 import com.ROLOS.Logistics.Facility;
+import com.ROLOS.Utils.HashMapList;
+import com.jaamsim.DisplayModels.ColladaModel;
+import com.jaamsim.DisplayModels.DisplayModel;
 import com.jaamsim.input.Input;
 import com.jaamsim.input.Keyword;
 import com.jaamsim.input.ValueInput;
 import com.jaamsim.math.Color4d;
+import com.jaamsim.math.Vec3d;
 import com.sandwell.JavaSimulation3D.DisplayEntity;
 
 /**
@@ -25,7 +37,14 @@ import com.sandwell.JavaSimulation3D.DisplayEntity;
  * @modified_by
  */
 public class ROLOSEntity extends DisplayEntity  {
+	private static final ArrayList<ROLOSEntity> allInstances;
 
+	private static boolean drawnColladas = false;
+	
+	// map of displaymodels used for drawing as a group in worldwind 
+	private static final HashMapList<DisplayModel,ROLOSEntity> wvDisplayModelGroups;
+	
+	//SHAPES
 	@Keyword(description = "priority for when this entity is compared against another of its type to be put in an ordered list. " +
 			"can be changed during the run. Default is 0", 
 			example = "WoodchipTrucks Priority { 5 }")
@@ -49,17 +68,38 @@ public class ROLOSEntity extends DisplayEntity  {
 	         example = "Road1 Opacity { 0.1 }")
 	private final ValueInput opacity;
 	
+	
+	//COLLADAS
+	@Keyword(description = "The size of the object in { x, y, z } coordinates. If only the x and y coordinates are given " +
+            "then the z dimension is assumed to be zero.",
+     example = "Object1 WVSize { 15 12 0 }")
+	private final Vec3dInput wvSizeInput;
+	
+	@Keyword(description = "The point in the region at which the alignment point of the object is positioned.",
+	         example = "Object1 WVPosition { -3.922 -1.830 0.000 m }")
+	private final Vec3dInput wvPositionInput;
+	
+	@Keyword(description = "If TRUE, the object is displayed in the simulation view windows.",
+	         example = "Object1 WVShow { FALSE }")
+	private final BooleanInput wvShow;
+	
 	/**
 	 * priority of the entity at the current state; default priority is 0; 
 	 */
-	private int internalPriority;											
+	private int internalPriority;		
+	
+	static {
+		allInstances = new ArrayList<ROLOSEntity>();
+		wvDisplayModelGroups = new HashMapList<DisplayModel, ROLOSEntity>();
+	}
 	
 	{
+		//SHAPES
 		priority = new IntegerInput("Priority", "Key Inputs", 0);
 		priority.setValidRange(0, Integer.MAX_VALUE);
 		this.addInput(priority);
 		
-		worldViewShapeFile = new EntityInput<Query>(Query.class, "ShapeFileQuery", "Graphics", null);
+		worldViewShapeFile = new EntityInput<Query>(Query.class, "ShapeFileQuery", "Basic Graphics", null);
 		this.addInput(worldViewShapeFile);
 		
 		colorInput = new ColourInput("Colour", "Basic Graphics", ColourInput.BLACK);
@@ -72,9 +112,37 @@ public class ROLOSEntity extends DisplayEntity  {
 		opacity = new ValueInput("Opacity", "Basic Graphics", 0.01d);
 		opacity.setValidRange(0.0d, 1.0d);
 		this.addInput(opacity);
+		
+		//COLLADAS
+		wvSizeInput = new Vec3dInput("WVSize", "Basic Graphics", new Vec3d(1.0d, 1.0d, 1.0d));
+		this.addInput(wvSizeInput);
+		
+		wvPositionInput = new Vec3dInput("WVPosition", "Basic Graphics", new Vec3d());
+		this.addInput(wvPositionInput);
+		
+		wvShow = new BooleanInput("WVShow", "Basic Graphics", false);
+		this.addInput(wvShow);
 	}
 	
 	public ROLOSEntity() {
+		synchronized (allInstances) {
+			allInstances.add(this);
+		}
+		
+	}
+	
+	public static ArrayList<? extends ROLOSEntity> getAll() {
+		synchronized (allInstances) {
+			return allInstances;
+		}
+	}
+
+	@Override
+	public void kill() {
+		super.kill();
+		synchronized (allInstances) {
+			allInstances.remove(this);
+		}
 	}
 	
 	@Override
@@ -83,9 +151,22 @@ public class ROLOSEntity extends DisplayEntity  {
 		if(in == priority)
 			this.setInternalPriority(priority.getValue());
 		
-		if(in == colorInput && this.getClass().equals(Facility.class)){
+		/*if(in == colorInput && this.getClass().equals(Facility.class)){
 			
 		}
+		//TODO delete old shapes/layers
+		if (in == wvPositionInput && wvShow.getValue()==true && this.getDisplayModelList()!=null){
+			ColladaModel target = (ColladaModel) getDisplayModelList().get(0);
+			File uri = new File(target.getColladaFile());
+			//System.out.println(uri);
+			Vec3d pos = wvPositionInput.getValue();
+			//System.out.println(pos.x + " " + pos.y + " " + pos.z);
+			Position position = Position.fromDegrees(pos.x, pos.y, pos.z);
+			Vec3d scale = wvSizeInput.getValue();
+			Vec4 actualScale = new Vec4(scale.x, scale.y, scale.z);
+			Thread thread = new WorldWindFrame.ColladaThread(uri, position,  actualScale, false);
+			thread.start();
+		}*/
 	}
 		
 	@Override
@@ -96,6 +177,39 @@ public class ROLOSEntity extends DisplayEntity  {
 	@Override
 	public void earlyInit() {
 		super.earlyInit();
+		
+		if (WorldWindFrame.AppFrame != null && !drawnColladas) {
+			for (DisplayModel eachDisplaymodel : wvDisplayModelGroups.getKeys()) {
+				try {
+					ColladaModel target = (ColladaModel) eachDisplaymodel;
+					File uri = new File(target.getColladaFile());
+					ArrayList<Vec3d> positionList = new ArrayList<Vec3d>();
+					ArrayList<Vec3d> scaleList = new ArrayList<Vec3d>();
+					for (ROLOSEntity eachEntity : wvDisplayModelGroups
+							.get(eachDisplaymodel)) {
+						positionList.add(eachEntity.getWVPositionInput());
+						scaleList.add(eachEntity.getWVSizeInput());
+					}
+					Thread thread = new WorldWindFrame.ColladaThread(uri, positionList, scaleList,
+							false);
+					thread.start();
+					try {
+						thread.join();
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				} catch (ClassCastException e) {
+					// TODO: handle exception
+				}
+			}
+			drawnColladas = true;
+		}
+	}
+	
+	public void addToWVDisplayModelList(){
+		for(DisplayModel each: this.getDisplayModelList())
+			wvDisplayModelGroups.add(each, this);
 	}
 	
 	public Query getShapeFileQuery(){
@@ -116,6 +230,18 @@ public class ROLOSEntity extends DisplayEntity  {
 	
 	public double getOpacity(){
 		return opacity.getValue();
+	}
+	
+	public String getWVShowString(){
+		return wvShow.getValueString();
+	}
+	
+	public Vec3d getWVPositionInput(){
+		return wvPositionInput.getValue();
+	}
+	
+	public Vec3d getWVSizeInput(){
+		return wvSizeInput.getValue();
 	}
 	
 	/**
@@ -275,6 +401,4 @@ public class ROLOSEntity extends DisplayEntity  {
 	               (o1.getEntityNumber() == o2.getEntityNumber() ? 0 : 1));
 		}		
 	}
-	
-
 }

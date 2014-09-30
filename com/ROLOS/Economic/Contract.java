@@ -16,6 +16,7 @@ import com.ROLOS.Logistics.Route;
 import com.ROLOS.Logistics.RouteEntity;
 import com.ROLOS.Logistics.RouteSegment;
 import com.ROLOS.Utils.HashMapList;
+import com.jaamsim.events.ReflectionTarget;
 import com.jaamsim.input.ValueInput;
 import com.jaamsim.units.TimeUnit;
 import com.sandwell.JavaSimulation.BooleanInput;
@@ -311,6 +312,8 @@ public class Contract extends ROLOSEntity {
 		
 		SimulationManager.printContractReport(this);
 		
+		this.scheduleProcess(this.getContractPeriod(), 1, new ReflectionTarget(this, "voidContract"));
+		
 		//TODO bad implementation for showing routes of active contracts. refactor when overriding shapefile based on input is figured out
 		if(WorldWindFrame.AppFrame != null){
 			//Populate routesegment/entity list to be drawn
@@ -326,7 +329,17 @@ public class Contract extends ROLOSEntity {
 				String layerName = routesList.get(0).getName()+this.getName();
 				SimulationManager.getRemoveablebleWorldWindLayers().add(layerName+".shp");
 				routesList.get(0).getShapeFileQuery().execute(layerName, routesList, true, false, 
-					new DefinedShapeAttributes(tempColor, tempWidth, routesList.get(0).getOpacity()));
+					new DefinedShapeAttributes(tempColor, tempWidth, this.getProduct().getOpacity()));
+			}
+			
+			// wait for a little bit after showing each route
+			synchronized (this) {
+				try {
+					this.wait(100);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 		}
 
@@ -367,8 +380,8 @@ public class Contract extends ROLOSEntity {
 	
 	public void voidContract(){
 		buyer.getValue().getGeneralManager().voidContract(this);
-	// TODO just call back moving entities and keep dormant fleet and contracts
-			supplier.getValue().getGeneralManager().voidContract(this);
+		// TODO just call back moving entities and keep dormant fleet and contracts
+		supplier.getValue().getGeneralManager().voidContract(this);
 		activeBuyer= false;
 		activeForScheduling = false;
 		activeSupplier= false;
