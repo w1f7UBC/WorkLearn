@@ -216,7 +216,7 @@ public class SimulationManager extends DisplayEntity {
 					inventoryTable = each;
 			}
 			sawmillTable.printResultContent("SawmillTable",
-					sawmillTable.execute(false, false, null));
+					sawmillTable.execute(false, false, null), false);
 			// wait for the panning to finish
 			synchronized (this) {
 				try {
@@ -244,9 +244,9 @@ public class SimulationManager extends DisplayEntity {
 					new Angle(Angle.fromDegrees(50)), initZoom, 10000, 90000,
 					true);
 			inventoryTable.printResultContent("InventoryTable", 
-					inventoryTable.execute("InventoryTable", "52.42", "-125.24", true, false, 
-							new DefinedShapeAttributes(),1,0));
-			
+					inventoryTable.execute("InventoryTable", "52.42", "-125.24", true, false, new DefinedShapeAttributes(),1,0),true);
+
+								
 			// wait for the sawmill table
 			synchronized (this) {
 				try {

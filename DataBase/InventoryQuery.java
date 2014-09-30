@@ -7,6 +7,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.Vector;
 
+import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 
@@ -79,7 +80,7 @@ public  class InventoryQuery extends Query {
 	}
 
 	@Override
-	public void printResultContent(String name, ResultSet resultset){
+	public void printResultContent(String name, ResultSet resultset, boolean verticalOrientation){
 		try {
 	    	ResultSetMetaData metaData = resultset.getMetaData();
 		    // names of columns
@@ -135,4 +136,6 @@ public  class InventoryQuery extends Query {
 			return;
 		}
 	}
+	
+	
 }

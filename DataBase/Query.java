@@ -31,6 +31,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 
+
 import worldwind.DefinedShapeAttributes;
 import worldwind.LayerManager;
 import worldwind.WorldWindFrame;
@@ -186,7 +187,7 @@ public class Query extends Entity {
 			 
 			 statements="SELECT DISTINCT * FROM " + areaTable.getValue() + " WHERE st_distance(ST_Transform("+areaTable.getValue()+".shape,26986), ST_Transform(ST_GeomFromText('POINT("+longitude+" "+latitude+")', 4269),26986))<"+radius*1000;
 			 //color of selected dots
-			 attributes.setColor(Color.red);
+			 attributes.setColor(Color.cyan);
 			 drawCircleOnWorldWind(name,latitude,longitude,currentShape,radius);
 			
 		}
@@ -289,32 +290,71 @@ public class Query extends Entity {
 		return null;
     }
 
-	public void printResultContent(String name, ResultSet restultset){
-		try{
-			if (restultset!=null){
-			    ResultSetMetaData metaData = restultset.getMetaData();
-			    // names of columns
-			    Vector<String> columnNames = new Vector<String>();
-			    int columnCount = metaData.getColumnCount();
-			    for (int column = 1; column <= columnCount; column++) {
-			    	columnNames.add(metaData.getColumnName(column));
-			    }
-			    // data of the table
-			    Vector<Vector<Object>> data = new Vector<Vector<Object>>();
-			    while (restultset.next()) {
-			    	Vector<Object> vector = new Vector<Object>();
-			    	for (int columnIndex = 1; columnIndex <= columnCount; columnIndex++) {
-			    		vector.add(restultset.getObject(columnIndex));
-			    	}
-			    	data.add(vector);
-			    }
-			    displayResultContent(name, new JTable(new DefaultTableModel(data, columnNames)));
+
+	
+	public void printResultContent(String name, ResultSet resultset, boolean verticalOrientation){
+		//If vertical orientation
+		if(verticalOrientation == true){
+			try{
+				if (resultset!=null){
+				    ResultSetMetaData metaData = resultset.getMetaData();
+				    
+				    //Sets column titles
+					Vector<String> columnName = new Vector<String>();
+					columnName.add("Key");
+					columnName.add("Value");
+					
+					//Creates vectors that fill table line by line
+					Vector<Vector<Object>> data = new Vector<Vector<Object>>();
+					int keyCount = metaData.getColumnCount();
+					while(resultset.next()){
+						for (int key = 1; key <= keyCount; key++){
+							String keyName = metaData.getColumnName(key);
+							Object keyValue = resultset.getObject(key);
+							Vector keyVector = new Vector<Object>();
+							keyVector.add(keyName);
+							keyVector.add(keyValue);
+							data.add(keyVector);
+					}
+					
+					}
+					displayResultContent(name, new JTable(new DefaultTableModel(data, columnName)));
+				}
+			} catch (SQLException e) {
+				System.out.println(e);
+				return;
 			}
-		} catch (SQLException e) {
-			System.out.println(e);
-			return;
 		}
+		// If horizontal orientation
+		else{
+			try{
+				if (resultset!=null){
+				    ResultSetMetaData metaData = resultset.getMetaData();
+				    // names of columns
+				    Vector<String> columnNames = new Vector<String>();
+				    int columnCount = metaData.getColumnCount();
+				    for (int column = 1; column <= columnCount; column++) {
+				    	columnNames.add(metaData.getColumnName(column));
+				    }
+				    // data of the table
+				    Vector<Vector<Object>> data = new Vector<Vector<Object>>();
+				    while (resultset.next()) {
+				    	Vector<Object> vector = new Vector<Object>();
+				    	for (int columnIndex = 1; columnIndex <= columnCount; columnIndex++) {
+				    		vector.add(resultset.getObject(columnIndex));
+				    	}
+				    	data.add(vector);
+				    }
+				    displayResultContent(name, new JTable(new DefaultTableModel(data, columnNames)));
+				}
+			} catch (SQLException e) {
+				System.out.println(e);
+				return;
+			}
+		}
+		
 	}
+
 
 	public void displayResultContent(final String name, final JTable content){
 		 EventQueue.invokeLater(new Runnable() {
