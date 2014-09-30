@@ -28,6 +28,7 @@ import com.jaamsim.input.Keyword;
 import com.jaamsim.input.ValueInput;
 import com.jaamsim.math.Color4d;
 import com.jaamsim.math.Vec3d;
+import com.jaamsim.render.VisibilityInfo;
 import com.sandwell.JavaSimulation3D.DisplayEntity;
 
 /**
@@ -67,8 +68,7 @@ public class ROLOSEntity extends DisplayEntity  {
 			+ "Default is 0.03",
 	         example = "Road1 Opacity { 0.1 }")
 	private final ValueInput opacity;
-	
-	
+		
 	//COLLADAS
 	@Keyword(description = "The size of the object in { x, y, z } coordinates. If only the x and y coordinates are given " +
             "then the z dimension is assumed to be zero.",
@@ -150,7 +150,6 @@ public class ROLOSEntity extends DisplayEntity  {
 		super.updateForInput(in);
 		if(in == priority)
 			this.setInternalPriority(priority.getValue());
-		
 		/*if(in == colorInput && this.getClass().equals(Facility.class)){
 			
 		}
@@ -182,16 +181,18 @@ public class ROLOSEntity extends DisplayEntity  {
 			for (DisplayModel eachDisplaymodel : wvDisplayModelGroups.getKeys()) {
 				try {
 					ColladaModel target = (ColladaModel) eachDisplaymodel;
+					
 					File uri = new File(target.getColladaFile());
 					ArrayList<Vec3d> positionList = new ArrayList<Vec3d>();
 					ArrayList<Vec3d> scaleList = new ArrayList<Vec3d>();
+					ArrayList<VisibilityInfo> visList = new ArrayList<VisibilityInfo>();
 					for (ROLOSEntity eachEntity : wvDisplayModelGroups
 							.get(eachDisplaymodel)) {
 						positionList.add(eachEntity.getWVPositionInput());
 						scaleList.add(eachEntity.getWVSizeInput());
+						visList.add(eachEntity.getDisplayModelList().get(0).getVisibilityInfo());
 					}
-					Thread thread = new WorldWindFrame.ColladaThread(uri, positionList, scaleList,
-							false);
+					Thread thread = new WorldWindFrame.ColladaThread(uri, positionList, scaleList, visList, false);
 					thread.start();
 					try {
 						thread.join();

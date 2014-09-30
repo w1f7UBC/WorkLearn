@@ -29,6 +29,7 @@ import javax.swing.*;
 import javax.swing.filechooser.*;
 
 import com.jaamsim.math.Vec3d;
+import com.jaamsim.render.VisibilityInfo;
 import com.sandwell.JavaSimulation3D.GUIFrame;
 
 import DataBase.Query;
@@ -272,7 +273,7 @@ public class WorldWindFrame extends ApplicationTemplate
         /** Geographic position of the COLLADA model. */
         protected ArrayList<Vec3d> position;
         protected ArrayList<Vec3d> scale;
-        
+        protected ArrayList<VisibilityInfo> visInfo;
 
         /**
          * Creates a new worker thread from a specified <code>colladaSource</code> and <code>appFrame</code>.
@@ -283,7 +284,7 @@ public class WorldWindFrame extends ApplicationTemplate
          * @param position      the geographic position of the COLLADA model.
          * @param appFrame      the <code>AppFrame</code> in which to display the COLLADA source.
          */
-        public ColladaThread(Object colladaSource, Vec3d position, Vec3d scale, Boolean zoom)
+        public ColladaThread(Object colladaSource, Vec3d position, Vec3d scale, VisibilityInfo visibilityInfo, Boolean zoom)
         {
             this.colladaSource = colladaSource;
             this.zoom = zoom;
@@ -291,15 +292,18 @@ public class WorldWindFrame extends ApplicationTemplate
             this.position.add(position);
             this.scale = new ArrayList<Vec3d>();
             this.scale.add(scale);
+            this.visInfo = new ArrayList<VisibilityInfo>();
+            this.visInfo.add(visibilityInfo);
 
         }
 
-        public ColladaThread(Object colladaSource, ArrayList<Vec3d> position, ArrayList<Vec3d> scale, Boolean zoom)
+        public ColladaThread(Object colladaSource, ArrayList<Vec3d> position, ArrayList<Vec3d> scale, ArrayList<VisibilityInfo> visibilityInfo, Boolean zoom)
         {
         	this.colladaSource = colladaSource;
         	this.position=position;
         	this.scale=scale;
         	this.zoom=zoom;
+        	this.visInfo=visibilityInfo;
         } 
 
         /**
@@ -314,10 +318,11 @@ public class WorldWindFrame extends ApplicationTemplate
                 final RenderableLayer layer = new RenderableLayer();
                 Iterator<Vec3d> posIterator = this.position.iterator();
                 Iterator<Vec3d> scaleIterator = this.scale.iterator();
+                Iterator<VisibilityInfo> visIterator = this.visInfo.iterator();
                 double x=0;
                 double y=0;
                 int count=0;
-                while(posIterator.hasNext() && scaleIterator.hasNext()){
+                while(posIterator.hasNext() && scaleIterator.hasNext() && visIterator.hasNext()){
                 	ColladaRoot colladaCopy = ColladaRoot.createAndParse(this.colladaSource);
                 	colladaCopy.setAltitudeMode(WorldWind.CLAMP_TO_GROUND);
                 	Vec3d target = posIterator.next();
@@ -331,13 +336,14 @@ public class WorldWindFrame extends ApplicationTemplate
                 	target = scaleIterator.next();
         			Vec4 actualScale = new Vec4(target.x, target.y, target.z);
                 	colladaCopy.setModelScale(actualScale);
+                    VisibilityInfo visibility = visIterator.next();
+                    layer.setMaxActiveAltitude(visibility.getMax());
+                    layer.setMinActiveAltitude(visibility.getMin());
                 	// Create a ColladaController to adapt the ColladaRoot to the World Wind renderable interface.
                     ColladaController colladaController = new ColladaController(colladaCopy);
                     // Adds a new layer containing the ColladaRoot to the end of the WorldWindow's layer list.
                     layer.addRenderable(colladaController);
                     layer.setPickEnabled(false);
-                    //layer.setMaxActiveAltitude(arg0);
-                    //layer.setMinActiveAltitude(arg0);
                 }
                 final double lat = (x/count);
                 final double lon = (y/count);
