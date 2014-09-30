@@ -233,10 +233,12 @@ rpm    ConversionFactorToSI { 3.14159265358979 30     }  Description { 'Revoluti
 " Energy units
 " ======================================================================================================================================================
 
-Define EnergyUnit { J kWh }
+Define EnergyUnit { J kWh MWh GWh}
 
 J      ConversionFactorToSI { 1       }  Description { 'Joules' }
 kWh    ConversionFactorToSI { 3600000 }  Description { 'Kilowatt-Hours' }
+MWh    ConversionFactorToSI { 3600000000 }  Description { 'Megawatt-Hours' }
+GWh    ConversionFactorToSI { 3600000000000 }  Description { 'Gigawatt-Hours' }
 
 " ======================================================================================================================================================
 " Energy density units

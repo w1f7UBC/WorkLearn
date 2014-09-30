@@ -151,12 +151,12 @@ public class SimulationManager extends DisplayEntity {
 			double bcZoom = 1500000;
 			view.addPanToAnimator(initPosition, bcPosition, initHeadingAngle,
 					initHeadingAngle, initPitchAngle,
-					initPitchAngle, initZoom, 1500000, 10000,
+					initPitchAngle, initZoom, 1500000, 90000,
 					true);
 			//first wait before zooming onto Anheim mill
 			synchronized (this) {
 				try {
-					this.wait(11000);
+					this.wait(95000);
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -171,12 +171,12 @@ public class SimulationManager extends DisplayEntity {
 			//zoom past sawmill icon
 			view.addPanToAnimator(initPosition, Position.fromDegrees(52.42, -125.24), initHeadingAngle,
 					initHeadingAngle, initPitchAngle,
-					initPitchAngle, initZoom, 18000, 5000,
+					initPitchAngle, initZoom, 18000, 90000,
 					true);
 			// wait for the panning to finish
 			synchronized (this) {
 				try {
-					this.wait(5000);
+					this.wait(90000);
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -190,12 +190,12 @@ public class SimulationManager extends DisplayEntity {
 			
 			view.addPanToAnimator(initPosition, initPosition, initHeadingAngle,
 					new Angle(Angle.fromDegrees(-60)), initPitchAngle,
-					new Angle(Angle.fromDegrees(80)), initZoom, 5000, 5000,
+					new Angle(Angle.fromDegrees(80)), initZoom, 5000, 90000,
 					true);
 			// wait for the panning to finish
 			synchronized (this) {
 				try {
-					this.wait(6000);
+					this.wait(95000);
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -220,7 +220,7 @@ public class SimulationManager extends DisplayEntity {
 			// wait for the panning to finish
 			synchronized (this) {
 				try {
-					this.wait(3000);
+					this.wait(10000);
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -241,7 +241,7 @@ public class SimulationManager extends DisplayEntity {
 			QueryFrame.setSliderValue(3);
 			view.addPanToAnimator(initPosition, Position.fromDegrees(52.39, -125.222), initHeadingAngle,
 					new Angle(Angle.fromDegrees(-20)), initPitchAngle,
-					new Angle(Angle.fromDegrees(50)), initZoom, 10000, 5000,
+					new Angle(Angle.fromDegrees(50)), initZoom, 10000, 90000,
 					true);
 			inventoryTable.printResultContent("InventoryTable", 
 					inventoryTable.execute("InventoryTable", "52.42", "-125.24", true, false, 
@@ -250,7 +250,7 @@ public class SimulationManager extends DisplayEntity {
 			// wait for the sawmill table
 			synchronized (this) {
 				try {
-					this.wait(10000);
+					this.wait(95000);
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -271,9 +271,18 @@ public class SimulationManager extends DisplayEntity {
 			// move back to the original view
 			view.addPanToAnimator(view.getCenterPosition(), bcPosition,
 					view.getHeading(), bcHeadingAngle, view.getPitch(),
-					bcPitchAngle, view.getZoom(), bcZoom, 6000, false);
+					bcPitchAngle, view.getZoom(), bcZoom, 90000, false);
 		}
-				
+		
+		// wait for the zoom out
+		synchronized (this) {
+			try {
+				this.wait(90000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 		
 	}
 	
