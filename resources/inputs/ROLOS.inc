@@ -32,8 +32,10 @@ Define ObjectType {
                     TimeSeries
                     Delay
                     SankyInfo
+                    XYGraph
                   }
 Group                       JavaClass { com.sandwell.JavaSimulation.Group               } Palette { 'ROLOS' } DragAndDrop 			{ FALSE 	}
+XYGraph                     JavaClass { com.sandwell.JavaSimulation3D.XYGraph               } Palette { 'ROLOS' } DragAndDrop 			{ TRUE 	}
 TimeSeries                  JavaClass { com.sandwell.JavaSimulation.TimeSeries          } Palette { 'ROLOS' } DragAndDrop 	{ FALSE 	}
 FacilityGeneralManager      JavaClass { com.ROLOS.DMAgents.FacilityGeneralManager       } Palette { 'ROLOS' } DragAndDrop 			{ FALSE 	}
 FacilityOperationsManager   JavaClass { com.ROLOS.DMAgents.FacilityOperationsManager    } Palette { 'ROLOS' } DragAndDrop 	{ FALSE 	}
