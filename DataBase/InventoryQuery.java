@@ -27,7 +27,7 @@ public  class InventoryQuery extends Query {
 	}
 	
 	@Override
-	public ResultSet execute(String name, String latitude, String longitude, Boolean draw, Boolean zoom, DefinedShapeAttributes attributes){
+	public ResultSet execute(String name, String latitude, String longitude, Boolean draw, Boolean zoom, DefinedShapeAttributes attributes,int mode,int radius){
 		//System.out.println(latitude + " " + longitude);
 		//for the shape generator/loader in LayerManager class to create the shape show on map
 		//for querying the actual data that is represented in the selected/generated area

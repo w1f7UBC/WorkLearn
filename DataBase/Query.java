@@ -1,5 +1,16 @@
 package DataBase;
 
+import gov.nasa.worldwind.geom.Angle;
+import gov.nasa.worldwind.geom.LatLon;
+import gov.nasa.worldwind.layers.Layer;
+import gov.nasa.worldwind.layers.RenderableLayer;
+import gov.nasa.worldwind.render.BasicShapeAttributes;
+import gov.nasa.worldwind.render.Material;
+import gov.nasa.worldwind.render.Renderable;
+import gov.nasa.worldwind.render.ShapeAttributes;
+import gov.nasa.worldwind.render.SurfaceCircle;
+import gov.nasa.worldwind.render.SurfaceShape;
+
 import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.GraphicsEnvironment;
@@ -22,7 +33,6 @@ import javax.swing.table.DefaultTableModel;
 
 import worldwind.DefinedShapeAttributes;
 import worldwind.LayerManager;
-import worldwind.QueryFrame;
 import worldwind.WorldWindFrame;
 import worldwind.WorldWindFrame.WorkerThread;
 
@@ -165,47 +175,30 @@ public class Query extends Entity {
 		}
 		return getResultSet(statements);
 	}
-	
-	public ResultSet execute(String name, String latitude, String longitude, Boolean draw, Boolean zoom, DefinedShapeAttributes attributes){
-		String radius_statements ="",statements="";
+
+	public ResultSet execute(String name, String latitude, String longitude, Boolean draw, Boolean zoom, DefinedShapeAttributes attributes,int mode,int radius){
+		String statements="";
+		Renderable currentShape=null;
 		/*
 		 *  RADIUS SEARCH
 		 */
-		if(QueryFrame.getMode()==2){
-			// TODO bad implementation! hacky way of passing selection statement!
-		 statements="SELECT objectid_1 as Stand_ID, round(site_index,1) as Site_index, round(poly_area,1) as Area, concat(spec_cd_1,'(', round(spec_pct_1,0), '%)', case when round(spec_pct_2,0) > 0 then "
-		 		+ "('-' || spec_cd_2||'('||round(spec_pct_2,0)|| '%)') end) as Species_Pct,"+
-       "round(proj_ht_1,1) as Avg_Height, round(proj_age_1,1) as Avg_Age, round(lvlsp1_125,1) as merchant_vol, round(dvltot_125,1) as dead_vol, round(wstem_biom,1) as stemwood_biomass, round(bark_biom,1) as Bark_biomass, round(brnch_biom,1) as Branch_biomass, "
-       + "round(folg_biom,1) as Foliage_biomass, shape FROM " + areaTable.getValue() + " WHERE st_distance(ST_Transform("+areaTable.getValue()+".shape,26986), ST_Transform(ST_GeomFromText('POINT("+longitude+" "+latitude+")', 4269),26986))<"+QueryFrame.getSliderValue()*1000;
-		 radius_statements="SELECT ST_Buffer(ST_MakePoint("+longitude+","+ latitude+")::geography, "+QueryFrame.getSliderValue()*1000+")";
-		 //color of circle
-		 attributes.setColor(Color.red);
+		if(mode==2){
+			 
+			 statements="SELECT DISTINCT * FROM " + areaTable.getValue() + " WHERE st_distance(ST_Transform("+areaTable.getValue()+".shape,26986), ST_Transform(ST_GeomFromText('POINT("+longitude+" "+latitude+")', 4269),26986))<"+radius*1000;
+			 //color of selected dots
+			 attributes.setColor(Color.red);
+			 drawCircleOnWorldWind(name,latitude,longitude,currentShape,radius);
+			
 		}
 		/*
 		 *  CLOSEST POINT
 		 */
-		else if(QueryFrame.getMode()==3){
+		else if(mode==3){
 		 statements="SELECT * FROM "+ areaTable.getValue() + " ORDER BY "+ areaTable.getValue() +".shape <->  ST_GeomFromText('POINT("+longitude+" "+latitude+")', 4269) LIMIT 1";
 			}
 		if (draw==true){
 			File file=null;
-			if(QueryFrame.getMode()==2){
-				File circle = database.getLayermanager().sql2shp(name+"circle", radius_statements);
-				WorkerThread prethread =new WorldWindFrame.WorkerThread(circle, WorldWindFrame.AppFrame, zoom, new DefinedShapeAttributes());
-				prethread.start();
-				try {
-					prethread.join();
-					
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				file = database.getLayermanager().sql2shp(name, statements);
-			}
-			else if(QueryFrame.getMode()==3)
-			{
-				 file = database.getLayermanager().sql2shp(name, statements);
-			}
+			file = database.getLayermanager().sql2shp(name, statements);			
 			if (file!=null){
 				
 				WorkerThread thread =new WorldWindFrame.WorkerThread(file, WorldWindFrame.AppFrame, zoom, attributes);
@@ -381,6 +374,29 @@ public class Query extends Entity {
 			}
 		}
 		return false;
+	}
+	private void drawCircleOnWorldWind(String name,String latitude,String longitude,Renderable currentShape,int radius)
+	{
+		 LatLon position = new LatLon(Angle.fromDegrees(Double.parseDouble(latitude)), Angle.fromDegrees(Double.parseDouble(longitude)));
+		 Object circle= new SurfaceCircle(position, radius*1000);
+		 currentShape = (Renderable) circle;
+		 SurfaceShape shape = (SurfaceShape) currentShape;
+         ShapeAttributes attr = new BasicShapeAttributes();
+        
+         attr.setDrawOutline(false);
+         attr.setInteriorMaterial(new Material(Color.red));
+         attr.setInteriorOpacity(0.2f);
+         attr.setDrawInterior(true);
+         
+         shape.setAttributes(attr);
+         
+         RenderableLayer layer = new RenderableLayer();
+         layer.setName(name+".shp");
+         layer.removeAllRenderables();
+         layer.addRenderable(currentShape);
+         layer.setPickEnabled(false);
+         WorldWindFrame.AppFrame.addShapefileLayer(layer);
+         WorldWindFrame.AppFrame.getWwjPanel().getWwd().redraw();
 	}
 }
 

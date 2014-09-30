@@ -245,7 +245,7 @@ public class SimulationManager extends DisplayEntity {
 					true);
 			inventoryTable.printResultContent("InventoryTable", 
 					inventoryTable.execute("InventoryTable", "52.42", "-125.24", true, false, 
-							new DefinedShapeAttributes()));
+							new DefinedShapeAttributes(),1,0));
 			
 			// wait for the sawmill table
 			synchronized (this) {
