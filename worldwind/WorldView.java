@@ -5,7 +5,9 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
+import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.Position;
+import gov.nasa.worldwind.view.orbit.BasicOrbitView;
 
 import com.jaamsim.events.ReflectionTarget;
 import com.jaamsim.input.Input;
@@ -27,14 +29,29 @@ public class WorldView extends Entity {
 		showWindow = new BooleanInput("ShowWindow", "WorldWind", false);
 		this.addInput(showWindow);
 	}
-	private Map<Double, Vec3d> cameraInputMap;
+	private Map<Double, double[]> cameraInputMap;
 
 	public WorldView(){
 		WorldWindFrame.initialize();
 	}
 
-    public void goTo(double lat, double lon, double zoom){
-    	WorldWindFrame.AppFrame.getWwd().getView().goTo(Position.fromDegrees(lat, lon), zoom);
+    public void goTo(double lat, double lon, double zoom, double heading, double pitch){
+    	//WorldWindFrame.AppFrame.getWwd().getView().goTo(Position.fromDegrees(lat, lon), zoom);
+
+    	
+    	BasicOrbitView orbitView;
+    	orbitView = (BasicOrbitView) WorldWindFrame.AppFrame.getWwd().getView();
+    	
+    	Angle newHeading = Angle.fromDegrees(heading);
+    	Angle newPitch = Angle.fromDegrees(pitch);
+    	
+		if(heading == -1.0){
+			newHeading = orbitView.getHeading();
+		}
+		if(pitch == -1.0){
+			newPitch = orbitView.getPitch();
+		}
+    	orbitView.addPanToAnimator(Position.fromDegrees(lat, lon), newHeading, newPitch, zoom);
     }
 
     @Override
@@ -43,9 +60,15 @@ public class WorldView extends Entity {
     	Iterator<Double> iterator = set.iterator();
     	while (iterator.hasNext()){
     		double time = iterator.next();
-    		Vec3d location = cameraInputMap.get(time);
-    		//System.out.println(time + " " + location);
-    		this.scheduleProcess(time, 3, new ReflectionTarget(this, "goTo", location.x, location.y, location.z));
+    		double[] location = cameraInputMap.get(time);
+    		
+    		BasicOrbitView orbitView;
+        	orbitView = (BasicOrbitView) WorldWindFrame.AppFrame.getWwd().getView();
+       
+        	
+    		//System.out.println("lat " + location[0] +"long "+ location[1] + "zoom " + location[2] + "header " + newHeading + "pitch " + newPitch);
+    		this.scheduleProcess(time, 3, new ReflectionTarget(this, "goTo", location[0], location[1], location[2], location[3], location[4]));
+    		
     	}
     }
 
@@ -54,9 +77,9 @@ public class WorldView extends Entity {
 		super.updateForInput(in);
 		if(in==camera){
 			if (cameraInputMap==null){
-				cameraInputMap=new HashMap<Double, Vec3d>();
+				cameraInputMap=new HashMap<Double, double[]>();
 			}
-			cameraInputMap.put(camera.getTime(), camera.getValue());
+			cameraInputMap.put(camera.getTime(), camera.getDoubles());
 		}
 		if(in==showWindow){
 			WorldWindFrame.setViewVisible(showWindow.getValue());

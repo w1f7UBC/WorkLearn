@@ -79,7 +79,7 @@ public class WorldWindFrame extends ApplicationTemplate
                 					lon=lon.substring(0, lon.length()-1);
                 					String name = query.getName()+"("+lat+","+lon+")";
                 					ResultSet resultset=query.execute(name, lat, lon, true, true, new DefinedShapeAttributes());
-                					query.printResultContent(name, resultset);
+                					query.printResultContent(name, resultset, true);
                 				}
                 				position=null;
                 			}
