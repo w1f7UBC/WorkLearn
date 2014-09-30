@@ -52,7 +52,8 @@ Facility                    JavaClass { com.ROLOS.Logistics.Facility            
 Transshipment               JavaClass { com.ROLOS.Logistics.Transshipment            } Palette { 'ROLOS' } DefaultDisplayModel 	{ Circle 				}
 Fleet                       JavaClass { com.ROLOS.Logistics.Fleet                       } Palette { 'ROLOS' } DefaultDisplayModel 	{ Circle 				}
 EntityGenerator             JavaClass { com.ROLOS.Logistics.EntityGenerator             } Palette { 'ROLOS' } DefaultDisplayModel 	{ Circle 				}
-MovingEntity                JavaClass { com.ROLOS.Logistics.MovingEntity                } Palette { 'ROLOS' } DefaultDisplayModel 	{ Truck3D 				}
+"MovingEntity                JavaClass { com.ROLOS.Logistics.MovingEntity                } Palette { 'ROLOS' } DefaultDisplayModel 	{ Truck3D 				}
+MovingEntity                JavaClass { com.ROLOS.Logistics.MovingEntity                } Palette { 'ROLOS' } DefaultDisplayModel 	{ BioenergyIcon				}
 BulkCargo                   JavaClass { com.ROLOS.Logistics.BulkCargo                   } Palette { 'ROLOS' } DefaultDisplayModel 	{ Cargo3D 				}
 Loader                      JavaClass { com.ROLOS.Logistics.Loader                      } Palette { 'ROLOS' } DefaultDisplayModel 	{ ScreenPointsModelDefault 				}
 BulkMaterial                JavaClass { com.ROLOS.Logistics.BulkMaterial                } Palette { 'ROLOS' } DefaultDisplayModel 	{ ScreenPointsModelDefault 				}

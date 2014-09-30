@@ -1,8 +1,12 @@
 package com.ROLOS;
 
+import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.geom.Vec4;
+import gov.nasa.worldwind.layers.IconLayer;
+import gov.nasa.worldwind.render.UserFacingIcon;
 
+import java.awt.Dimension;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -23,6 +27,7 @@ import com.ROLOS.Logistics.Facility;
 import com.ROLOS.Utils.HashMapList;
 import com.jaamsim.DisplayModels.ColladaModel;
 import com.jaamsim.DisplayModels.DisplayModel;
+import com.jaamsim.DisplayModels.ImageModel;
 import com.jaamsim.input.Input;
 import com.jaamsim.input.Keyword;
 import com.jaamsim.input.ValueInput;
@@ -122,6 +127,8 @@ public class ROLOSEntity extends DisplayEntity  {
 		
 		wvShow = new BooleanInput("WVShow", "Basic Graphics", false);
 		this.addInput(wvShow);
+		
+		//IMAGES
 	}
 	
 	public ROLOSEntity() {
@@ -150,29 +157,45 @@ public class ROLOSEntity extends DisplayEntity  {
 		super.updateForInput(in);
 		if(in == priority)
 			this.setInternalPriority(priority.getValue());
-		/*if(in == colorInput && this.getClass().equals(Facility.class)){
+		if(in == colorInput && this.getClass().equals(Facility.class)){
 			
 		}
 		//TODO delete old shapes/layers
-		if (in == wvPositionInput && wvShow.getValue()==true && this.getDisplayModelList()!=null){
-			ColladaModel target = (ColladaModel) getDisplayModelList().get(0);
-			File uri = new File(target.getColladaFile());
-			//System.out.println(uri);
-			Vec3d pos = wvPositionInput.getValue();
-			//System.out.println(pos.x + " " + pos.y + " " + pos.z);
-			Position position = Position.fromDegrees(pos.x, pos.y, pos.z);
-			Vec3d scale = wvSizeInput.getValue();
-			Vec4 actualScale = new Vec4(scale.x, scale.y, scale.z);
-			Thread thread = new WorldWindFrame.ColladaThread(uri, position,  actualScale, false);
-			thread.start();
-		}*/
+		if (in ==wvShow && wvShow.getValue()==true){
+			if (wvPositionInput !=null && this.getDisplayModelList()!=null){
+				System.out.println("got in here");
+				DisplayModel target = getDisplayModelList().get(0);
+				if (target.getClass().isAssignableFrom(ColladaModel.class)){
+					System.out.println("got in here1");
+					ColladaModel colladaTarget = (ColladaModel) target;
+					File uri = new File(colladaTarget.getColladaFile());
+					Thread thread = new WorldWindFrame.ColladaThread(uri, wvPositionInput.getValue(),  wvSizeInput.getValue(), target.getVisibilityInfo(), true);
+					thread.start();
+				}
+				else if (target.getClass().isAssignableFrom(ImageModel.class)){
+					System.out.println("got in here2");
+					ImageModel imageTarget = (ImageModel) target;
+					IconLayer layer = new IconLayer();
+		            layer.setPickEnabled(true);
+		            layer.setAllowBatchPicking(false);
+		            layer.setRegionCulling(true);
+		            Position actualPosition = Position.fromDegrees(wvPositionInput.getValue().x, wvPositionInput.getValue().y, wvPositionInput.getValue().z);
+		            UserFacingIcon icon = new UserFacingIcon(imageTarget.getImageFile().getPath(), actualPosition);
+		            icon.setSize(new Dimension(24, 24));
+		            layer.addIcon(icon);
+		            layer.setMaxActiveAltitude(target.getVisibilityInfo().getMax());
+		            layer.setMinActiveAltitude(target.getVisibilityInfo().getMin());
+		            WorldWindFrame.AppFrame.getWwd().getModel().getLayers().add(layer);
+				}
+			}
+		}
 	}
 		
 	@Override
 	public void validate() {
 		super.validate();
 	}
-	
+	/*
 	@Override
 	public void earlyInit() {
 		super.earlyInit();
@@ -207,7 +230,7 @@ public class ROLOSEntity extends DisplayEntity  {
 			drawnColladas = true;
 		}
 	}
-	
+	*/
 	public void addToWVDisplayModelList(){
 		for(DisplayModel each: this.getDisplayModelList())
 			wvDisplayModelGroups.add(each, this);
