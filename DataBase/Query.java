@@ -183,25 +183,21 @@ public class Query extends Entity {
 		/*
 		 *  RADIUS SEARCH
 		 */
-		if(mode==2){
-			 
-			 statements="SELECT DISTINCT * FROM " + areaTable.getValue() + " WHERE st_distance(ST_Transform("+areaTable.getValue()+".shape,26986), ST_Transform(ST_GeomFromText('POINT("+longitude+" "+latitude+")', 4269),26986))<"+radius*1000;
-			 //color of selected dots
-			 attributes.setColor(Color.cyan);
-			 drawCircleOnWorldWind(name,latitude,longitude,currentShape,radius);
-			
+		if(mode==2){			 
+			 statements="SELECT DISTINCT * FROM " + areaTable.getValue() + " WHERE st_distance(ST_Transform("+areaTable.getValue()+".shape,26986), ST_Transform(ST_GeomFromText('POINT("+longitude+" "+latitude+")', 4269),26986))<"+radius*1000;	
 		}
 		/*
 		 *  CLOSEST POINT
 		 */
 		else if(mode==3){
-		 statements="SELECT * FROM "+ areaTable.getValue() + " ORDER BY "+ areaTable.getValue() +".shape <->  ST_GeomFromText('POINT("+longitude+" "+latitude+")', 4269) LIMIT 1";
+			statements="SELECT * FROM "+ areaTable.getValue() + " ORDER BY "+ areaTable.getValue() +".shape <->  ST_GeomFromText('POINT("+longitude+" "+latitude+")', 4269) LIMIT 1";
 			}
 		if (draw==true){
 			File file=null;
 			file = database.getLayermanager().sql2shp(name, statements);			
 			if (file!=null){
-				
+				if(mode==2)
+					 drawCircleOnWorldWind(name,latitude,longitude,currentShape,radius);
 				WorkerThread thread =new WorldWindFrame.WorkerThread(file, WorldWindFrame.AppFrame, zoom, attributes);
 				thread.start();
 				try {
