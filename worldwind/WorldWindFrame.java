@@ -82,8 +82,9 @@ public class WorldWindFrame extends ApplicationTemplate
                 					String lon = position.longitude.toString();
                 					lon=lon.substring(0, lon.length()-1);
                 					String name = query.getName()+"("+lat+","+lon+")";
-                					ResultSet resultset=query.execute(name, lat, lon, true, true, new DefinedShapeAttributes());
-                					query.printResultContent(name, resultset);
+                					ResultSet resultset=query.execute(name, lat, lon, true, true, new DefinedShapeAttributes(),QueryFrame.getMode(),QueryFrame.getSliderValue());
+                					query.printResultContent(name, resultset, true);
+
                 				}
                 				position=null;
                 			}
@@ -101,7 +102,7 @@ public class WorldWindFrame extends ApplicationTemplate
 
         public void removeShapefileLayer(String layer) {
 			LayerList layerList=this.getWwd().getModel().getLayers();
-			if (layerList.getLayerByName(layer)!=null){
+			while (layerList.getLayerByName(layer)!=null){
 				layerList.remove(layerList.getLayerByName(layer));
 			}
 		}

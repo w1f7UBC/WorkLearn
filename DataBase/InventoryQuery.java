@@ -7,6 +7,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.Vector;
 
+import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 
@@ -27,7 +28,7 @@ public  class InventoryQuery extends Query {
 	}
 	
 	@Override
-	public ResultSet execute(String name, String latitude, String longitude, Boolean draw, Boolean zoom, DefinedShapeAttributes attributes){
+	public ResultSet execute(String name, String latitude, String longitude, Boolean draw, Boolean zoom, DefinedShapeAttributes attributes,int mode,int radius){
 		//System.out.println(latitude + " " + longitude);
 		//for the shape generator/loader in LayerManager class to create the shape show on map
 		//for querying the actual data that is represented in the selected/generated area
@@ -79,7 +80,7 @@ public  class InventoryQuery extends Query {
 	}
 
 	@Override
-	public void printResultContent(String name, ResultSet resultset){
+	public void printResultContent(String name, ResultSet resultset, boolean verticalOrientation){
 		try {
 	    	ResultSetMetaData metaData = resultset.getMetaData();
 		    // names of columns
@@ -135,4 +136,6 @@ public  class InventoryQuery extends Query {
 			return;
 		}
 	}
+	
+	
 }
