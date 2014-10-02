@@ -293,28 +293,35 @@ public class Query extends Entity {
 		if(verticalOrientation == true){
 			try{
 				if (resultset!=null){
+
 				    ResultSetMetaData metaData = resultset.getMetaData();
 				    
 				    //Sets column titles
 					Vector<String> columnName = new Vector<String>();
 					columnName.add("Key");
-					columnName.add("Value");
 					
 					//Creates vectors that fill table line by line
 					Vector<Vector<Object>> data = new Vector<Vector<Object>>();
 					int keyCount = metaData.getColumnCount();
+					//Makes key column
+					for (int key = 1; key <= keyCount; key++){
+						String keyName = metaData.getColumnName(key);
+						Vector keyVector = new Vector<Object>();
+						keyVector.add(keyName);
+						data.add(keyVector);
+					}
+					//Makes a new column for every object
 					while(resultset.next()){
+						columnName.add(" ");
 						for (int key = 1; key <= keyCount; key++){
-							String keyName = metaData.getColumnName(key);
+							//finds respective rows and adds values to them
 							Object keyValue = resultset.getObject(key);
-							Vector keyVector = new Vector<Object>();
-							keyVector.add(keyName);
-							keyVector.add(keyValue);
-							data.add(keyVector);
+							data.get(key-1).add(keyValue);
 					}
 					
 					}
 					displayResultContent(name, new JTable(new DefaultTableModel(data, columnName)));
+
 				}
 			} catch (SQLException e) {
 				System.out.println(e);
