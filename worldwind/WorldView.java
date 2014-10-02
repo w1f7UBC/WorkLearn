@@ -11,7 +11,6 @@ import gov.nasa.worldwind.view.orbit.BasicOrbitView;
 import DataBase.InventoryQuery;
 import DataBase.Query;
 
-
 import com.jaamsim.events.ReflectionTarget;
 import com.jaamsim.input.Input;
 import com.jaamsim.input.Keyword;
@@ -20,6 +19,9 @@ import com.jaamsim.input.WorldWindQueryInput;
 import com.jaamsim.math.Vec3d;
 import com.sandwell.JavaSimulation.BooleanInput;
 import com.sandwell.JavaSimulation.Entity;
+import com.sandwell.JavaSimulation.IntegerListInput;
+import com.sandwell.JavaSimulation.IntegerVector;
+import com.sandwell.JavaSimulation3D.GUIFrame;
 
 public class WorldView extends Entity {
 
@@ -29,6 +31,12 @@ public class WorldView extends Entity {
 	private BooleanInput showWindow;
 	@Keyword(description = "Shows query in the WorldWindFrame")
 	private WorldWindQueryInput query;
+	@Keyword(description = "The size of the window in pixels (width, height).")
+	private final IntegerListInput windowSize;
+	@Keyword(description = "The position of the upper left corner of the window in pixels measured" +
+            "from the top left corner of the screen.")
+	private final IntegerListInput windowPosition;
+	
 	{
 		camera = new WorldWindCameraInput("CameraLocation", "WorldWind");
 		this.addInput(camera);
@@ -36,6 +44,22 @@ public class WorldView extends Entity {
 		this.addInput(showWindow);
 		query = new WorldWindQueryInput("QueryLocation", "WorldWind");
 		this.addInput(query);
+		
+		IntegerVector defSize = new IntegerVector(2);
+		defSize.add(GUIFrame.COL4_WIDTH);
+		defSize.add(GUIFrame.VIEW_HEIGHT);
+		windowSize = new IntegerListInput("WindowSize", "WorldWind", defSize);
+		windowSize.setValidCount(2);
+		windowSize.setValidRange(1, 8192);
+		this.addInput(windowSize);
+		
+		IntegerVector defPos = new IntegerVector(2);
+		defPos.add(GUIFrame.COL4_START);
+		defPos.add(GUIFrame.TOP_START);
+		windowPosition = new IntegerListInput("WindowPosition", "WorldWind", defPos);
+		windowPosition.setValidCount(2);
+		windowPosition.setValidRange(-8192, 8192);
+		this.addInput(windowPosition);
 	}
 
 	private Map<Double, double[]> cameraInputMap;
@@ -48,14 +72,10 @@ public class WorldView extends Entity {
 
     public void goTo(double lat, double lon, double zoom, double heading, double pitch){
     	//WorldWindFrame.AppFrame.getWwd().getView().goTo(Position.fromDegrees(lat, lon), zoom);
-
-    	
     	BasicOrbitView orbitView;
     	orbitView = (BasicOrbitView) WorldWindFrame.AppFrame.getWwd().getView();
-    	
     	Angle newHeading = Angle.fromDegrees(heading);
-    	Angle newPitch = Angle.fromDegrees(pitch);
-    	
+    	Angle newPitch = Angle.fromDegrees(pitch);    	
 		if(heading == -1.0){
 			newHeading = orbitView.getHeading();
 		}
@@ -132,6 +152,13 @@ public class WorldView extends Entity {
 				queryInputMap=new HashMap<Double, Query>();
 			}
 			queryInputMap.put(query.getTime(), query.getQuery());
+		}
+		if(in==windowSize){
+			WorldWindFrame.setWorldWindSize(windowSize.getValue().get(0), windowSize.getValue().get(1));
+		
+		}
+		if(in==windowPosition){
+			WorldWindFrame.setWorldWindLocation(windowPosition.getValue().get(0), windowPosition.getValue().get(1));
 		}
 	}
 	
