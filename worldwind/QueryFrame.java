@@ -13,6 +13,7 @@ import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JList;
 import javax.swing.JPanel;
@@ -102,52 +103,10 @@ public class QueryFrame extends JPanel {
             }
         });
         buttonPanel.add(queryArea);
-
-        JPanel radioButtonPanel = new JPanel(new GridLayout(2, 3, 0, 0));
-        JRadioButton noneRadioButton = new JRadioButton("None");
-        noneRadioButton.setSelected(true);
-        noneRadioButton.addActionListener(new ActionListener()
-        {
-            @Override
-			public void actionPerformed(ActionEvent event)
-            {
-            	mode=0;
-            }
-        });
-        radioButtonPanel.add(noneRadioButton);
-        
-        JRadioButton pointRadioButton = new JRadioButton("Point");
-        pointRadioButton.addActionListener(new ActionListener()
-        {
-            @Override
-			public void actionPerformed(ActionEvent event)
-            {
-            	mode=1;
-            }
-        });
-        radioButtonPanel.add(pointRadioButton);
- 
-        JRadioButton closestPointRadioButton = new JRadioButton("Closest Point");
-        closestPointRadioButton.addActionListener(new ActionListener()
-        {
-            @Override
-			public void actionPerformed(ActionEvent event)
-            {
-            	mode=3;
-            }
-        });
-        radioButtonPanel.add(closestPointRadioButton);
-        
-        JRadioButton radiusRadioButton = new JRadioButton("Radius(km)");
-        radiusRadioButton.addActionListener(new ActionListener()
-        {
-            @Override
-			public void actionPerformed(ActionEvent event)
-            {
-            	mode=2;
-            }
-        });
-        radioButtonPanel.add(radiusRadioButton);
+       
+        	
+        JPanel comboBoxPanel = new JPanel(new GridLayout(0, 2, 0, 0));
+       
         
         slider = new JSlider(JSlider.HORIZONTAL, 0, 50, 25);
         slider.setMinorTickSpacing(2);
@@ -155,19 +114,37 @@ public class QueryFrame extends JPanel {
         slider.setPaintTicks(true);
         slider.setPaintLabels(true);
         slider.setLabelTable(slider.createStandardLabels(10));
-        radioButtonPanel.add(slider);
+        slider.setVisible(false);
+       
      
-        ButtonGroup group = new ButtonGroup();
-        group.add(noneRadioButton);
-        group.add(pointRadioButton);
-        group.add(closestPointRadioButton);
-        group.add(radiusRadioButton);
-
+        /*
+         * DROP DOWN
+         */
+         String[] menu_options = {"None","Point","Radius(km)","Closest Point"};
+         JComboBox comboBox = new JComboBox();   
+         
+         int count = 0;
+         for(int i = 0; i < menu_options.length; i++)
+        	   comboBox.addItem(menu_options[count++]);
+         comboBox.addActionListener(new ActionListener() {
+        	   public void actionPerformed(ActionEvent e) {        	     
+        	       setMode(((JComboBox)e.getSource()).getSelectedIndex());  
+        	       if(((JComboBox)e.getSource()).getSelectedIndex()==2)
+        	    	   slider.setVisible(true);
+        	       else
+        	    	   slider.setVisible(false);
+        	   }
+        	 });
+         comboBoxPanel.add(comboBox);
+         comboBoxPanel.add(slider);
+         
         selectorPanel.add(listScroller, BorderLayout.CENTER);
         selectorPanel.add(buttonPanel, BorderLayout.WEST);
-        selectorPanel.add(radioButtonPanel, BorderLayout.SOUTH);
+        selectorPanel.add(comboBoxPanel, BorderLayout.SOUTH);
         selectorPanel.setBorder(new CompoundBorder(BorderFactory.createEmptyBorder(5, 9, 9, 9), new TitledBorder("Query Selector")));
         selectorPanel.setToolTipText("Set query target");
+  
+  
         return selectorPanel;
     }
 	
