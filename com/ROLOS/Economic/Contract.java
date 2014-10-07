@@ -331,16 +331,6 @@ public class Contract extends ROLOSEntity {
 				routesList.get(0).getShapeFileQuery().execute(layerName, routesList, true, false, 
 					new DefinedShapeAttributes(tempColor, tempWidth, this.getProduct().getOpacity()));
 			}
-			
-			// wait for a little bit after showing each route
-			synchronized (this) {
-				try {
-					this.wait(100);
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
 		}
 
 	}

@@ -106,7 +106,7 @@ public class QueryFrame extends JPanel {
        
         	
         JPanel comboBoxPanel = new JPanel(new GridLayout(0, 2, 0, 0));
-       
+        
         
         slider = new JSlider(JSlider.HORIZONTAL, 0, 50, 25);
         slider.setMinorTickSpacing(2);
