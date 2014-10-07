@@ -73,3 +73,5 @@
 /WorldWindCameraInput.class
 /WorldWindQueryInput.class
 /WorldWindWindowSize.class
+/WorldWindInitialCamera.class
+/WorldWindInitialCamera$WorldWindCameraInput.class

@@ -12,7 +12,7 @@ import com.sandwell.JavaSimulation.InputErrorException;
 public class WorldWindCameraInput extends Input<Vec3d> {
 	
 	//private Vec3d location;
-	private double[] location;
+	private DoubleVector location;
 	private double time;
 	
 	public WorldWindCameraInput(String key, String cat) {
@@ -38,44 +38,35 @@ public class WorldWindCameraInput extends Input<Vec3d> {
 
 		DoubleVector times = Input.parseDoubles(timeInput.subList(1, 3), 0.0d, Double.POSITIVE_INFINITY, TimeUnit.class);
 		time = times.get(0);
-		location = new double[5];
+		location = new DoubleVector();
 		
-		if (isNumeric(valInput.get(4))){
-			location[3]=Input.parseDouble(valInput.get(4), Double.NEGATIVE_INFINITY,  Double.POSITIVE_INFINITY);
+		DoubleVector vals = Input.parseDoubles(valInput.subList(1, 4), Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, DimensionlessUnit.class);
+		for(int i=0;i<3;i++){
+			location.add(vals.get(i));
+		}
+		if(isNumeric(valInput.get(3))){
+			location.add(Input.parseDouble(valInput.get(3), Double.NEGATIVE_INFINITY,  Double.POSITIVE_INFINITY));
 		}else{
-			if(valInput.get(4).equals("none")){
-				location[3]=-1.0;
+			if(valInput.get(3).equals("none")){
+				location.add(Double.NEGATIVE_INFINITY);
 			}else{
 				throw new InputErrorException("Value entry not formated correctly: %s", valInput.toString());
 			}
-			
-		if (isNumeric(valInput.get(5))){
-			location[4]=Input.parseDouble(valInput.get(5), Double.NEGATIVE_INFINITY,  Double.POSITIVE_INFINITY);
-		}else {
-			if(valInput.get(5).equals("none")){
-				location[4]=-1.0;
+		}
+		if(isNumeric(valInput.get(4))){
+			location.add(Input.parseDouble(valInput.get(4), Double.NEGATIVE_INFINITY,  Double.POSITIVE_INFINITY));
+		}else{
+			if(valInput.get(4).equals("none")){
+				location.add(Double.NEGATIVE_INFINITY);
 			}else{
-				//throw new InputErrorException("Value entry not formated correctly: %s", valInput.toString());
+				throw new InputErrorException("Value entry not formated correctly: %s", valInput.toString());
 			}
 		}
-			
+				
 		}
-		DoubleVector vals = Input.parseDoubles(valInput.subList(1, 4), Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, DimensionlessUnit.class);
-		for(int i=0; i<3; i++){
-			location[i]=vals.get(i);
-		}
-		//System.out.println(time);
-		//System.out.println(val);
-		
-		
-	}
+
 	
-	//@Override
-	//public Vec3d getValue(){
-		//return location;
-	//}
-	
-	public double[] getDoubles(){
+	public DoubleVector getDoubles(){
 		return location;
 	}
 	
