@@ -46,6 +46,7 @@ import com.sandwell.JavaSimulation.Entity;
 import com.sandwell.JavaSimulation.InputErrorException;
 import com.sandwell.JavaSimulation.StringInput;
 import com.sandwell.JavaSimulation3D.GUIFrame;
+import com.sun.xml.internal.ws.api.addressing.WSEndpointReference.Metadata;
 
 public class Query extends Entity {
 	private static final ArrayList<Query> allInstances;
@@ -180,18 +181,22 @@ public class Query extends Entity {
 	public ResultSet execute(String name, String latitude, String longitude, Boolean draw, Boolean zoom, DefinedShapeAttributes attributes,int mode,int radius){
 		String statements="";
 		Renderable currentShape=null;
-		/*
+		String geomColumn=findGeomColumn();
+		 /*
 		 *  RADIUS SEARCH
 		 */
 		if(mode==2){			 
-			 statements="SELECT DISTINCT * FROM " + areaTable.getValue() + " WHERE st_distance(ST_Transform("+areaTable.getValue()+".shape,26986), ST_Transform(ST_GeomFromText('POINT("+longitude+" "+latitude+")', 4269),26986))<"+radius*1000;	
+			 statements="SELECT DISTINCT * FROM " + areaTable.getValue() + " WHERE st_distance(ST_Transform("+areaTable.getValue()+"."+geomColumn+",26986), ST_Transform(ST_GeomFromText('POINT("+longitude+" "+latitude+")', st_srid("+geomColumn+")),26986))<"+radius*1000;	
+			 System.out.println(statements);
 		}
 		/*
 		 *  CLOSEST POINT
 		 */
 		else if(mode==3){
-			statements="SELECT * FROM "+ areaTable.getValue() + " ORDER BY "+ areaTable.getValue() +".shape <->  ST_GeomFromText('POINT("+longitude+" "+latitude+")', 4269) LIMIT 1";
+			statements="SELECT * FROM "+ areaTable.getValue() + " ORDER BY "+ areaTable.getValue() +"."+geomColumn+" <->  ST_GeomFromText('POINT("+longitude+" "+latitude+")', st_srid("+geomColumn+")) LIMIT 1";
+			
 			}
+		
 		if (draw==true){
 			File file=null;
 			file = database.getLayermanager().sql2shp(name, statements);			
@@ -287,6 +292,45 @@ public class Query extends Entity {
     }
 
 
+	private String getSRID(ResultSet resultset)
+	{	
+		String keyName="";
+		if(resultset !=null){
+		try {
+			ResultSetMetaData metaData = resultset.getMetaData();
+			keyName = metaData.getColumnName(1);
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		}
+		return keyName;
+	}
+	private String findGeomColumn()
+	{   String statements="SELECT column_name, data_type FROM information_schema.columns WHERE table_name ='"+areaTable.getValue()+"'";
+		ResultSet resultset= getResultSet(statements);
+		String type="";
+		try {
+		if (resultset!=null){
+			 ResultSetMetaData metaData =resultset.getMetaData();
+			 while(resultset.next()){
+				for(int i=1;i<=metaData.getColumnCount();i++)
+				 {	
+					type= metaData.getColumnTypeName(i);
+					//System.out.println(metaData.getColumnName(i)+" "+resultset.getObject(i));
+					if(resultset.getObject(i).toString().equals("USER-DEFINED"))
+						return resultset.getObject(i-1).toString();
+				 }
+			 }
+			
+		}
+	
+	} catch (SQLException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	}
+		return "";
+	}
 	
 	public void printResultContent(String name, ResultSet resultset, boolean verticalOrientation){
 		//If vertical orientation
@@ -306,6 +350,7 @@ public class Query extends Entity {
 					//Makes key column
 					for (int key = 1; key <= keyCount; key++){
 						String keyName = metaData.getColumnName(key);
+					
 						Vector keyVector = new Vector<Object>();
 						keyVector.add(keyName);
 						data.add(keyVector);
