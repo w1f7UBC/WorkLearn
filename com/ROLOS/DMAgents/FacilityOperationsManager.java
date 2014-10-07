@@ -17,8 +17,9 @@ import com.ROLOS.Logistics.ProcessingRoute;
 import com.ROLOS.Logistics.Stockpile;
 import com.ROLOS.Utils.HashMapList;
 import com.ROLOS.Utils.PriorityQueue;
-import com.sandwell.JavaSimulation.EntityListListInput;
-import com.jaamsim.events.ReflectionTarget;
+
+import com.jaamsim.basicsim.ReflectionTarget;
+import com.jaamsim.input.EntityListListInput;
 import com.jaamsim.input.Keyword;
 import com.sandwell.JavaSimulation.Tester;
 

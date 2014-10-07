@@ -6,12 +6,10 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 import org.apache.poi.hssf.util.CellReference;
-import org.apache.poi.ss.formula.functions.Column;
 import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.FormulaEvaluator;
 import org.apache.poi.ss.usermodel.Row;
 
-import com.jaamsim.input.InputAgent;
+import com.ROLOS.Input.InputAgent_Rolos;
 import com.sandwell.JavaSimulation.Entity;
 
 
@@ -84,7 +82,7 @@ import com.sandwell.JavaSimulation.Entity;
  	    valuecell.setCellType(Cell.CELL_TYPE_STRING);
  		String	keyword = keywordcell.getStringCellValue();
  		String	value =valuecell.getStringCellValue();
- 		InputAgent.processEntity_Keyword_Value(findEnt(name),keyword,value); 	
+ 		InputAgent_Rolos.processEntity_Keyword_Value(findEnt(name),keyword,value); 	
  			}	
  		}
  	}
@@ -116,7 +114,7 @@ import com.sandwell.JavaSimulation.Entity;
 	private void processAttribute(String cellContent, String entName)
 			throws IOException {
 		
-		InputAgent.processEntity_Keyword_Value(this, getInput(getKeyword(cellContent)), cellContent);
+		InputAgent_Rolos.processEntity_Keyword_Value(this, getInput(getKeyword(cellContent)), cellContent);
 	}
 
 	private Entity findEnt(String entName) {

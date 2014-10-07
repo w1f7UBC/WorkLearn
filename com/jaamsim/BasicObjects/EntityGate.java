@@ -14,18 +14,15 @@
  */
 package com.jaamsim.BasicObjects;
 
-import com.jaamsim.Thresholds.Threshold;
-import com.jaamsim.Thresholds.ThresholdUser;
+import com.jaamsim.input.EntityInput;
+import com.jaamsim.input.InputErrorException;
 import com.jaamsim.input.Keyword;
 import com.jaamsim.input.ValueInput;
 import com.jaamsim.units.TimeUnit;
-import com.sandwell.JavaSimulation.EntityInput;
-import com.sandwell.JavaSimulation.EntityTarget;
-import com.sandwell.JavaSimulation.InputErrorException;
 import com.sandwell.JavaSimulation3D.DisplayEntity;
 import com.sandwell.JavaSimulation3D.Queue;
 
-public class EntityGate extends LinkedComponent implements ThresholdUser {
+public class EntityGate extends LinkedService {
 
 	@Keyword(description = "The queue in which the waiting DisplayEntities will be placed.",
 	         example = "EntityGate1 WaitQueue { Queue1 }")
@@ -36,133 +33,74 @@ public class EntityGate extends LinkedComponent implements ThresholdUser {
 	         example = "EntityGate1 ReleaseDelay { 5.0 s }")
 	private final ValueInput releaseDelay;
 
-	private boolean gateOpen;  // TRUE if the gate is open
-	private boolean busy;  // TRUE if the process of emptying the queue has started
-
 	{
-		waitQueue = new EntityInput<Queue>( Queue.class, "WaitQueue", "Key Inputs", null);
-		this.addInput( waitQueue);
+		waitQueue = new EntityInput<Queue>(Queue.class, "WaitQueue", "Key Inputs", null);
+		this.addInput(waitQueue);
 
-		releaseDelay = new ValueInput( "ReleaseDelay", "Key Inputs", 0.0);
+		releaseDelay = new ValueInput("ReleaseDelay", "Key Inputs", 0.0);
 		releaseDelay.setUnitType(TimeUnit.class);
 		releaseDelay.setValidRange(0.0, Double.POSITIVE_INFINITY);
-		this.addInput( releaseDelay);
+		this.addInput(releaseDelay);
 	}
+
+	public EntityGate() {}
 
 	@Override
 	public void validate() {
 		super.validate();
 
 		// Confirm that the target queue has been specified
-		if( waitQueue.getValue() == null ) {
-			throw new InputErrorException( "The keyword WaitQueue must be set." );
+		if (waitQueue.getValue() == null) {
+			throw new InputErrorException("The keyword WaitQueue must be set.");
 		}
 	}
 
 	@Override
 	public void earlyInit() {
 		super.earlyInit();
-		busy = false;
+		this.setPresentState();
 	}
 
-	/**
-	 * Add a DisplayEntity from upstream
-	 * @param ent = entity to be added
-	 */
 	@Override
-	public void addDisplayEntity( DisplayEntity ent ) {
+	public void addDisplayEntity(DisplayEntity ent) {
 		super.addDisplayEntity(ent);
 
 		// If the gate is closed or other entities are already queued, then add the entity to the queue
 		Queue queue = waitQueue.getValue();
-		if( queue.getCount() > 0 || !gateOpen ) {
-			queue.addLast( ent );
+		if (queue.getCount() > 0 || this.isClosed()) {
+			queue.addLast(ent);
 			return;
 		}
 
 		// If the gate is open and there are no other entities still in the queue, then send the entity to the next component
-		this.sendToNextComponent( ent );
+		this.sendToNextComponent(ent);
 	}
 
 	@Override
-	public void thresholdChanged() {
+	public void startAction() {
 
-		// Are any of the thresholds closed?
-		boolean threshOpen = true;
-		for( Threshold thr : this.getThresholds() ) {
-			if( thr.isClosed() ) {
-				threshOpen = false;
-				break;
-			}
-		}
-
-		// Should the gate's state be changed?
-		if( threshOpen == gateOpen )
+		// Stop if the gate has closed or the queue has become empty
+		if (this.isClosed() || waitQueue.getValue().getCount() == 0) {
+			this.setBusy(false);
+			this.setPresentState();
 			return;
-
-		// Open or close the gate
-		if (threshOpen)
-			this.open();
-		else
-			this.close();
-	}
-
-	/**
-	 * Close the gate.
-	 */
-	private void close() {
-		gateOpen = false;
-	}
-
-	/**
-	 * Open the gate and release any entities in the queue.
-	 */
-	private void open() {
-		gateOpen = true;
-
-		// Release any entities that are in the queue
-		if( busy || waitQueue.getValue().getCount() == 0 )
-			return;
-		busy = true;
-		this.scheduleProcess(releaseDelay.getValue(), 5, new ReleaseQueuedEntityTarget(this, "releaseQueuedEntity"));
-	}
-
-	private static class ReleaseQueuedEntityTarget extends EntityTarget<EntityGate> {
-
-		public ReleaseQueuedEntityTarget(EntityGate gate, String method) {
-			super(gate,method);
 		}
 
-		@Override
-		public void process() {
-			ent.releaseQueuedEntity();
-		}
+		// Schedule the release of the next entity
+		this.scheduleProcess(releaseDelay.getValue(), 5, endActionTarget);
 	}
 
 	/**
 	 * Loop recursively through the queued entities, releasing them one by one.
 	 */
-	private void releaseQueuedEntity() {
-
-		// Stop the recursive loop if the gate has closed or the queue has become empty
-		Queue queue = waitQueue.getValue();
-		if( !gateOpen || queue.getCount() == 0 ) {
-			busy = false;
-			return;
-		}
+	@Override
+	public void endAction() {
 
 		// Release the first element in the queue and send to the next component
-		DisplayEntity ent = queue.removeFirst();
-		this.sendToNextComponent( ent );
+		this.sendToNextComponent(waitQueue.getValue().removeFirst());
 
-		// Stop the recursive loop if the queue is now empty
-		if( queue.getCount() == 0 ) {
-			busy = false;
-			return;
-		}
-
-		// Continue the recursive loop by scheduling the release of the next queued entity
-		this.scheduleProcess(releaseDelay.getValue(), 5, new ReleaseQueuedEntityTarget(this, "releaseQueuedEntity"));
+		// Try to release another entity
+		this.startAction();
 	}
 
 }

@@ -15,7 +15,10 @@
 package com.jaamsim.ProbabilityDistributions;
 
 import com.jaamsim.Samples.SampleProvider;
+import com.jaamsim.events.EventManager;
 import com.jaamsim.input.Input;
+import com.jaamsim.input.InputErrorException;
+import com.jaamsim.input.IntegerInput;
 import com.jaamsim.input.Keyword;
 import com.jaamsim.input.Output;
 import com.jaamsim.input.OutputHandle;
@@ -25,8 +28,6 @@ import com.jaamsim.ui.FrameBox;
 import com.jaamsim.units.DimensionlessUnit;
 import com.jaamsim.units.Unit;
 import com.jaamsim.units.UserSpecifiedUnit;
-import com.sandwell.JavaSimulation.InputErrorException;
-import com.sandwell.JavaSimulation.IntegerInput;
 import com.sandwell.JavaSimulation3D.DisplayEntity;
 
 /**
@@ -62,6 +63,8 @@ implements SampleProvider {
 	private double sampleSquaredSum;
 	private double sampleMin;
 	private double sampleMax;
+
+	private double lastSample = 0;
 
 	static {
 		globalSeedInput = new IntegerInput("GlobalSubstreamSeed", "Key Inputs", 0);
@@ -109,6 +112,8 @@ implements SampleProvider {
 		sampleSquaredSum = 0.0;
 		sampleMin = Double.POSITIVE_INFINITY;
 		sampleMax = Double.NEGATIVE_INFINITY;
+
+		lastSample = getMeanValue(0);
 	}
 
 	@Override
@@ -156,8 +161,17 @@ implements SampleProvider {
 	/**
 	 * Returns the next sample from the probability distribution.
 	 */
+	@Output(name = "Value",
+	        description = "The last sampled value in the distribution.",
+	        unitType = UserSpecifiedUnit.class)
 	@Override
 	public final double getNextSample(double simTime) {
+		// If we are not in a model context, do not perturb the distribution by sampling,
+		// instead simply return the last sampled value
+		if (!EventManager.hasCurrent()) {
+			return lastSample;
+		}
+
 		// Loop until the select sample falls within the desired min and max values
 		double nextSample;
 		do {
@@ -165,6 +179,8 @@ implements SampleProvider {
 		}
 		while (nextSample < this.minValueInput.getValue() ||
 		       nextSample > this.maxValueInput.getValue());
+
+		lastSample = nextSample;
 
 		// Collect statistics on the sampled values
 		sampleCount++;
@@ -248,4 +264,3 @@ implements SampleProvider {
 		return sampleMax;
 	}
 }
-

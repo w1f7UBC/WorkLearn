@@ -14,10 +14,15 @@
  */
 package com.jaamsim.Thresholds;
 
+import com.jaamsim.events.Conditional;
+import com.jaamsim.events.EventManager;
+import com.jaamsim.events.ProcessTarget;
 import com.jaamsim.input.ExpEvaluator;
 import com.jaamsim.input.ExpressionInput;
+import com.jaamsim.input.InputErrorException;
 import com.jaamsim.input.Keyword;
-import com.sandwell.JavaSimulation.InputErrorException;
+import com.jaamsim.input.Output;
+import com.jaamsim.units.DimensionlessUnit;
 
 public class ExpressionThreshold extends Threshold {
 
@@ -27,6 +32,7 @@ public class ExpressionThreshold extends Threshold {
 
 	{
 		openCondition = new ExpressionInput("OpenCondition", "Key Inputs", null);
+		openCondition.setEntity(this);
 		this.addInput(openCondition);
 	}
 
@@ -41,26 +47,35 @@ public class ExpressionThreshold extends Threshold {
 	@Override
     public void startUp() {
 		super.startUp();
+
 		doOpenClose();
 	}
 
-	private void doOpenClose() {
+	class OpenChangedConditional extends Conditional {
+		@Override
+		public boolean evaluate() {
+			return ExpressionThreshold.this.openStateChanged();
+		}
+	}
+	private final Conditional openChanged = new OpenChangedConditional();
 
+	class DoOpenCloseTarget extends ProcessTarget {
+		@Override
+		public String getDescription() {
+			return ExpressionThreshold.this.getInputName() + ".doOpenClose";
+		}
+
+		@Override
+		public void process() {
+			doOpenClose();
+		}
+	}
+	private final ProcessTarget doOpenClose = new DoOpenCloseTarget();
+
+	void doOpenClose() {
 		// Set the present state
 		setOpen(this.getOpenConditionValue(this.getSimTime()));
-
-		// Loop endlessly
-		while (true) {
-
-			// Wait until the state has changed
-			while( this.getOpenConditionValue(this.getSimTime()) == isOpen() ) {
-				waitUntil();
-			}
-			waitUntilEnded();
-
-			// Set the present state
-			setOpen(this.getOpenConditionValue(this.getSimTime()));
-		}
+		EventManager.scheduleUntil(doOpenClose, openChanged, null);
 	}
 
 	private boolean getOpenConditionValue(double simTime) {
@@ -71,6 +86,23 @@ public class ExpressionThreshold extends Threshold {
 		} catch(ExpEvaluator.Error e) {
 			throw new RuntimeException(e);
 		}
+	}
+
+	@Override
+	public boolean isOpen() {
+		return this.getOpenConditionValue(getSimTime());
+	}
+
+	boolean openStateChanged() {
+		return getOpenConditionValue(getSimTime()) != super.isOpen();
+	}
+
+	@Output(name = "Open",
+	 description = "If open, then return TRUE.  Otherwise, return FALSE.",
+	    unitType = DimensionlessUnit.class)
+	@Override
+	public Boolean getOpen(double simTime) {
+		return this.getOpenConditionValue(simTime);
 	}
 
 }

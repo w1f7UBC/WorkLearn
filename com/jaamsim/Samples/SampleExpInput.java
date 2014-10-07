@@ -17,16 +17,17 @@ package com.jaamsim.Samples;
 import java.util.ArrayList;
 import java.util.Collections;
 
+import com.jaamsim.datatypes.DoubleVector;
+import com.jaamsim.input.ExpEvaluator;
 import com.jaamsim.input.ExpParser;
 import com.jaamsim.input.ExpParser.Expression;
 import com.jaamsim.input.Input;
+import com.jaamsim.input.InputErrorException;
 import com.jaamsim.input.KeywordIndex;
 import com.jaamsim.units.DimensionlessUnit;
 import com.jaamsim.units.Unit;
 import com.jaamsim.units.UserSpecifiedUnit;
-import com.sandwell.JavaSimulation.DoubleVector;
 import com.sandwell.JavaSimulation.Entity;
-import com.sandwell.JavaSimulation.InputErrorException;
 
 public class SampleExpInput extends Input<SampleProvider> {
 	private Class<? extends Unit> unitType = DimensionlessUnit.class;
@@ -74,7 +75,7 @@ public class SampleExpInput extends Input<SampleProvider> {
 		// Try parsing an expression
 		try {
 			Input.assertCount(kw, 1);
-			Expression exp = ExpParser.parseExpression(kw.getArg(0));
+			Expression exp = ExpParser.parseExpression(ExpEvaluator.getContext(), kw.getArg(0));
 			// Assume that the expression returns the correct unit type
 			//Input.assertUnitsMatch(unitType, DimensionlessUnit.class);
 			value = new SampleExpression(exp, thisEnt);
@@ -87,10 +88,10 @@ public class SampleExpInput extends Input<SampleProvider> {
 	@Override
 	public ArrayList<String> getValidOptions() {
 		ArrayList<String> list = new ArrayList<String>();
-		for (Entity each: Entity.getAll()) {
-			if( (SampleProvider.class).isAssignableFrom(each.getClass()) ) {
-			    list.add(each.getInputName());
-			}
+		for (Entity each : Entity.getClonesOfIterator(Entity.class, SampleProvider.class)) {
+			SampleProvider sp = (SampleProvider)each;
+			if (sp.getUnitType() == unitType)
+				list.add(each.getInputName());
 		}
 		Collections.sort(list);
 		return list;
@@ -100,7 +101,7 @@ public class SampleExpInput extends Input<SampleProvider> {
 	public String getValueString() {
 		if (value == null || defValue == value)
 			return "";
-		if (value instanceof SampleExpression)
+		if (value instanceof SampleExpression || value instanceof SampleConstant)
 			return super.getValueString();
 		return value.toString();
 	}

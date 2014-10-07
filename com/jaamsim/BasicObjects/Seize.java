@@ -16,12 +16,12 @@ package com.jaamsim.BasicObjects;
 
 import java.util.ArrayList;
 
+import com.jaamsim.datatypes.IntegerVector;
+import com.jaamsim.input.EntityInput;
+import com.jaamsim.input.EntityListInput;
+import com.jaamsim.input.InputErrorException;
+import com.jaamsim.input.IntegerListInput;
 import com.jaamsim.input.Keyword;
-import com.sandwell.JavaSimulation.EntityInput;
-import com.sandwell.JavaSimulation.EntityListInput;
-import com.sandwell.JavaSimulation.InputErrorException;
-import com.sandwell.JavaSimulation.IntegerListInput;
-import com.sandwell.JavaSimulation.IntegerVector;
 import com.sandwell.JavaSimulation3D.DisplayEntity;
 import com.sandwell.JavaSimulation3D.Queue;
 
@@ -40,8 +40,6 @@ public class Seize extends LinkedComponent {
 	private final EntityInput<Queue> waitQueue;
 
 	{
-		operatingThresholdList.setHidden(true);
-
 		resourceList = new EntityListInput<Resource>(Resource.class, "Resource", "Key Inputs", null);
 		this.addInput( resourceList);
 
@@ -69,10 +67,6 @@ public class Seize extends LinkedComponent {
 		}
 	}
 
-	/**
-	 * Add a DisplayEntity from upstream
-	 * @param ent = entity to be added
-	 */
 	@Override
 	public void addDisplayEntity( DisplayEntity ent ) {
 		super.addDisplayEntity(ent);

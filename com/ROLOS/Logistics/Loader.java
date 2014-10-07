@@ -3,9 +3,11 @@ package com.ROLOS.Logistics;
 import java.util.ArrayList;
 
 import com.ROLOS.Economic.Contract;
+import com.ROLOS.JavaSimulation.Tester_Rolos;
 import com.jaamsim.math.Vec3d;
-import com.sandwell.JavaSimulation.BooleanInput;
-import com.sandwell.JavaSimulation.InputErrorException;
+
+import com.jaamsim.input.BooleanInput;
+import com.jaamsim.input.InputErrorException;
 import com.jaamsim.input.Keyword;
 import com.sandwell.JavaSimulation.Tester;
 
@@ -237,7 +239,7 @@ public class Loader extends BulkHandlingLinkedEntity {
 				this.setOrientation(lastOrientation);
 			} else{
 				if (rotationValue < 0.0d)
-					lastOrientation.z = Tester.max(minZ,lastOrientation.z+rotationValue);
+					lastOrientation.z = Tester_Rolos.max(minZ,lastOrientation.z+rotationValue);
 				else
 					lastOrientation.z = Tester.min(maxZ,lastOrientation.z+rotationValue);
 				this.setOrientation(lastOrientation);				

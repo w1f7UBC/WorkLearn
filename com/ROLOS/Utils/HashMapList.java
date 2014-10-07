@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
 
-import com.sandwell.JavaSimulation.ErrorException;
+import com.jaamsim.basicsim.ErrorException;
+
+
 
 /**
  * Data structure for storing a list of arraylists of type T2 associated with type T1. Duplicates are permitted.

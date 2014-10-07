@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 
 import com.ROLOS.ROLOSEntity;
+import com.ROLOS.JavaSimulation.Tester_Rolos;
 import com.sandwell.JavaSimulation.Tester;
 import com.sun.xml.internal.bind.v2.runtime.unmarshaller.XsiNilLoader.Array;
 
@@ -201,7 +202,7 @@ public class TwoLinkedLists<T extends ROLOSEntity> {
 		synchronized (listLock) {
 			if(firstList.contains(entity)){
 				double tempValue = valueList.get(valueListIndex).get(firstList.indexOf(entity));
-				valueList.get(valueListIndex).set(firstList.indexOf(entity), Tester.max(tempValue,value));
+				valueList.get(valueListIndex).set(firstList.indexOf(entity), Tester_Rolos.max(tempValue,value));
 			} else{
 				int index = 0;
 				for (T each: firstList){

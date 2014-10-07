@@ -3,7 +3,8 @@ package com.ROLOS.Logistics;
 import java.util.ArrayList;
 
 import com.ROLOS.Economic.Contract;
-import com.jaamsim.events.ReflectionTarget;
+
+import com.jaamsim.basicsim.ReflectionTarget;
 import com.sandwell.JavaSimulation.Tester;
 
 /**

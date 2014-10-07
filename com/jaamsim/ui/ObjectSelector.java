@@ -20,10 +20,8 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.Locale;
 
 import javax.swing.JFrame;
 import javax.swing.JMenuItem;
@@ -39,11 +37,10 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
-import DataBase.InventoryQuery;
-
 import com.jaamsim.controllers.RenderManager;
 import com.jaamsim.input.Input;
 import com.jaamsim.input.InputAgent;
+import com.jaamsim.input.KeywordIndex;
 import com.jaamsim.math.Vec3d;
 import com.sandwell.JavaSimulation.Entity;
 import com.sandwell.JavaSimulation.ObjectType;
@@ -392,17 +389,6 @@ static class PropertyMenuItem extends MenuItem {
 		FrameBox.setSelectedEntity(ent);
 	}
 }
-static class DataBaseViewer extends MenuItem{
-	private final Entity ent;
-	public DataBaseViewer(Entity ent){
-		super("DataBase Viewer");
-		this.ent = ent;
-	}
-	@Override
-	public void action() {
-		
-	}
-}
 
 static class OutputMenuItem extends MenuItem {
 	private final Entity ent;
@@ -444,8 +430,8 @@ static class DuplicateMenuItem extends MenuItem {
 			dEnt.setPosition(pos);
 
 			// Set the input for the "Position" keyword to the new value
-			InputAgent.processEntity_Keyword_Value(dEnt, "Position", String.format((Locale)null, "%.6f %.6f %.6f m", pos.x, pos.y, pos.z ));
-			FrameBox.valueUpdate();
+			KeywordIndex kw = InputAgent.formatPointInputs("Position", pos, "m");
+			InputAgent.apply(dEnt, kw);
 		}
 
 		// Show the duplicated entity in the editors and viewers
@@ -548,12 +534,7 @@ static class CenterInViewMenuItem extends MenuItem {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			try {
-				de.action();
-			} catch (SQLException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
+			de.action();
 		}
 	}
 
@@ -574,7 +555,7 @@ static class CenterInViewMenuItem extends MenuItem {
 		list.add(new InputMenuItem(ent));
 		list.add(new OutputMenuItem(ent));
 		list.add(new PropertyMenuItem(ent));
-        list.add(new DataBaseViewer(ent) );
+
 		if (!ent.testFlag(Entity.FLAG_GENERATED))
 			list.add(new DuplicateMenuItem(ent));
 

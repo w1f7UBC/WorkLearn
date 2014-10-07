@@ -7,11 +7,13 @@ import com.ROLOS.ROLOSEntity;
 import com.ROLOS.Utils.HandyUtils;
 import com.ROLOS.Utils.PriorityQueue;
 import com.ROLOS.Utils.ThreeLinkedLists;
-import com.jaamsim.events.ReflectionTarget;
+
+import com.jaamsim.basicsim.ErrorException;
+import com.jaamsim.basicsim.ReflectionTarget;
+import com.jaamsim.input.EntityListInput;
 import com.jaamsim.input.Output;
 import com.jaamsim.units.DimensionlessUnit;
-import com.sandwell.JavaSimulation.EntityListInput;
-import com.sandwell.JavaSimulation.ErrorException;
+
 
 import com.jaamsim.input.Keyword;
 

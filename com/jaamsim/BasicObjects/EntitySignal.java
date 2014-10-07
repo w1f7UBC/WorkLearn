@@ -15,10 +15,10 @@
 package com.jaamsim.BasicObjects;
 
 import com.jaamsim.Thresholds.SignalThreshold;
+import com.jaamsim.input.BooleanInput;
+import com.jaamsim.input.EntityInput;
+import com.jaamsim.input.InputErrorException;
 import com.jaamsim.input.Keyword;
-import com.sandwell.JavaSimulation.BooleanInput;
-import com.sandwell.JavaSimulation.EntityInput;
-import com.sandwell.JavaSimulation.InputErrorException;
 import com.sandwell.JavaSimulation3D.DisplayEntity;
 
 public class EntitySignal extends LinkedComponent {
@@ -32,8 +32,6 @@ public class EntitySignal extends LinkedComponent {
 	private final BooleanInput newState;
 
 	{
-		operatingThresholdList.setHidden(true);
-
 		targetSignalThreshold = new EntityInput<SignalThreshold>( SignalThreshold.class, "TargetSignalThreshold", "Key Inputs", null);
 		this.addInput( targetSignalThreshold);
 
@@ -51,10 +49,6 @@ public class EntitySignal extends LinkedComponent {
 		}
 	}
 
-	/**
-	 * Add a DisplayEntity from upstream
-	 * @param ent = entity to be added
-	 */
 	@Override
 	public void addDisplayEntity( DisplayEntity ent ) {
 		super.addDisplayEntity(ent);

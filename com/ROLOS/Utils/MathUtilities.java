@@ -1,7 +1,7 @@
 package com.ROLOS.Utils;
 
 import com.jaamsim.math.Vec3d;
-import com.sandwell.JavaSimulation.ErrorException;
+
 
 public class MathUtilities {
 

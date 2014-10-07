@@ -53,8 +53,7 @@ public final class EventManager {
 	private volatile boolean executeEvents;
 	private boolean processRunning;
 
-	private final ArrayList<Process> conditionalList; // List of all conditionally waiting processes
-	private final ArrayList<ConditionalHandle> conditionalHandles; // List of any handles tracking conditional events
+	private final ArrayList<ConditionalEvent> condEvents;
 
 	private long currentTick; // Master simulation time (long)
 	private long nextTick; // The next tick to execute events at
@@ -94,9 +93,7 @@ public final class EventManager {
 		secsPerTick = 1.0d / ticksPerSecond;
 
 		eventTree = new EventTree();
-
-		conditionalList = new ArrayList<Process>();
-		conditionalHandles = new ArrayList<ConditionalHandle>();
+		condEvents = new ArrayList<ConditionalEvent>();
 
 		executeEvents = false;
 		processRunning = false;
@@ -143,16 +140,15 @@ public final class EventManager {
 
 			eventTree.runOnAllNodes(new KillAllEvents());
 			eventTree.reset();
+			clearFreeList();
 
-			// Kill conditional threads
-			for (int i = 0; i < conditionalList.size(); i++) {
-				conditionalList.get(i).kill();
-				if (conditionalHandles.get(i) != null) {
-					conditionalHandles.get(i).proc = null;
+			for (int i = 0; i < condEvents.size(); i++) {
+				condEvents.get(i).target.kill();
+				if (condEvents.get(i).handle != null) {
+					condEvents.get(i).handle.event = null;
 				}
 			}
-			conditionalList.clear();
-			conditionalHandles.clear();
+			condEvents.clear();
 		}
 	}
 
@@ -166,48 +162,60 @@ public final class EventManager {
 					each.handle = null;
 				}
 
-				Process proc = each.target.getProcess();
-				if (proc != null)
-					proc.kill();
-
+				each.target.kill();
 				each = each.next;
 			}
 		}
 	}
 
-	boolean executeTarget(ProcessTarget t) {
+	private boolean executeTarget(Process cur, ProcessTarget t) {
 		try {
+			// If the event has a captured process, pass control to it
+			Process p = t.getProcess();
+			if (p != null) {
+				p.setNextProcess(cur);
+				p.wake();
+				threadWait(cur);
+				return true;
+			}
+
 			// Execute the method
 			t.process();
 
 			// Notify the event manager that the process has been completed
-			synchronized (lockObject) {
-				Process cur = assertNotWaitUntil();
-				if (trcListener != null) trcListener.traceProcessEnd(this);
-				return !cur.wakeNextProcess();
-			}
-		}
-		catch (ThreadKilledException e) {
-			// If the process was killed by a terminateThread method then
-			// return to the beginning of the process loop
-			return false;
+			if (trcListener != null) trcListener.traceProcessEnd(this, currentTick);
+			return !cur.wakeNextProcess();
 		}
 		catch (Throwable e) {
-			this.handleProcessError(e);
+			// This is how kill() is implemented for sleeping processes.
+			if (e instanceof ThreadKilledException)
+				return false;
+
+			// Tear down any threads waiting for this to finish
+			Process next = cur.forceKillNext();
+			while (next != null) {
+				next = next.forceKillNext();
+			}
+			executeEvents = false;
+			processRunning = false;
+			errListener.handleError(this, e, currentTick);
 			return false;
 		}
 	}
 
 	/**
-	 * Main event processing loop for the eventManager.
-	 *
-	 * Each eventManager runs its loop continuous throughout the simulation run
-	 * with its own thread. The loop for each eventManager is never terminated.
-	 * It is only paused and restarted as required. The run method is called by
-	 * eventManager.start().
+	 * Main event execution method the eventManager, this is the only entrypoint
+	 * for Process objects taken out of the pool.
 	 */
-	void executeEvents(Process cur) {
+	final void execute(Process cur, ProcessTarget t) {
 		synchronized (lockObject) {
+			// This occurs in the startProcess or interrupt case where we start
+			// a process with a target already assigned
+			if (t != null) {
+				executeTarget(cur, t);
+				return;
+			}
+
 			if (processRunning)
 				return;
 
@@ -232,53 +240,24 @@ public final class EventManager {
 				if (nextNode.schedTick == currentTick) {
 					// Remove the event from the future events
 					Event nextEvent = nextNode.head;
-					nextNode.head = nextEvent.next;
-					// check for an empty node
-					if (nextEvent.next == null) {
-						nextNode.tail = null;
-						eventTree.removeNode(nextNode.schedTick, nextNode.priority);
-					}
+					ProcessTarget nextTarget = nextEvent.target;
+					if (trcListener != null) trcListener.traceEvent(this, currentTick, nextNode.schedTick, nextNode.priority, nextTarget);
 
-					if (trcListener != null) trcListener.traceEvent(this, nextEvent);
-					if (nextEvent.handle != null) {
-						nextEvent.handle.event = null;
-						nextEvent.handle = null;
-					}
-					nextEvent.next = null;
-
-					// If the event has a captured process, pass control to it
-					Process p = nextEvent.target.getProcess();
-					if (p != null) {
-						p.setNextProcess(cur);
-						p.wake();
-						threadWait();
-						continue;
-					}
+					removeEvent(nextEvent);
 
 					// the return from execute target informs whether or not this
 					// thread should grab an new Event, or return to the pool
-					if (executeTarget(nextEvent.target))
+					if (executeTarget(cur, nextTarget))
 						continue;
-
-					return;
+					else
+						return;
 				}
 
 				// If the next event would require us to advance the time, check the
 				// conditonal events
 				if (eventTree.getNextNode().schedTick > nextTick) {
-					if (conditionalList.size() > 0) {
-						// Loop through the conditions in reverse order and add to the linked
-						// list of active threads
-						for (int i = 0; i < conditionalList.size() - 1; i++) {
-							conditionalList.get(i).setNextProcess(conditionalList.get(i + 1));
-						}
-						conditionalList.get(conditionalList.size() - 1).setNextProcess(cur);
-
-						// Wake up the first conditional thread to be tested
-						// at this point, nextThread == conditionalList.get(0)
-						conditionalList.get(0).wake();
-						threadWait();
-					}
+					if (condEvents.size() > 0)
+						evaluateConditions(cur);
 
 					// If a conditional event was satisfied, we will have a new event at the
 					// beginning of the eventStack for the current tick, go back to the
@@ -313,6 +292,25 @@ public final class EventManager {
 		}
 	}
 
+	private void evaluateConditions(Process cur) {
+		cur.begCondWait();
+		for (int i = 0; i < condEvents.size();) {
+			ConditionalEvent c = condEvents.get(i);
+			if (c.c.evaluate()) {
+				if (c.handle != null)
+					c.handle.event = null;
+				EventNode node = getEventNode(currentTick, 0);
+				Event temp = getEvent(node, c.target, c.handle);
+				if (trcListener != null) trcListener.traceWaitUntilEnded(this, currentTick, c.target);
+				node.addEvent(temp, true);
+				condEvents.remove(i);
+				continue;
+			}
+			i++;
+		}
+		cur.endCondWait();
+	}
+
 	/**
 	 * Return the simulation time corresponding the given wall clock time
 	 * @param simTime = the current simulation time used when setting a real-time basis
@@ -344,11 +342,10 @@ public final class EventManager {
 		// if we don't wake a new process, take one from the pool
 		if (!cur.wakeNextProcess()) {
 			processRunning = false;
-			Process.allocate(this, null, null).wake();
+			Process.processEvents(this);
 		}
 
-		threadWait();
-		if (cur.shouldDie()) throw new ThreadKilledException("Thread killed");
+		threadWait(cur);
 		cur.setActive();
 	}
 
@@ -359,7 +356,7 @@ public final class EventManager {
 	private long calculateEventTime(long waitLength) {
 		// Test for negative duration schedule wait length
 		if(waitLength < 0)
-			throw new ProcessError("Negative duration wait is invalid (wait length specified to be %d )", waitLength);
+			throw new ProcessError("Negative duration wait is invalid, waitLength = " + waitLength);
 
 		// Check for numeric overflow of internal time
 		long nextEventTime = currentTick + waitLength;
@@ -369,6 +366,17 @@ public final class EventManager {
 		return nextEventTime;
 	}
 
+	public static final void waitTicks(long ticks, int priority, boolean fifo, EventHandle handle) {
+		Process cur = Process.current();
+		cur.evt().waitTicks(cur, ticks, priority, fifo, handle);
+	}
+
+	public static final void waitSeconds(double secs, int priority, boolean fifo, EventHandle handle) {
+		Process cur = Process.current();
+		long ticks = cur.evt().secondsToNearestTick(secs);
+		cur.evt().waitTicks(cur, ticks, priority, fifo, handle);
+	}
+
 	/**
 	 * Schedules a future event to occur with a given priority.  Lower priority
 	 * events will be executed preferentially over higher priority.  This is
@@ -376,21 +384,14 @@ public final class EventManager {
 	 * @param ticks the number of discrete ticks from now to schedule the event.
 	 * @param priority the priority of the scheduled event: 1 is the highest priority (default is priority 5)
 	 */
-	public void waitTicks(long ticks, int priority, boolean fifo, EventHandle handle) {
+	private void waitTicks(Process cur, long ticks, int priority, boolean fifo, EventHandle handle) {
 		synchronized (lockObject) {
-			Process cur = assertNotWaitUntil();
+			if (cur.isCondWait()) assertWaitUntil(cur);
 			long nextEventTime = calculateEventTime(ticks);
 			WaitTarget t = new WaitTarget(cur);
 			EventNode node = getEventNode(nextEventTime, priority);
-			Event temp = new Event(node, t);
-			if (handle != null) {
-				if (handle.event != null)
-					throw new ProcessError("EVT:%s - Tried to schedule using an EventHandler already in use", name);
-
-				handle.event = temp;
-				temp.handle = handle;
-			}
-			if (trcListener != null) trcListener.traceWait(this, temp);
+			Event temp = getEvent(node, t, handle);
+			if (trcListener != null) trcListener.traceWait(this, currentTick, nextEventTime, priority, t);
 			node.addEvent(temp, fifo);
 			captureProcess(cur);
 		}
@@ -404,23 +405,48 @@ public final class EventManager {
 		return eventTree.createOrFindNode(tick, prio);
 	}
 
+	private Event freeEvents = null;
+	private Event getEvent(EventNode n, ProcessTarget t, EventHandle h) {
+		Event evt = freeEvents;
+		if (evt != null) {
+			freeEvents = evt.next;
+			evt.node = n;
+			evt.target = t;
+			evt.handle = h;
+		}
+		else {
+			evt = new Event(n, t, h);
+		}
+
+		if (h != null) {
+			if (h.isScheduled())
+				throw new ProcessError("Tried to schedule using an EventHandle already in use");
+
+			h.event = evt;
+		}
+
+		return evt;
+	}
+
+	private void clearFreeList() {
+		freeEvents = null;
+	}
 	/**
 	 * Debugging aid to test that we are not executing a conditional event, useful
 	 * to try and catch places where a waitUntil was missing a waitUntilEnded.
 	 * While not fatal, it will print out a stack dump to try and find where the
 	 * waitUntilEnded was missed.
-	 * @return the current model Process
 	 */
-	private Process assertNotWaitUntil() {
-		Process cur = Process.current();
-		if (!cur.isCondWait())
-			return cur;
+	private void assertWaitUntil(Process cur) {
+		executeEvents = false;
+		processRunning = false;
+		Throwable e = new ProcessError("Event Control attempted from inside a Conditional callback");
+		errListener.handleError(this, e, currentTick);
+	}
 
-		System.out.println("AUDIT - waitUntil without waitUntilEnded " + this);
-		for (StackTraceElement elem : cur.getStackTrace()) {
-			System.out.println(elem.toString());
-		}
-		return cur;
+	public static final void waitUntil(Conditional cond, EventHandle handle) {
+		Process cur = Process.current();
+		cur.evt().waitUntil(cur, cond, handle);
 	}
 
 	/**
@@ -428,56 +454,55 @@ public final class EventManager {
 	 * thread to the conditional stack, then wakes the next waiting thread on
 	 * the thread stack.
 	 */
-	public void waitUntil(ConditionalHandle handle) {
+	private void waitUntil(Process cur, Conditional cond, EventHandle handle) {
 		synchronized (lockObject) {
-			Process cur = Process.current();
-			if (!conditionalList.contains(cur)) {
-				if (handle != null) {
-					if (handle.proc != null)
-						throw new ProcessError("EVT:%s - Tried to waitUntil using a handle already in use", name);
-					handle.proc = cur;
-				}
+			if (cur.isCondWait()) assertWaitUntil(cur);
+			if (handle != null && handle.isScheduled())
+				throw new ProcessError("Tried to waitUntil using a handle already in use");
 
-				if (trcListener != null) trcListener.traceWaitUntil(this);
-				cur.setCondWait(true);
-				conditionalList.add(cur);
-				conditionalHandles.add(handle);
-			}
-			captureProcess(cur);
-		}
-	}
-
-	public void waitUntilEnded() {
-		synchronized (lockObject) {
-			// Do not wait at all if we never actually were on the waitUntilStack
-			// ie. we never called waitUntil
-			Process cur = Process.current();
-			int index = conditionalList.indexOf(cur);
-			if (index == -1)
-				return;
-
-			conditionalList.remove(index);
-			ConditionalHandle handle = conditionalHandles.remove(index);
-			if (handle != null) handle.proc = null;
-
-			cur.setCondWait(false);
 			WaitTarget t = new WaitTarget(cur);
-			EventNode node = getEventNode(currentTick, 0);
-			Event temp = new Event(node, t);
-			if (trcListener != null) trcListener.traceWaitUntilEnded(this, temp);
-			node.addEvent(temp, true);
+			ConditionalEvent evt = new ConditionalEvent(cond, t, handle);
+			if (handle != null)
+				handle.event = evt;
+			condEvents.add(evt);
+			if (trcListener != null) trcListener.traceWaitUntil(this, currentTick);
 			captureProcess(cur);
 		}
 	}
 
-	public void start(ProcessTarget t) {
-		Process newProcess = Process.allocate(this, Process.current(), t);
+	public static final void scheduleUntil(ProcessTarget t, Conditional cond, EventHandle handle) {
+		Process cur = Process.current();
+		cur.evt().schedUntil(cur, t, cond, handle);
+	}
+
+	private void schedUntil(Process cur, ProcessTarget t, Conditional cond, EventHandle handle) {
+		synchronized (lockObject) {
+			if (cur.isCondWait()) assertWaitUntil(cur);
+			if (handle != null && handle.isScheduled())
+				throw new ProcessError("Tried to waitUntil using a handle already in use");
+
+			ConditionalEvent evt = new ConditionalEvent(cond, t, handle);
+			if (handle != null)
+				handle.event = evt;
+			condEvents.add(evt);
+			if (trcListener != null) trcListener.traceWaitUntil(this, currentTick);
+		}
+	}
+
+	public static final void startProcess(ProcessTarget t) {
+		Process cur = Process.current();
+		cur.evt().start(cur, t);
+	}
+
+	private void start(Process cur, ProcessTarget t) {
+		Process newProcess = Process.allocate(this, cur, t);
 		// Notify the eventManager that a new process has been started
 		synchronized (lockObject) {
-			if (trcListener != null) trcListener.traceProcessStart(this, t);
+			if (cur.isCondWait()) assertWaitUntil(cur);
+			if (trcListener != null) trcListener.traceProcessStart(this, t, currentTick);
 			// Transfer control to the new process
 			newProcess.wake();
-			threadWait();
+			threadWait(cur);
 		}
 	}
 
@@ -488,112 +513,123 @@ public final class EventManager {
 	 */
 	private void removeEvent(Event evt) {
 		EventNode node = evt.node;
-		evt.handle.event = null;
-		evt.handle = null;
 		// quick case where we are the head event
 		if (node.head == evt) {
 			node.head = evt.next;
 			if (evt.next == null) {
 				node.tail = null;
-				removeNode(node);
+				if (!eventTree.removeNode(node.schedTick, node.priority))
+					throw new ProcessError("Tried to remove an event that could not be found");
 			}
 			evt.next = null;
-			return;
+		}
+		else {
+			Event prev = node.head;
+			while (prev.next != evt) {
+				prev = prev.next;
+			}
+
+			prev.next = evt.next;
+			if (evt.next == null)
+				node.tail = prev;
 		}
 
-		Event prev = node.head;
-		while (prev.next != evt) {
-			prev = prev.next;
+		// Clear the event to reuse it
+		evt.node = null;
+		evt.target = null;
+		if (evt.handle != null) {
+			evt.handle.event = null;
+			evt.handle = null;
 		}
 
-		prev.next = evt.next;
-		if (evt.next == null)
-			node.tail = prev;
-
-		evt.next = null;
+		evt.next = freeEvents;
+		freeEvents = evt;
 	}
 
-	private void removeNode(EventNode node) {
-		boolean removed = eventTree.removeNode(node.schedTick, node.priority);
-
-		if (!removed) {
-			throw new ProcessError("EVT:%s - Tried to remove an event that could not be found", name);
+	private ProcessTarget rem(EventHandle handle) {
+		ProcessTarget t = handle.event.target;
+		BaseEvent base = handle.event;
+		if (base instanceof Event) {
+			removeEvent((Event)base);
 		}
+		else {
+			handle.event = null;
+			base.handle = null;
+			condEvents.remove(base);
+		}
+		return t;
 	}
 
-	public void killEvent(ConditionalHandle handle) {
-		synchronized (lockObject) {
-			assertNotWaitUntil();
-
-			Process p = handle.proc;
-			if (p == null)
-				return;
-
-			int index = conditionalList.indexOf(p);
-			if (index == -1)
-				throw new ProcessError("EVT:%s - Tried to terminate a waitUntil that couldn't be found", name);
-
-			conditionalList.remove(index);
-			conditionalHandles.remove(index);
-			handle.proc = null;
-
-			p.kill();
-		}
+	public static final void killEvent(EventHandle handle) {
+		Process cur = Process.current();
+		cur.evt().killEvent(cur, handle);
 	}
 
 	/**
 	 *	Removes an event from the pending list without executing it.
 	 */
-	public void killEvent(EventHandle handle) {
+	private void killEvent(Process cur, EventHandle handle) {
 		synchronized (lockObject) {
-			assertNotWaitUntil();
+			if (cur.isCondWait()) assertWaitUntil(cur);
 
-			Event evt = handle.event;
-			if (evt == null)
+			// Handle was not scheduled, nothing to do
+			if (handle.event == null)
 				return;
 
-			removeEvent(evt);
-			Process proc = evt.target.getProcess();
-			if (proc != null)
-				proc.kill();
-			if (trcListener != null) trcListener.traceKill(this, evt);
+			if (trcListener != null) trcKill(handle.event);
+			ProcessTarget t = rem(handle);
+
+			t.kill();
 		}
+	}
+
+	private void trcKill(BaseEvent event) {
+		if (event instanceof Event) {
+			EventNode node = ((Event)event).node;
+			trcListener.traceKill(this, currentTick, node.schedTick, node.priority, event.target);
+		}
+		else {
+			trcListener.traceKill(this, currentTick, -1, -1, event.target);
+		}
+	}
+
+	public static final void interruptEvent(EventHandle handle) {
+		Process cur = Process.current();
+		cur.evt().interruptEvent(cur, handle);
 	}
 
 	/**
 	 *	Removes an event from the pending list and executes it.
 	 */
-	public void interruptEvent(EventHandle handle) {
+	private void interruptEvent(Process cur, EventHandle handle) {
 		synchronized (lockObject) {
-			Process cur = assertNotWaitUntil();
+			if (cur.isCondWait()) assertWaitUntil(cur);
 
-			Event evt = handle.event;
-			if (evt == null)
+			// Handle was not scheduled, nothing to do
+			if (handle.event == null)
 				return;
 
-			removeEvent(evt);
-			if (trcListener != null) trcListener.traceInterrupt(this, evt);
-			Process proc = evt.target.getProcess();
+			if (trcListener != null) trcInterrupt(handle.event);
+			ProcessTarget t = rem(handle);
+
+			Process proc = t.getProcess();
 			if (proc == null)
-				proc = Process.allocate(this, cur, evt.target);
+				proc = Process.allocate(this, cur, t);
 			proc.setNextProcess(cur);
 			proc.wake();
-			threadWait();
+			threadWait(cur);
 		}
 	}
 
-	public long getSimTicks() {
-		synchronized (lockObject) {
-			return currentTick;
+	private void trcInterrupt(BaseEvent event) {
+		if (event instanceof Event) {
+			EventNode node = ((Event)event).node;
+			trcListener.traceInterrupt(this, currentTick, node.schedTick, node.priority, event.target);
+		}
+		else {
+			trcListener.traceInterrupt(this, currentTick, -1, -1, event.target);
 		}
 	}
-
-	public double getSimSeconds() {
-		synchronized (lockObject) {
-			return currentTick * secsPerTick;
-		}
-	}
-
 
 	public void setExecuteRealTime(boolean useRealTime, int factor) {
 		executeRealTime = useRealTime;
@@ -615,7 +651,7 @@ public final class EventManager {
 	 * There is a synchronized block of code that will acquire the global lock
 	 * and then wait() the current thread.
 	 */
-	private void threadWait() {
+	private void threadWait(Process cur) {
 		// Ensure that the thread owns the global thread lock
 		try {
 			/*
@@ -629,24 +665,38 @@ public final class EventManager {
 		}
 		// Catch the exception when the thread is interrupted
 		catch( InterruptedException e ) {}
-
+		if (cur.shouldDie())
+			throw new ThreadKilledException("Thread killed");
 	}
 
-	public void scheduleProcess(long waitLength, int eventPriority, boolean fifo, ProcessTarget t, EventHandle handle) {
+	public void scheduleProcessExternal(long waitLength, int eventPriority, boolean fifo, ProcessTarget t, EventHandle handle) {
 		synchronized (lockObject) {
 			long schedTick = calculateEventTime(waitLength);
 			EventNode node = getEventNode(schedTick, eventPriority);
-			Event e = new Event(node, t);
-			if (handle != null) {
-				if (handle.event != null)
-					throw new ProcessError("EVT:%s - Tried to schedule using an EventHandler already in use", name);
-
-				handle.event = e;
-				e.handle = handle;
-			}
-			if (trcListener != null) trcListener.traceSchedProcess(this, e);
+			Event e = getEvent(node, t, handle);
+			if (trcListener != null) trcListener.traceSchedProcess(this, currentTick, schedTick, eventPriority, t);
 			node.addEvent(e, fifo);
 		}
+	}
+
+	public static final void scheduleTicks(long waitLength, int eventPriority, boolean fifo, ProcessTarget t, EventHandle handle) {
+		Process cur = Process.current();
+		cur.evt().scheduleTicks(cur, waitLength, eventPriority, fifo, t, handle);
+	}
+
+	public static final void scheduleSeconds(double secs, int eventPriority, boolean fifo, ProcessTarget t, EventHandle handle) {
+		Process cur = Process.current();
+		long ticks = cur.evt().secondsToNearestTick(secs);
+		cur.evt().scheduleTicks(cur, ticks, eventPriority, fifo, t, handle);
+	}
+
+	private void scheduleTicks(Process cur, long waitLength, int eventPriority, boolean fifo, ProcessTarget t, EventHandle handle) {
+		if (cur.isCondWait()) assertWaitUntil(cur);
+		long schedTick = calculateEventTime(waitLength);
+		EventNode node = getEventNode(schedTick, eventPriority);
+		Event e = getEvent(node, t, handle);
+		if (trcListener != null) trcListener.traceSchedProcess(this, currentTick, schedTick, eventPriority, t);
+		node.addEvent(e, fifo);
 	}
 
 	/**
@@ -675,7 +725,7 @@ public final class EventManager {
 				return;
 
 			executeEvents = true;
-			Process.allocate(this, null, null).wake();
+			Process.processEvents(this);
 		}
 	}
 
@@ -696,7 +746,27 @@ public final class EventManager {
 	 * Returns the eventManager that is currently executing events for this thread.
 	 */
 	public static final EventManager current() {
-		return Process.currentEVT();
+		return Process.current().evt();
+	}
+
+	/**
+	 * Returns the current simulation tick for the eventManager that is
+	 * currently executing events for this thread.
+	 */
+	public static final long simTicks() {
+		return Process.current().evt().currentTick;
+	}
+
+	private double getSeconds() {
+		return currentTick * secsPerTick;
+	}
+
+	/**
+	 * Returns the current simulation time in seconds  for the eventManager that is
+	 * currently executing events for this thread.
+	 */
+	public static final double simSeconds() {
+		return Process.current().evt().getSeconds();
 	}
 
 	public final void setSimTimeScale(double scale) {
@@ -716,13 +786,6 @@ public final class EventManager {
 	 */
 	public final double ticksToSeconds(long ticks) {
 		return ticks * secsPerTick;
-	}
-
-	void handleProcessError(Throwable t) {
-		this.pause();
-		synchronized (lockObject) {
-			errListener.handleError(this, t, currentTick);
-		}
 	}
 
 	private static class DefaultTimeListener implements EventTimeListener {

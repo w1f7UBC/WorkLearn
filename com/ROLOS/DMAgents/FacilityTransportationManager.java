@@ -21,10 +21,11 @@ import com.ROLOS.Logistics.RouteSegment;
 import com.ROLOS.Logistics.Stockpile;
 import com.ROLOS.Utils.HashMapList;
 import com.ROLOS.Utils.TwoLinkedLists;
-import com.sandwell.JavaSimulation.BooleanInput;
-import com.sandwell.JavaSimulation.EntityListInput;
-import com.sandwell.JavaSimulation.InputErrorException;
+
+import com.jaamsim.input.BooleanInput;
+import com.jaamsim.input.EntityListInput;
 import com.jaamsim.input.Input;
+import com.jaamsim.input.InputErrorException;
 import com.jaamsim.input.Keyword;
 import com.sandwell.JavaSimulation.Tester;
 

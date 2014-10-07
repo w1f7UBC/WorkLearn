@@ -1,14 +1,16 @@
 package com.ROLOS.Logistics;
 
+import com.ROLOS.JavaSimulation.Tester_Rolos;
 import com.ROLOS.Utils.HandyUtils;
+import com.jaamsim.basicsim.ErrorException;
+import com.jaamsim.input.EntityInput;
 import com.jaamsim.input.InputAgent;
 import com.jaamsim.input.Output;
 import com.jaamsim.input.ValueInput;
 import com.jaamsim.units.MassUnit;
 import com.jaamsim.units.Unit;
 import com.jaamsim.units.VolumeUnit;
-import com.sandwell.JavaSimulation.EntityInput;
-import com.sandwell.JavaSimulation.ErrorException;
+
 
 import com.jaamsim.input.Keyword;
 import com.sandwell.JavaSimulation.Tester;
@@ -384,9 +386,9 @@ public class BulkMaterialStorage extends BulkHandlingLinkedEntity {
 		} else if(this.getPresentState() == "UnLoading" || this.getPresentState() == "Reclaimed") {
 			tempAmount = this.getCurrentOutfeedRate()*dt;
 			if (this.getCurrentlyHandlingList().getEntityList().get(0).getEntityUnit().equals(VolumeUnit.class)) {
-				return Tester.max(0.0d,this.getVolumetricBasedContent()-tempAmount);	
+				return Tester_Rolos.max(0.0d,this.getVolumetricBasedContent()-tempAmount);	
 			} else if (tempBulkMaterial.getDensity() != 0.0d){
-				return Tester.max(0.0d,this.getVolumetricBasedContent() - tempAmount / tempBulkMaterial.getDensity());
+				return Tester_Rolos.max(0.0d,this.getVolumetricBasedContent() - tempAmount / tempBulkMaterial.getDensity());
 			} else return 0.0d;
 		} else {
 			return this.getVolumetricBasedContent();

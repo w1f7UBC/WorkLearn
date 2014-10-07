@@ -24,11 +24,11 @@ import com.ROLOS.Logistics.RouteSegment;
 import com.ROLOS.Logistics.Transshipment;
 import com.ROLOS.Utils.HandyUtils;
 import com.ROLOS.Utils.HashMapList;
-import com.sandwell.JavaSimulation.BooleanInput;
-import com.sandwell.JavaSimulation.EntityInput;
-import com.sandwell.JavaSimulation.EnumInput;
+
 import com.sandwell.JavaSimulation.FileEntity;
 import com.sandwell.JavaSimulation3D.DisplayEntity;
+import com.jaamsim.input.BooleanInput;
+import com.jaamsim.input.EntityInput;
 import com.jaamsim.input.Keyword;
 
 public class RouteManager extends DisplayEntity {

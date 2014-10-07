@@ -68,11 +68,14 @@ import javax.swing.event.MenuListener;
 
 import worldwind.WorldWindFrame;
 
+import com.jaamsim.basicsim.ErrorException;
+import com.jaamsim.controllers.RateLimiter;
 import com.jaamsim.controllers.RenderManager;
 import com.jaamsim.events.EventErrorListener;
 import com.jaamsim.events.EventManager;
 import com.jaamsim.events.EventTimeListener;
 import com.jaamsim.input.InputAgent;
+import com.jaamsim.input.KeywordIndex;
 import com.jaamsim.math.Vec3d;
 import com.jaamsim.ui.AboutBox;
 import com.jaamsim.ui.DisplayEntityFactory;
@@ -81,7 +84,6 @@ import com.jaamsim.ui.FrameBox;
 import com.jaamsim.ui.LogBox;
 import com.jaamsim.ui.View;
 import com.sandwell.JavaSimulation.Entity;
-import com.sandwell.JavaSimulation.ErrorException;
 import com.sandwell.JavaSimulation.Simulation;
 import com.sandwell.JavaSimulation.Tester;
 
@@ -125,12 +127,14 @@ public class GUIFrame extends JFrame implements EventTimeListener, EventErrorLis
 	JButton toolButtonXYPlane;
 	JButton toolButtonUndo;
 	JButton toolButtonRedo;
-	JButton toolButtonNone;
+	JButton toolButtonNone; 	 	
 	JButton toolButtonPoint;
 
 	private int lastValue = -1;
 	private JProgressBar progressBar;
 	private static Image iconImage;
+
+	private static final RateLimiter rateLimiter;
 
 	private static boolean SAFE_GRAPHICS;
 
@@ -138,11 +142,11 @@ public class GUIFrame extends JFrame implements EventTimeListener, EventErrorLis
 	public static int COL1_WIDTH;
 	public static int COL2_WIDTH;
 	public static int COL3_WIDTH;
-	public static int COL4_WIDTH;
+	public static int COL4_WIDTH; 
 	public static int COL1_START;
 	public static int COL2_START;
 	public static int COL3_START;
-	public static int COL4_START;
+	public static int COL4_START; 
 	public static int HALF_TOP;
 	public static int HALF_BOTTOM;
 	public static int TOP_START;
@@ -171,9 +175,10 @@ public class GUIFrame extends JFrame implements EventTimeListener, EventErrorLis
 		}
 
 		shuttingDown = new AtomicBoolean(false);
+		rateLimiter = RateLimiter.create(60);
 	}
 
-	private GUIFrame() {
+	public GUIFrame() {
 		super();
 
 		getContentPane().setLayout( new BorderLayout() );
@@ -205,6 +210,10 @@ public class GUIFrame extends JFrame implements EventTimeListener, EventErrorLis
 			instance = new GUIFrame();
 
 		return instance;
+	}
+
+	public static final RateLimiter getRateLimiter() {
+		return rateLimiter;
 	}
 
 	/**
@@ -476,11 +485,13 @@ public class GUIFrame extends JFrame implements EventTimeListener, EventErrorLis
 
 			@Override
 			public void actionPerformed( ActionEvent event ) {
-				InputAgent.processEntity_Keyword_Value(Simulation.getInstance(), "ShowModelBuilder", "TRUE");
-				InputAgent.processEntity_Keyword_Value(Simulation.getInstance(), "ShowObjectSelector", "TRUE");
-				InputAgent.processEntity_Keyword_Value(Simulation.getInstance(), "ShowInputEditor", "TRUE");
-				InputAgent.processEntity_Keyword_Value(Simulation.getInstance(), "ShowOutputViewer", "TRUE");
-				InputAgent.processEntity_Keyword_Value(Simulation.getInstance(), "ShowWorldController", "TRUE");
+				Simulation sim = Simulation.getInstance();
+				ArrayList<String> arg = new ArrayList<String>(1);
+				arg.add("TRUE");
+				InputAgent.apply(sim, new KeywordIndex("ShowModelBuilder", arg, null));
+				InputAgent.apply(sim, new KeywordIndex("ShowObjectSelector", arg, null));
+				InputAgent.apply(sim, new KeywordIndex("ShowInputEditor", arg, null));
+				InputAgent.apply(sim, new KeywordIndex("ShowOutputViewer", arg, null));
 			}
 		} );
 		viewMenu.add( showBasicToolsMenuItem );
@@ -492,13 +503,15 @@ public class GUIFrame extends JFrame implements EventTimeListener, EventErrorLis
 
 			@Override
 			public void actionPerformed( ActionEvent event ) {
-				InputAgent.processEntity_Keyword_Value(Simulation.getInstance(), "ShowModelBuilder", "FALSE");
-				InputAgent.processEntity_Keyword_Value(Simulation.getInstance(), "ShowObjectSelector", "FALSE");
-				InputAgent.processEntity_Keyword_Value(Simulation.getInstance(), "ShowInputEditor", "FALSE");
-				InputAgent.processEntity_Keyword_Value(Simulation.getInstance(), "ShowOutputViewer", "FALSE");
-				InputAgent.processEntity_Keyword_Value(Simulation.getInstance(), "ShowPropertyViewer", "FALSE");
-				InputAgent.processEntity_Keyword_Value(Simulation.getInstance(), "ShowLogViewer", "FALSE");
-				InputAgent.processEntity_Keyword_Value(Simulation.getInstance(), "ShowWorldController", "FALSE");
+				Simulation sim = Simulation.getInstance();
+				ArrayList<String> arg = new ArrayList<String>(1);
+				arg.add("FALSE");
+				InputAgent.apply(sim, new KeywordIndex("ShowModelBuilder", arg, null));
+				InputAgent.apply(sim, new KeywordIndex("ShowObjectSelector", arg, null));
+				InputAgent.apply(sim, new KeywordIndex("ShowInputEditor", arg, null));
+				InputAgent.apply(sim, new KeywordIndex("ShowOutputViewer", arg, null));
+				InputAgent.apply(sim, new KeywordIndex("ShowPropertyViewer", arg, null));
+				InputAgent.apply(sim, new KeywordIndex("ShowLogViewer", arg, null));
 			}
 		} );
 		viewMenu.add( closeAllToolsMenuItem );
@@ -510,7 +523,9 @@ public class GUIFrame extends JFrame implements EventTimeListener, EventErrorLis
 
 			@Override
 			public void actionPerformed( ActionEvent event ) {
-				InputAgent.processEntity_Keyword_Value(Simulation.getInstance(), "", "TRUE");
+				ArrayList<String> arg = new ArrayList<String>(1);
+				arg.add("TRUE");
+				InputAgent.apply(Simulation.getInstance(), new KeywordIndex("ShowModelBuilder", arg, null));
 			}
 		} );
 		viewMenu.add( objectPalletMenuItem );
@@ -522,7 +537,9 @@ public class GUIFrame extends JFrame implements EventTimeListener, EventErrorLis
 
 			@Override
 			public void actionPerformed( ActionEvent event ) {
-				InputAgent.processEntity_Keyword_Value(Simulation.getInstance(), "ShowObjectSelector", "TRUE");
+				ArrayList<String> arg = new ArrayList<String>(1);
+				arg.add("TRUE");
+				InputAgent.apply(Simulation.getInstance(), new KeywordIndex("ShowObjectSelector", arg, null));
 			}
 		} );
 		viewMenu.add( objectSelectorMenuItem );
@@ -534,7 +551,9 @@ public class GUIFrame extends JFrame implements EventTimeListener, EventErrorLis
 
 			@Override
 			public void actionPerformed( ActionEvent event ) {
-				InputAgent.processEntity_Keyword_Value(Simulation.getInstance(), "ShowInputEditor", "TRUE");
+				ArrayList<String> arg = new ArrayList<String>(1);
+				arg.add("TRUE");
+				InputAgent.apply(Simulation.getInstance(), new KeywordIndex("ShowInputEditor", arg, null));
 			}
 		} );
 		viewMenu.add( inputEditorMenuItem );
@@ -546,7 +565,9 @@ public class GUIFrame extends JFrame implements EventTimeListener, EventErrorLis
 
 			@Override
 			public void actionPerformed( ActionEvent event ) {
-				InputAgent.processEntity_Keyword_Value(Simulation.getInstance(), "ShowOutputViewer", "TRUE");
+				ArrayList<String> arg = new ArrayList<String>(1);
+				arg.add("TRUE");
+				InputAgent.apply(Simulation.getInstance(), new KeywordIndex("ShowOutputViewer", arg, null));
 			}
 		} );
 		viewMenu.add( outputMenuItem );
@@ -558,7 +579,9 @@ public class GUIFrame extends JFrame implements EventTimeListener, EventErrorLis
 
 			@Override
 			public void actionPerformed( ActionEvent event ) {
-				InputAgent.processEntity_Keyword_Value(Simulation.getInstance(), "ShowPropertyViewer", "TRUE");
+				ArrayList<String> arg = new ArrayList<String>(1);
+				arg.add("TRUE");
+				InputAgent.apply(Simulation.getInstance(), new KeywordIndex("ShowPropertyViewer", arg, null));
 			}
 		} );
 		viewMenu.add( propertiesMenuItem );
@@ -570,22 +593,23 @@ public class GUIFrame extends JFrame implements EventTimeListener, EventErrorLis
 
 			@Override
 			public void actionPerformed( ActionEvent event ) {
-				InputAgent.processEntity_Keyword_Value(Simulation.getInstance(), "ShowLogViewer", "TRUE");
+				ArrayList<String> arg = new ArrayList<String>(1);
+				arg.add("TRUE");
+				InputAgent.apply(Simulation.getInstance(), new KeywordIndex("ShowLogViewer", arg, null));
 			}
 		} );
 		viewMenu.add( logMenuItem );
-		
-		// 9) "World Controller" menu item
-		JMenuItem worldControllerItem = new JMenuItem( "WorldView Controller" );
-		worldControllerItem.setMnemonic( 'W' );
-		worldControllerItem.addActionListener( new ActionListener() {
-
-			@Override
-			public void actionPerformed( ActionEvent event ) {
-				InputAgent.processEntity_Keyword_Value(Simulation.getInstance(), "ShowWorldController", "TRUE");
-			}
-		} );
-		viewMenu.add( worldControllerItem );
+		// 9) "World Controller" menu item 	 	
+			JMenuItem worldControllerItem = new JMenuItem( "WorldView Controller" ); 	 	
+			worldControllerItem.setMnemonic( 'W' ); 	 	
+			worldControllerItem.addActionListener( new ActionListener() { 	 	
+			 	 	
+				@Override 	 	
+				public void actionPerformed( ActionEvent event ) { 	 	
+					InputAgent.processEntity_Keyword_Value(Simulation.getInstance(), "ShowWorldController", "TRUE"); 	 	
+				} 	 	
+			} ); 	 	
+					viewMenu.add( worldControllerItem ); 
 	}
 
 	/**
@@ -718,6 +742,7 @@ public class GUIFrame extends JFrame implements EventTimeListener, EventErrorLis
 			@Override
 			public void actionPerformed( ActionEvent event ) {
 				JToggleButton startResume = (JToggleButton)event.getSource();
+				startResume.setEnabled(false);
 				if(startResume.isSelected()) {
 					GUIFrame.this.startSimulation();
 				}
@@ -831,7 +856,6 @@ public class GUIFrame extends JFrame implements EventTimeListener, EventErrorLis
 		spinner.addChangeListener(new SpeedFactorListener());
 		mainToolBar.add( spinner );
 
-
 		// 6) View Control buttons
 		mainToolBar.addSeparator(separatorDim);
 		JLabel viewLabel = new JLabel( "   View Control:   " );
@@ -890,6 +914,9 @@ public class GUIFrame extends JFrame implements EventTimeListener, EventErrorLis
 		} );
 		//mainToolBar.add( toolButtonRedo );
 		//mainToolBar.addSeparator(separatorDim);
+
+		// End creation of view control label and buttons
+
 		// Add toolbar to the window
 		getContentPane().add( mainToolBar, BorderLayout.NORTH );
 	}
@@ -953,14 +980,14 @@ public class GUIFrame extends JFrame implements EventTimeListener, EventErrorLis
 			}
 			this.addSeparator();
 			this.add(new ViewDefiner());
-			JMenuItem WorldViewer = new JMenuItem("Show WorldViewer");
-			WorldViewer.addActionListener( new ActionListener() {
-				@Override
-				public void actionPerformed( ActionEvent event ) {
-					WorldWindFrame.setViewVisible(true);
-				}
-			} );
-			this.add(WorldViewer);
+			JMenuItem WorldViewer = new JMenuItem("Show WorldViewer"); 	 	
+							WorldViewer.addActionListener( new ActionListener() { 	 	
+								@Override 	 	
+								public void actionPerformed( ActionEvent event ) { 	 	
+									WorldWindFrame.setViewVisible(true); 	 	
+								} 	 	
+							} ); 	 	
+							this.add(WorldViewer); 
 		}
 
 		@Override
@@ -978,7 +1005,6 @@ public class GUIFrame extends JFrame implements EventTimeListener, EventErrorLis
 		NewRenderWindowLauncher(View v) {
 			view = v;
 			this.setText(view.getName());
-			//System.out.println(view);
 			this.addActionListener(this);
 		}
 
@@ -993,7 +1019,9 @@ public class GUIFrame extends JFrame implements EventTimeListener, EventErrorLis
 				}
 			}
 
-			InputAgent.processEntity_Keyword_Value(view, "ShowWindow", "TRUE");
+			ArrayList<String> arg = new ArrayList<String>(1);
+			arg.add("TRUE");
+			InputAgent.apply(view, new KeywordIndex("ShowWindow", arg, null));
 			RenderManager.inst().createWindow(view);
 			FrameBox.setSelectedEntity(view);
 		}
@@ -1019,7 +1047,9 @@ public class GUIFrame extends JFrame implements EventTimeListener, EventErrorLis
 			View tmp = InputAgent.defineEntityWithUniqueName(View.class, "View", "", true);
 			RenderManager.inst().createWindow(tmp);
 			FrameBox.setSelectedEntity(tmp);
-			InputAgent.processEntity_Keyword_Value(tmp, "ShowWindow", "TRUE");
+			ArrayList<String> arg = new ArrayList<String>(1);
+			arg.add("TRUE");
+			InputAgent.apply(tmp, new KeywordIndex("ShowWindow", arg, null));
 		}
 	}
 
@@ -1164,11 +1194,11 @@ public class GUIFrame extends JFrame implements EventTimeListener, EventErrorLis
 	/**
 	 * Starts or resumes the simulation run.
 	 */
-	private void startSimulation() {
+	public void startSimulation() {
 
 		// pause at a time
 		double runToSecs = Double.POSITIVE_INFINITY;
-		if(! pauseTime.getText().equalsIgnoreCase(infinitySign)) {
+		if(! pauseTime.getText().equalsIgnoreCase(infinitySign) && pauseTime.getText().length() > 0 ) {
 
 			try {
 				if (Tester.isDate(pauseTime.getText())) {
@@ -1178,9 +1208,9 @@ public class GUIFrame extends JFrame implements EventTimeListener, EventErrorLis
 						throw new NumberFormatException
 						("Date string must be of form yyyy-mm-dd");
 					}
-					int year = Integer.valueOf(str[0]).intValue();
-					int month = Integer.valueOf(str[1]).intValue();
-					int day = Integer.valueOf(str[2]).intValue();
+					int year = Integer.parseInt(str[0]);
+					int month = Integer.parseInt(str[1]);
+					int day = Integer.parseInt(str[2]);
 					double time =
 							Clock.calcTimeForYear_Month_Day_Hour(year, month, day, 0.0);
 
@@ -1200,8 +1230,7 @@ public class GUIFrame extends JFrame implements EventTimeListener, EventErrorLis
 						"error", JOptionPane.ERROR_MESSAGE);
 
 				// it is not running any more
-				controlStartResume.setSelected(!
-						controlStartResume.isSelected() );
+				controlStartResume.setSelected(!controlStartResume.isSelected());
 				return;
 			}
 		}
@@ -1210,19 +1239,16 @@ public class GUIFrame extends JFrame implements EventTimeListener, EventErrorLis
 			if (InputAgent.isSessionEdited()) {
 				InputAgent.saveAs(this);
 			}
-			Simulation.start();
+			Simulation.start(currentEvt);
 			currentEvt.resume(currentEvt.secondsToNearestTick(runToSecs));
-			updateForSimulationState(GUIFrame.SIM_STATE_RUNNING);
 		}
 		else if( getSimState() == SIM_STATE_PAUSED ) {
 			currentEvt.resume(currentEvt.secondsToNearestTick(runToSecs));
-			updateForSimulationState(GUIFrame.SIM_STATE_RUNNING);
 		}
 		else if( getSimState() == SIM_STATE_STOPPED ) {
 			updateForSimulationState(SIM_STATE_CONFIGURED);
-			Simulation.start();
+			Simulation.start(currentEvt);
 			currentEvt.resume(currentEvt.secondsToNearestTick(runToSecs));
-			updateForSimulationState(GUIFrame.SIM_STATE_RUNNING);
 		}
 		else
 			throw new ErrorException( "Invalid Simulation State for Start/Resume" );
@@ -1241,7 +1267,7 @@ public class GUIFrame extends JFrame implements EventTimeListener, EventErrorLis
 	/**
 	 * Stops the simulation run.
 	 */
-	private void stopSimulation() {
+	public void stopSimulation() {
 		if( getSimState() == SIM_STATE_RUNNING ||
 		    getSimState() == SIM_STATE_PAUSED ) {
 			currentEvt.pause();
@@ -1391,6 +1417,7 @@ public class GUIFrame extends JFrame implements EventTimeListener, EventErrorLis
 	 * updates RealTime button and Spinner
 	 */
 	public void updateForRealTime(boolean executeRT, int factorRT) {
+		currentEvt.setExecuteRealTime(executeRT, factorRT);
 		controlRealTime.setSelected(executeRT);
 		spinner.setValue(factorRT);
 	}
@@ -1440,15 +1467,14 @@ public class GUIFrame extends JFrame implements EventTimeListener, EventErrorLis
 		Dimension guiSize = GUIFrame.instance().getSize();
 		Rectangle winSize = GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds();
 
-		COL1_WIDTH = 180;
-		COL2_WIDTH = ((winSize.width - COL1_WIDTH)*6/10*6/10);
-		COL3_WIDTH = ((winSize.width - COL1_WIDTH)*4/10*6/10);
-		COL4_WIDTH = winSize.width - COL1_WIDTH - COL2_WIDTH - COL3_WIDTH;
-		
+		COL1_WIDTH = 220;
+		COL2_WIDTH = Math.min(520, (winSize.width - COL1_WIDTH) / 2);
+		COL3_WIDTH = Math.min(420, winSize.width - COL1_WIDTH - COL2_WIDTH);
+
 		COL1_START = 0;
 		COL2_START = COL1_START + COL1_WIDTH;
 		COL3_START = COL2_START + COL2_WIDTH;
-		COL4_START = COL3_START + COL3_WIDTH;
+		COL4_START = COL3_START + COL3_WIDTH; 
 
 		HALF_TOP = (winSize.height - guiSize.height) / 2;
 		HALF_BOTTOM = (winSize.height - guiSize.height - HALF_TOP);
@@ -1527,11 +1553,11 @@ public class GUIFrame extends JFrame implements EventTimeListener, EventErrorLis
 			// Not a program directive, add to list of config files
 			configFiles.add(each);
 		}
-		GUIFrame.calcWindowDefaults();
+
 		// If not running in batch mode, create the splash screen
 		JWindow splashScreen = null;
 		if (!batch) {
-/*			URL splashImage = GUIFrame.class.getResource("/resources/images/splashscreen.png");
+			URL splashImage = GUIFrame.class.getResource("/resources/images/splashscreen.png");
 			ImageIcon imageIcon = new ImageIcon(splashImage);
 			Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
 			int splashX = (screen.width - imageIcon.getIconWidth()) / 2;
@@ -1547,7 +1573,7 @@ public class GUIFrame extends JFrame implements EventTimeListener, EventErrorLis
 
 			// Display it
 			splashScreen.setVisible(true);
-*/
+
 			// Begin initializing the rendering system
 			RenderManager.initialize(SAFE_GRAPHICS);
 		}
@@ -1555,7 +1581,7 @@ public class GUIFrame extends JFrame implements EventTimeListener, EventErrorLis
 		// create a graphic simulation
 		LogBox.logLine("Loading Simulation Environment ... ");
 
-		EventManager evt = Simulation.initEVT();
+		EventManager evt = new EventManager("DefaultEventManager");
 		GUIFrame gui = GUIFrame.instance();
 		gui.setEventManager(evt);
 		gui.updateForSimulationState(SIM_STATE_LOADED);
@@ -1572,7 +1598,7 @@ public class GUIFrame extends JFrame implements EventTimeListener, EventErrorLis
 
 		// Show the Control Panel
 		gui.setVisible(true);
-		
+		GUIFrame.calcWindowDefaults();
 
 		// Load the autoload file
 		InputAgent.setRecordEdits(false);
@@ -1615,7 +1641,7 @@ public class GUIFrame extends JFrame implements EventTimeListener, EventErrorLis
 		if (batch) {
 			if (InputAgent.numErrors() > 0)
 				GUIFrame.shutdown(0);
-			Simulation.start();
+			Simulation.start(evt);
 			evt.resume(Long.MAX_VALUE);
 			GUIFrame.instance.updateForSimulationState(GUIFrame.SIM_STATE_RUNNING);
 			return;
@@ -1624,12 +1650,12 @@ public class GUIFrame extends JFrame implements EventTimeListener, EventErrorLis
 		// Wait to allow the renderer time to finish initialisation
 		try { Thread.sleep(1000); } catch (InterruptedException e) {}
 
-/*		// Hide the splash screen
+		// Hide the splash screen
 		if (splashScreen != null) {
 			splashScreen.dispose();
 			splashScreen = null;
 		}
-*/
+
 		// Bring the Control Panel to the front (along with any open Tools)
 		gui.toFront();
 
@@ -1642,8 +1668,9 @@ public class GUIFrame extends JFrame implements EventTimeListener, EventErrorLis
 
 		@Override
 		public void stateChanged( ChangeEvent e ) {
-			String factorRT = String.format("%d", ((JSpinner)e.getSource()).getValue());
-			InputAgent.processEntity_Keyword_Value(Simulation.getInstance(), "RealTimeFactor", factorRT);
+			ArrayList<String> arg = new ArrayList<String>(1);
+			arg.add(String.format("%d", ((JSpinner)e.getSource()).getValue()));
+			InputAgent.apply(Simulation.getInstance(), new KeywordIndex("RealTimeFactor", arg, null));
 		}
 	}
 
@@ -1685,10 +1712,12 @@ public class GUIFrame extends JFrame implements EventTimeListener, EventErrorLis
 	public static class RealTimeActionListener implements ActionListener {
 		@Override
 		public void actionPerformed( ActionEvent event ) {
+			ArrayList<String> arg = new ArrayList<String>(1);
 			if (((JToggleButton)event.getSource()).isSelected())
-				InputAgent.processEntity_Keyword_Value(Simulation.getInstance(), "RealTime", "TRUE");
+				arg.add("TRUE");
 			else
-				InputAgent.processEntity_Keyword_Value(Simulation.getInstance(), "RealTime", "FALSE");
+				arg.add("FALSE");
+			InputAgent.apply(Simulation.getInstance(), new KeywordIndex("RealTime", arg, null));
 		}
 	}
 
@@ -1714,7 +1743,7 @@ public class GUIFrame extends JFrame implements EventTimeListener, EventErrorLis
 	@Override
 	public void timeRunning(boolean running) {
 		if (running) {
-
+			updateForSimulationState(SIM_STATE_RUNNING);
 		}
 		else {
 			updateForSimulationState(SIM_STATE_PAUSED);

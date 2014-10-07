@@ -24,11 +24,6 @@ Define ObjectType  { TimeUnit
                      AreaUnit
                      DimensionlessUnit
                      RateUnit
-                     CostPerMassPerDistUnit
-                     CostPerMassUnit
-                     CostPerVolumePerDistUnit
-                     CostPerVolumeUnit                     
-                     CostPerEnergyUnit                     
                      }
 
 TimeUnit            JavaClass { com.jaamsim.units.TimeUnit            } Palette { Units } DragAndDrop { FALSE }
@@ -55,11 +50,6 @@ ViscosityUnit       JavaClass { com.jaamsim.units.ViscosityUnit       } Palette 
 AreaUnit            JavaClass { com.jaamsim.units.AreaUnit            } Palette { Units } DragAndDrop { FALSE }
 DimensionlessUnit   JavaClass { com.jaamsim.units.DimensionlessUnit   } Palette { Units } DragAndDrop { FALSE }
 RateUnit            JavaClass { com.jaamsim.units.RateUnit            } Palette { Units } DragAndDrop { FALSE }
-CostPerMassPerDistUnit     JavaClass { com.jaamsim.units.CostPerMassPerDistUnit          } Palette { Units } DragAndDrop { FALSE }
-CostPerMassUnit             JavaClass { com.jaamsim.units.CostPerMassUnit          } Palette { Units } DragAndDrop { FALSE }
-CostPerVolumePerDistUnit   JavaClass { com.jaamsim.units.CostPerVolumePerDistUnit          } Palette { Units } DragAndDrop { FALSE }
-CostPerVolumeUnit           JavaClass { com.jaamsim.units.CostPerVolumeUnit          } Palette { Units } DragAndDrop { FALSE }
-CostPerEnergyUnit           JavaClass { com.jaamsim.units.CostPerEnergyUnit          } Palette { Units } DragAndDrop { FALSE }
 
 TimeUnit                Description { 'Unit of time. Default = seconds (s).' }
 DistanceUnit            Description { 'Unit of length. Default = meters (m).' }
@@ -85,11 +75,6 @@ ViscosityUnit           Description { 'Unit of dynamic viscosity. Default = Pasc
 AreaUnit                Description { 'Unit of area. Default = square meters (m2).' }
 DimensionlessUnit       Description { 'Indicates that a value is a pure number. No unit is required or accepted.' }
 RateUnit                Description { 'Unit of number per unit time. Default = per second (/s).' }
-CostPerMassPerDistUnit Description { 'Cost per Unit of Mass per unit Distance. Default = Dollar per kilogram per kilometre ($/kg/km) .' }
-CostPerMassUnit         Description { 'Cost per Unit of Mass. Default = Dollar per kilogram ($/kg)' }
-CostPerVolumePerDistUnit  Description { 'Cost per Unit of Volume per unit Distance. Default = Dollar per cubic meter per kilometre ($/m3/km).' }
-CostPerVolumeUnit       Description { 'Cost per Unit of Volume. Default = Dollar per cubic meter ($/m3).' }
-CostPerEnergyUnit       Description { 'Cost per Unit of Energy. Default = Dollar per joule ($/J).' }
 
 " ======================================================================================================================================================
 " Time units
@@ -233,12 +218,10 @@ rpm    ConversionFactorToSI { 3.14159265358979 30     }  Description { 'Revoluti
 " Energy units
 " ======================================================================================================================================================
 
-Define EnergyUnit { J kWh MWh GWh}
+Define EnergyUnit { J kWh }
 
 J      ConversionFactorToSI { 1       }  Description { 'Joules' }
 kWh    ConversionFactorToSI { 3600000 }  Description { 'Kilowatt-Hours' }
-MWh    ConversionFactorToSI { 3600000000 }  Description { 'Megawatt-Hours' }
-GWh    ConversionFactorToSI { 3600000000000 }  Description { 'Gigawatt-Hours' }
 
 " ======================================================================================================================================================
 " Energy density units
@@ -262,14 +245,11 @@ kWh/t  ConversionFactorToSI { 3600000 1000 }  Description { 'Kilowatt-Hours per 
 " Power units
 " ======================================================================================================================================================
 
-Define PowerUnit { J/s W kW kWh/y MW GW }
+Define PowerUnit { W kW MW}
 
-J/s    ConversionFactorToSI { 1     }  Description { 'Joule per second' }
 W      ConversionFactorToSI { 1     }  Description { 'Watts' }
 kW     ConversionFactorToSI { 1000  }  Description { 'Kilowatts' }
-kWh/y  ConversionFactorToSI { 3600000 31536000 }  Description { 'Kilowatthour per year' }
 MW     ConversionFactorToSI { 1.0e6 }  Description { 'Megawatts' }
-GW     ConversionFactorToSI { 1.0e9 }  Description { 'Gigawatts' }
 
 " ======================================================================================================================================================
 " Cost units
@@ -357,43 +337,3 @@ Define RateUnit  { /s  /h  /d  /w  /y }
 /d     ConversionFactorToSI { 1 86400    }  Description { 'Per Day' }
 /w     ConversionFactorToSI { 1 604800   }  Description { 'Per Week' }
 /y     ConversionFactorToSI { 1 31536000 }  Description { 'Per Year' }
- 
-" ======================================================================================================================================================
-" CostPerMassDistanceUnit units
-" ======================================================================================================================================================
-Define CostPerMassPerDistUnit  { $/kg/m $/t/m $/t/km }
-
-$/kg/m      ConversionFactorToSI { 1          }  Description { 'Dollar per kilogram per meter' }
-$/t/m       ConversionFactorToSI { 1 1.0e3      }  Description { 'Dollar per tonne per meter' }
-$/t/km      ConversionFactorToSI { 1 1.0e6    }  Description { 'Dollar per tonne per kilometre' }
-
-" ======================================================================================================================================================
-" CostPerMassUnit units
-" ======================================================================================================================================================
-Define CostPerMassUnit  { $/kg $/t }
-
-$/kg      ConversionFactorToSI { 1          }  Description { 'Dollar per kilogram ' }
-$/t       ConversionFactorToSI { 1 1.0e3      }  Description { 'Dollar per tonne ' }
-
-" ======================================================================================================================================================
-" CostPerVolumeDistanceUnit units
-" ======================================================================================================================================================
-Define CostPerVolumePerDistUnit  { $/m3/m $/m3/km }
-
-$/m3/m     ConversionFactorToSI { 1          }  Description { 'Dollar per cubic meter per meter' }
-$/m3/km    ConversionFactorToSI { 1 1.0e3      }  Description { 'Dollar per cubic meter per meter' }
-
-" ======================================================================================================================================================
-" CostPerVolumeUnit units
-" ======================================================================================================================================================
-Define CostPerVolumeUnit  { $/m3 }
-
-$/m3      ConversionFactorToSI { 1          }  Description { 'Dollar per cubic meter' }
-
-" ======================================================================================================================================================
-" CostPerEnergyUnit units
-" ======================================================================================================================================================
-Define CostPerEnergyUnit  { $/J $/kWh }
-
-$/J      ConversionFactorToSI { 1          }  Description { 'Dollar per joule' }
-$/kWh      ConversionFactorToSI { 1   3600000       }  Description { 'Dollar per kilowatthour' }

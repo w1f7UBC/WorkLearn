@@ -19,19 +19,24 @@ import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
 import com.jaamsim.basicsim.ClonesOfIterable;
+import com.jaamsim.basicsim.ClonesOfIterableInterface;
+import com.jaamsim.basicsim.ErrorException;
 import com.jaamsim.basicsim.InstanceIterable;
 import com.jaamsim.basicsim.ReflectionTarget;
-import com.jaamsim.events.ConditionalHandle;
+import com.jaamsim.events.Conditional;
 import com.jaamsim.events.EventHandle;
 import com.jaamsim.events.EventManager;
 import com.jaamsim.events.ProcessTarget;
 import com.jaamsim.input.AttributeDefinitionListInput;
 import com.jaamsim.input.AttributeHandle;
+import com.jaamsim.input.BooleanInput;
 import com.jaamsim.input.Input;
 import com.jaamsim.input.InputAgent;
+import com.jaamsim.input.InputErrorException;
 import com.jaamsim.input.Keyword;
 import com.jaamsim.input.Output;
 import com.jaamsim.input.OutputHandle;
+import com.jaamsim.input.StringInput;
 import com.jaamsim.ui.FrameBox;
 import com.jaamsim.units.TimeUnit;
 
@@ -142,6 +147,15 @@ public class Entity {
 		return new ClonesOfIterable<T>(proto);
 	}
 
+	/**
+	 * Returns an iterator over the given proto class, but also filters only those
+	 * objects that implement the given interface class.
+	 * @return
+	 */
+	public static <T extends Entity> ClonesOfIterableInterface<T> getClonesOfIterator(Class<T> proto, Class<?> iface){
+		return new ClonesOfIterableInterface<T>(proto, iface);
+	}
+
 	public static <T extends Entity> ArrayList<T> getClonesOf(Class<T> proto) {
 		ArrayList<T> cloneList = new ArrayList<T>();
 
@@ -217,7 +231,7 @@ public class Entity {
 	 * @return the current simulation tick
 	 */
 	public final long getSimTicks() {
-		return EventManager.current().getSimTicks();
+		return EventManager.simTicks();
 	}
 
 	/**
@@ -225,7 +239,7 @@ public class Entity {
 	 * @return the current time in seconds
 	 */
 	public final double getSimTime() {
-		return EventManager.current().getSimSeconds();
+		return EventManager.simSeconds();
 	}
 
 	public final double getCurrentTime() {
@@ -304,7 +318,7 @@ public class Entity {
 					targetInput.reset();
 			}
 			else {
-				InputAgent.processEntity_Keyword_Value(this, targetInput, val);
+				InputAgent.processEntity_Keyword_Value(this, targetInput.getKeyword(), val);
 			}
 		}
 	}
@@ -327,13 +341,6 @@ public class Entity {
 
 	public void clearTraceFlag() {
 		traceFlag = false;
-	}
-
-	/**
-	 * Static method to get the eventManager for all entities.
-	 */
-	private EventManager getEventManager() {
-		return EventManager.current();
 	}
 
 	/**
@@ -452,11 +459,21 @@ public class Entity {
 
 	public double calculateEventTime(double waitLength) {
 		long eventTime = getSimTicks() + calculateDelayLength(waitLength);
+
+		if( eventTime < 0 ) {
+			eventTime = Long.MAX_VALUE;
+		}
+
 		return eventTime / Simulation.getSimTimeFactor();
 	}
 
 	public double calculateEventTimeBefore(double waitLength) {
 		long eventTime = getSimTicks() + (long)Math.floor(waitLength * Simulation.getSimTimeFactor());
+
+		if( eventTime < 0 ) {
+			eventTime = Long.MAX_VALUE;
+		}
+
 		return eventTime / Simulation.getSimTimeFactor();
 	}
 
@@ -471,37 +488,37 @@ public class Entity {
 	}
 
 	public final void startProcess(ProcessTarget t) {
-		getEventManager().start(t);
+		EventManager.startProcess(t);
 	}
 
 	public final void scheduleProcess(ProcessTarget t) {
-		getEventManager().scheduleProcess(0, Entity.PRIO_DEFAULT, false, t, null);
+		EventManager.scheduleTicks(0, Entity.PRIO_DEFAULT, false, t, null);
 	}
 
 	public final void scheduleProcess(double secs, int priority, ProcessTarget t) {
-		EventManager evt = getEventManager();
-		long ticks = evt.secondsToNearestTick(secs);
-		evt.scheduleProcess(ticks, priority, false, t, null);
+		EventManager.scheduleSeconds(secs, priority, false, t, null);
 	}
 
 	public final void scheduleProcess(double secs, int priority, ProcessTarget t, EventHandle handle) {
-		EventManager evt = getEventManager();
-		long ticks = evt.secondsToNearestTick(secs);
-		evt.scheduleProcess(ticks, priority, false, t, handle);
+		EventManager.scheduleSeconds(secs, priority, false, t, handle);
 	}
 
 	public final void scheduleProcess(double secs, int priority, boolean fifo, ProcessTarget t, EventHandle handle) {
-		EventManager evt = getEventManager();
-		long ticks = evt.secondsToNearestTick(secs);
-		evt.scheduleProcess(ticks, priority, fifo, t, handle);
+		EventManager.scheduleSeconds(secs, priority, fifo, t, handle);
 	}
 
 	public final void scheduleProcessTicks(long ticks, int priority, boolean fifo, ProcessTarget t, EventHandle h) {
-		getEventManager().scheduleProcess(ticks, priority, fifo, t, h);
+		EventManager.scheduleTicks(ticks, priority, fifo, t, h);
 	}
 
 	public final void scheduleProcessTicks(long ticks, int priority, ProcessTarget t) {
-		getEventManager().scheduleProcess(ticks, priority, false, t, null);
+		EventManager.scheduleTicks(ticks, priority, false, t, null);
+	}
+
+	public final void waitUntil(Conditional cond, EventHandle handle) {
+		// Don't actually wait if the condition is already true
+		if (cond.evaluate()) return;
+		EventManager.waitUntil(cond, handle);
 	}
 
 	/**
@@ -509,7 +526,7 @@ public class Entity {
 	 * @param secs
 	 */
 	public final void simWait(double secs) {
-		this.simWait(secs, Entity.PRIO_DEFAULT, false, null);
+		EventManager.waitSeconds(secs, Entity.PRIO_DEFAULT, false, null);
 	}
 
 	/**
@@ -518,7 +535,7 @@ public class Entity {
 	 * @param priority
 	 */
 	public final void simWait(double secs, int priority) {
-		this.simWait(secs, priority, false, null);
+		EventManager.waitSeconds(secs, priority, false, null);
 	}
 
 	/**
@@ -527,7 +544,7 @@ public class Entity {
 	 * @param priority
 	 */
 	public final void simWait(double secs, int priority, EventHandle handle) {
-		this.simWait(secs, priority, false, handle);
+		EventManager.waitSeconds(secs, priority, false, handle);
 	}
 
 	/**
@@ -536,9 +553,7 @@ public class Entity {
 	 * @param priority
 	 */
 	public final void simWait(double secs, int priority, boolean fifo, EventHandle handle) {
-		EventManager evt = getEventManager();
-		long ticks = evt.secondsToNearestTick(secs);
-		evt.waitTicks(ticks, priority, fifo, handle);
+		EventManager.waitSeconds(secs, priority, fifo, handle);
 	}
 
 	/**
@@ -546,7 +561,7 @@ public class Entity {
 	 * @param secs
 	 */
 	public final void simWaitTicks(long ticks) {
-		this.simWaitTicks(ticks, Entity.PRIO_DEFAULT);
+		EventManager.waitTicks(ticks, Entity.PRIO_DEFAULT, false, null);
 	}
 
 	/**
@@ -555,7 +570,7 @@ public class Entity {
 	 * @param priority
 	 */
 	public final void simWaitTicks(long ticks, int priority) {
-		this.simWaitTicks(ticks, priority, false, null);
+		EventManager.waitTicks(ticks, priority, false, null);
 	}
 
 	/**
@@ -566,7 +581,7 @@ public class Entity {
 	 * @param handle
 	 */
 	public final void simWaitTicks(long ticks, int priority, boolean fifo, EventHandle handle) {
-		getEventManager().waitTicks(ticks, priority, fifo, handle);
+		EventManager.waitTicks(ticks, priority, fifo, handle);
 	}
 
 	/**
@@ -579,7 +594,7 @@ public class Entity {
 		long waitLength = calculateDelayLength(duration);
 		if (waitLength == 0)
 			return;
-		this.simWaitTicks(waitLength, Entity.PRIO_DEFAULT, false, null);
+		EventManager.waitTicks(waitLength, Entity.PRIO_DEFAULT, false, null);
 	}
 
 	/**
@@ -593,7 +608,7 @@ public class Entity {
 		long waitLength = calculateDelayLength(duration);
 		if (waitLength == 0)
 			return;
-		this.simWaitTicks(waitLength, priority, false, null);
+		EventManager.waitTicks(waitLength, priority, false, null);
 	}
 
 	/**
@@ -607,7 +622,7 @@ public class Entity {
 		long waitLength = calculateDelayLength(duration);
 		if (waitLength == 0)
 			return;
-		this.simWaitTicks(waitLength, priority, false, handle);
+		EventManager.waitTicks(waitLength, priority, false, handle);
 	}
 
 	/**
@@ -615,7 +630,7 @@ public class Entity {
 	 * Additional calls to scheduleLast will place a new event as the last event.
 	 */
 	public final void scheduleLastFIFO() {
-		this.simWaitTicks(0, Entity.PRIO_LOWEST, true, null);
+		EventManager.waitTicks(0, Entity.PRIO_LOWEST, true, null);
 	}
 
 	/**
@@ -623,31 +638,7 @@ public class Entity {
 	 * Additional calls to scheduleLast will place a new event as the last event.
 	 */
 	public final void scheduleLastLIFO() {
-		this.simWaitTicks(0, Entity.PRIO_LOWEST, false, null);
-	}
-
-	public final void waitUntil() {
-		getEventManager().waitUntil(null);
-	}
-
-	public final void waitUntil(ConditionalHandle handle) {
-		getEventManager().waitUntil(handle);
-	}
-
-	public final void waitUntilEnded() {
-		getEventManager().waitUntilEnded();
-	}
-
-	public final void killEvent(EventHandle handle) {
-		getEventManager().killEvent(handle);
-	}
-
-	public final void killEvent(ConditionalHandle handle) {
-		getEventManager().killEvent(handle);
-	}
-
-	public final void interruptEvent(EventHandle handle) {
-		getEventManager().interruptEvent(handle);
+		EventManager.waitTicks(0, Entity.PRIO_LOWEST, false, null);
 	}
 
 	// ******************************************************************************************************
@@ -731,6 +722,21 @@ public class Entity {
 
 		if (hasOutput(outputName))
 			return new OutputHandle(this, outputName);
+
+		return null;
+	}
+
+	/**
+	 * Optimized version of getOutputHandle() for output names that are known to be interned
+	 * @param outputName
+	 * @return
+	 */
+	public final OutputHandle getOutputHandleInterned(String outputName) {
+		if (hasAttribute(outputName))
+			return attributeMap.get(outputName);
+
+		if (OutputHandle.hasOutputInterned(this.getClass(), outputName) || attributeMap.containsKey(outputName))
+			return new OutputHandle(this, outputName, 0);
 
 		return null;
 	}

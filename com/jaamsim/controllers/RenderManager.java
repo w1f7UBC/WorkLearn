@@ -14,6 +14,7 @@
  */
 package com.jaamsim.controllers;
 
+import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Frame;
 import java.awt.Image;
@@ -25,6 +26,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.lang.reflect.InvocationTargetException;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -34,8 +36,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.swing.JMenuItem;
@@ -44,9 +44,11 @@ import javax.swing.JPopupMenu;
 import com.jaamsim.DisplayModels.DisplayModel;
 import com.jaamsim.DisplayModels.ImageModel;
 import com.jaamsim.DisplayModels.TextModel;
+import com.jaamsim.datatypes.IntegerVector;
 import com.jaamsim.font.TessFont;
 import com.jaamsim.input.Input;
 import com.jaamsim.input.InputAgent;
+import com.jaamsim.input.InputErrorException;
 import com.jaamsim.input.KeywordIndex;
 import com.jaamsim.math.AABB;
 import com.jaamsim.math.Mat4d;
@@ -55,6 +57,7 @@ import com.jaamsim.math.Plane;
 import com.jaamsim.math.Quaternion;
 import com.jaamsim.math.Ray;
 import com.jaamsim.math.Transform;
+import com.jaamsim.math.Vec2d;
 import com.jaamsim.math.Vec3d;
 import com.jaamsim.math.Vec4d;
 import com.jaamsim.render.Action;
@@ -70,6 +73,7 @@ import com.jaamsim.render.RenderProxy;
 import com.jaamsim.render.RenderUtils;
 import com.jaamsim.render.Renderer;
 import com.jaamsim.render.TessFontKey;
+import com.jaamsim.render.TexCache;
 import com.jaamsim.render.WindowInteractionListener;
 import com.jaamsim.render.util.ExceptionLogger;
 import com.jaamsim.ui.FrameBox;
@@ -77,8 +81,6 @@ import com.jaamsim.ui.LogBox;
 import com.jaamsim.ui.ObjectSelector;
 import com.jaamsim.ui.View;
 import com.sandwell.JavaSimulation.Entity;
-import com.sandwell.JavaSimulation.InputErrorException;
-import com.sandwell.JavaSimulation.IntegerVector;
 import com.sandwell.JavaSimulation.ObjectType;
 import com.sandwell.JavaSimulation3D.DisplayEntity;
 import com.sandwell.JavaSimulation3D.DisplayModelCompat;
@@ -117,16 +119,7 @@ public class RenderManager implements DragSourceListener {
 
 	private final AtomicBoolean screenshot = new AtomicBoolean(false);
 
-	// These values are used to limit redraw rate, the stored values are time in milliseconds
-	// returned by System.currentTimeMillis()
-	private long lastDraw = 0;
-	private long scheduledDraw = 0;
-	private final Object timingLock = new Object();
-
 	private final ExceptionLogger exceptionLogger;
-
-	private final static double FPS = 60;
-	private final Timer timer;
 
 	private final HashMap<Integer, CameraControl> windowControls = new HashMap<Integer, CameraControl>();
 	private final HashMap<Integer, View> windowToViewMap= new HashMap<Integer, View>();
@@ -190,36 +183,18 @@ public class RenderManager implements DragSourceListener {
 		}, "RenderManagerThread");
 		managerThread.start();
 
-		// Start the display timer
-		timer = new Timer("RedrawThread");
-		TimerTask displayTask = new TimerTask() {
+		GUIFrame.getRateLimiter().registerCallback(new Runnable() {
 			@Override
 			public void run() {
-
-				synchronized(timingLock) {
-					// Is a redraw scheduled
-					long currentTime = System.currentTimeMillis();
-
-					// Only draw if the scheduled time is before now and after the last redraw
-					// but never skip a draw if a screen shot is requested
-					if (!screenshot.get() && (scheduledDraw < lastDraw || currentTime < scheduledDraw)) {
-						return;
+				synchronized(redraw) {
+					if (windowControls.size() == 0 && !screenshot.get()) {
+						return; // Do not queue a redraw if there are no open windows
 					}
-
-					lastDraw = currentTime;
-
-					synchronized(redraw) {
-						if (windowControls.size() == 0 && !screenshot.get()) {
-							return; // Do not queue a redraw if there are no open windows
-						}
-						redraw.set(true);
-						redraw.notifyAll();
-					}
+					redraw.set(true);
+					redraw.notifyAll();
 				}
 			}
-		};
-
-		timer.scheduleAtFixedRate(displayTask, 0, (long) (1000 / (FPS*2)));
+		});
 
 		popupLock = new Object();
 	}
@@ -239,22 +214,7 @@ public class RenderManager implements DragSourceListener {
 	}
 
 	private void queueRedraw() {
-		synchronized(timingLock) {
-			long currentTime = System.currentTimeMillis();
-
-			if (scheduledDraw > lastDraw) {
-				// A draw is scheduled
-				return;
-			}
-
-			long newDraw = currentTime;
-			long frameTime = (long)(1000.0/FPS);
-			if (newDraw < lastDraw + frameTime) {
-				// This would be scheduled too soon
-				newDraw = lastDraw + frameTime;
-			}
-			scheduledDraw = newDraw;
-		}
+		GUIFrame.getRateLimiter().queueUpdate();
 	}
 
 	public void createWindow(View view) {
@@ -339,13 +299,16 @@ public class RenderManager implements DragSourceListener {
 					fatalError.set(true);
 					LogBox.formatRenderLog("Renderer failed with error: %s\n", renderer.getErrorString());
 
-					LogBox.getInstance().setVisible(true);
+					EventQueue.invokeAndWait(new Runnable() {
+						@Override
+						public void run() {
+							LogBox.getInstance().setVisible(true);
+						}
+					});
 
 					// Do some basic cleanup
 					windowControls.clear();
 					previewCache.clear();
-
-					timer.cancel();
 
 					break;
 				}
@@ -1043,9 +1006,8 @@ public class RenderManager implements DragSourceListener {
 			pos.add3(posAdjust);
 			dispEnt.setGlobalPosition(pos);
 
-			Vec3d vec = dispEnt.getSize();
-			InputAgent.processEntity_Keyword_Value(dispEnt, "Size", String.format((Locale)null, "%.6f %.6f %.6f %s", vec.x, vec.y, vec.z, "m" ));
-			FrameBox.valueUpdate();
+			KeywordIndex kw = InputAgent.formatPointInputs("Size", dispEnt.getSize(), "m");
+			InputAgent.apply(dispEnt, kw);
 			return true;
 		}
 
@@ -1069,8 +1031,8 @@ public class RenderManager implements DragSourceListener {
 
 			Vec3d orient = dispEnt.getOrientation();
 			orient.z += theta;
-			InputAgent.processEntity_Keyword_Value(dispEnt, "Orientation", String.format((Locale)null, "%f %f %f rad", orient.x, orient.y, orient.z));
-			FrameBox.valueUpdate();
+			KeywordIndex kw = InputAgent.formatPointInputs("Orientation", orient, "rad");
+			InputAgent.apply(dispEnt, kw);
 			return true;
 		}
 		if (dragHandleID == LINEDRAG_PICK_ID) {
@@ -1093,15 +1055,18 @@ public class RenderManager implements DragSourceListener {
 			}
 
 			Region reg = dispEnt.getCurrentRegion();
-			Transform regionInvTrans = new Transform();
 			if (reg != null) {
-				regionInvTrans = reg.getRegionTrans();
+				Transform regionInvTrans = reg.getRegionTrans();
 				regionInvTrans.inverse(regionInvTrans);
-			}
-			Vec3d localDelta = new Vec3d();
-			regionInvTrans.multAndTrans(delta, localDelta);
 
-			dispEnt.dragged(localDelta);
+				Vec3d localLast = new Vec3d();
+				regionInvTrans.multAndTrans(lastPoint, localLast);
+				Vec3d localCurr = new Vec3d();
+				regionInvTrans.multAndTrans(currentPoint, localCurr);
+				delta.sub3(localCurr, localLast);
+			}
+
+			dispEnt.dragged(delta);
 			return true;
 		}
 
@@ -1139,14 +1104,8 @@ public class RenderManager implements DragSourceListener {
 				return true;
 			}
 
-			StringBuilder sb = new StringBuilder();
-			String pointFormatter = " { %.3f %.3f %.3f m }";
-			for(Vec3d pt : screenPoints) {
-				sb.append(String.format((Locale)null, pointFormatter, pt.x, pt.y, pt.z));
-			}
-
-			InputAgent.processEntity_Keyword_Value(dispEnt, pointsInput, sb.toString());
-			FrameBox.valueUpdate();
+			KeywordIndex kw = InputAgent.formatPointsInputs("Points", screenPoints, new Vec3d());
+			InputAgent.apply(dispEnt, kw);
 			return true;
 		}
 
@@ -1188,26 +1147,16 @@ public class RenderManager implements DragSourceListener {
 		}
 
 		// If we are here, we have a segment to split, at index i
-
-		StringBuilder sb = new StringBuilder();
-		Locale loc = null;
-		String pointFormatter = " { %.3f %.3f %.3f m }";
-
+		ArrayList<Vec3d> splitPoints = new ArrayList<Vec3d>();
 		for(int i = 0; i <= splitInd; ++i) {
-			Vec3d pt = points.get(i);
-			sb.append(String.format(loc, pointFormatter, pt.x, pt.y, pt.z));
+			splitPoints.add(points.get(i));
 		}
-
-		sb.append(String.format(loc, pointFormatter, nearPoint.x, nearPoint.y, nearPoint.z));
-
+		splitPoints.add(nearPoint);
 		for (int i = splitInd+1; i < points.size(); ++i) {
-			Vec3d pt = points.get(i);
-			sb.append(String.format(loc, pointFormatter, pt.x, pt.y, pt.z));
+			splitPoints.add(points.get(i));
 		}
-
-		Input<?> pointsInput = selectedEntity.getInput("Points");
-		InputAgent.processEntity_Keyword_Value(selectedEntity, pointsInput, sb.toString());
-		FrameBox.valueUpdate();
+		KeywordIndex kw = InputAgent.formatPointsInputs("Points", splitPoints, new Vec3d());
+		InputAgent.apply(selectedEntity, kw);
 	}
 
 	private void removeLineNode(int windowID, int x, int y) {
@@ -1246,25 +1195,14 @@ public class RenderManager implements DragSourceListener {
 			}
 		}
 
-		StringBuilder sb = new StringBuilder();
-		Locale loc = null;
-		String pointFormatter = " { %.3f %.3f %.3f m }";
-
+		ArrayList<Vec3d> splitPoints = new ArrayList<Vec3d>();
 		for(int i = 0; i < points.size(); ++i) {
-			if (i == removeInd) {
-				continue;
-			}
-
-			Vec3d pt = points.get(i);
-			sb.append(String.format(loc, pointFormatter, pt.x, pt.y, pt.z));
+			if (i == removeInd) continue;
+			splitPoints.add(points.get(i));
 		}
-
-		Input<?> pointsInput = selectedEntity.getInput("Points");
-		InputAgent.processEntity_Keyword_Value(selectedEntity, pointsInput, sb.toString());
-		FrameBox.valueUpdate();
+		KeywordIndex kw = InputAgent.formatPointsInputs("Points", splitPoints, new Vec3d());
+		InputAgent.apply(selectedEntity, kw);
 	}
-
-
 
 	private boolean isMouseHandleID(long id) {
 		return (id < 0); // For now all negative IDs are mouse handles, this may change
@@ -1498,6 +1436,16 @@ public class RenderManager implements DragSourceListener {
 		return null;
 	}
 
+	public Vec2d getImageDims(URI imageURI) {
+		if (imageURI == null)
+			return null;
+		Dimension dim = TexCache.getImageDimension(imageURI);
+		if (dim == null)
+			return null;
+
+		return new Vec2d(dim.getWidth(), dim.getHeight());
+	}
+
 	/**
 	 * Set the current windows camera to an isometric view
 	 */
@@ -1519,7 +1467,6 @@ public class RenderManager implements DragSourceListener {
 		// Do not look straight down the Z axis as that is actually a degenerate state
 		control.setRotationAngles(0.0000001, 0.0);
 	}
-	
 
 	public View getActiveView() {
 		return windowToViewMap.get(activeWindowID);
@@ -1536,7 +1483,7 @@ public class RenderManager implements DragSourceListener {
 	public void focusWindow(int windowID) {
 		renderer.focusWindow(windowID);
 	}
-	
+
 	/**
 	 * Queue up an off screen rendering, this simply passes the call directly to the renderer
 	 * @param scene
@@ -1559,11 +1506,13 @@ public class RenderManager implements DragSourceListener {
 	 * @param target - optional target to prevent re-allocating GPU resources
 	 * @return
 	 */
-	public Future<BufferedImage> renderScreenShot(Vec3d cameraPos, Vec3d viewCenter, int viewID,
-	                                              int width, int height, OffscreenTarget target) {
+	public Future<BufferedImage> renderScreenShot(View view, int width, int height, OffscreenTarget target) {
+
+		Vec3d cameraPos = view.getGlobalPosition();
+		Vec3d cameraCenter = view.getGlobalCenter();
 
 		Vec3d viewDiff = new Vec3d();
-		viewDiff.sub3(cameraPos, viewCenter);
+		viewDiff.sub3(cameraPos, cameraCenter);
 
 		double rotZ = Math.atan2(viewDiff.x, -viewDiff.y);
 
@@ -1575,7 +1524,6 @@ public class RenderManager implements DragSourceListener {
 			rotZ = 0; // Don't rotate if we are looking straight up or down
 		}
 
-		double viewDist = viewDiff.mag3();
 		Quaternion rot = new Quaternion();
 		rot.setRotZAxis(rotZ);
 
@@ -1586,9 +1534,9 @@ public class RenderManager implements DragSourceListener {
 
 		Transform trans = new Transform(cameraPos, rot, 1);
 
-		CameraInfo camInfo = new CameraInfo(Math.PI/3, viewDist*0.1, viewDist*10, trans, null);
+		CameraInfo camInfo = new CameraInfo(Math.PI/3, trans, view.getSkyboxTexture());
 
-		return renderer.renderOffscreen(null, viewID, camInfo, width, height, null, target);
+		return renderer.renderOffscreen(null, view.getID(), camInfo, width, height, null, target);
 	}
 
 	public Future<BufferedImage> getPreviewForDisplayModel(DisplayModel dm, Runnable notifier) {
@@ -1631,7 +1579,6 @@ public class RenderManager implements DragSourceListener {
 	}
 
 	public void shutdown() {
-		timer.cancel();
 		finished.set(true);
 		if (renderer != null) {
 			renderer.shutdown();

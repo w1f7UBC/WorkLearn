@@ -16,12 +16,11 @@ package com.jaamsim.input;
 
 import java.util.ArrayList;
 
+import com.jaamsim.datatypes.DoubleVector;
 import com.jaamsim.math.Vec3d;
 import com.jaamsim.units.DimensionlessUnit;
 import com.jaamsim.units.TimeUnit;
 import com.jaamsim.units.Unit;
-import com.sandwell.JavaSimulation.DoubleVector;
-import com.sandwell.JavaSimulation.InputErrorException;
 
 public class KeyedVec3dInput extends Input<Vec3d> {
 	private Class<? extends Unit> unitType = DimensionlessUnit.class;

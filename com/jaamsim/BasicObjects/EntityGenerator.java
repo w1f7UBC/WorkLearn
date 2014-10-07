@@ -16,23 +16,21 @@ package com.jaamsim.BasicObjects;
 
 import com.jaamsim.Samples.SampleConstant;
 import com.jaamsim.Samples.SampleExpInput;
-import com.jaamsim.Thresholds.Threshold;
+import com.jaamsim.input.EntityInput;
 import com.jaamsim.input.InputAgent;
+import com.jaamsim.input.InputErrorException;
+import com.jaamsim.input.IntegerInput;
 import com.jaamsim.input.Keyword;
 import com.jaamsim.input.Output;
 import com.jaamsim.units.DimensionlessUnit;
 import com.jaamsim.units.TimeUnit;
 import com.sandwell.JavaSimulation.Entity;
-import com.sandwell.JavaSimulation.EntityInput;
-import com.sandwell.JavaSimulation.EntityTarget;
-import com.sandwell.JavaSimulation.InputErrorException;
-import com.sandwell.JavaSimulation.IntegerInput;
 import com.sandwell.JavaSimulation3D.DisplayEntity;
 
 /**
  * EntityGenerator creates sequence of DisplayEntities at random intervals, which are placed in a target Queue.
  */
-public class EntityGenerator extends LinkedComponent {
+public class EntityGenerator extends LinkedService {
 
 	@Keyword(description = "The arrival time for the first generated entity.\n" +
 			"A constant value, a distribution to be sampled, or a time series can be entered.",
@@ -55,39 +53,38 @@ public class EntityGenerator extends LinkedComponent {
 	private final IntegerInput maxNumber;
 
 	private int numberGenerated = 0;  // Number of entities generated so far
-	private boolean busy;
 
 	{
 		testEntity.setHidden(true);
+		stateAssignment.setHidden(true);
 
-		firstArrivalTime = new SampleExpInput( "FirstArrivalTime", "Key Inputs", new SampleConstant(TimeUnit.class, 0.0));
-		firstArrivalTime.setUnitType( TimeUnit.class );
+		firstArrivalTime = new SampleExpInput("FirstArrivalTime", "Key Inputs", new SampleConstant(TimeUnit.class, 0.0));
+		firstArrivalTime.setUnitType(TimeUnit.class);
 		firstArrivalTime.setEntity(this);
-		this.addInput( firstArrivalTime);
+		this.addInput(firstArrivalTime);
 
-		interArrivalTime = new SampleExpInput( "InterArrivalTime", "Key Inputs", new SampleConstant(TimeUnit.class, 1.0));
-		interArrivalTime.setUnitType( TimeUnit.class );
+		interArrivalTime = new SampleExpInput("InterArrivalTime", "Key Inputs", new SampleConstant(TimeUnit.class, 1.0));
+		interArrivalTime.setUnitType(TimeUnit.class);
 		interArrivalTime.setEntity(this);
-		this.addInput( interArrivalTime);
+		this.addInput(interArrivalTime);
 
-		prototypeEntity = new EntityInput<DisplayEntity>( DisplayEntity.class, "PrototypeEntity", "Key Inputs", null);
-		this.addInput( prototypeEntity);
+		prototypeEntity = new EntityInput<DisplayEntity>(DisplayEntity.class, "PrototypeEntity", "Key Inputs", null);
+		this.addInput(prototypeEntity);
 
-		maxNumber = new IntegerInput( "MaxNumber", "Key Inputs", null);
+		maxNumber = new IntegerInput("MaxNumber", "Key Inputs", null);
 		maxNumber.setValidRange(1, Integer.MAX_VALUE);
-		this.addInput( maxNumber);
+		this.addInput(maxNumber);
 	}
 
-	public EntityGenerator() {
-	}
+	public EntityGenerator() {}
 
 	@Override
 	public void validate() {
 		super.validate();
 
 		// Confirm that prototype entity has been specified
-		if( prototypeEntity.getValue() == null ) {
-			throw new InputErrorException( "The keyword PrototypeEntity must be set." );
+		if (prototypeEntity.getValue() == null) {
+			throw new InputErrorException("The keyword PrototypeEntity must be set.");
 		}
 
 		interArrivalTime.verifyUnit();
@@ -96,65 +93,47 @@ public class EntityGenerator extends LinkedComponent {
 	@Override
 	public void earlyInit() {
 		super.earlyInit();
-
 		numberGenerated = 0;
-		busy = false;
 	}
 
 	@Override
 	public void startUp() {
 		super.startUp();
 
-		// Generate the first entity and start the recursive loop to continue the process
-		double dt = firstArrivalTime.getValue().getNextSample(0.0);
-		this.scheduleProcess(dt, 5, new CreateNextEntityTarget(this, "createNextEntity"));
-	}
-
-	private static class CreateNextEntityTarget extends EntityTarget<EntityGenerator> {
-		public CreateNextEntityTarget(EntityGenerator ent, String method) {
-			super(ent, method);
-		}
-
-		@Override
-		public void process() {
-			ent.createNextEntity();
-		}
+		// Start generating entities
+		this.setBusy(true);
+		this.setPresentState();
+		this.startAction();
 	}
 
 	@Override
-	public void thresholdChanged() {
+	public void startAction() {
 
-		// Is restart required?
-		if (busy) return;
-
-		// Are all the thresholds satisfied?
-		for( Threshold thr : this.getThresholds() ) {
-			if( thr.isClosed() ) return;
+		// Stop if the gate is closed or the last entity been generated
+		if (this.isClosed() || (maxNumber.getValue() != null && numberGenerated >= maxNumber.getValue())) {
+			this.setBusy(false);
+			this.setPresentState();
+			return;
 		}
 
-		// Has the last entity been generated?
-		if( maxNumber.getValue() != null && numberGenerated >= maxNumber.getValue() )
-			return;
-
-		// Restart entity creation
-		double dt = interArrivalTime.getValue().getNextSample(getSimTime());
-		this.scheduleProcess(dt, 5, new CreateNextEntityTarget(this, "createNextEntity"));
+		// Schedule the next entity to be generated
+		double dt;
+		if (numberGenerated == 0)
+			dt = firstArrivalTime.getValue().getNextSample(getSimTime());
+		else
+			dt = interArrivalTime.getValue().getNextSample(getSimTime());
+		this.scheduleProcess(dt, 5, endActionTarget);
 	}
 
-	/**
-	* Loop recursively to generate each entity
-	*/
-	public void createNextEntity() {
+	@Override
+	public void endAction() {
 
 		// Do any of the thresholds stop the generator?
-		for( Threshold thr : this.getThresholds() ) {
-			if( thr.isClosed() ) {
-				busy = false;
-				return;
-			}
+		if (this.isClosed()) {
+			this.setBusy(false);
+			this.setPresentState();
+			return;
 		}
-
-		busy = true;
 
 		// Create the new entity
 		numberGenerated++;
@@ -164,17 +143,13 @@ public class EntityGenerator extends LinkedComponent {
 		DisplayEntity ent = InputAgent.defineEntityWithUniqueName(proto.getClass(), sb.toString(),"_", true);
 		ent.copyInputs(proto);
 		ent.setFlag(Entity.FLAG_GENERATED);
+		ent.earlyInit();
 
 		// Send the entity to the next element in the chain
-		this.sendToNextComponent( ent );
+		this.sendToNextComponent(ent);
 
-		// Stop if the last entity been generated
-		if( maxNumber.getValue() != null && numberGenerated >= maxNumber.getValue() )
-			return;
-
-		// Schedule the next entity to be generated
-		double dt = interArrivalTime.getValue().getNextSample(getSimTime());
-		this.scheduleProcess(dt, 5, new CreateNextEntityTarget(this, "createNextEntity"));
+		// Try to generate another entity
+		this.startAction();
 	}
 
 	@Output(name = "NumberGenerated",
@@ -183,4 +158,5 @@ public class EntityGenerator extends LinkedComponent {
 	public Double getNumberGenerated(double simTime) {
 		return (double)numberGenerated;
 	}
+
 }

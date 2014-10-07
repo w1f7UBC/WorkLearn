@@ -3,15 +3,16 @@ package com.ROLOS.DMAgents;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
+import com.ROLOS.JavaSimulation.Tester_Rolos;
 import com.ROLOS.Logistics.BulkMaterial;
 import com.ROLOS.Logistics.BulkMaterialProcessor;
 import com.ROLOS.Logistics.LogisticsEntity;
 import com.ROLOS.Logistics.ProcessingRoute;
-import com.sandwell.JavaSimulation.ErrorException;
-import com.jaamsim.events.ReflectionTarget;
+
 import com.jaamsim.input.Keyword;
+import com.jaamsim.input.StringInput;
 import com.sandwell.JavaSimulation.Simulation;
-import com.sandwell.JavaSimulation.StringInput;
+
 import com.sandwell.JavaSimulation.Tester;
 
 public class FacilityFinancialManager extends FacilityManager {
@@ -104,7 +105,7 @@ public class FacilityFinancialManager extends FacilityManager {
 		double inputRatio = processingRoute.getCapacityRatio(inputMaterial, processingRoute.getProcessor().getPrimaryProduct());
 		
 		return Tester.greaterCheckTolerance(inputRatio, 0.0d)? 
-				Tester.max(0.0d,this.calcRevenue(processingRoute,expectedPrimaryProductPric)/inputRatio): 0.0d;	
+				Tester_Rolos.max(0.0d,this.calcRevenue(processingRoute,expectedPrimaryProductPric)/inputRatio): 0.0d;	
 	}
 	
 	/**

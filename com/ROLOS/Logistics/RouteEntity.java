@@ -1,15 +1,16 @@
 package com.ROLOS.Logistics;
 
 import com.ROLOS.DMAgents.RouteManager.Transport_Mode;
+import com.jaamsim.input.EntityListInput;
+import com.jaamsim.input.EnumInput;
 import com.jaamsim.input.Input;
+import com.jaamsim.input.InputErrorException;
 import com.jaamsim.input.Keyword;
+import com.jaamsim.input.StringListInput;
 import com.jaamsim.input.ValueListInput;
 import com.jaamsim.units.DistanceUnit;
 import com.jaamsim.units.SpeedUnit;
-import com.sandwell.JavaSimulation.EntityListInput;
-import com.sandwell.JavaSimulation.EnumInput;
-import com.sandwell.JavaSimulation.InputErrorException;
-import com.sandwell.JavaSimulation.StringListInput;
+
 
 /**
  * Implicit representation of route. i.e. travel and traffic on routeentities are not modeled explicitly.

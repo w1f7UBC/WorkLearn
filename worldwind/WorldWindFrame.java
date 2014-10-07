@@ -30,7 +30,7 @@ import javax.swing.filechooser.*;
 
 import com.jaamsim.math.Vec3d;
 import com.jaamsim.render.VisibilityInfo;
-import com.sandwell.JavaSimulation.IntegerListInput;
+
 import com.sandwell.JavaSimulation3D.GUIFrame;
 
 import DataBase.Query;

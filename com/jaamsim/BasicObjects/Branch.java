@@ -15,10 +15,11 @@
 package com.jaamsim.BasicObjects;
 
 import com.jaamsim.Samples.SampleExpInput;
+import com.jaamsim.basicsim.ErrorException;
+import com.jaamsim.input.EntityListInput;
+import com.jaamsim.input.InputErrorException;
 import com.jaamsim.input.Keyword;
 import com.jaamsim.units.DimensionlessUnit;
-import com.sandwell.JavaSimulation.EntityListInput;
-import com.sandwell.JavaSimulation.InputErrorException;
 import com.sandwell.JavaSimulation3D.DisplayEntity;
 
 public class Branch extends LinkedComponent {
@@ -35,7 +36,6 @@ public class Branch extends LinkedComponent {
 
 	{
 		nextComponentInput.setHidden(true);
-		operatingThresholdList.setHidden(true);
 
 		nextComponentList = new EntityListInput<LinkedComponent>( LinkedComponent.class, "NextComponentList", "Key Inputs", null);
 		this.addInput( nextComponentList);
@@ -67,6 +67,8 @@ public class Branch extends LinkedComponent {
 
 		// Choose the next component for this entity
 		int i = (int) choice.getValue().getNextSample(this.getSimTime());
+		if (i<1 || i>nextComponentList.getValue().size())
+			throw new ErrorException("Chosen index i=%s is out of range for NextComponentList: %s.", i, nextComponentList.getValue());
 
 		// Pass the entity to the next component
 		nextComponentList.getValue().get(i-1).addDisplayEntity(ent);

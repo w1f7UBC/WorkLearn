@@ -20,6 +20,7 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
@@ -46,6 +47,7 @@ public class RenderUtils {
 	public static List<Vec4d> CIRCLE_POINTS;
 	public static List<Vec4d> RECT_POINTS;
 	public static List<Vec4d> TRIANGLE_POINTS;
+	public static List<Vec4d> DIAMOND_POINTS;
 
 	static {
 		CIRCLE_POINTS = getCirclePoints(32);
@@ -64,6 +66,12 @@ public class RenderUtils {
 		TRIANGLE_POINTS.add(new Vec4d( 0.5, -0.5, 0, 1.0d));
 		TRIANGLE_POINTS.add(new Vec4d( 0.5,  0.5, 0, 1.0d));
 		TRIANGLE_POINTS.add(new Vec4d(-0.5,  0.0, 0, 1.0d));
+
+		DIAMOND_POINTS = new ArrayList<Vec4d>();
+		DIAMOND_POINTS.add(new Vec4d(  1,  0, 0, 1.0d));
+		DIAMOND_POINTS.add(new Vec4d(  0,  1, 0, 1.0d));
+		DIAMOND_POINTS.add(new Vec4d( -1,  0, 0, 1.0d));
+		DIAMOND_POINTS.add(new Vec4d(  0, -1, 0, 1.0d));
 	}
 
 	// Transform the list of points in place
@@ -527,12 +535,15 @@ static void putPointXYZW(FloatBuffer fb, Vec4d v) {
 				}
 			}
 
-			MeshProtoKey ret = new MeshProtoKey(meshURL);
+			MeshProtoKey ret = new MeshProtoKey(meshURL.toURI());
 			return ret;
 		} catch (MalformedURLException e) {
 			LogBox.renderLogException(e);
 			assert (false);
 		} catch (IOException e) {
+			assert (false);
+		} catch (URISyntaxException e) {
+			LogBox.renderLogException(e);
 			assert (false);
 		}
 		return null;

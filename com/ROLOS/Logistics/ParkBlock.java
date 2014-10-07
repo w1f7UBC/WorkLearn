@@ -1,7 +1,8 @@
 package com.ROLOS.Logistics;
 
 import com.ROLOS.DMAgents.TrafficController;
-import com.sandwell.JavaSimulation.EntityListInput;
+
+import com.jaamsim.input.EntityListInput;
 import com.jaamsim.input.Keyword;
 
 public class ParkBlock extends RouteSegment {

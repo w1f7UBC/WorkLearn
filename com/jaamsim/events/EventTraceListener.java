@@ -17,17 +17,19 @@ package com.jaamsim.events;
 
 public interface EventTraceListener {
 
-public void traceWait(EventManager e, Event evt);
-public void traceEvent(EventManager e, Event evt);
-public void traceSchedProcess(EventManager e, Event evt);
+public void traceEvent(EventManager e, long curTick, long tick, int priority, ProcessTarget t);
 
-public void traceProcessStart(EventManager e, ProcessTarget t);
-public void traceProcessEnd(EventManager e);
+public void traceWait(EventManager e, long curTick, long tick, int priority, ProcessTarget t);
 
-public void traceInterrupt(EventManager e, Event evt);
-public void traceKill(EventManager e, Event evt);
+public void traceSchedProcess(EventManager e, long curTick, long tick, int priority, ProcessTarget t);
 
-public void traceWaitUntil(EventManager e);
-public void traceWaitUntilEnded(EventManager e, Event evt);
+public void traceProcessStart(EventManager e, ProcessTarget t, long tick);
+public void traceProcessEnd(EventManager e, long tick);
+
+public void traceInterrupt(EventManager e, long curTick, long tick, int priority, ProcessTarget t);
+public void traceKill(EventManager e, long curTick, long tick, int priority, ProcessTarget t);
+
+public void traceWaitUntil(EventManager e, long tick);
+public void traceWaitUntilEnded(EventManager e, long tick, ProcessTarget t);
 
 }

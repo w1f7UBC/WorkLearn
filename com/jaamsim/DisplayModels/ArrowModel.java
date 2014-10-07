@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.jaamsim.input.Keyword;
+import com.jaamsim.input.Vec3dInput;
 import com.jaamsim.math.Color4d;
 import com.jaamsim.math.Mat4d;
 import com.jaamsim.math.Transform;
@@ -29,7 +30,6 @@ import com.jaamsim.render.PolygonProxy;
 import com.jaamsim.render.RenderProxy;
 import com.jaamsim.units.DistanceUnit;
 import com.sandwell.JavaSimulation.Entity;
-import com.sandwell.JavaSimulation.Vec3dInput;
 import com.sandwell.JavaSimulation3D.Arrow;
 
 public class ArrowModel extends ScreenPointsModel {
@@ -69,6 +69,7 @@ public class ArrowModel extends ScreenPointsModel {
 		private Vec4d startCache;
 		private Vec4d fromCache;
 		private Color4d colorCache;
+		private Vec3d arrowSizeCache;
 
 		public Binding(Entity ent, DisplayModel dm) {
 			super(ent, dm);
@@ -88,13 +89,21 @@ public class ArrowModel extends ScreenPointsModel {
 
 			boolean dirty = false;
 
+			Vec3d arrowSize;
+			if (arrowObservee != null)
+				arrowSize = arrowObservee.getArrowHeadSize();
+			else
+				arrowSize = arrowHeadSize.getValue();
+
 			dirty = dirty || dirty_vec4d(startCache, startPoint);
 			dirty = dirty || dirty_vec4d(fromCache, fromPoint);
 			dirty = dirty || dirty_col4d(colorCache, color);
+			dirty = dirty || dirty_vec3d(arrowSizeCache, arrowSize);
 
 			startCache = startPoint;
 			fromCache = fromPoint;
 			colorCache = color;
+			arrowSizeCache = arrowSize;
 
 			if (cachedProxy != null && !dirty) {
 				// up to date
@@ -113,10 +122,7 @@ public class ArrowModel extends ScreenPointsModel {
 
 			Mat4d trans = new Mat4d();
 			trans.setEuler3(zRot);
-			if (arrowObservee != null)
-				trans.scaleCols3(arrowObservee.getArrowHeadSize());
-			else
-				trans.scaleCols3(arrowHeadSize.getValue());
+			trans.scaleCols3(arrowSize);
 			trans.setTranslate3(startPoint);
 
 			headPoints = new ArrayList<Vec4d>(arrowHeadVerts.size());

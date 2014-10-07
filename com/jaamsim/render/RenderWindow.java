@@ -17,22 +17,28 @@ package com.jaamsim.render;
 import java.awt.Frame;
 import java.awt.Image;
 import java.util.ArrayList;
+
 import javax.media.opengl.GLCapabilitiesImmutable;
 import javax.media.opengl.GLContext;
 import javax.media.opengl.GLEventListener;
+
 import com.jogamp.newt.awt.NewtCanvasAWT;
 import com.jogamp.newt.opengl.GLWindow;
 
 public class RenderWindow {
+
 	private Frame _awtFrame;
 	private final GLWindow _window;
 	private int _windowID;
 	private int _viewID;
 	private String _name;
+
 	private final WindowInteractionListener _appListener;
+
 	// These two members are almost certainly a bad idea and are just around to debug the picking
 	private String _debugString = "";
 	private ArrayList<Long> _debugIDs = new ArrayList<Long>();
+
 	private ArrayList<Integer> _VAOs = new ArrayList<Integer>();
 
 	RenderWindow(int x, int y, int width, int height, String title, String name,
@@ -40,20 +46,28 @@ public class RenderWindow {
 	             GLCapabilitiesImmutable caps,
 	             GLEventListener glListener, Image icon, int windowID, int viewID,
 	             WindowInteractionListener appListener) {
+
 		_window = GLWindow.create(caps);
+
 		_window.addGLEventListener(glListener);
 		_window.setSharedContext(sharedContext);
+
 		_awtFrame = new Frame(title);
 		NewtCanvasAWT canvas = new NewtCanvasAWT(_window);
 		_awtFrame.add(canvas);
 		_awtFrame.setBounds(x, y, width, height);
+
 		if (icon != null) {
 			_awtFrame.setIconImage(icon);
 		}
+
 		_appListener = appListener;
+
 		_windowID = windowID;
 		_viewID = viewID;
+
 		_name = name;
+
 	}
 
 	public GLWindow getGLWindowRef() {

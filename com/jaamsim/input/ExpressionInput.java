@@ -16,7 +16,6 @@ package com.jaamsim.input;
 
 import com.jaamsim.input.ExpParser.Expression;
 import com.sandwell.JavaSimulation.Entity;
-import com.sandwell.JavaSimulation.InputErrorException;
 
 public class ExpressionInput extends Input<ExpParser.Expression> {
 	private Entity thisEnt;
@@ -34,7 +33,7 @@ public class ExpressionInput extends Input<ExpParser.Expression> {
 	throws InputErrorException {
 		Input.assertCount(kw, 1);
 		try {
-			Expression exp = ExpParser.parseExpression(kw.getArg(0));
+			Expression exp = ExpParser.parseExpression(ExpEvaluator.getContext(), kw.getArg(0));
 
 			// Test whether the expression can be evaluated
 			try {

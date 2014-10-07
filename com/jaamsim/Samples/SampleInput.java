@@ -17,14 +17,14 @@ package com.jaamsim.Samples;
 import java.util.ArrayList;
 import java.util.Collections;
 
+import com.jaamsim.datatypes.DoubleVector;
 import com.jaamsim.input.Input;
+import com.jaamsim.input.InputErrorException;
 import com.jaamsim.input.KeywordIndex;
 import com.jaamsim.units.DimensionlessUnit;
 import com.jaamsim.units.Unit;
 import com.jaamsim.units.UserSpecifiedUnit;
-import com.sandwell.JavaSimulation.DoubleVector;
 import com.sandwell.JavaSimulation.Entity;
-import com.sandwell.JavaSimulation.InputErrorException;
 
 public class SampleInput extends Input<SampleProvider> {
 	private Class<? extends Unit> unitType = DimensionlessUnit.class;
@@ -63,10 +63,10 @@ public class SampleInput extends Input<SampleProvider> {
 	@Override
 	public ArrayList<String> getValidOptions() {
 		ArrayList<String> list = new ArrayList<String>();
-		for (Entity each: Entity.getAll()) {
-			if( (SampleProvider.class).isAssignableFrom(each.getClass()) ) {
-			    list.add(each.getInputName());
-			}
+		for (Entity each : Entity.getClonesOfIterator(Entity.class, SampleProvider.class)) {
+			SampleProvider sp = (SampleProvider)each;
+			if (sp.getUnitType() == unitType)
+				list.add(each.getInputName());
 		}
 		Collections.sort(list);
 		return list;
@@ -76,6 +76,8 @@ public class SampleInput extends Input<SampleProvider> {
 	public String getValueString() {
 		if (value == null || defValue == value)
 			return "";
+		if (value instanceof SampleConstant)
+			return super.getValueString();
 		return value.toString();
 	}
 

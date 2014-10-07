@@ -16,21 +16,21 @@ package com.jaamsim.BasicObjects;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Locale;
 
 import com.jaamsim.Samples.SampleExpInput;
-import com.jaamsim.events.ProcessTarget;
+import com.jaamsim.input.ColourInput;
 import com.jaamsim.input.Input;
 import com.jaamsim.input.InputAgent;
 import com.jaamsim.input.Keyword;
+import com.jaamsim.input.KeywordIndex;
 import com.jaamsim.input.ValueInput;
+import com.jaamsim.input.Vec3dListInput;
 import com.jaamsim.math.Vec3d;
 import com.jaamsim.render.HasScreenPoints;
 import com.jaamsim.units.DimensionlessUnit;
 import com.jaamsim.units.DistanceUnit;
 import com.jaamsim.units.TimeUnit;
-import com.sandwell.JavaSimulation.ColourInput;
-import com.sandwell.JavaSimulation.Vec3dListInput;
+import com.sandwell.JavaSimulation.EntityTarget;
 import com.sandwell.JavaSimulation3D.DisplayEntity;
 
 /**
@@ -68,8 +68,6 @@ public class EntityDelay extends LinkedComponent implements HasScreenPoints {
 	private HasScreenPoints.PointsInfo[] cachedPointInfo;
 
 	{
-		operatingThresholdList.setHidden(true);
-
 		duration = new SampleExpInput( "Duration", "Key Inputs", null);
 		duration.setUnitType(TimeUnit.class);
 		duration.setEntity(this);
@@ -101,6 +99,7 @@ public class EntityDelay extends LinkedComponent implements HasScreenPoints {
 	@Override
 	public void earlyInit() {
 		super.earlyInit();
+		this.setPresentState("Idle");
 
 		entityMap.clear();
 
@@ -140,28 +139,20 @@ public class EntityDelay extends LinkedComponent implements HasScreenPoints {
 		entry.duration = dur;
 		entityMap.put(ent.getEntityNumber(), entry);
 
-		this.scheduleProcess(dur, 5, new RemoveDisplayEntityTarget(this, "removeDisplayEntity", ent));
+		this.scheduleProcess(dur, 5, new RemoveDisplayEntityTarget(this, ent));
 	}
 
-	private static class RemoveDisplayEntityTarget extends ProcessTarget {
-		private final EntityDelay delay;
-		private final String method;
-		private final DisplayEntity ent;
+	private static class RemoveDisplayEntityTarget extends EntityTarget<EntityDelay> {
+		private final DisplayEntity delayedEnt;
 
-		RemoveDisplayEntityTarget(EntityDelay d, String m, DisplayEntity e) {
-			delay = d;
-			method = m;
-			ent = e;
+		RemoveDisplayEntityTarget(EntityDelay d, DisplayEntity e) {
+			super(d, "removeDisplayEntity");
+			delayedEnt = e;
 		}
 
 		@Override
 		public void process() {
-			delay.removeDisplayEntity(ent);
-		}
-
-		@Override
-		public String getDescription() {
-			return String.format( "%s.%s(%s)", delay.getInputName(), method, ent.getInputName() );
+			ent.removeDisplayEntity(delayedEnt);
 		}
 	}
 
@@ -258,18 +249,8 @@ public class EntityDelay extends LinkedComponent implements HasScreenPoints {
 	 */
 	@Override
 	public void dragged(Vec3d dist) {
-		ArrayList<Vec3d> vec = new ArrayList<Vec3d>(pointsInput.getValue().size());
-		for (Vec3d v : pointsInput.getValue()) {
-			vec.add(new Vec3d(v.x + dist.x, v.y + dist.y, v.z + dist.z));
-		}
-
-		StringBuilder tmp = new StringBuilder();
-		for (Vec3d v : vec) {
-			tmp.append(String.format((Locale)null, " { %.3f %.3f %.3f m }", v.x, v.y, v.z));
-		}
-		InputAgent.processEntity_Keyword_Value(this, pointsInput, tmp.toString());
-
+		KeywordIndex kw = InputAgent.formatPointsInputs(pointsInput.getKeyword(), pointsInput.getValue(), dist);
+		InputAgent.apply(this, kw);
 		super.dragged(dist);
 	}
-
 }

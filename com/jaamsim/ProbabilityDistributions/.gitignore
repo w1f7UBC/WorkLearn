@@ -1,3 +1,5 @@
+/BetaDistribution.class
+/BooleanSelector.class
 /ContinuousDistribution.class
 /DiscreteDistribution.class
 /Distribution.class
@@ -13,4 +15,3 @@
 /TriangularDistribution.class
 /UniformDistribution.class
 /WeibullDistribution.class
-/BooleanSelector.class

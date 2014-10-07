@@ -16,22 +16,22 @@ package com.sandwell.JavaSimulation3D;
 
 import java.util.ArrayList;
 
+import com.jaamsim.datatypes.DoubleVector;
+import com.jaamsim.input.ColorListInput;
+import com.jaamsim.input.ColourInput;
+import com.jaamsim.input.EntityInput;
 import com.jaamsim.input.FormatInput;
 import com.jaamsim.input.Input;
+import com.jaamsim.input.InputErrorException;
 import com.jaamsim.input.Keyword;
 import com.jaamsim.input.OutputHandle;
+import com.jaamsim.input.StringInput;
 import com.jaamsim.input.ValueInput;
 import com.jaamsim.input.ValueListInput;
 import com.jaamsim.math.Color4d;
 import com.jaamsim.ui.FrameBox;
 import com.jaamsim.units.Unit;
 import com.jaamsim.units.UserSpecifiedUnit;
-import com.sandwell.JavaSimulation.ColorListInput;
-import com.sandwell.JavaSimulation.ColourInput;
-import com.sandwell.JavaSimulation.DoubleVector;
-import com.sandwell.JavaSimulation.EntityInput;
-import com.sandwell.JavaSimulation.InputErrorException;
-import com.sandwell.JavaSimulation.StringInput;
 
 public abstract class GraphBasics extends DisplayEntity {
 
@@ -86,8 +86,8 @@ public abstract class GraphBasics extends DisplayEntity {
 	         example = "Graph1 XAxisLabelFormat { %.1fs }")
 	private final FormatInput xAxisLabelFormat;
 
-	@Keyword(description = "A list of values beGraph1 XLines { -48 -40 -32 -24 -16 -8 0 h }tween XAxisStart and XAxisEnd at which to insert vertical gridlines.",
-	         example = "")
+	@Keyword(description = "A list of values between XAxisStart and XAxisEnd at which to insert vertical gridlines.",
+	         example = "Graph1 XLines { -48 -40 -32 -24 -16 -8 0 h }")
 	private final ValueListInput xLines;
 
 	@Keyword(description = "The color of the vertical gridlines (or a list corresponding to the colour of each " +

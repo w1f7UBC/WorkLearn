@@ -23,12 +23,10 @@ public class EntitySink extends LinkedComponent {
 
 	{
 		nextComponentInput.setHidden(true);
-		operatingThresholdList.setHidden(true);
+		testEntity.setHidden(true);
+		stateAssignment.setHidden(true);
 	}
 
-	/**
-	 * Add a DisplayEntity from upstream
-	 */
 	@Override
 	public void addDisplayEntity( DisplayEntity ent ) {
 		super.addDisplayEntity(ent);

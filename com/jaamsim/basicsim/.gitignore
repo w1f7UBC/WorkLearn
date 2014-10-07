@@ -1,4 +1,8 @@
-/EntityTracer.class
 /ClonesOfIterable.class
+/ClonesOfIterableInterface.class
+/EntityIterator.class
+/EntityTracer.class
+/ErrorException.class
+/ExpressionEntity.class
 /InstanceIterable.class
 /ReflectionTarget.class

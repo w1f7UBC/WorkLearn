@@ -3,12 +3,11 @@ package DataBase;
 import java.util.ArrayList;
 
 import com.ROLOS.ROLOSEntity;
+import com.jaamsim.input.KeyInput;
 import com.jaamsim.input.Keyword;
 import com.jaamsim.input.ValueInput;
 import com.sandwell.JavaSimulation.Entity;
-import com.sandwell.JavaSimulation.KeyInput;
-import com.sandwell.JavaSimulation.KeyListInput;
-import com.sandwell.JavaSimulation.OneOrTwoKeyInput;
+
 
 public class TestEntity extends Entity {
 	

@@ -4,6 +4,10 @@ import java.util.ArrayList;
 
 import com.ROLOS.DMAgents.SimulationManager;
 import com.ROLOS.Economic.Contract;
+import com.jaamsim.basicsim.ErrorException;
+import com.jaamsim.input.EntityInput;
+import com.jaamsim.input.EntityListInput;
+import com.jaamsim.input.InputErrorException;
 import com.jaamsim.input.ValueInput;
 import com.jaamsim.input.ValueListInput;
 import com.jaamsim.units.EnergyUnit;
@@ -14,10 +18,7 @@ import com.jaamsim.units.RateUnit;
 import com.jaamsim.units.TimeUnit;
 import com.jaamsim.units.VolumeFlowUnit;
 import com.jaamsim.units.VolumeUnit;
-import com.sandwell.JavaSimulation.EntityInput;
-import com.sandwell.JavaSimulation.EntityListInput;
-import com.sandwell.JavaSimulation.ErrorException;
-import com.sandwell.JavaSimulation.InputErrorException;
+
 import com.jaamsim.input.Input;
 import com.jaamsim.input.Keyword;
 import com.sandwell.JavaSimulation.Tester;

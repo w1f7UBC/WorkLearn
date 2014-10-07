@@ -21,9 +21,9 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 
+import com.jaamsim.basicsim.ErrorException;
 import com.jaamsim.units.Unit;
 import com.sandwell.JavaSimulation.Entity;
-import com.sandwell.JavaSimulation.ErrorException;
 
 /**
  * OutputHandle is a class that represents all the useful runtime information for an output,
@@ -34,56 +34,89 @@ import com.sandwell.JavaSimulation.ErrorException;
 public class OutputHandle {
 
 	public Entity ent;
-	public OutputPair pair;
+	public OutputStaticInfo outputInfo;
 	public Class<? extends Unit> unitType;
 
-	private static final HashMap<Class<? extends Entity>, ArrayList<OutputPair>> outputPairCache;
+	private static final HashMap<Class<? extends Entity>, ArrayList<OutputStaticInfo>> outputInfoCache;
 
 	static {
-		outputPairCache = new HashMap<Class<? extends Entity>, ArrayList<OutputPair>>();
+		outputInfoCache = new HashMap<Class<? extends Entity>, ArrayList<OutputStaticInfo>>();
 	}
 
 	public OutputHandle(Entity e, String outputName) {
 		ent = e;
-		pair = OutputHandle.getOutputPair(e.getClass(), outputName);
-		unitType = pair.annotation.unitType();
+		outputInfo = OutputHandle.getOutputInfo(e.getClass(), outputName);
+		unitType = outputInfo.unitType;
+	}
+
+	/**
+	 * A custom constructor for an interned string parameter
+	 * @param e
+	 * @param outputName
+	 * @param dummy
+	 */
+	public OutputHandle(Entity e, String outputName, int dummy) {
+		ent = e;
+		outputInfo = OutputHandle.getOutputInfoInterned(e.getClass(), outputName);
+		unitType = outputInfo.unitType;
 	}
 
 	protected OutputHandle(Entity e) {
 		ent = e;
 	}
 
-	private static class OutputPair {
+	/**
+	 * A data class containing the 'static' (ie: class derived) information for a single output
+	 */
+	private static final class OutputStaticInfo {
 		public Method method;
-		public Output annotation;
+		public final String name;
+		public final String desc;
+		public final boolean reportable;
+		public final Class<? extends Unit> unitType;
 
-		public OutputPair(Method m, Output a) {
+		public OutputStaticInfo(Method m, Output a) {
 			method = m;
-			annotation = a;
+			desc = a.description();
+			reportable = a.reportable();
+			name = a.name().intern();
+			unitType = a.unitType();
 		}
 	}
 
 	// Note: this method will not include attributes in the list. For a complete list use
 	// Entity.hasOutput()
 	public static Boolean hasOutput(Class<? extends Entity> klass, String outputName) {
-		return OutputHandle.getOutputPair(klass, outputName) != null;
+		return OutputHandle.getOutputInfo(klass, outputName) != null;
 	}
 
-	private static OutputPair getOutputPair(Class<? extends Entity> klass, String outputName) {
-		for (OutputPair p : getOutputPair(klass)) {
-			if( p.annotation.name().equals(outputName) )
+	public static Boolean hasOutputInterned(Class<? extends Entity> klass, String outputName) {
+		return OutputHandle.getOutputInfoInterned(klass, outputName) != null;
+	}
+
+	private static OutputStaticInfo getOutputInfo(Class<? extends Entity> klass, String outputName) {
+		for (OutputStaticInfo p : getOutputInfoImp(klass)) {
+			if( p.name.equals(outputName) )
 				return p;
 		}
 		return null;
 	}
 
-	private static ArrayList<OutputPair> getOutputPair(Class<? extends Entity> klass) {
-		ArrayList<OutputPair> ret = outputPairCache.get(klass);
+	private static OutputStaticInfo getOutputInfoInterned(Class<? extends Entity> klass, String outputName) {
+		for (OutputStaticInfo p : getOutputInfoImp(klass)) {
+			if( p.name == outputName )
+				return p;
+		}
+		return null;
+	}
+
+	private static ArrayList<OutputStaticInfo> getOutputInfoImp(Class<? extends Entity> klass) {
+		ArrayList<OutputStaticInfo> ret = outputInfoCache.get(klass);
 		if (ret != null)
 			return ret;
 
-		// klass has not been cached yet, generate pairs
-		ret = new ArrayList<OutputPair>();
+		// klass has not been cached yet, generate info
+		ret = new ArrayList<OutputStaticInfo>();
 		for (Method m : klass.getMethods()) {
 			Output a = m.getAnnotation(Output.class);
 			if (a == null)
@@ -96,9 +129,9 @@ public class OutputHandle {
 				continue;
 			}
 
-			ret.add(new OutputPair(m, a));
+			ret.add(new OutputStaticInfo(m, a));
 		}
-		outputPairCache.put(klass, ret);
+		outputInfoCache.put(klass, ret);
 		return ret;
 	}
 
@@ -109,11 +142,11 @@ public class OutputHandle {
 	 */
 	public static ArrayList<OutputHandle> getOutputHandleList(Entity e) {
 		Class<? extends Entity> klass = e.getClass();
-		ArrayList<OutputPair> list = getOutputPair(klass);
+		ArrayList<OutputStaticInfo> list = getOutputInfoImp(klass);
 		ArrayList<OutputHandle> ret = new ArrayList<OutputHandle>(list.size());
-		for( OutputPair p : list ) {
+		for( OutputStaticInfo p : list ) {
 			//ret.add( new OutputHandle(e, p) );
-			ret.add( e.getOutputHandle(p.annotation.name()) );  // required to get the correct unit type for the output
+			ret.add( e.getOutputHandle(p.name) );  // required to get the correct unit type for the output
 		}
 
 		// And the attributes
@@ -144,15 +177,15 @@ public class OutputHandle {
 
 	@SuppressWarnings("unchecked") // This suppresses the warning on the cast, which is effectively checked
 	public <T> T getValue(double simTime, Class<T> klass) {
-		if( pair.method == null )
+		if( outputInfo.method == null )
 			return null;
 
 		T ret = null;
 		try {
-			if (!klass.isAssignableFrom(pair.method.getReturnType()))
+			if (!klass.isAssignableFrom(outputInfo.method.getReturnType()))
 				return null;
 
-			ret = (T)pair.method.invoke(ent, simTime);
+			ret = (T)outputInfo.method.invoke(ent, simTime);
 		}
 		catch (InvocationTargetException ex) {}
 		catch (IllegalAccessException ex) {}
@@ -238,29 +271,36 @@ public class OutputHandle {
 			if (val == null) return def;
 			return val.charValue();
 		}
+		if (retType == Boolean.class) {
+			Boolean val = getValue(simTime, Boolean.class);
+			if (val == null) return def;
+			return val.booleanValue() ? 1.0d : 0.0d;
+		}
 
 		if (retType == float.class)
-			return this.getValue(simTime, float.class);
+			return this.getValue(simTime, float.class).doubleValue();
 		if (retType == int.class)
-			return this.getValue(simTime, int.class);
+			return this.getValue(simTime, int.class).doubleValue();
 		if (retType == long.class)
-			return this.getValue(simTime, long.class);
+			return this.getValue(simTime, long.class).doubleValue();
 		if (retType == short.class)
-			return this.getValue(simTime, short.class);
+			return this.getValue(simTime, short.class).doubleValue();
 		if (retType == char.class)
-			return this.getValue(simTime, char.class);
+			return this.getValue(simTime, char.class).charValue();
+		if (retType == boolean.class)
+			return this.getValue(simTime, boolean.class) ? 1.0d : 0.0d;
 
 		return def;
 	}
 
 	public Class<?> getReturnType() {
-		assert (pair.method != null);
-		return pair.method.getReturnType();
+		assert (outputInfo.method != null);
+		return outputInfo.method.getReturnType();
 	}
 
 	public Class<?> getDeclaringClass() {
-		assert (pair.method != null);
-		return pair.method.getDeclaringClass();
+		assert (outputInfo.method != null);
+		return outputInfo.method.getDeclaringClass();
 	}
 
 	public void setUnitType(Class<? extends Unit> ut) {
@@ -272,18 +312,15 @@ public class OutputHandle {
 	}
 
 	public String getDescription() {
-		assert (pair.annotation != null);
-		return pair.annotation.description();
+		return outputInfo.desc;
 	}
 
 	public String getName() {
-		assert (pair.annotation != null);
-		return pair.annotation.name();
+		return outputInfo.name;
 	}
 
 	public boolean isReportable() {
-		assert (pair.annotation != null);
-		return pair.annotation.reportable();
+		return outputInfo.reportable;
 	}
 
 }

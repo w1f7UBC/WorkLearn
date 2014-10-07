@@ -15,20 +15,20 @@
 package com.jaamsim.FluidObjects;
 
 import java.util.ArrayList;
-import java.util.Locale;
 
+import com.jaamsim.basicsim.ErrorException;
+import com.jaamsim.input.ColourInput;
 import com.jaamsim.input.Input;
 import com.jaamsim.input.InputAgent;
 import com.jaamsim.input.Keyword;
+import com.jaamsim.input.KeywordIndex;
 import com.jaamsim.input.Output;
 import com.jaamsim.input.ValueInput;
+import com.jaamsim.input.Vec3dListInput;
 import com.jaamsim.math.Vec3d;
 import com.jaamsim.render.HasScreenPoints;
 import com.jaamsim.units.DimensionlessUnit;
 import com.jaamsim.units.DistanceUnit;
-import com.sandwell.JavaSimulation.ColourInput;
-import com.sandwell.JavaSimulation.ErrorException;
-import com.sandwell.JavaSimulation.Vec3dListInput;
 
 /**
  * FluidPipe is a pipe through which fluid can flow.
@@ -226,16 +226,8 @@ public class FluidPipe extends FluidComponent implements HasScreenPoints {
 	 */
 	@Override
 	public void dragged(Vec3d dist) {
-		ArrayList<Vec3d> vec = new ArrayList<Vec3d>(pointsInput.getValue().size());
-		for (Vec3d v : pointsInput.getValue()) {
-			vec.add(new Vec3d(v.x + dist.x, v.y + dist.y, v.z + dist.z));
-		}
-		StringBuilder tmp = new StringBuilder();
-		for (Vec3d v : vec) {
-			tmp.append(String.format((Locale)null, " { %.3f %.3f %.3f m }", v.x, v.y, v.z));
-		}
-		InputAgent.processEntity_Keyword_Value(this, pointsInput, tmp.toString());
-
+		KeywordIndex kw = InputAgent.formatPointsInputs(pointsInput.getKeyword(), pointsInput.getValue(), dist);
+		InputAgent.apply(this, kw);
 		super.dragged(dist);
 	}
 

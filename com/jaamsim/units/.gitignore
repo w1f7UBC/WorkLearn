@@ -19,14 +19,10 @@
 /SpecificEnergyUnit.class
 /SpeedUnit.class
 /TimeUnit.class
+/Unit$DivPair.class
+/Unit$MultPair.class
 /Unit.class
 /UserSpecifiedUnit.class
 /ViscosityUnit.class
 /VolumeFlowUnit.class
 /VolumeUnit.class
-/CostPerMassPerDistUnit.class
-/CostPerMassUnit.class
-/CostPerVolumePerDistUnit.class
-/CostPerVolumeUnit.class
-/CostPerEnergyUnit.class
-/EnergyFlowUnit.class

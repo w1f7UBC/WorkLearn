@@ -38,15 +38,17 @@ import worldwind.WorldWindFrame;
 import worldwind.WorldWindFrame.WorkerThread;
 
 import com.ROLOS.ROLOSEntity;
+import com.ROLOS.Input.InputAgent_Rolos;
 import com.ROLOS.Utils.HandyUtils;
 import com.jaamsim.input.Input;
 import com.jaamsim.input.InputAgent;
+import com.jaamsim.input.InputErrorException;
 import com.jaamsim.input.Keyword;
+import com.jaamsim.input.StringInput;
 import com.sandwell.JavaSimulation.Entity;
-import com.sandwell.JavaSimulation.InputErrorException;
-import com.sandwell.JavaSimulation.StringInput;
+
 import com.sandwell.JavaSimulation3D.GUIFrame;
-import com.sun.xml.internal.ws.api.addressing.WSEndpointReference.Metadata;
+
 
 public class Query extends Entity {
 	private static final ArrayList<Query> allInstances;
@@ -127,12 +129,12 @@ public class Query extends Entity {
 
 	//change the default statement in this object
 	public void setStatement(String statements){
-		InputAgent.processEntity_Keyword_Value(this, statement, statements);
+		InputAgent_Rolos.processEntity_Keyword_Value(this, statement, statements);
 		return;
 	}
 
 	public void setTable(String tables){
-		InputAgent.processEntity_Keyword_Value(this, table, tables);
+		InputAgent_Rolos.processEntity_Keyword_Value(this, table, tables);
 		return;
 	}
 

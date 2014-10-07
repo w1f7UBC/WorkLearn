@@ -16,6 +16,7 @@ package com.jaamsim.ProbabilityDistributions;
 
 import com.jaamsim.input.Keyword;
 import com.jaamsim.input.ValueInput;
+import com.jaamsim.math.Gamma;
 import com.jaamsim.rng.MRG1999a;
 import com.jaamsim.units.DimensionlessUnit;
 import com.jaamsim.units.Unit;
@@ -31,11 +32,13 @@ public class WeibullDistribution extends Distribution {
 	         example = "WeibullDist1 Scale { 3.0 h }")
 	private final ValueInput scaleInput;
 
-	@Keyword(description = "The shape parameter for the Weibull distribution.  A decimal value > 0.0.  " +
-			"Note: The CalculatedMean and CalculatedStandardDeviation outputs are valid only for shape = 1/N, 1, or 2.  " +
-			"Other values for Shape are acceptable, but the CalculatedMean and CalculatedStandardDeviation outputs will be reported incorrectly as zero.",
+	@Keyword(description = "The shape parameter for the Weibull distribution.  A decimal value > 0.0.",
 	         example = "WeibullDist-1 Shape { 1.0 }")
 	private final ValueInput shapeInput;
+
+	@Keyword(description = "The location parameter for the Weibull distribution.",
+	         example = "WeibullDist-1 Location { 5.0 h }")
+	private final ValueInput locationInput;
 
 	private final MRG1999a rng = new MRG1999a();
 
@@ -46,6 +49,10 @@ public class WeibullDistribution extends Distribution {
 		scaleInput.setValidRange( 0.0d, Double.POSITIVE_INFINITY);
 		scaleInput.setUnitType( UserSpecifiedUnit.class );
 		this.addInput(scaleInput);
+
+		locationInput = new ValueInput("Location", "Key Inputs", 0.0d);
+		locationInput.setUnitType( UserSpecifiedUnit.class );
+		this.addInput(locationInput);
 
 		shapeInput = new ValueInput("Shape", "Key Inputs", 1.0d);
 		shapeInput.setValidRange( 1.0e-10d, Double.POSITIVE_INFINITY);
@@ -65,49 +72,28 @@ public class WeibullDistribution extends Distribution {
 	protected void setUnitType(Class<? extends Unit> ut) {
 		super.setUnitType(ut);
 		scaleInput.setUnitType(ut);
+		locationInput.setUnitType(ut);
 	}
 
 	@Override
 	protected double getNextSample() {
 
 		// Inverse transform method
-		return  scaleInput.getValue() * Math.pow( - Math.log( rng.nextUniform() ), 1.0/shapeInput.getValue() );
+		return  scaleInput.getValue() * Math.pow( - Math.log( rng.nextUniform() ), 1.0/shapeInput.getValue() ) + locationInput.getValue();
 	}
 
 	@Override
 	protected double getMeanValue() {
 		double shape = shapeInput.getValue();
 		double scale = scaleInput.getValue();
-		return scale / shape * this.gamma( 1.0 / shape );
+		double loc = locationInput.getValue();
+		return scale/shape * Gamma.gamma(1.0/shape) + loc;
 	}
 
 	@Override
 	protected double getStandardDeviation() {
 		double shape = shapeInput.getValue();
 		double scale = scaleInput.getValue();
-		return scale/shape * Math.sqrt( 2.0*shape*this.gamma(2.0/shape) - Math.pow( this.gamma(1.0/shape), 2.0 ) );
-	}
-
-	/**
-	 * Gamma function.  A crude implementation for x = 0.5 or an integer.
-	 * Needed for the getMeanValue() and getStandardDeviation() methods.
-	 */
-	private double gamma( double x ) {
-
-		// Special case for x = 0.5
-		if( x == 0.5 ) return Math.sqrt( Math.PI );
-
-		// Only works for integer values
-		int k = (int) x;
-		if( Math.abs(x - k) > 1.0e-10  || ( x < 0.0 ) ) {
-			return 0.0;
-		}
-
-		// Calculate k-1 factorial
-		double ret = 1.0;
-		for( int i=2; i<k; i++ ) {
-			ret *= i;
-		}
-		return ret;
+		return scale/shape * Math.sqrt( 2.0*shape*Gamma.gamma(2.0/shape) - Math.pow(Gamma.gamma(1.0/shape), 2.0) );
 	}
 }

@@ -2,8 +2,9 @@ package com.ROLOS.Logistics;
 
 import com.jaamsim.Samples.SampleInput;
 import com.jaamsim.units.TimeUnit;
-import com.sandwell.JavaSimulation.EntityListInput;
-import com.sandwell.JavaSimulation.ErrorException;
+
+import com.jaamsim.basicsim.ErrorException;
+import com.jaamsim.input.EntityListInput;
 import com.jaamsim.input.Keyword;
 import com.sandwell.JavaSimulation3D.DisplayEntity;
 

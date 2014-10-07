@@ -17,8 +17,13 @@ package com.sandwell.JavaSimulation3D;
 
 import java.util.ArrayList;
 
+import com.jaamsim.datatypes.DoubleVector;
 import com.jaamsim.events.ProcessTarget;
+import com.jaamsim.input.ColorListInput;
+import com.jaamsim.input.ColourInput;
 import com.jaamsim.input.Input;
+import com.jaamsim.input.InputErrorException;
+import com.jaamsim.input.IntegerInput;
 import com.jaamsim.input.Keyword;
 import com.jaamsim.input.OutputHandle;
 import com.jaamsim.input.OutputListInput;
@@ -27,11 +32,6 @@ import com.jaamsim.math.Color4d;
 import com.jaamsim.units.DimensionlessUnit;
 import com.jaamsim.units.TimeUnit;
 import com.jaamsim.units.Unit;
-import com.sandwell.JavaSimulation.ColorListInput;
-import com.sandwell.JavaSimulation.ColourInput;
-import com.sandwell.JavaSimulation.DoubleVector;
-import com.sandwell.JavaSimulation.InputErrorException;
-import com.sandwell.JavaSimulation.IntegerInput;
 
 public class Graph extends GraphBasics  {
 

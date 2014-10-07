@@ -69,12 +69,4 @@ public class VisibilityInfo {
 		VisibilityInfo vi = (VisibilityInfo)o;
 		return Arrays.equals(vi.viewIDs, viewIDs) && vi.minDist == minDist && vi.maxDist == maxDist;
 	}
-	
-	public double getMin(){
-		return minDist;
-	}
-	
-	public double getMax(){
-		return maxDist;
-	}
 }

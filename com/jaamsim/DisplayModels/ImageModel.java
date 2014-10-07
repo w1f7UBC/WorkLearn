@@ -14,12 +14,15 @@
  */
 package com.jaamsim.DisplayModels;
 
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.ArrayList;
 
 import javax.swing.filechooser.FileNameExtensionFilter;
 
+import com.jaamsim.basicsim.ErrorException;
+import com.jaamsim.datatypes.IntegerVector;
+import com.jaamsim.input.BooleanInput;
+import com.jaamsim.input.FileInput;
 import com.jaamsim.input.Keyword;
 import com.jaamsim.math.Transform;
 import com.jaamsim.math.Vec3d;
@@ -27,13 +30,8 @@ import com.jaamsim.render.DisplayModelBinding;
 import com.jaamsim.render.ImageProxy;
 import com.jaamsim.render.OverlayTextureProxy;
 import com.jaamsim.render.RenderProxy;
-import com.jaamsim.render.TexCache;
 import com.jaamsim.render.VisibilityInfo;
-import com.sandwell.JavaSimulation.BooleanInput;
 import com.sandwell.JavaSimulation.Entity;
-import com.sandwell.JavaSimulation.ErrorException;
-import com.sandwell.JavaSimulation.FileInput;
-import com.sandwell.JavaSimulation.IntegerVector;
 import com.sandwell.JavaSimulation3D.DisplayEntity;
 import com.sandwell.JavaSimulation3D.OverlayImage;
 
@@ -193,13 +191,8 @@ public class ImageModel extends DisplayModel {
 			// Gather some inputs
 
 			cachedProxies = new ArrayList<RenderProxy>();
-			try {
-				cachedProxies.add(new ImageProxy(imageName.toURL(), trans,
-				                       scale, transp, compressed, vi, pickingID));
-			} catch (MalformedURLException e) {
-				cachedProxies.add(new ImageProxy(TexCache.BAD_TEXTURE, trans, scale,
-				                                 transp, compressed, vi, pickingID));
-			}
+			cachedProxies.add(new ImageProxy(imageName, trans,
+			                       scale, transp, compressed, vi, pickingID));
 
 		}
 
@@ -227,6 +220,7 @@ public class ImageModel extends DisplayModel {
 		private IntegerVector sizeCache;
 		private boolean alignBottomCache;
 		private boolean alignRightCache;
+		private boolean transpCache;
 		private VisibilityInfo viCache;
 
 		public OverlayBinding(Entity ent, DisplayModel dm) {
@@ -251,6 +245,7 @@ public class ImageModel extends DisplayModel {
 
 			boolean alignRight = imageObservee.getAlignRight();
 			boolean alignBottom = imageObservee.getAlignBottom();
+			boolean transp = transparent.getValue();
 
 			VisibilityInfo vi = getVisibilityInfo();
 
@@ -261,6 +256,7 @@ public class ImageModel extends DisplayModel {
 			dirty = dirty || !compare(sizeCache, size);
 			dirty = dirty || alignRightCache != alignRight;
 			dirty = dirty || alignBottomCache != alignBottom;
+			dirty = dirty || transpCache != transp;
 			dirty = dirty || !compare(viCache, vi);
 
 			filenameCache = filename;
@@ -268,6 +264,7 @@ public class ImageModel extends DisplayModel {
 			sizeCache = size;
 			alignRightCache = alignRight;
 			alignBottomCache = alignBottom;
+			transpCache = transp;
 			viCache = vi;
 
 			if (cachedProxy != null && !dirty) {
@@ -282,13 +279,11 @@ public class ImageModel extends DisplayModel {
 
 			try {
 				cachedProxy = new OverlayTextureProxy(pos.get(0), pos.get(1), size.get(0), size.get(1),
-				                                      filename.toURL(),
-				                                      transparent.getValue(), false,
+				                                      filename,
+				                                      transp, false,
 				                                      alignRight, alignBottom, vi);
 
 				out.add(cachedProxy);
-			} catch (MalformedURLException ex) {
-				cachedProxy = null;
 			} catch (ErrorException ex) {
 				cachedProxy = null;
 			}

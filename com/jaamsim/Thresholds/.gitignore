@@ -1,7 +1,11 @@
+/ExpressionThreshold$DoOpenCloseTarget.class
+/ExpressionThreshold$OpenChangedConditional.class
 /ExpressionThreshold.class
+/SignalThreshold.class
+/Threshold$DoCloseTarget.class
+/Threshold$DoOpenTarget.class
 /Threshold$DoThresholdChanged.class
 /Threshold.class
 /ThresholdUser.class
 /TimeSeriesThreshold$DoOpenCloseTarget.class
 /TimeSeriesThreshold.class
-/SignalThreshold.class

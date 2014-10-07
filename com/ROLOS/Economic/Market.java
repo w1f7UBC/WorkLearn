@@ -10,11 +10,13 @@ import com.ROLOS.Logistics.BulkMaterial;
 import com.ROLOS.Logistics.Facility;
 import com.ROLOS.Logistics.MovingEntity;
 import com.ROLOS.Logistics.Route;
+import com.jaamsim.input.BooleanInput;
+import com.jaamsim.input.EntityInput;
+import com.jaamsim.input.EntityListInput;
 import com.jaamsim.input.InputAgent;
-import com.sandwell.JavaSimulation.BooleanInput;
+
 import com.sandwell.JavaSimulation.Entity;
-import com.sandwell.JavaSimulation.EntityInput;
-import com.sandwell.JavaSimulation.EntityListInput;
+
 import com.jaamsim.input.Keyword;
 import com.sandwell.JavaSimulation.Tester;
 

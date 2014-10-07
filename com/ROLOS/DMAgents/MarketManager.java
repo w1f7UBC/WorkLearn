@@ -9,7 +9,8 @@ import com.ROLOS.Logistics.Facility;
 import com.ROLOS.Logistics.ProcessingRoute;
 import com.ROLOS.Utils.HashMapList;
 import com.ROLOS.Utils.PriorityQueue;
-import com.jaamsim.events.ReflectionTarget;
+import com.jaamsim.basicsim.ReflectionTarget;
+
 
 public class MarketManager extends ROLOSEntity {
 

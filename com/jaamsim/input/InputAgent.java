@@ -24,25 +24,25 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
+import com.jaamsim.basicsim.ErrorException;
 import com.jaamsim.input.Input.ParseContext;
+import com.jaamsim.math.Vec3d;
 import com.jaamsim.ui.ExceptionBox;
 import com.jaamsim.ui.FrameBox;
 import com.jaamsim.ui.LogBox;
 import com.sandwell.JavaSimulation.Entity;
-import com.sandwell.JavaSimulation.ErrorException;
 import com.sandwell.JavaSimulation.FileEntity;
 import com.sandwell.JavaSimulation.Group;
-import com.sandwell.JavaSimulation.InputErrorException;
 import com.sandwell.JavaSimulation.ObjectType;
 import com.sandwell.JavaSimulation.Simulation;
 import com.sandwell.JavaSimulation3D.GUIFrame;
@@ -87,7 +87,7 @@ public class InputAgent {
 		setReportDirectory(null);
 	}
 
-	public static String getReportDirectory() {
+	private static String getReportDirectory() {
 		if (reportDir != null)
 			return reportDir.getPath() + File.separator;
 
@@ -293,7 +293,7 @@ public class InputAgent {
 		}
 
 		if (url == null) {
-			InputAgent.logWarning("Unable to resolve path %s%s - %s", root, path.toString(), file);
+			InputAgent.logError("Unable to resolve path %s%s - %s", root, path.toString(), file);
 			return false;
 		}
 
@@ -302,7 +302,7 @@ public class InputAgent {
 			InputStream in = url.openStream();
 			buf = new BufferedReader(new InputStreamReader(in));
 		} catch (IOException e) {
-			InputAgent.logWarning("Could not read from %s", url.toString());
+			InputAgent.logError("Could not read from %s", url.toString());
 			return false;
 		}
 
@@ -601,25 +601,30 @@ public class InputAgent {
 	}
 
 	public static final void apply(Entity ent, Input<?> in, KeywordIndex kw) {
-		in.parse(kw);
+		// If the input value is blank, restore the default
+		if (kw.numArgs() == 0) {
+			in.reset();
+		}
+		else {
+			in.parse(kw);
+			if (kw.numArgs() < 1000)
+				in.setValueString(kw.argString());
+			else
+				in.setValueString("");
+		}
 
 		// Only mark the keyword edited if we have finished initial configuration
-		if ( InputAgent.recordEdits() )
+		if (InputAgent.recordEdits()) {
 			in.setEdited(true);
+			ent.setFlag(Entity.FLAG_EDITED);
+			if (!ent.testFlag(Entity.FLAG_GENERATED))
+				sessionEdited = true;
+		}
 
 		ent.updateForInput(in);
-
-		if(ent.testFlag(Entity.FLAG_GENERATED))
-			return;
-
-		if(in.isEdited()) {
-			ent.setFlag(Entity.FLAG_EDITED);
-			sessionEdited = true;
-		}
-		in.setValueString(kw.argString());
 	}
 
-	private static void processKeyword(Entity entity, KeywordIndex key) {
+	public static void processKeyword(Entity entity, KeywordIndex key) {
 		if (entity.testFlag(Entity.FLAG_LOCKED))
 			throw new InputErrorException("Entity: %s is locked and cannot be modified", entity.getName());
 
@@ -665,7 +670,7 @@ public class InputAgent {
     		InputAgent.setLoadFile(gui, temp);
         }
 	}
-    
+
 	public static void save(GUIFrame gui) {
 		LogBox.logLine("Saving...");
 		if( InputAgent.getConfigFile() != null ) {
@@ -688,6 +693,7 @@ public class InputAgent {
 				new FileNameExtensionFilter("JaamSim Configuration File (*.cfg)", "CFG");
 		chooser.addChoosableFileFilter(cfgFilter);
 		chooser.setFileFilter(cfgFilter);
+		chooser.setSelectedFile(InputAgent.getConfigFile());
 
 		// Show the file chooser and wait for selection
 		int returnVal = chooser.showSaveDialog(gui);
@@ -959,21 +965,23 @@ public class InputAgent {
 	private static void echoInputRecord(ArrayList<String> tokens) {
 		if (logFile == null)
 			return;
-		StringBuilder line = new StringBuilder();
+
+		boolean beginLine = true;
 		for (int i = 0; i < tokens.size(); i++) {
-			line.append("  ").append(tokens.get(i));
-			if (tokens.get(i).startsWith("\"")) {
-				logFile.write(line.toString());
+			if (!beginLine)
+				logFile.write("  ");
+			String tok = tokens.get(i);
+			logFile.write(tok);
+			beginLine = false;
+			if (tok.startsWith("\"")) {
 				logFile.newLine();
-				line.setLength(0);
+				beginLine = true;
 			}
 		}
-
-		// Leftover input
-		if (line.length() > 0) {
-			logFile.write(line.toString());
+		// If there were any leftover string written out, make sure the line gets terminated
+		if (!beginLine)
 			logFile.newLine();
-		}
+
 		logFile.flush();
 	}
 
@@ -1039,17 +1047,6 @@ public class InputAgent {
 	/**
 	 * Prepares the keyword and input value for processing.
 	 *
-	 * @param ent - the entity whose keyword and value have been entered.
-	 * @param in - the input object for the keyword.
-	 * @param value - the input value String for the keyword.
-	 */
-	public static void processEntity_Keyword_Value(Entity ent, Input<?> in, String value){
-		processEntity_Keyword_Value(ent, in.getKeyword(), value);
-	}
-
-	/**
-	 * Prepares the keyword and input value for processing.
-	 *
 	 * @param ent - the entity whose keyword and value has been entered.
 	 * @param keyword - the keyword.
 	 * @param value - the input value String for the keyword.
@@ -1074,6 +1071,8 @@ public class InputAgent {
 	 * @param fileName - the full path and file name for the new configuration file.
 	 */
 	public static void printNewConfigurationFileWithName( String fileName ) {
+
+		// 1) WRITE LINES FROM THE ORIGINAL CONFIGURATION FILE
 
 		// Copy the original configuration file up to the "RecordEdits" marker (if present)
 		// Temporary storage for the copied lines is needed in case the original file is to be overwritten
@@ -1107,10 +1106,11 @@ public class InputAgent {
 			InputAgent.setRecordEditsFound(true);
 		}
 
+		// 2) WRITE THE DEFINITION STATEMENTS FOR NEW OBJECTS
+
 		// Determine all the new classes that were created
 		ArrayList<Class<? extends Entity>> newClasses = new ArrayList<Class<? extends Entity>>();
-		for (int i = 0; i < Entity.getAll().size(); i++) {
-			Entity ent = Entity.getAll().get(i);
+		for (Entity ent : Entity.getAll()) {
 			if (!ent.testFlag(Entity.FLAG_ADDED) || ent.testFlag(Entity.FLAG_GENERATED))
 				continue;
 
@@ -1134,8 +1134,7 @@ public class InputAgent {
 			}
 
 			// Print the new instances that were defined
-			for (int i = 0; i < Entity.getAll().size(); i++) {
-				Entity ent = Entity.getAll().get(i);
+			for (Entity ent : Entity.getAll()) {
 				if (!ent.testFlag(Entity.FLAG_ADDED) || ent.testFlag(Entity.FLAG_GENERATED))
 					continue;
 
@@ -1147,12 +1146,55 @@ public class InputAgent {
 			file.format("}%n");
 		}
 
-		// Identify the entities whose inputs were edited
-		for (int i = 0; i < Entity.getAll().size(); i++) {
-			Entity ent = Entity.getAll().get(i);
-			if (ent.testFlag(Entity.FLAG_EDITED) && !ent.testFlag(Entity.FLAG_GENERATED)) {
+		// 3) WRITE THE ATTRIBUTE DEFINITIONS
+		boolean blankLinePrinted = false;
+		for (Entity ent : Entity.getAll()) {
+			if (!ent.testFlag(Entity.FLAG_EDITED))
+				continue;
+			if (ent.testFlag(Entity.FLAG_GENERATED))
+				continue;
+
+			final Input<?> in = ent.getInput("AttributeDefinitionList");
+			if (in == null || !in.isEdited())
+				continue;
+
+			if (!blankLinePrinted) {
 				file.format("%n");
-				writeInputsOnFile_ForEntity( file, ent );
+				blankLinePrinted = true;
+			}
+			writeInputOnFile_ForEntity(file, ent, in);
+		}
+
+		// 4) WRITE THE INPUTS FOR KEYWORDS THAT WERE EDITED
+
+		// Identify the entities whose inputs were edited
+		for (Entity ent : Entity.getAll()) {
+			if (!ent.testFlag(Entity.FLAG_EDITED))
+				continue;
+			if (ent.testFlag(Entity.FLAG_GENERATED))
+				continue;
+
+			file.format("%n");
+
+			ArrayList<Input<?>> deferredInputs = new ArrayList<Input<?>>();
+			// Print the key inputs first
+			for (Input<?> in : ent.getEditableInputs()) {
+				if (!in.isEdited())
+					continue;
+				if ("AttributeDefinitionList".equals(in.getKeyword()))
+					continue;
+
+				// defer all inputs outside the Key Inputs category
+				if (!"Key Inputs".equals(in.getCategory())) {
+					deferredInputs.add(in);
+					continue;
+				}
+
+				writeInputOnFile_ForEntity(file, ent, in);
+			}
+
+			for (Input<?> in : deferredInputs) {
+				writeInputOnFile_ForEntity(file, ent, in);
 			}
 		}
 
@@ -1161,33 +1203,9 @@ public class InputAgent {
 		file.close();
 	}
 
-	/**
-	 * Prints the configuration file entries for Entity ent to the FileEntity file.
-	 *
-	 * @param file - the target configuration file.
-	 * @param ent  - the entity whose configuration file entries are to be written.
-	 */
-	static void writeInputsOnFile_ForEntity( FileEntity file, Entity ent ) {
-
-		// Print keywords for this entity that are in the "Key Inputs" category
-		for (Input<?> in : ent.getEditableInputs()) {
-			if (in.isEdited() && in.getCategory().equals("Key Inputs")) {
-				String value = in.getValueString();
-				ArrayList<String> tokens = new ArrayList<String>();
-				Parser.tokenize(tokens, value);
-				file.format("%s %s { %s }%n", ent.getInputName(), in.getKeyword(), value);
-			}
-		}
-
-		// Print keywords for this entity that are NOT in the "Key Inputs" category
-		for (Input<?> in : ent.getEditableInputs()) {
-			if (in.isEdited() && !in.getCategory().equals("Key Inputs")) {
-				String value = in.getValueString();
-				ArrayList<String> tokens = new ArrayList<String>();
-				Parser.tokenize(tokens, value);
-				file.format("%s %s { %s }%n", ent.getInputName(), in.getKeyword(), value);
-			}
-		}
+	static void writeInputOnFile_ForEntity(FileEntity file, Entity ent, Input<?> in) {
+		file.format("%s %s { %s }%n",
+		            ent.getInputName(), in.getKeyword(), in.getValueString());
 	}
 
 	/**
@@ -1233,6 +1251,33 @@ public class InputAgent {
 		sessionEdited = false;
 	}
 
+	public static KeywordIndex formatPointsInputs(String keyword, ArrayList<Vec3d> points, Vec3d offset) {
+		ArrayList<String> tokens = new ArrayList<String>(points.size() * 6);
+		for (Vec3d v : points) {
+			tokens.add("{");
+			tokens.add(String.format((Locale)null, "%.3f", v.x + offset.x));
+			tokens.add(String.format((Locale)null, "%.3f", v.y + offset.y));
+			tokens.add(String.format((Locale)null, "%.3f", v.z + offset.z));
+			tokens.add("m");
+			tokens.add("}");
+		}
+
+		// Parse the keyword inputs
+		return new KeywordIndex(tokens, keyword, 0, tokens.size(), null);
+	}
+
+	public static KeywordIndex formatPointInputs(String keyword, Vec3d point, String unit) {
+		ArrayList<String> tokens = new ArrayList<String>(4);
+		tokens.add(String.format((Locale)null, "%.6f", point.x));
+		tokens.add(String.format((Locale)null, "%.6f", point.y));
+		tokens.add(String.format((Locale)null, "%.6f", point.z));
+		if (unit != null)
+			tokens.add(unit);
+
+		// Parse the keyword inputs
+		return new KeywordIndex(tokens, keyword, 0, tokens.size(), null);
+	}
+
 	/**
 	 * Split an input (list of strings) down to a single level of nested braces, this may then be called again for
 	 * further nesting.
@@ -1266,7 +1311,6 @@ public class InputAgent {
 
 		return inputs;
 	}
-
 
 
 	/**

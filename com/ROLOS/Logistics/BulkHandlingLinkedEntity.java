@@ -5,17 +5,18 @@ import java.util.ArrayList;
 import com.ROLOS.ROLOSEntity;
 import com.ROLOS.Utils.HandyUtils;
 import com.ROLOS.Utils.ThreeLinkedLists;
+import com.jaamsim.basicsim.ErrorException;
+import com.jaamsim.input.EntityInput;
 import com.jaamsim.input.InputAgent;
 import com.jaamsim.input.ValueInput;
 import com.jaamsim.input.ValueListInput;
+import com.jaamsim.input.Vec3dInput;
 import com.jaamsim.math.Vec3d;
 import com.jaamsim.units.DistanceUnit;
 import com.jaamsim.units.Unit;
-import com.sandwell.JavaSimulation.EntityInput;
-import com.sandwell.JavaSimulation.ErrorException;
-import com.sandwell.JavaSimulation.InputErrorException;
+
 import com.jaamsim.input.Keyword;
-import com.sandwell.JavaSimulation.Vec3dInput;
+
 import com.sandwell.JavaSimulation3D.DisplayEntity;
 
 /**

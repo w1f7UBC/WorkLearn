@@ -30,6 +30,7 @@ import com.jaamsim.MeshFiles.MeshData;
 import com.jaamsim.collada.ColParser;
 import com.jaamsim.controllers.RenderManager;
 import com.jaamsim.input.ActionListInput;
+import com.jaamsim.input.FileInput;
 import com.jaamsim.input.Keyword;
 import com.jaamsim.input.Output;
 import com.jaamsim.math.AABB;
@@ -48,7 +49,6 @@ import com.jaamsim.ui.MenuItem;
 import com.jaamsim.ui.LogBox;
 import com.jaamsim.ui.MenuItemEntity;
 import com.sandwell.JavaSimulation.Entity;
-import com.sandwell.JavaSimulation.FileInput;
 import com.sandwell.JavaSimulation3D.DisplayEntity;
 
 public class ColladaModel extends DisplayModel implements MenuItemEntity {
@@ -331,7 +331,7 @@ public class ColladaModel extends DisplayModel implements MenuItemEntity {
 
 		try {
 			ColParser.setKeepData(true);
-			MeshData data = ColParser.parse(meshKey.getURL());
+			MeshData data = ColParser.parse(meshKey.getURI());
 			DataBlock block = data.getDataAsBlock();
 			File outFile = new File(outputName);
 			FileOutputStream outStream = new FileOutputStream(outFile);
@@ -361,6 +361,10 @@ public class ColladaModel extends DisplayModel implements MenuItemEntity {
 				FileNameExtensionFilter jsbFilter = new FileNameExtensionFilter("JaamSim 3D Binary Files (*.jsb)", "JSB");
 				chooser.addChoosableFileFilter(jsbFilter);
 				chooser.setFileFilter(jsbFilter);
+
+				// Set the default name for the binary file
+				String defName = colFile.getName().concat(".jsb");
+				chooser.setSelectedFile(new File(defName));
 
 				// Show the file chooser and wait for selection
 				int returnVal = chooser.showDialog(null, "Export");

@@ -16,10 +16,13 @@ package com.sandwell.JavaSimulation;
 
 import java.util.Arrays;
 
+import com.jaamsim.basicsim.ErrorException;
 import com.jaamsim.input.Input;
+import com.jaamsim.input.InputErrorException;
 import com.jaamsim.input.Keyword;
 import com.jaamsim.input.Output;
 import com.jaamsim.input.OutputHandle;
+import com.jaamsim.input.TimeSeriesDataInput;
 import com.jaamsim.input.UnitTypeInput;
 import com.jaamsim.input.ValueInput;
 import com.jaamsim.units.TimeUnit;
@@ -100,19 +103,18 @@ public class TimeSeries extends DisplayEntity implements TimeSeriesProvider {
 		return out;
 	}
 
-	@Output( name="PresentValue",
-			 description="The time series value for the present time.",
-			 unitType = UserSpecifiedUnit.class)
+	@Output(name = "PresentValue",
+	        description = "The time series value for the present time.",
+	        unitType = UserSpecifiedUnit.class)
 	@Override
-	public double getNextSample(double simTime) {
+	public final double getNextSample(double simTime) {
 		return this.getValueForTimeHours(simTime / 3600.0);
 	}
 
 	/**
 	 * Return the value for the given simulation time in hours
 	 */
-	@Override
-	public double getValueForTimeHours( double time ) {
+	private double getValueForTimeHours( double time ) {
 		double[] valueList = value.getValue().valueList;
 		return valueList[ getIndexForTimeHours( time ) ];
 	}
@@ -162,6 +164,11 @@ public class TimeSeries extends DisplayEntity implements TimeSeriesProvider {
 						return -index - 2;
 			}
 		}
+	}
+
+	@Override
+	public double getNextTimeAfter(double simTime) {
+		return getNextChangeTimeAfterHours(simTime / 3600.0d) * 3600.0d;
 	}
 
 	/**

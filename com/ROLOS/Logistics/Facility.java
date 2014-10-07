@@ -12,12 +12,14 @@ import com.ROLOS.DMAgents.FacilityTransportationManager;
 import com.ROLOS.Economic.Contract;
 import com.ROLOS.Utils.HashMapList;
 import com.ROLOS.Utils.TwoLinkedLists;
-import com.jaamsim.events.ReflectionTarget;
+
+import com.jaamsim.basicsim.ReflectionTarget;
+import com.jaamsim.input.BooleanInput;
 import com.jaamsim.input.InputAgent;
 import com.jaamsim.input.Output;
 import com.jaamsim.input.ValueInput;
 import com.jaamsim.units.MassFlowUnit;
-import com.sandwell.JavaSimulation.BooleanInput;
+
 import com.sandwell.JavaSimulation.FileEntity;
 import com.jaamsim.input.Input;
 import com.jaamsim.input.Keyword;

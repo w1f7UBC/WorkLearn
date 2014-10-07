@@ -10,8 +10,9 @@ import java.util.Properties;
 import worldwind.LayerManager;
 
 import com.jaamsim.input.Keyword;
+import com.jaamsim.input.StringInput;
 import com.sandwell.JavaSimulation.Entity;
-import com.sandwell.JavaSimulation.StringInput;
+
 
 public class Database extends Entity {
 	private static final ArrayList<Database> allInstances;

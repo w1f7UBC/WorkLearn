@@ -14,14 +14,14 @@
  */
 package com.jaamsim.ProbabilityDistributions;
 
+import com.jaamsim.datatypes.DoubleVector;
+import com.jaamsim.input.InputErrorException;
 import com.jaamsim.input.Keyword;
 import com.jaamsim.input.ValueListInput;
 import com.jaamsim.rng.MRG1999a;
 import com.jaamsim.units.DimensionlessUnit;
 import com.jaamsim.units.Unit;
 import com.jaamsim.units.UserSpecifiedUnit;
-import com.sandwell.JavaSimulation.DoubleVector;
-import com.sandwell.JavaSimulation.InputErrorException;
 
 /**
  * ContinuousDistribution is a user-defined probability distribution that selects an output value based on an ordered list

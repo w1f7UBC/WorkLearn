@@ -14,8 +14,6 @@
  */
 package com.jaamsim.input;
 
-import com.sandwell.JavaSimulation.InputErrorException;
-import com.sandwell.JavaSimulation.StringInput;
 
 public class FormatInput extends StringInput {
 	public FormatInput(String key, String cat, String def) {

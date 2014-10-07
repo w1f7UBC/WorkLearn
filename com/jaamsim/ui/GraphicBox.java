@@ -45,10 +45,12 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 
 import com.jaamsim.DisplayModels.ColladaModel;
 import com.jaamsim.DisplayModels.DisplayModel;
+import com.jaamsim.DisplayModels.ImageModel;
 import com.jaamsim.controllers.RenderManager;
 import com.jaamsim.input.InputAgent;
 import com.jaamsim.input.KeywordIndex;
 import com.jaamsim.math.AABB;
+import com.jaamsim.math.Vec2d;
 import com.jaamsim.math.Vec3d;
 import com.jaamsim.render.Future;
 import com.jaamsim.render.MeshProtoKey;
@@ -214,42 +216,56 @@ public class GraphicBox extends JDialog {
 					myInstance.close();
 				}
 
+				Locale loc = null;
+
 				AABB modelBounds = new AABB();
 				if (dm instanceof ColladaModel) {
 					ColladaModel dmc = (ColladaModel)dm;
 					MeshProtoKey key = RenderUtils.FileNameToMeshProtoKey(dmc.getColladaFile());
 					modelBounds = RenderManager.inst().getMeshBounds(key, true);
+
+					Vec3d modelSize = new Vec3d(modelBounds.radius);
+
+					modelSize.scale3(2);
+
+					Vec3d entitySize = currentEntity.getSize();
+					double longestSide = modelSize.x;
+
+					//double ratio = dm.getConversionFactorToMeters();
+					double ratio = 1;
+					if(! useModelSize.isSelected()) {
+						ratio = entitySize.x/modelSize.x;
+						if(modelSize.y > longestSide) {
+							ratio = entitySize.y/modelSize.y;
+							longestSide = modelSize.y;
+						}
+						if(modelSize.z > longestSide) {
+							ratio = entitySize.z/modelSize.z;
+						}
+					}
+
+					entitySize = new Vec3d(modelSize);
+					entitySize.scale3(ratio);
+					InputAgent.processEntity_Keyword_Value(currentEntity, "Size", String.format(loc, "%.6f %.6f %.6f m", entitySize.x, entitySize.y, entitySize.z));
 				}
 
-				Vec3d modelSize = new Vec3d(modelBounds.radius);
-				modelSize.scale3(2);
+				if (dm instanceof ImageModel) {
+					ImageModel im = (ImageModel)dm;
+					Vec2d imageDims = RenderManager.inst().getImageDims(im.getImageFile());
+					if (imageDims != null && useModelSize.isSelected()) {
+						// Keep the y size the same, but use the image's proportions. We can't really use the model size, as it is in pixels
+						double scale = currentEntity.getSize().y / imageDims.y;
+						InputAgent.processEntity_Keyword_Value(currentEntity, "Size", String.format(loc, "%.6f %.6f %.6f m", imageDims.x*scale, imageDims.y*scale, 1.0));
 
-				Vec3d entitySize = currentEntity.getSize();
-				double longestSide = modelSize.x;
-				//double ratio = dm.getConversionFactorToMeters();
-				double ratio = 1;
-				if(! useModelSize.isSelected()) {
-					ratio = entitySize.x/modelSize.x;
-					if(modelSize.y > longestSide) {
-						ratio = entitySize.y/modelSize.y;
-						longestSide = modelSize.y;
-					}
-					if(modelSize.z > longestSide) {
-						ratio = entitySize.z/modelSize.z;
 					}
 				}
-				Locale loc = null;
+
 				if (useModelPosition.isSelected()) {
 
 					Vec3d entityPos = modelBounds.center;
 
 					InputAgent.processEntity_Keyword_Value(currentEntity, "Position", String.format(loc, "%.6f %.6f %.6f m", entityPos.x, entityPos.y, entityPos.z));
 					InputAgent.processEntity_Keyword_Value(currentEntity, "Alignment", "0 0 0");
-				}
-				if (dm instanceof ColladaModel) {
-					entitySize = new Vec3d(modelSize);
-					entitySize.scale3(ratio);
-					InputAgent.processEntity_Keyword_Value(currentEntity, "Size", String.format(loc, "%.6f %.6f %.6f m", entitySize.x, entitySize.y, entitySize.z));
 				}
 				FrameBox.valueUpdate();
 				myInstance.close();

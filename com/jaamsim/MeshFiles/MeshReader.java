@@ -15,6 +15,8 @@
 package com.jaamsim.MeshFiles;
 
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,13 +38,13 @@ import com.jaamsim.xml.XmlParser;
 
 public class MeshReader {
 
-	public static MeshData parse(URL asset) throws RenderException {
+	public static MeshData parse(URI asset) throws RenderException {
 
 		SAXParserFactory factory = SAXParserFactory.newInstance();
 		factory.setValidating(false);
 
 		try {
-			MeshReader reader = new MeshReader(asset);
+			MeshReader reader = new MeshReader(asset.toURL());
 			reader.processContent();
 
 
@@ -276,10 +278,12 @@ public class MeshReader {
 			parseAssert(textureNode.getAttrib("coordIndex").equals("0"));
 			String file = (String)textureNode.getContent();
 			try {
-				URL texURL = new URL(contentURL, file);
-				finalData.addMaterial(texURL, file, null, null, null, 1, MeshData.NO_TRANS, null);
+				URI texURI = new URL(contentURL, file).toURI();
+				finalData.addMaterial(texURI, file, null, null, null, 1, MeshData.NO_TRANS, null);
 				return;
 			} catch (MalformedURLException ex) {
+				parseAssert(false);
+			} catch (URISyntaxException e) {
 				parseAssert(false);
 			}
 		}

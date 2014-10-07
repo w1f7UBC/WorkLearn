@@ -30,7 +30,7 @@ import java.util.ArrayList;
  * the eventManager's lock while holding the Process's lock as this can cause a
  * deadlock with other threads trying to wake you from the threadPool.
  */
-public final class Process extends Thread {
+final class Process extends Thread {
 	// Properties required to manage the pool of available Processes
 	private static final ArrayList<Process> pool; // storage for all available Processes
 	private static final int maxPoolSize = 100; // Maximum number of Processes allowed to be pooled at a given time
@@ -41,8 +41,8 @@ public final class Process extends Thread {
 	private ProcessTarget target; // The entity whose method is to be executed
 
 	// This is a very special reference that is only safe to use form the currently
-	// executing Process, it is essentiall a Threadlocal variable
-	private EventManager currentEVT;
+	// executing Process, it is essentially a Threadlocal variable
+	private EventManager evt;
 
 	private boolean dieFlag;
 	private boolean activeFlag;
@@ -61,12 +61,13 @@ public final class Process extends Thread {
 	/**
 	 * Returns the currently executing Process.
 	 */
-	public static final Process current() {
-		Thread cur = Thread.currentThread();
-		if (cur instanceof Process)
-			return (Process)cur;
-
-		throw new ProcessError("Non-process thread called Process.current()");
+	static final Process current() {
+		try {
+			return (Process)Thread.currentThread();
+		}
+		catch (ClassCastException e) {
+			throw new ProcessError("Non-process thread called Process.current()");
+		}
 	}
 
 	/**
@@ -81,62 +82,70 @@ public final class Process extends Thread {
 	@Override
 	public void run() {
 		while (true) {
-			synchronized (pool) {
-				// Add ourselves to the pool and wait to be assigned work
-				pool.add(this);
-				// Set the present process to sleep, and release its lock
-				// (done by pool.wait();)
-				// Note: the try/while(true)/catch construct is needed to avoid
-				// spurious wake ups allowed as of Java 5.  All legitimate wake
-				// ups are done through the InterruptedException.
-				try {
-					while (true) { pool.wait(); }
-				} catch (InterruptedException e) {}
-			}
+			waitInPool();
 
 			// Process has been woken up, execute the method we have been assigned
 			ProcessTarget t;
 			synchronized (this) {
-				currentEVT = eventManager;
+				evt = eventManager;
 				t = target;
 				target = null;
 				activeFlag = true;
 			}
-			if (t != null)
-				currentEVT.executeTarget(t);
-			else
-				currentEVT.executeEvents(this);
+
+			evt.execute(this, t);
 
 			// Ensure all state is cleared before returning to the pool
-			synchronized (this) {
-				eventManager = null;
-				nextProcess = null;
-				target = null;
-				currentEVT = null;
-				activeFlag = false;
-				dieFlag = false;
-				condWait = false;
-			}
+			evt = null;
+			setup(null, null, null);
 		}
+	}
+
+	final EventManager evt() {
+		return evt;
+	}
+
+	// Useful to filter pooled threads when staring at stack traces.
+	private void waitInPool() {
+		synchronized (pool) {
+			// Add ourselves to the pool and wait to be assigned work
+			pool.add(this);
+			// Set the present process to sleep, and release its lock
+			// (done by pool.wait();)
+			// Note: the try/while(true)/catch construct is needed to avoid
+			// spurious wake ups allowed as of Java 5.  All legitimate wake
+			// ups are done through the InterruptedException.
+			try {
+				while (true) { pool.wait(); }
+			} catch (InterruptedException e) {}
+		}
+	}
+
+	/*
+	 * Setup the process state for execution.
+	 */
+	private synchronized void setup(EventManager evt, Process next, ProcessTarget targ) {
+		eventManager = evt;
+		nextProcess = next;
+		target = targ;
+		activeFlag = false;
+		dieFlag = false;
+		condWait = false;
+	}
+
+	// Pull a process from the pool and have it attempt to execute events from the
+	// given eventManager
+	static void processEvents(EventManager evt) {
+		Process newProcess = Process.getProcess();
+		newProcess.setup(evt, null, null);
+		newProcess.wake();
 	}
 
 	// Set up a new process for the given entity, method, and arguments
 	// Called from Process.start() and from EventManager.startExternalProcess()
 	static Process allocate(EventManager eventManager, Process next, ProcessTarget proc) {
-
-		// Create the new process
 		Process newProcess = Process.getProcess();
-
-		// Setup the process state for execution
-		synchronized (newProcess) {
-			newProcess.eventManager = eventManager;
-			newProcess.nextProcess = next;
-			newProcess.target = proc;
-			newProcess.activeFlag = false;
-			newProcess.dieFlag = false;
-			newProcess.condWait = false;
-		}
-
+		newProcess.setup(eventManager, next, proc);
 		return newProcess;
 	}
 
@@ -182,10 +191,6 @@ public final class Process extends Thread {
 		super.interrupt();
 	}
 
-	static EventManager currentEVT() {
-		return Process.current().currentEVT;
-	}
-
 	synchronized void setNextProcess(Process next) {
 		nextProcess = next;
 	}
@@ -194,11 +199,10 @@ public final class Process extends Thread {
 	 * Returns true if we woke a next Process, otherwise return false.
 	 */
 	synchronized boolean wakeNextProcess() {
-		Process p = nextProcess;
-		nextProcess = null;
 		activeFlag = false;
-		if (p != null) {
-			p.wake();
+		if (nextProcess != null) {
+			nextProcess.wake();
+			nextProcess = null;
 			return true;
 		}
 
@@ -212,6 +216,20 @@ public final class Process extends Thread {
 		this.wake();
 	}
 
+	/**
+	 * This is used to tear down a live threadstack when an error is received from
+	 * the model.
+	 */
+	synchronized Process forceKillNext() {
+		Process ret = nextProcess;
+		nextProcess = null;
+		if (ret != null) {
+			ret.dieFlag = true;
+			ret.wake();
+		}
+		return ret;
+	}
+
 	synchronized boolean shouldDie() {
 		return dieFlag;
 	}
@@ -220,11 +238,15 @@ public final class Process extends Thread {
 		activeFlag = true;
 	}
 
-	synchronized void setCondWait(boolean b) {
-		condWait = b;
+	final void begCondWait() {
+		condWait = true;
 	}
 
-	synchronized boolean isCondWait() {
+	final void endCondWait() {
+		condWait = false;
+	}
+
+	final boolean isCondWait() {
 		return condWait;
 	}
 }

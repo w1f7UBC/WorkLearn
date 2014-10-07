@@ -14,28 +14,26 @@
  */
 package com.jaamsim.ui;
 
-import java.net.MalformedURLException;
 import java.net.URI;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Locale;
 
-import com.jaamsim.input.Input;
+import com.jaamsim.datatypes.IntegerVector;
+import com.jaamsim.input.BooleanInput;
+import com.jaamsim.input.EntityInput;
+import com.jaamsim.input.FileInput;
 import com.jaamsim.input.InputAgent;
+import com.jaamsim.input.IntegerListInput;
 import com.jaamsim.input.KeyedVec3dInput;
 import com.jaamsim.input.Keyword;
+import com.jaamsim.input.KeywordIndex;
+import com.jaamsim.input.StringInput;
+import com.jaamsim.input.Vec3dInput;
 import com.jaamsim.math.Transform;
 import com.jaamsim.math.Vec3d;
 import com.jaamsim.math.Vec4d;
 import com.jaamsim.units.DistanceUnit;
-import com.sandwell.JavaSimulation.BooleanInput;
 import com.sandwell.JavaSimulation.Entity;
-import com.sandwell.JavaSimulation.EntityInput;
-import com.sandwell.JavaSimulation.FileInput;
-import com.sandwell.JavaSimulation.IntegerListInput;
-import com.sandwell.JavaSimulation.IntegerVector;
-import com.sandwell.JavaSimulation.StringInput;
-import com.sandwell.JavaSimulation.Vec3dInput;
 import com.sandwell.JavaSimulation3D.DisplayEntity;
 import com.sandwell.JavaSimulation3D.GUIFrame;
 import com.sandwell.JavaSimulation3D.Region;
@@ -84,10 +82,6 @@ private final BooleanInput showWindow;
  example = "View1 Movable { FALSE }")
 private final BooleanInput movable;
 
-@Keyword(description = "A Boolean indicating whether the view should show the map baselayer", 
-example = "View1 BaseMap { TRUE }")
-private final BooleanInput baseMap;
-
 @Keyword(description = "The (optional) entity for this view to follow. Setting this input makes the view ignore ViewCenter " +
                 "and interprets ViewPosition as a relative offset to this entity.",
          example = "View1 FollowEntity { Ship1 }")
@@ -104,7 +98,6 @@ private final KeyedVec3dInput centerScriptInput;
 @Keyword(description = "The image file to use as the background for this view.",
 example = "View1 SkyboxImage { '/resources/images/sky_map_2048x1024.jpg' }")
 private final FileInput skyboxImage;
-
 
 private Object setLock = new Object();
 
@@ -150,9 +143,6 @@ static {
 
 	movable = new BooleanInput("Movable", "Graphics", true);
 	this.addInput(movable);
-	
-	baseMap = new BooleanInput("BaseMap", "Graphics", true);
-	this.addInput(baseMap);
 
 	followEntityInput = new EntityInput<DisplayEntity>(DisplayEntity.class, "FollowEntity", "Graphics", null);
 	this.addInput(followEntityInput);
@@ -167,6 +157,7 @@ static {
 
 	skyboxImage = new FileInput("SkyboxImage", "Graphics", null);
 	this.addInput(skyboxImage);
+
 }
 
 public View() {
@@ -261,11 +252,10 @@ public void updateCenterAndPos(Vec3d center, Vec3d pos) {
 			tempPos.sub3(followEntityInput.getValue().getGlobalPosition(), tempPos);
 		}
 
-		Locale loc = null;
-		String posVal = String.format(loc, "%f %f %f m", tempPos.x, tempPos.y, tempPos.z);
-		InputAgent.processEntity_Keyword_Value(this, this.position, posVal);
-		String cenVal = String.format(loc, "%f %f %f m", tempCent.x, tempCent.y, tempCent.z);
-		InputAgent.processEntity_Keyword_Value(this, this.center, cenVal);
+		KeywordIndex kw = InputAgent.formatPointInputs(this.position.getKeyword(), tempPos, "m");
+		InputAgent.apply(this, kw);
+		kw = InputAgent.formatPointInputs(this.center.getKeyword(), tempCent, "m");
+		InputAgent.apply(this, kw);
 	}
 }
 
@@ -280,36 +270,39 @@ public boolean showWindow() {
 	return showWindow.getValue();
 }
 
-public boolean baseMap(){
-	return baseMap.getValue();
-}
-
 public Region getRegion() {
 	return region.getValue();
 }
 
 public void setRegion(Region reg) {
-	InputAgent.processEntity_Keyword_Value(this, this.region, reg.getInputName());
+	ArrayList<String> tokens = new ArrayList<String>(1);
+	tokens.add(reg.getInputName());
+	KeywordIndex kw = new KeywordIndex(tokens, region.getKeyword(), 0, tokens.size(), null);
+	InputAgent.apply(this, kw);
 }
 
 public void setPosition(Vec3d pos) {
-	String val = String.format((Locale)null, "%f %f %f m", pos.x, pos.y, pos.z);
-	InputAgent.processEntity_Keyword_Value(this, this.position, val);
+	KeywordIndex kw = InputAgent.formatPointInputs(position.getKeyword(), pos, "m");
+	InputAgent.apply(this, kw);
 }
 
 public void setCenter(Vec3d cent) {
-	String val = String.format((Locale)null, "%f %f %f m", cent.x, cent.y, cent.z);
-	InputAgent.processEntity_Keyword_Value(this, this.center, val);
+	KeywordIndex kw = InputAgent.formatPointInputs(center.getKeyword(), cent, "m");
+	InputAgent.apply(this, kw);
 }
 
 public void setWindowPos(int x, int y, int width, int height) {
-	String posVal = String.format((Locale)null, "%d %d", x, y);
-	String sizeVal = String.format((Locale)null, "%d %d", width, height);
-	InputAgent.processEntity_Keyword_Value(this, this.windowPos, posVal);
-	InputAgent.processEntity_Keyword_Value(this, this.windowSize, sizeVal);
+	ArrayList<String> tokens = new ArrayList<String>(2);
+	tokens.add(String.format((Locale)null, "%d", x));
+	tokens.add(String.format((Locale)null, "%d", y));
+	KeywordIndex kw = new KeywordIndex(tokens, this.windowPos.getKeyword(), 0, tokens.size(), null);
+	InputAgent.apply(this, kw);
 
-	FrameBox.valueUpdate();
-
+	tokens.clear();
+	tokens.add(String.format((Locale)null, "%d", width));
+	tokens.add(String.format((Locale)null, "%d", height));
+	kw = new KeywordIndex(tokens, this.windowSize.getKeyword(), 0, tokens.size(), null);
+	InputAgent.apply(this, kw);
 }
 
 public IntegerVector getWindowPos() {
@@ -344,16 +337,12 @@ public boolean isScripted() {
 	return positionScriptInput.hasKeys() || centerScriptInput.hasKeys();
 }
 
-public URL getSkyboxTexture() {
-	try {
-		URI file = skyboxImage.getValue();
-		if (file == null || file.toString().equals("")) {
-			return null;
-		}
-		return file.toURL();
-	} catch (MalformedURLException ex) {
+public URI getSkyboxTexture() {
+	URI file = skyboxImage.getValue();
+	if (file == null || file.toString().equals("")) {
 		return null;
 	}
+	return file;
 }
 
 public void update(double simTime) {

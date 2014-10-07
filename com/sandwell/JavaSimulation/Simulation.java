@@ -18,15 +18,16 @@ import java.io.File;
 
 import javax.swing.JFrame;
 
-import worldwind.QueryFrame;
-import worldwind.WorldWindFrame;
-
 import com.jaamsim.events.EventManager;
 import com.jaamsim.events.ProcessTarget;
+import com.jaamsim.input.BooleanInput;
 import com.jaamsim.input.Input;
 import com.jaamsim.input.InputAgent;
+import com.jaamsim.input.InputErrorException;
+import com.jaamsim.input.IntegerInput;
 import com.jaamsim.input.Keyword;
 import com.jaamsim.input.Output;
+import com.jaamsim.input.StringInput;
 import com.jaamsim.input.ValueInput;
 import com.jaamsim.ui.EditBox;
 import com.jaamsim.ui.EntityPallet;
@@ -89,17 +90,19 @@ public class Simulation extends Entity {
 	private static final BooleanInput verifyEventsInput;
 
 	@Keyword(description = "The real time speed up factor",
-	         example = "RunControl RealTimeFactor { 1200 }")
+	         example = "Simulation RealTimeFactor { 1200 }")
 	private static final IntegerInput realTimeFactor;
+
 	public static final int DEFAULT_REAL_TIME_FACTOR = 10000;
 	public static final int MIN_REAL_TIME_FACTOR = 1;
 	public static final int MAX_REAL_TIME_FACTOR= 1000000;
+
 	@Keyword(description = "A Boolean to turn on or off real time in the simulation run",
-	         example = "RunControl RealTime { TRUE }")
+	         example = "Simulation RealTime { TRUE }")
 	private static final BooleanInput realTime;
 
-	@Keyword(description = "This is placeholder description text",
-	         example = "This is placeholder example text")
+	@Keyword(description = "Indicates whether to close the program on completion of the simulation run.",
+	         example = "Simulation ExitAtStop { TRUE }")
 	private static final BooleanInput exitAtStop;
 
 	@Keyword(description = "Indicates whether the Model Builder tool should be shown on startup.",
@@ -125,10 +128,6 @@ public class Simulation extends Entity {
 	@Keyword(description = "Indicates whether the Log Viewer tool should be shown on startup.",
 	         example = "Simulation ShowLogViewer { TRUE }")
 	private static final BooleanInput showLogViewer;
-
-	@Keyword(description = "Indicates whether the WorldController should be shown on startup.",
-			 example = "Simulation ShowWorldController { TRUE }")
-	private static final BooleanInput showWorldController;
 
 	private static double timeScale; // the scale from discrete to continuous time
 	private static double startTime;
@@ -175,7 +174,6 @@ public class Simulation extends Entity {
 		showOutputViewer = new BooleanInput("ShowOutputViewer", "Key Inputs", false);
 		showPropertyViewer = new BooleanInput("ShowPropertyViewer", "Key Inputs", false);
 		showLogViewer = new BooleanInput("ShowLogViewer", "Key Inputs", false);
-		showWorldController = new BooleanInput("showWorldController", "Key Inputs", false);
 
 		// Create clock
 		Clock.setStartDate(2000, 1, 1);
@@ -211,7 +209,13 @@ public class Simulation extends Entity {
 		this.addInput(showOutputViewer);
 		this.addInput(showPropertyViewer);
 		this.addInput(showLogViewer);
-		this.addInput(showWorldController);
+
+		attributeDefinitionList.setHidden(true);
+		startDate.setHidden(true);
+		startTimeInput.setHidden(true);
+		traceEventsInput.setHidden(true);
+		verifyEventsInput.setHidden(true);
+		printInputReport.setHidden(true);
 	}
 
 	public Simulation() {}
@@ -226,13 +230,6 @@ public class Simulation extends Entity {
 			}
 		}
 		return myInstance;
-	}
-
-	private static EventManager root;
-	public static synchronized final EventManager initEVT() {
-		if (root != null) return root;
-		root = new EventManager("DefaultEventManager");
-		return root;
 	}
 
 	@Override
@@ -286,11 +283,6 @@ public class Simulation extends Entity {
 			FrameBox.reSelectEntity();
 			return;
 		}
-
-		if (in == showWorldController) {
-			QueryFrame.setControlVisible(showWorldController.getValue());
-			return;
-		}
 	}
 
 	public static void clear() {
@@ -314,8 +306,6 @@ public class Simulation extends Entity {
 		showOutputViewer.reset();
 		showPropertyViewer.reset();
 		showLogViewer.reset();
-		QueryFrame.setControlVisible(false);
-		WorldWindFrame.setViewVisible(false);
 
 		// Create clock
 		Clock.setStartDate(2000, 1, 1);
@@ -340,7 +330,7 @@ public class Simulation extends Entity {
 	 *		2) calls startModel() to allow the model to add its starting events to EventManager
 	 *		3) start EventManager processing events
 	 */
-	public static void start() {
+	public static void start(EventManager evt) {
 		// Validate each entity based on inputs only
 		for (int i = 0; i < Entity.getAll().size(); i++) {
 			try {
@@ -354,21 +344,21 @@ public class Simulation extends Entity {
 		}
 
 		InputAgent.prepareReportDirectory();
-		root.clear();
-		root.setTraceListener(null);
+		evt.clear();
+		evt.setTraceListener(null);
 
-		if( traceEventsInput.getValue() ) {
+		if( Simulation.traceEvents() ) {
 			String evtName = InputAgent.getConfigFile().getParentFile() + File.separator + InputAgent.getRunName() + ".evt";
 			EventRecorder rec = new EventRecorder(evtName);
-			root.setTraceListener(rec);
+			evt.setTraceListener(rec);
 		}
-		else if( verifyEventsInput.getValue() ) {
+		else if( Simulation.verifyEvents() ) {
 			String evtName = InputAgent.getConfigFile().getParentFile() + File.separator + InputAgent.getRunName() + ".evt";
 			EventTracer trc = new EventTracer(evtName);
-			root.setTraceListener(trc);
+			evt.setTraceListener(trc);
 		}
 
-		root.setSimTimeScale(simTimeScaleInput.getValue());
+		evt.setSimTimeScale(simTimeScaleInput.getValue());
 		setSimTimeScale(simTimeScaleInput.getValue());
 		FrameBox.setSecondsPerTick(3600.0d / simTimeScaleInput.getValue());
 
@@ -379,9 +369,16 @@ public class Simulation extends Entity {
 		startTime = Clock.calcTimeForYear_Month_Day_Hour(1, Clock.getStartingMonth(), Clock.getStartingDay(), startTimeHours);
 		endTime = startTime + Simulation.getInitializationHours() + Simulation.getRunDurationHours();
 
-		root.scheduleProcess(0, Entity.PRIO_DEFAULT, false, new InitModelTarget(), null);
+		evt.scheduleProcessExternal(0, Entity.PRIO_DEFAULT, false, new InitModelTarget(), null);
 	}
 
+	public static boolean traceEvents() {
+		return traceEventsInput.getValue();
+	}
+
+	public static boolean verifyEvents() {
+		return verifyEventsInput.getValue();
+	}
 
 	static void setSimTimeScale(double scale) {
 		timeScale = scale;
@@ -427,14 +424,13 @@ public class Simulation extends Entity {
 				Entity.getAll().get(i).earlyInit();
 			}
 
-			EventManager cur = EventManager.current();
 			long startTick = calculateDelayLength(Simulation.getStartHours());
 			for (int i = Entity.getAll().size() - 1; i >= 0; i--) {
-				cur.scheduleProcess(startTick, 0, false, new StartUpTarget(Entity.getAll().get(i)), null);
+				EventManager.scheduleTicks(startTick, 0, false, new StartUpTarget(Entity.getAll().get(i)), null);
 			}
 
 			long endTick = calculateDelayLength(Simulation.getEndHours());
-			cur.scheduleProcess(endTick, Entity.PRIO_DEFAULT, false, new EndModelTarget(), null);
+			EventManager.scheduleTicks(endTick, Entity.PRIO_DEFAULT, false, new EndModelTarget(), null);
 		}
 	}
 
@@ -494,7 +490,6 @@ public class Simulation extends Entity {
 	}
 
 	static void updateRealTime() {
-		root.setExecuteRealTime(realTime.getValue(), realTimeFactor.getValue());
 		GUIFrame.instance().updateForRealTime(realTime.getValue(), realTimeFactor.getValue());
 	}
 
@@ -530,7 +525,6 @@ public class Simulation extends Entity {
 		setWindowVisible(OutputBox.getInstance(), showOutputViewer.getValue());
 		setWindowVisible(PropertyBox.getInstance(), showPropertyViewer.getValue());
 		setWindowVisible(LogBox.getInstance(), showLogViewer.getValue());
-		QueryFrame.setControlVisible(showWorldController.getValue());
 	}
 
 	/**
@@ -543,7 +537,6 @@ public class Simulation extends Entity {
 		setWindowVisible(OutputBox.getInstance(), false);
 		setWindowVisible(PropertyBox.getInstance(), false);
 		setWindowVisible(LogBox.getInstance(), false);
-		QueryFrame.setControlVisible(false);
 	}
 
 	@Output(name = "Configuration File",

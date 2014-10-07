@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.jaamsim.controllers.RenderManager;
+import com.jaamsim.input.ColourInput;
 import com.jaamsim.math.Color4d;
 import com.jaamsim.math.Transform;
 import com.jaamsim.math.Vec3d;
@@ -29,7 +30,6 @@ import com.jaamsim.render.PointProxy;
 import com.jaamsim.render.RenderProxy;
 import com.jaamsim.render.RenderUtils;
 import com.jaamsim.render.VisibilityInfo;
-import com.sandwell.JavaSimulation.ColourInput;
 import com.sandwell.JavaSimulation.Entity;
 import com.sandwell.JavaSimulation3D.DisplayEntity;
 
@@ -200,15 +200,24 @@ public class ScreenPointsModel extends DisplayModel {
 			out.add(lp);
 
 			for (int i = 0; i < nodePoints.size(); ++i) {
-				List<Vec4d> pl = new ArrayList<Vec4d>(1);
 
-				pl.add(new Vec4d(nodePoints.get(i)));
-				PointProxy pp = new PointProxy(pl, ColourInput.GREEN, 8, getVisibilityInfo(), RenderManager.LINENODE_PICK_ID - i);
-				pp.setHoverColour(ColourInput.LIGHT_GREY);
-				out.add(pp);
+				Color4d col = ColourInput.GREEN;
+				if (i == 0)
+					col = ColourInput.BLUE;
+				if (i == nodePoints.size() -1)
+					col = ColourInput.YELLOW;
+
+				addPoint(nodePoints.get(i), col, ColourInput.LIGHT_GREY, RenderManager.LINENODE_PICK_ID - i, out);
 			}
-
 		}
+	}
 
+	private void addPoint(Vec4d p, Color4d col, Color4d hovCol, long pickID, ArrayList<RenderProxy> out) {
+		List<Vec4d> pl = new ArrayList<Vec4d>(1);
+
+		pl.add(new Vec4d(p));
+		PointProxy pp = new PointProxy(pl, col, 8, getVisibilityInfo(), pickID);
+		pp.setHoverColour(hovCol);
+		out.add(pp);
 	}
 }

@@ -14,7 +14,7 @@
  */
 package com.jaamsim.render;
 
-import java.net.URL;
+import java.net.URI;
 import java.nio.FloatBuffer;
 import java.util.HashMap;
 
@@ -28,7 +28,7 @@ public class OverlayTexture implements OverlayRenderable {
 	private int _x, _y;
 	private int _width, _height;
 
-	private URL _imageURL;
+	private URI _imageURI;
 
 	private boolean _isTransparent;
 	private boolean _isCompressed;
@@ -48,11 +48,11 @@ public class OverlayTexture implements OverlayRenderable {
 	private boolean _alignRight, _alignBottom;
 	private VisibilityInfo _visInfo;
 
-	public OverlayTexture(int x, int y, int width, int height, URL imageURL, boolean transparent, boolean compressed,
+	public OverlayTexture(int x, int y, int width, int height, URI imageURI, boolean transparent, boolean compressed,
 	                      boolean alignRight, boolean alignBottom, VisibilityInfo visInfo) {
 		_x = x; _y = y;
 		_width = width; _height = height;
-		_imageURL = imageURL;
+		_imageURI = imageURI;
 		_isTransparent = transparent; _isCompressed = compressed;
 		_alignRight = alignRight; _alignBottom = alignBottom;
 		_visInfo = visInfo;
@@ -150,7 +150,7 @@ public class OverlayTexture implements OverlayRenderable {
 
 		GL2GL3 gl = renderer.getGL();
 
-		int textureID = renderer.getTexCache().getTexID(gl, _imageURL, _isTransparent, _isCompressed, false);
+		int textureID = renderer.getTexCache().getTexID(gl, _imageURI, _isTransparent, _isCompressed, false);
 
 		if (textureID == TexCache.LOADING_TEX_ID) {
 			return; // This texture is not ready yet
@@ -169,6 +169,8 @@ public class OverlayTexture implements OverlayRenderable {
 
 		gl.glActiveTexture(GL2GL3.GL_TEXTURE0);
 		gl.glBindTexture(GL2GL3.GL_TEXTURE_2D, textureID);
+		gl.glTexParameteri(GL2GL3.GL_TEXTURE_2D, GL2GL3.GL_TEXTURE_WRAP_S, GL2GL3.GL_CLAMP_TO_EDGE);
+		gl.glTexParameteri(GL2GL3.GL_TEXTURE_2D, GL2GL3.GL_TEXTURE_WRAP_T, GL2GL3.GL_CLAMP_TO_EDGE);
 		gl.glUniform1i(texVar, 0);
 
 		if (_isTransparent) {

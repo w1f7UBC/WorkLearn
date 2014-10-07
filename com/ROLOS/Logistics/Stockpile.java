@@ -2,10 +2,11 @@ package com.ROLOS.Logistics;
 
 import java.util.LinkedList;
 
+import com.jaamsim.basicsim.ErrorException;
 import com.jaamsim.input.ValueInput;
 import com.jaamsim.units.Unit;
 import com.jaamsim.input.Keyword;
-import com.sandwell.JavaSimulation.ErrorException;
+
 import com.sandwell.JavaSimulation.Tester;
 
 public class Stockpile extends BulkMaterialStorage {

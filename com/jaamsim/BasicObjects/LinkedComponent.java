@@ -14,25 +14,23 @@
  */
 package com.jaamsim.BasicObjects;
 
-import java.util.ArrayList;
-
-import com.jaamsim.Thresholds.Threshold;
-import com.jaamsim.Thresholds.ThresholdUser;
+import com.jaamsim.input.EntityInput;
 import com.jaamsim.input.Input;
+import com.jaamsim.input.InputErrorException;
 import com.jaamsim.input.Keyword;
 import com.jaamsim.input.Output;
+import com.jaamsim.input.StringInput;
+import com.jaamsim.states.StateEntity;
 import com.jaamsim.units.DimensionlessUnit;
 import com.jaamsim.units.RateUnit;
-import com.sandwell.JavaSimulation.EntityInput;
-import com.sandwell.JavaSimulation.EntityListInput;
-import com.sandwell.JavaSimulation.InputErrorException;
+import com.jaamsim.units.TimeUnit;
 import com.sandwell.JavaSimulation3D.DisplayEntity;
 
 /**
  * LinkedComponents are used to form a chain of components that process DisplayEntities that pass through the system.
  * Sub-classes for EntityGenerator, Server, and EntitySink.
  */
-public abstract class LinkedComponent extends DisplayEntity implements ThresholdUser {
+public abstract class LinkedComponent extends StateEntity {
 
 	@Keyword(description = "The prototype for entities that will be received by this object.\n" +
 			"This input must be set if the expression 'this.obj' is used in the input to any keywords.",
@@ -43,23 +41,25 @@ public abstract class LinkedComponent extends DisplayEntity implements Threshold
 			example = "EntityGenerator1 NextComponent { Server1 }")
 	protected final EntityInput<LinkedComponent> nextComponentInput;
 
-	@Keyword(description = "A list of thresholds that must be satisified for the entity to operate.",
-			example = "EntityGenerator1 OperatingThresholdList { Server1 }")
-	protected final EntityListInput<Threshold> operatingThresholdList;
+	@Keyword(description = "The state to be assigned to each entity on arrival at this object.\n" +
+			"No state is assigned if the entry is blank.",
+	         example = "Server1 StateAssignment { Service }")
+	protected final StringInput stateAssignment;
 
 	private int numberAdded;     // Number of entities added to this component from upstream
 	private int numberProcessed; // Number of entities processed by this component
 	private DisplayEntity receivedEntity; // Entity most recently received by this component
+	private double releaseTime = Double.NaN;
 
 	{
-		testEntity = new EntityInput<DisplayEntity>( DisplayEntity.class, "TestEntity", "Key Inputs", null);
-		this.addInput( testEntity);
+		testEntity = new EntityInput<DisplayEntity>(DisplayEntity.class, "TestEntity", "Key Inputs", null);
+		this.addInput(testEntity);
 
-		nextComponentInput = new EntityInput<LinkedComponent>( LinkedComponent.class, "NextComponent", "Key Inputs", null);
-		this.addInput( nextComponentInput);
+		nextComponentInput = new EntityInput<LinkedComponent>(LinkedComponent.class, "NextComponent", "Key Inputs", null);
+		this.addInput(nextComponentInput);
 
-		operatingThresholdList = new EntityListInput<Threshold>(Threshold.class, "OperatingThresholdList", "Key Inputs", new ArrayList<Threshold>());
-		this.addInput( operatingThresholdList);
+		stateAssignment = new StringInput("StateAssignment", "Key Inputs", "");
+		this.addInput(stateAssignment);
 	}
 
 	@Override
@@ -77,8 +77,15 @@ public abstract class LinkedComponent extends DisplayEntity implements Threshold
 		super.validate();
 
 		// Confirm that the next entity in the chain has been specified
-		if( ! nextComponentInput.getHidden() &&	nextComponentInput.getValue() == null ) {
-			throw new InputErrorException( "The keyword NextComponent must be set." );
+		if (!nextComponentInput.getHidden() &&	nextComponentInput.getValue() == null) {
+			throw new InputErrorException("The keyword NextComponent must be set.");
+		}
+
+		// If a state is to be assigned, ensure that the prototype is a StateEntity
+		if (testEntity.getValue() != null && !stateAssignment.getValue().isEmpty()) {
+			if (!(testEntity.getValue() instanceof StateEntity)) {
+				throw new InputErrorException("Only a SimEntity can be specified for the TestEntity keyword if a state is be be assigned.");
+			}
 		}
 	}
 
@@ -87,26 +94,43 @@ public abstract class LinkedComponent extends DisplayEntity implements Threshold
 		super.earlyInit();
 		numberAdded = 0;
 		numberProcessed = 0;
+		receivedEntity = null;
+		releaseTime = Double.NaN;
 	}
 
 	@Override
-	public ArrayList<Threshold> getThresholds() {
-		return operatingThresholdList.getValue();
+	public String getInitialState() {
+		return "None";
 	}
 
 	@Override
-	public void thresholdChanged() {}
+	public boolean isValidState(String state) {
+		return true;
+	}
 
-	public void addDisplayEntity( DisplayEntity ent ) {
+	/**
+	 * Receives the specified entity from an upstream component.
+	 * @param ent - the entity received from upstream.
+	 */
+	public void addDisplayEntity(DisplayEntity ent) {
+
 		receivedEntity = ent;
 		numberAdded++;
+
+		// Assign a new state to the received entity
+		if (!stateAssignment.getValue().isEmpty() && ent instanceof StateEntity)
+			((StateEntity)ent).setPresentState(stateAssignment.getValue());
 	}
 
+	/**
+	 * Sends the specified entity to the next component downstream.
+	 * @param ent - the entity to be sent downstream.
+	 */
 	public void sendToNextComponent(DisplayEntity ent) {
+		numberProcessed++;
+		releaseTime = this.getSimTime();
 		if( nextComponentInput.getValue() != null )
 			nextComponentInput.getValue().addDisplayEntity(ent);
-
-		numberProcessed++;
 	}
 
 	// ******************************************************************************************************
@@ -141,6 +165,13 @@ public abstract class LinkedComponent extends DisplayEntity implements Threshold
 	  reportable = true)
 	public Double getProcessingRate( double simTime) {
 		return numberProcessed/simTime;
+	}
+
+	@Output(name = "ReleaseTime",
+	 description = "The time at which the last entity was released.",
+	    unitType = TimeUnit.class)
+	public Double getReleaseTime(double simTime) {
+		return releaseTime;
 	}
 
 }

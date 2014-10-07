@@ -18,10 +18,12 @@ import com.ROLOS.Logistics.ReportAgent;
 import com.ROLOS.Logistics.Route;
 import com.ROLOS.Utils.HandyUtils;
 import com.ROLOS.Utils.HashMapList;
-import com.jaamsim.events.ReflectionTarget;
+
+import com.jaamsim.basicsim.ReflectionTarget;
+import com.jaamsim.input.BooleanInput;
 import com.jaamsim.input.ValueInput;
 import com.jaamsim.units.TimeUnit;
-import com.sandwell.JavaSimulation.BooleanInput;
+
 import com.sandwell.JavaSimulation.FileEntity;
 import com.jaamsim.input.Keyword;
 import com.jaamsim.math.Color4d;

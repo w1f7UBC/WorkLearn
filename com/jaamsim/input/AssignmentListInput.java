@@ -16,8 +16,6 @@ package com.jaamsim.input;
 
 import java.util.ArrayList;
 
-import com.sandwell.JavaSimulation.InputErrorException;
-import com.sandwell.JavaSimulation.ListInput;
 
 public class AssignmentListInput extends ListInput<ArrayList<ExpParser.Assignment>> {
 
@@ -38,7 +36,7 @@ public class AssignmentListInput extends ListInput<ArrayList<ExpParser.Assignmen
 			Input.assertCount(subArg, 1);
 			try {
 				// Parse the assignment expression
-				ExpParser.Assignment ass = ExpParser.parseAssignment(subArg.getArg(0));
+				ExpParser.Assignment ass = ExpParser.parseAssignment(ExpEvaluator.getContext(), subArg.getArg(0));
 
 				// Save the data for this assignment
 				temp.add(ass);

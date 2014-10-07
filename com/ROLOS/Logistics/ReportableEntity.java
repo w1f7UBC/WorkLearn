@@ -3,13 +3,14 @@ package com.ROLOS.Logistics;
 import java.util.ArrayList;
 
 import com.ROLOS.ROLOSEntity;
+import com.jaamsim.datatypes.DoubleVector;
+import com.jaamsim.datatypes.IntegerVector;
+import com.jaamsim.input.BooleanInput;
 import com.jaamsim.input.Output;
 import com.jaamsim.units.DimensionlessUnit;
-import com.sandwell.JavaSimulation.BooleanInput;
-import com.sandwell.JavaSimulation.DoubleVector;
+
 import com.sandwell.JavaSimulation.FileEntity;
 
-import com.sandwell.JavaSimulation.IntegerVector;
 import com.jaamsim.input.Keyword;
 import com.sandwell.JavaSimulation.Simulation;
 import com.sandwell.JavaSimulation.Tester;

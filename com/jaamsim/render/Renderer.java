@@ -16,6 +16,7 @@ package com.jaamsim.render;
 
 //import com.jaamsim.math.*;
 
+import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.Frame;
 import java.awt.Image;
@@ -57,6 +58,7 @@ import com.jaamsim.DisplayModels.DisplayModel;
 import com.jaamsim.MeshFiles.MeshData;
 import com.jaamsim.font.OverlayString;
 import com.jaamsim.font.TessFont;
+import com.jaamsim.input.ColourInput;
 import com.jaamsim.math.AABB;
 import com.jaamsim.math.Color4d;
 import com.jaamsim.math.Ray;
@@ -69,7 +71,6 @@ import com.jogamp.newt.event.WindowEvent;
 import com.jogamp.newt.event.WindowListener;
 import com.jogamp.newt.event.WindowUpdateEvent;
 import com.jogamp.newt.opengl.GLWindow;
-import com.sandwell.JavaSimulation.ColourInput;
 
 /**
  * The central renderer for JaamSim Renderer, Contains references to all context
@@ -112,7 +113,6 @@ public class Renderer implements GLAnimatorControl {
 
 	private TexCache texCache = new TexCache(this);
 
-	
 	// An initalization time flag specifying if the 'safest' graphical techniques should be used
 	private boolean safeGraphics;
 
@@ -300,6 +300,8 @@ public class Renderer implements GLAnimatorControl {
 
 				displayNeeded.set(false);
 
+				updateRenderableScene();
+
 				// Run all render messages
 				RenderMessage message;
 				boolean moreMessages = false;
@@ -323,8 +325,6 @@ public class Renderer implements GLAnimatorControl {
 					}
 
 				} while (moreMessages);
-
-				updateRenderableScene();
 
 				// Defensive copy the window list (in case a window is closed while we render)
 				HashMap<Integer, RenderWindow> winds;
@@ -501,7 +501,6 @@ public class Renderer implements GLAnimatorControl {
 			win.getAWTFrameRef().toFront();
 		}
 	}
-	
 	/**
 	 * Construct a new window (a NEWT window specifically)
 	 *
@@ -513,7 +512,7 @@ public class Renderer implements GLAnimatorControl {
 
 		RenderGLListener listener = new RenderGLListener();
 
-		RenderWindow window = new RenderWindow(message.x, message.y,
+		final RenderWindow window = new RenderWindow(message.x, message.y,
 		                                       message.width, message.height,
 		                                       message.title, message.name,
 		                                       sharedContext,
@@ -522,7 +521,6 @@ public class Renderer implements GLAnimatorControl {
 		                                       message.windowID,
 		                                       message.viewID,
 		                                       message.listener);
-		//System.out.println(message.windowID);
 		listener.setWindow(window);
 
 		Camera camera = new Camera(Math.PI/3.0, 1, 0.1, 1000);
@@ -540,7 +538,13 @@ public class Renderer implements GLAnimatorControl {
 		window.getGLWindowRef().addMouseListener(new MouseHandler(window, message.listener));
 		window.getGLWindowRef().addKeyListener(message.listener);
 
-		window.getAWTFrameRef().setVisible(true);
+
+		EventQueue.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				window.getAWTFrameRef().setVisible(true);
+			}
+		});
 
 		queueRedraw();
 	}
@@ -792,6 +796,9 @@ private void initCoreShaders(GL2GL3 gl, String version) throws RenderException {
 		VersionNumber vn = sharedContext.getGLVersionNumber();
 		boolean isCore = sharedContext.isGLCoreProfile();
 		LogBox.formatRenderLog("OpenGL Major: %d Minor: %d IsCore:%s", vn.getMajor(), vn.getMinor(), isCore);
+		if (vn.getMajor() < 2) {
+			throw new RenderException("OpenGL version is too low. OpenGL >= 2.1 is required.");
+		}
 		GL2GL3 gl = sharedContext.getGL().getGL2GL3();
 		if (!isCore)
 			initShaders(gl);
@@ -844,7 +851,7 @@ private void initCoreShaders(GL2GL3 gl, String version) throws RenderException {
 				// This did not load cleanly, clear it out and use the default bad mesh asset
 				proto.freeResources(gl);
 
-				LogBox.formatRenderLog("Could not load GPU assset: %s\n", key.getURL().toString());
+				LogBox.formatRenderLog("Could not load GPU assset: %s\n", key.getURI().toString());
 
 				proto = badProto;
 			}
@@ -1267,7 +1274,6 @@ private void initCoreShaders(GL2GL3 gl, String version) throws RenderException {
 			this.width = width;
 			this.height = height;
 			this.title = title;
-
 			this.name = name;
 			this.listener = listener;
 			this.windowID = windowID;
@@ -1890,4 +1896,12 @@ private static class TransSortable implements Comparable<TransSortable> {
 			showDebugInfo = showDebug;
 		}
 	}
+
+	@Override
+	public UncaughtExceptionHandler getUncaughtExceptionHandler() {
+		return null;
+	}
+
+	@Override
+	public void setUncaughtExceptionHandler(UncaughtExceptionHandler arg0) {}
 }

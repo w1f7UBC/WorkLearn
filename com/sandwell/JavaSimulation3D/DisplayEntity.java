@@ -14,23 +14,22 @@
  */
 package com.sandwell.JavaSimulation3D;
 
-import gov.nasa.worldwind.geom.Position;
-import gov.nasa.worldwind.geom.Vec4;
-
-import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
 
-import worldwind.WorldWindFrame;
-
-import com.jaamsim.DisplayModels.ColladaModel;
 import com.jaamsim.DisplayModels.DisplayModel;
+import com.jaamsim.datatypes.DoubleVector;
+import com.jaamsim.input.BooleanInput;
+import com.jaamsim.input.EntityInput;
+import com.jaamsim.input.EntityListInput;
 import com.jaamsim.input.Input;
 import com.jaamsim.input.InputAgent;
+import com.jaamsim.input.InputErrorException;
 import com.jaamsim.input.Keyword;
+import com.jaamsim.input.KeywordIndex;
 import com.jaamsim.input.Output;
+import com.jaamsim.input.Vec3dInput;
 import com.jaamsim.math.Color4d;
 import com.jaamsim.math.Mat4d;
 import com.jaamsim.math.Quaternion;
@@ -38,17 +37,10 @@ import com.jaamsim.math.Transform;
 import com.jaamsim.math.Vec3d;
 import com.jaamsim.render.DisplayModelBinding;
 import com.jaamsim.render.RenderUtils;
-import com.jaamsim.ui.FrameBox;
 import com.jaamsim.units.AngleUnit;
 import com.jaamsim.units.DimensionlessUnit;
 import com.jaamsim.units.DistanceUnit;
-import com.sandwell.JavaSimulation.BooleanInput;
-import com.sandwell.JavaSimulation.DoubleVector;
 import com.sandwell.JavaSimulation.Entity;
-import com.sandwell.JavaSimulation.EntityInput;
-import com.sandwell.JavaSimulation.EntityListInput;
-import com.sandwell.JavaSimulation.InputErrorException;
-import com.sandwell.JavaSimulation.Vec3dInput;
 
 /**
  * Encapsulates the methods and data needed to display a simulation object in the 3D environment.
@@ -66,7 +58,7 @@ public class DisplayEntity extends Entity {
 	                "then the z dimension is assumed to be zero.",
 	         example = "Object1 Size { 15 12 0 m }")
 	private final Vec3dInput sizeInput;
-	
+
 	@Keyword(description = "Euler angles defining the rotation of the object.",
 	         example = "Object1 Orientation { 0 0 90 deg }")
 	private final Vec3dInput orientationInput;
@@ -101,7 +93,7 @@ public class DisplayEntity extends Entity {
 	@Keyword(description = "If TRUE, the object is displayed in the simulation view windows.",
 	         example = "Object1 Show { FALSE }")
 	private final BooleanInput show;
-	
+
 	@Keyword(description = "If TRUE, the object is active and used in simulation runs.",
 	         example = "Object1 Active { FALSE }")
 	private final BooleanInput active;
@@ -207,6 +199,7 @@ public class DisplayEntity extends Entity {
 
 		sizeInput = new Vec3dInput("Size", "Basic Graphics", new Vec3d(1.0d, 1.0d, 1.0d));
 		sizeInput.setUnitType(DistanceUnit.class);
+		sizeInput.setValidRange(0.0d, Double.POSITIVE_INFINITY);
 		this.addInput(sizeInput);
 
 		orientationInput = new Vec3dInput("Orientation", "Basic Graphics", new Vec3d());
@@ -349,29 +342,24 @@ public class DisplayEntity extends Entity {
 		return temp;
 	}
 
+	public Vec3d getGlobalPositionForAlignment(Vec3d alignment) {
+		Vec3d temp = new Vec3d(alignment);
+		synchronized (position) {
+			temp.sub3(align);
+			temp.mul3(size);
+			calculateEulerRotation(temp, orient);
+			temp.add3(this.getGlobalPosition());
+		}
+
+		return temp;
+	}
+
 	public Vec3d getOrientation() {
 		synchronized (position) {
 			return new Vec3d(orient);
 		}
 	}
 
-public Vec3d getPositionInput(){
-		return positionInput.getValue();
-	}
-	
-	public Vec3d getOrientationInput(){
-		return orientationInput.getValue();
-	}
-
-    public Vec3d getPositionVector(){
-		synchronized(position){
-			return position;
-		}
-	}
-    
-     public Vec3d getAlignmentInput(){
-		return alignmentInput.getValue();
-	}
 	public void setOrientation(Vec3d orientation) {
 		synchronized (position) {
 			orient.set3(orientation);
@@ -541,8 +529,8 @@ public Vec3d getPositionInput(){
 			localPos.sub3(entity.position);
 
 		setPosition(localPos);
-		InputAgent.processEntity_Keyword_Value(this, positionInput, String.format((Locale)null, "%.6f %.6f %.6f m", localPos.x, localPos.y, localPos.z ));
-		FrameBox.valueUpdate();
+		KeywordIndex kw = InputAgent.formatPointInputs(positionInput.getKeyword(), localPos, "m");
+		InputAgent.apply(this, kw);
 	}
 
 	/*
@@ -588,9 +576,8 @@ public Vec3d getPositionInput(){
 		newPos.add3(distance);
 		this.setPosition(newPos);
 
-		// inform simulation and editBox of new positions
-		InputAgent.processEntity_Keyword_Value(this, positionInput, String.format((Locale)null, "%.6f %.6f %.6f m", newPos.x, newPos.y, newPos.z ));
-		FrameBox.valueUpdate();
+		KeywordIndex kw = InputAgent.formatPointInputs(positionInput.getKeyword(), newPos, "m");
+		InputAgent.apply(this, kw);
 	}
 
 	public boolean isActive() {

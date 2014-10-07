@@ -16,16 +16,19 @@ import com.ROLOS.Logistics.Route;
 import com.ROLOS.Logistics.RouteEntity;
 import com.ROLOS.Logistics.RouteSegment;
 import com.ROLOS.Utils.HashMapList;
-import com.jaamsim.events.ReflectionTarget;
+
+import com.jaamsim.basicsim.ErrorException;
+import com.jaamsim.basicsim.ReflectionTarget;
 import com.jaamsim.input.ValueInput;
 import com.jaamsim.units.TimeUnit;
-import com.sandwell.JavaSimulation.BooleanInput;
-import com.sandwell.JavaSimulation.EntityInput;
-import com.sandwell.JavaSimulation.ErrorException;
+
+import com.jaamsim.input.BooleanInput;
+import com.jaamsim.input.EntityInput;
 import com.jaamsim.input.Input;
 import com.jaamsim.input.Keyword;
+import com.jaamsim.input.StringInput;
 import com.jaamsim.math.Color4d;
-import com.sandwell.JavaSimulation.StringInput;
+
 import com.sandwell.JavaSimulation.Tester;
 
 public class Contract extends ROLOSEntity {

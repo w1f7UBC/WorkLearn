@@ -15,27 +15,25 @@
 package com.jaamsim.BasicObjects;
 
 import java.util.ArrayList;
-import java.util.Locale;
 
+import com.jaamsim.input.ColourInput;
 import com.jaamsim.input.Input;
 import com.jaamsim.input.InputAgent;
 import com.jaamsim.input.Keyword;
+import com.jaamsim.input.KeywordIndex;
 import com.jaamsim.input.ValueInput;
+import com.jaamsim.input.Vec3dListInput;
 import com.jaamsim.math.Vec3d;
 import com.jaamsim.render.HasScreenPoints;
 import com.jaamsim.units.DimensionlessUnit;
 import com.jaamsim.units.DistanceUnit;
 import com.jaamsim.units.TimeUnit;
-import com.sandwell.JavaSimulation.ColourInput;
-import com.sandwell.JavaSimulation.EntityTarget;
-import com.sandwell.JavaSimulation.ErrorException;
-import com.sandwell.JavaSimulation.Vec3dListInput;
 import com.sandwell.JavaSimulation3D.DisplayEntity;
 
 /**
  * Moves one or more Entities along a path at a constant speed.
  */
-public class EntityConveyor extends LinkedComponent implements HasScreenPoints {
+public class EntityConveyor extends LinkedService implements HasScreenPoints {
 
 	@Keyword(description = "The travel time for the conveyor.",
 	         example = "Conveyor1 TravelTime { 10.0 s }")
@@ -56,7 +54,6 @@ public class EntityConveyor extends LinkedComponent implements HasScreenPoints {
 
 	private final ArrayList<DisplayEntity> entityList;  // List of the entities being conveyed
 	private final ArrayList<Double> startTimeList;  // List of times at which the entities entered the conveyor
-	private boolean busy;  // True if there are any DisplayEntities being conveyed
 	private double totalLength;  // Graphical length of the conveyor
 	private final ArrayList<Double> lengthList;  // Length of each segment of the conveyor
 	private final ArrayList<Double> cumLengthList;  // Total length to the end of each segment
@@ -67,16 +64,16 @@ public class EntityConveyor extends LinkedComponent implements HasScreenPoints {
 	{
 		operatingThresholdList.setHidden(true);
 
-		travelTimeInput = new ValueInput( "TravelTime", "Key Inputs", 0.0d);
-		travelTimeInput.setValidRange( 0.0, Double.POSITIVE_INFINITY);
+		travelTimeInput = new ValueInput("TravelTime", "Key Inputs", 0.0d);
+		travelTimeInput.setValidRange(0.0, Double.POSITIVE_INFINITY);
 		travelTimeInput.setUnitType(TimeUnit.class);
-		this.addInput( travelTimeInput);
+		this.addInput(travelTimeInput);
 
 		ArrayList<Vec3d> defPoints =  new ArrayList<Vec3d>();
 		defPoints.add(new Vec3d(0.0d, 0.0d, 0.0d));
 		defPoints.add(new Vec3d(1.0d, 0.0d, 0.0d));
 		pointsInput = new Vec3dListInput("Points", "Key Inputs", defPoints);
-		pointsInput.setValidCountRange( 2, Integer.MAX_VALUE );
+		pointsInput.setValidCountRange(2, Integer.MAX_VALUE );
 		pointsInput.setUnitType(DistanceUnit.class);
 		this.addInput(pointsInput);
 
@@ -103,78 +100,68 @@ public class EntityConveyor extends LinkedComponent implements HasScreenPoints {
 
 		entityList.clear();
 		startTimeList.clear();
-		busy = false;
+		this.setPresentState();
 
 	    // Initialize the segment length data
 		lengthList.clear();
 		cumLengthList.clear();
 		totalLength = 0.0;
-		for( int i = 1; i < pointsInput.getValue().size(); i++ ) {
+		for (int i = 1; i < pointsInput.getValue().size(); i++) {
 			// Get length between points
 			Vec3d vec = new Vec3d();
-			vec.sub3( pointsInput.getValue().get(i), pointsInput.getValue().get(i-1));
+			vec.sub3(pointsInput.getValue().get(i), pointsInput.getValue().get(i-1));
 			double length = vec.mag3();
 
-			lengthList.add( length);
+			lengthList.add(length);
 			totalLength += length;
-			cumLengthList.add( totalLength);
+			cumLengthList.add(totalLength);
 		}
 	}
 
 	@Override
-	public void addDisplayEntity( DisplayEntity ent ) {
+	public void addDisplayEntity(DisplayEntity ent ) {
 		super.addDisplayEntity(ent);
 
 		// Add the entity to the conveyor
-		entityList.add( ent );
-		startTimeList.add( this.getSimTime() );
+		entityList.add(ent);
+		startTimeList.add(this.getSimTime());
 
 		// If necessary, wake up the conveyor
-		if ( !busy ) {
-			startProcess( new ProcessEntitiesTarget(this, "processEntities") );
+		if (!this.isBusy()) {
+			this.setBusy(true);
+			this.setPresentState();
+			this.startAction();
 		}
 	}
 
-	private static class ProcessEntitiesTarget extends EntityTarget<EntityConveyor> {
+	@Override
+	public void startAction() {
 
-		ProcessEntitiesTarget(EntityConveyor ent, String method) {
-			super(ent, method);
-		}
-
-		@Override
-		public void process() {
-			ent.processEntities();
-		}
+		// Schedule the next entity to reach the end of the conveyor
+		double dt = startTimeList.get(0) + travelTimeInput.getValue() - this.getSimTime();
+		dt = Math.max(dt, 0);  // Round-off to the nearest tick can cause a negative value
+		this.scheduleProcess(dt, 5, endActionTarget);
 	}
 
-	/**
-	* Process DisplayEntities from the Queue
-	*/
-	public void processEntities() {
+	@Override
+	public void endAction() {
 
-		// Conveyor should not be busy already
-		if( busy ) {
-			throw new ErrorException( "Conveyor should not be busy already." );
-		}
-		busy = true;
+		// Remove the entity from the conveyor
+		DisplayEntity ent = entityList.remove(0);
+		startTimeList.remove(0);
 
-		// Loop until the conveyor is empty
-		while( entityList.size() > 0 ) {
+		// Send the entity to the next component
+		this.sendToNextComponent(ent);
 
-			// Wait for the first entity to reach the end
-			double dt = startTimeList.get(0) + travelTimeInput.getValue() - this.getSimTime();
-			this.simWait( dt);
-
-			// Remove the entity from the conveyor
-			DisplayEntity ent = entityList.remove(0);
-			startTimeList.remove(0);
-
-			// Send the entity to the next component
-			this.sendToNextComponent(ent);
+		// Stop if the conveyor is empty
+		if (entityList.isEmpty()) {
+			this.setBusy(false);
+			this.setPresentState();
+			return;
 		}
 
-		// Queue is empty, stop work
-		busy = false;
+		// Schedule the next entity to reach the end of the conveyor
+		this.startAction();
 	}
 
 	/**
@@ -182,12 +169,12 @@ public class EntityConveyor extends LinkedComponent implements HasScreenPoints {
 	 * @param dist = distance along the conveyor.
 	 * @return position coordinates
 	 */
-	private Vec3d getPositionForDistance( double dist) {
+	private Vec3d getPositionForDistance(double dist) {
 
 		// Find the present segment
 		int seg = 0;
-		for( int i = 0; i < cumLengthList.size(); i++) {
-			if( dist <= cumLengthList.get(i)) {
+		for (int i = 0; i < cumLengthList.size(); i++) {
+			if (dist <= cumLengthList.get(i)) {
 				seg = i;
 				break;
 			}
@@ -195,14 +182,14 @@ public class EntityConveyor extends LinkedComponent implements HasScreenPoints {
 
 		// Interpolate between the start and end of the segment
 		double frac = 0.0;
-		if( seg == 0 ) {
+		if (seg == 0) {
 			frac = dist / lengthList.get(0);
 		}
 		else {
 			frac = ( dist - cumLengthList.get(seg-1) ) / lengthList.get(seg);
 		}
-		if( frac < 0.0 )  frac = 0.0;
-		else if( frac > 1.0 )  frac = 1.0;
+		if (frac < 0.0)  frac = 0.0;
+		else if (frac > 1.0)  frac = 1.0;
 
 		Vec3d vec = new Vec3d();
 		vec.interpolate3(pointsInput.getValue().get(seg), pointsInput.getValue().get(seg+1), frac);
@@ -210,11 +197,11 @@ public class EntityConveyor extends LinkedComponent implements HasScreenPoints {
 	}
 
 	@Override
-	public void updateForInput( Input<?> in ) {
+	public void updateForInput(Input<?> in) {
 		super.updateForInput(in);
 
 		// If Points were input, then use them to set the start and end coordinates
-		if( in == pointsInput || in == colorInput || in == widthInput ) {
+		if (in == pointsInput || in == colorInput || in == widthInput) {
 			synchronized(screenPointLock) {
 				cachedPointInfo = null;
 			}
@@ -223,17 +210,17 @@ public class EntityConveyor extends LinkedComponent implements HasScreenPoints {
 	}
 
 	@Override
-	public void updateGraphics( double simTime ) {
+	public void updateGraphics(double simTime) {
 
 		// Loop through the entities on the conveyor
-		for( int i = 0; i < entityList.size(); i++) {
-			DisplayEntity each = entityList.get( i );
+		for (int i = 0; i < entityList.size(); i++) {
+			DisplayEntity each = entityList.get(i);
 
 			// Calculate the distance travelled by this entity
-			double dist = ( simTime - startTimeList.get(i) ) / travelTimeInput.getValue() * totalLength;
+			double dist = (simTime - startTimeList.get(i)) / travelTimeInput.getValue() * totalLength;
 
 			// Set the position for the entity
-			each.setPosition( this.getPositionForDistance( dist) );
+			each.setPosition(this.getPositionForDistance( dist));
 		}
 	}
 
@@ -264,17 +251,8 @@ public class EntityConveyor extends LinkedComponent implements HasScreenPoints {
 	 */
 	@Override
 	public void dragged(Vec3d dist) {
-		ArrayList<Vec3d> vec = new ArrayList<Vec3d>(pointsInput.getValue().size());
-		for (Vec3d v : pointsInput.getValue()) {
-			vec.add(new Vec3d(v.x + dist.x, v.y + dist.y, v.z + dist.z));
-		}
-
-		StringBuilder tmp = new StringBuilder();
-		for (Vec3d v : vec) {
-			tmp.append(String.format((Locale)null, " { %.3f %.3f %.3f m }", v.x, v.y, v.z));
-		}
-		InputAgent.processEntity_Keyword_Value(this, pointsInput, tmp.toString());
-
+		KeywordIndex kw = InputAgent.formatPointsInputs(pointsInput.getKeyword(), pointsInput.getValue(), dist);
+		InputAgent.apply(this, kw);
 		super.dragged(dist);
 	}
 

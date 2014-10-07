@@ -18,14 +18,16 @@ import java.io.File;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 
+import com.jaamsim.datatypes.DoubleVector;
+import com.jaamsim.datatypes.IntegerVector;
 import com.jaamsim.input.InputAgent;
+import com.jaamsim.input.IntegerInput;
 import com.jaamsim.input.ValueListInput;
 import com.jaamsim.units.TimeUnit;
-import com.sandwell.JavaSimulation.DoubleVector;
+
 import com.sandwell.JavaSimulation.Entity;
 import com.sandwell.JavaSimulation.Group;
-import com.sandwell.JavaSimulation.IntegerInput;
-import com.sandwell.JavaSimulation.IntegerVector;
+
 import com.sandwell.JavaSimulation.Simulation;
 import com.sandwell.JavaSimulation.FileEntity;
 import com.sandwell.JavaSimulation3D.DisplayEntity;

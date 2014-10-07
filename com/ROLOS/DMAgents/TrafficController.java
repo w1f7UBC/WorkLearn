@@ -7,7 +7,8 @@ import com.ROLOS.DMAgents.RouteManager.Route_Type;
 import com.ROLOS.Logistics.DiscreteHandlingLinkedEntity;
 import com.ROLOS.Logistics.MovingEntity;
 import com.ROLOS.Logistics.Route;
-import com.sandwell.JavaSimulation.ErrorException;
+
+import com.jaamsim.basicsim.ErrorException;
 import com.sandwell.JavaSimulation3D.DisplayEntity;
 
 public class TrafficController extends DisplayEntity {

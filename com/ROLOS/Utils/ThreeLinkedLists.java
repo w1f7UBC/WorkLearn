@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
+import com.ROLOS.JavaSimulation.Tester_Rolos;
 import com.sandwell.JavaSimulation.Tester;
 
 /**
@@ -367,7 +368,7 @@ public class ThreeLinkedLists<T1,T2> {
 				else{
 					if (secondList.get(fromIndex + index).equals(secondEntity)){
 						double tempValue = valueList.get(valueListIndex).get(fromIndex + index);
-						valueList.get(valueListIndex).set(fromIndex + index,Tester.max(tempValue,value));
+						valueList.get(valueListIndex).set(fromIndex + index,Tester_Rolos.max(tempValue,value));
 						return;
 					}
 					else{

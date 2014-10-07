@@ -18,21 +18,22 @@ import java.util.ArrayList;
 
 import com.jaamsim.controllers.RenderManager;
 import com.jaamsim.controllers.VideoRecorder;
+import com.jaamsim.datatypes.IntegerVector;
 import com.jaamsim.events.EventHandle;
+import com.jaamsim.events.EventManager;
 import com.jaamsim.events.ProcessTarget;
+import com.jaamsim.input.BooleanInput;
+import com.jaamsim.input.ColourInput;
+import com.jaamsim.input.EntityListInput;
 import com.jaamsim.input.Input;
 import com.jaamsim.input.InputAgent;
+import com.jaamsim.input.IntegerInput;
+import com.jaamsim.input.IntegerListInput;
 import com.jaamsim.input.Keyword;
+import com.jaamsim.input.StringInput;
 import com.jaamsim.input.ValueInput;
 import com.jaamsim.units.TimeUnit;
-import com.sandwell.JavaSimulation.BooleanInput;
-import com.sandwell.JavaSimulation.ColourInput;
 import com.sandwell.JavaSimulation.Entity;
-import com.sandwell.JavaSimulation.EntityListInput;
-import com.sandwell.JavaSimulation.IntegerInput;
-import com.sandwell.JavaSimulation.IntegerListInput;
-import com.sandwell.JavaSimulation.IntegerVector;
-import com.sandwell.JavaSimulation.StringInput;
 
 public class VideoRecorderEntity extends Entity {
 	@Keyword(description = "Simulated time between screen captures",
@@ -175,7 +176,7 @@ public class VideoRecorderEntity extends Entity {
 	public void doCaptureNetwork() {
 
 		// If the capture network is already in progress, then stop the previous network
-		killEvent(captureHandle);
+		EventManager.killEvent(captureHandle);
 		simWait(captureStartTime.getValue(), 10, captureHandle);
 
 		if (!RenderManager.isGood()) {

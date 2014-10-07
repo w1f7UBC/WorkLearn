@@ -14,6 +14,9 @@
  */
 package com.sandwell.JavaSimulation;
 
+import com.jaamsim.datatypes.DoubleVector;
+import com.jaamsim.input.InputErrorException;
+
 
 /**
  * Class used to implement Audition-style string format tests.
@@ -175,7 +178,6 @@ public class Tester {
 		return Math.round(time * Simulation.getSimTimeFactor());
 	}
 
-	
 	public static void checkValueOrderAscending( DoubleVector vec ) throws InputErrorException {
 		for ( int i = 0; i < vec.size() - 1; i++ ) {
 			if ( vec.get( i ) >= vec.get( i + 1 ) ) {
@@ -213,15 +215,6 @@ public class Tester {
 		}
 	}
 
-public static double max( double... values ) {
-
-		double max = Double.NEGATIVE_INFINITY;
-
-		for( double each : values ) {
-			max = Math.max(max, each);
-		}
-		return max;
-	}
 	public static double min( double... values ) {
 
 		double min = Double.POSITIVE_INFINITY;
