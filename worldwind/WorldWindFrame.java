@@ -30,6 +30,7 @@ import javax.swing.filechooser.*;
 
 import com.jaamsim.math.Vec3d;
 import com.jaamsim.render.VisibilityInfo;
+import com.sandwell.JavaSimulation.IntegerListInput;
 import com.sandwell.JavaSimulation3D.GUIFrame;
 
 import DataBase.Query;
@@ -92,6 +93,7 @@ public class WorldWindFrame extends ApplicationTemplate
             AppFrame=this;
         }
 
+       
         public void addShapefileLayer(Layer layer)
         {
             this.getWwd().getModel().getLayers().add(layer);
@@ -502,4 +504,14 @@ public class WorldWindFrame extends ApplicationTemplate
             }
         });
     }
+    
+    public static void setWorldWindSize(int x, int y){
+    	AppFrame.setSize(x, y);
+    }
+    
+    public static void setWorldWindLocation(int x, int y){
+    	AppFrame.setLocation(x, y);
+    }
+
+    
 }

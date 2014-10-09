@@ -10,19 +10,20 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 import javax.swing.BorderFactory;
-import javax.swing.ButtonGroup;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JList;
 import javax.swing.JPanel;
-import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JSlider;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 
 import com.sandwell.JavaSimulation3D.GUIFrame;
 
@@ -33,10 +34,9 @@ import gov.nasa.worldwindx.examples.LayerPanel;
 public class QueryFrame extends JPanel {
 	public static JFrame HostFrame=null;
 	private static JList<String> querySelector;
-    private static JRadioButton noneRadioButton = new JRadioButton("None");
-    private static JRadioButton pointRadioButton = new JRadioButton("Point");
-    private static JRadioButton radiusRadioButton = new JRadioButton("Radius(km)");
+	private static JButton execute;
 	private static JSlider slider;
+	private static JComboBox<String> comboBox;
     
 	private QueryFrame() {
 		super(new BorderLayout(0, 0));
@@ -64,9 +64,25 @@ public class QueryFrame extends JPanel {
         JPanel selectorPanel=new JPanel(new BorderLayout());
         final DefaultListModel<String> selection=new DefaultListModel<String>();
         querySelector=new JList<String>(selection);
+        querySelector.addListSelectionListener(new ListSelectionListener() { 
+			@Override
+			public void valueChanged(ListSelectionEvent e) {
+				if (e.getValueIsAdjusting()==false){
+					if (querySelector.getSelectedValue()==null || querySelector.getSelectedValue().equals("None")){
+						comboBox.setEnabled(false);
+						execute.setEnabled(false);
+					}
+					else{
+						comboBox.setEnabled(true);
+						execute.setEnabled(true);
+					}
+				}
+			}
+        });
         JScrollPane listScroller = new JScrollPane(querySelector);
-        JPanel buttonPanel = new JPanel(new GridLayout(0, 1, 0, 0));
 
+        JPanel buttonPanel = new JPanel(new GridLayout(0, 1, 0, 0));
+        
         JButton refresh = new JButton("Refresh Queriables");
         refresh.addMouseListener(new MouseAdapter() {
             @Override
@@ -93,70 +109,25 @@ public class QueryFrame extends JPanel {
         });
         buttonPanel.add(refresh);
 
-        JButton execute = new JButton("Execute Query");
+        execute = new JButton("Execute Query");
         execute.addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
             	if (querySelector.getSelectedValue()!=null){
-            		if (querySelector.getSelectedValue()!="none"){
-            			getQueryObject().execute();
-            		}
+            		getQueryObject().execute();
             	}
             }
         });
+        execute.setEnabled(false);
         buttonPanel.add(execute);
 
-        JPanel radioButtonPanel = new JPanel(new GridLayout(2, 3, 0, 0));
-        
-        noneRadioButton.setSelected(true);
-        noneRadioButton.addActionListener(new ActionListener()
-        {
-            @Override
-			public void actionPerformed(ActionEvent event)
-            {
-            	Iterator<Query> iterator = Query.getAll().iterator();
-        		while(iterator.hasNext()){
-        			Query target=iterator.next();
-        			target.setMode(0);
-        		}
-            }
-        });
-        radioButtonPanel.add(noneRadioButton);
-        
-        pointRadioButton.addActionListener(new ActionListener()
-        {
-            @Override
-			public void actionPerformed(ActionEvent event)
-            {
-               	Iterator<Query> iterator = Query.getAll().iterator();
-           		while(iterator.hasNext()){
-           			Query target=iterator.next();
-           			target.setMode(1);
-           		}
-            }
-        });
-        radioButtonPanel.add(pointRadioButton);
-
-        radiusRadioButton.addActionListener(new ActionListener()
-        {
-            @Override
-			public void actionPerformed(ActionEvent event)
-            {
-               	Iterator<Query> iterator = Query.getAll().iterator();
-           		while(iterator.hasNext()){
-           			Query target=iterator.next();
-           			target.setMode(2);
-           		}
-            }
-        });
-        radioButtonPanel.add(radiusRadioButton);
-        
         slider = new JSlider(JSlider.HORIZONTAL, 0, 50, 25);
         slider.setMinorTickSpacing(2);
         slider.setMajorTickSpacing(10);
         slider.setPaintTicks(true);
         slider.setPaintLabels(true);
         slider.setLabelTable(slider.createStandardLabels(10));
+        slider.setVisible(false);
         slider.addChangeListener(new ChangeListener(){
         	@Override
         	public void stateChanged(ChangeEvent e) {
@@ -167,16 +138,41 @@ public class QueryFrame extends JPanel {
            		}
         	}
         });
-        radioButtonPanel.add(slider);
-     
-        ButtonGroup group = new ButtonGroup();
-        group.add(noneRadioButton);
-        group.add(pointRadioButton);
-        group.add(radiusRadioButton);
-
+       
+        /*
+         * DROP DOWN
+         */
+        JPanel comboBoxPanel = new JPanel(new GridLayout(0, 2, 0, 0));
+        String[] menu_options = {"None","Point","Radius(km)"};
+        comboBox = new JComboBox<String>();     
+        int count = 0;
+        for(int i = 0; i < menu_options.length; i++){
+       	   comboBox.addItem(menu_options[count++]);
+        }
+        comboBox.addActionListener(new ActionListener() {
+        	@Override
+        	public void actionPerformed(ActionEvent e) {        	     
+        		setMode(((JComboBox<?>)e.getSource()).getSelectedIndex());  
+        		if(((JComboBox<?>)e.getSource()).getSelectedIndex()==0){
+        			getQueryObject().setMode(0);
+        			slider.setVisible(false);
+        		}
+        		if(((JComboBox<?>)e.getSource()).getSelectedIndex()==1){
+        			getQueryObject().setMode(1);
+        			slider.setVisible(false);
+        		}
+        		if(((JComboBox<?>)e.getSource()).getSelectedIndex()==2){
+      	       		slider.setVisible(true);
+      	       		getQueryObject().setMode(2);
+      	       	}
+       	 	}
+        });
+        comboBox.setEnabled(false);
+        comboBoxPanel.add(comboBox);
+        comboBoxPanel.add(slider);
         selectorPanel.add(listScroller, BorderLayout.CENTER);
         selectorPanel.add(buttonPanel, BorderLayout.WEST);
-        selectorPanel.add(radioButtonPanel, BorderLayout.SOUTH);
+        selectorPanel.add(comboBoxPanel, BorderLayout.SOUTH);
         selectorPanel.setBorder(new CompoundBorder(BorderFactory.createEmptyBorder(5, 9, 9, 9), new TitledBorder("Query Selector")));
         selectorPanel.setToolTipText("Set query target");
         return selectorPanel;
@@ -187,15 +183,7 @@ public class QueryFrame extends JPanel {
 	}
 	
 	public static void setMode(int mode){
-		if (mode==0){
-			noneRadioButton.setSelected(true);
-		}
-		else if (mode==1){
-			pointRadioButton.setSelected(true);
-		}
-		else if (mode==2){
-			radiusRadioButton.setSelected(true);
-		}
+		comboBox.setSelectedIndex(mode);
 	}
 
 	public static Query getQueryObject(){
