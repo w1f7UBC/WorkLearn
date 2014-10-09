@@ -24,6 +24,14 @@ public class VisibilityInfo {
 
 	private final int[] viewIDs;
 	private final double minDist;
+	public double getMin() {
+		return minDist;
+	}
+
+	public double getMax() {
+		return maxDist;
+	}
+
 	private final double maxDist;
 
 	public VisibilityInfo(ArrayList<View> views, double minDist, double maxDist) {

@@ -24,12 +24,14 @@ public class ReflectionTarget extends ProcessTarget {
 	private final Entity target; // The entity whose method is to be executed
 	private final Method method; // The method to be executed
 	private final Object[] arguments; // The arguments passed to the method to be executed
-
-	public ReflectionTarget(Entity ent, String methodName, Object[] arguments) {
+	
+	public ReflectionTarget(Entity ent, String methodName, Object... arguments) {
 		target = ent;
 		method = findEntityMethod(target.getClass(), methodName, arguments);
 		this.arguments = arguments;
 	}
+	
+
 
 	@Override
 	public void process() {

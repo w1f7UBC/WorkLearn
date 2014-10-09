@@ -27,8 +27,8 @@ public class EntityTerminator extends DiscreteHandlingLinkedEntity {
 			MovingEntity entityUnderProcess = (MovingEntity) this.getQueuedEntitiesList().get(0);
 			while (!this.isReadyToHandle(entityUnderProcess)) {
 				//TODO set present states of this and the queued entity
-				waitUntil();
-			} waitUntilEnded();
+				waitUntil(null, null);
+			} //waitUntilEnded();
 			
 			this.removeFromQueuedEntityList(entityUnderProcess);
 			

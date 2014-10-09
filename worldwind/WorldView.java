@@ -14,6 +14,8 @@ import DataBase.Query;
 
 import com.ROLOS.Input.WorldWindCameraInput;
 import com.ROLOS.Input.WorldWindQueryInput;
+import com.jaamsim.basicsim.ReflectionTarget;
+import com.jaamsim.datatypes.DoubleVector;
 import com.jaamsim.datatypes.IntegerVector;
 import com.jaamsim.input.BooleanInput;
 import com.jaamsim.input.Input;
@@ -65,7 +67,7 @@ public class WorldView extends Entity {
 		this.addInput(windowPosition);
 	}
 
-	private Map<Double, double[]> cameraInputMap;
+	private Map<Double, DoubleVector> cameraInputMap;
 	private Map<Double, Query> queryInputMap;
 
 
@@ -127,9 +129,9 @@ public class WorldView extends Entity {
 		Iterator<Double> queryIterator = querySet.iterator();
 		while (cameraIterator.hasNext()){
 			double time = cameraIterator.next();
-			double[] location = cameraInputMap.get(time);
+			DoubleVector location = cameraInputMap.get(time);
 			//System.out.println(time + " " + location);
-			this.scheduleProcess(time, 3, new ReflectionTarget(this, "goTo", location[0], location[1], location[2], location[3], location[4]));
+			this.scheduleProcess(time, 3, new ReflectionTarget(this, "goTo", location.get(0), location.get(1), location.get(2), location.get(3), location.get(4)));
 		}
 		while (queryIterator.hasNext()){
 			double time = queryIterator.next();
@@ -143,7 +145,7 @@ public class WorldView extends Entity {
 		super.updateForInput(in);
 		if(in==camera){
 			if (cameraInputMap==null){
-				cameraInputMap=new HashMap<Double, double[]>();
+				cameraInputMap=new HashMap<Double, DoubleVector>();
 			}
 			cameraInputMap.put(camera.getTime(), camera.getDoubles());
 		}

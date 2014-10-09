@@ -114,7 +114,7 @@ public class TimeSeries extends DisplayEntity implements TimeSeriesProvider {
 	/**
 	 * Return the value for the given simulation time in hours
 	 */
-	private double getValueForTimeHours( double time ) {
+	public double getValueForTimeHours( double time ) {
 		double[] valueList = value.getValue().valueList;
 		return valueList[ getIndexForTimeHours( time ) ];
 	}

@@ -1470,7 +1470,8 @@ public class GUIFrame extends JFrame implements EventTimeListener, EventErrorLis
 		COL1_WIDTH = 220;
 		COL2_WIDTH = Math.min(520, (winSize.width - COL1_WIDTH) / 2);
 		COL3_WIDTH = Math.min(420, winSize.width - COL1_WIDTH - COL2_WIDTH);
-
+		COL4_WIDTH = winSize.width - COL1_WIDTH - COL2_WIDTH - COL3_WIDTH;
+		
 		COL1_START = 0;
 		COL2_START = COL1_START + COL1_WIDTH;
 		COL3_START = COL2_START + COL2_WIDTH;

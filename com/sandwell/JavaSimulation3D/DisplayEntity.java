@@ -268,7 +268,14 @@ public class DisplayEntity extends Entity {
 			}
 		}
 	}
-
+	public Vec3d getPositionVector(){
+		synchronized(position){
+			return position;
+		}
+	}
+	 public Vec3d getAlignmentInput(){
+			return alignmentInput.getValue();
+		}
 	/**
 	 * Destroys the branchGroup hierarchy for the entity
 	 */
@@ -359,7 +366,9 @@ public class DisplayEntity extends Entity {
 			return new Vec3d(orient);
 		}
 	}
-
+	public Vec3d getOrientationInput(){
+		return orientationInput.getValue();
+	}
 	public void setOrientation(Vec3d orientation) {
 		synchronized (position) {
 			orient.set3(orientation);

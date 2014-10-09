@@ -8,7 +8,7 @@ import com.jaamsim.input.ValueInput;
 import com.jaamsim.math.Vec3d;
 import com.jaamsim.units.DistanceUnit;
 import com.jaamsim.units.SpeedUnit;
-
+import com.jaamsim.events.Process;
 import com.jaamsim.input.BooleanInput;
 import com.jaamsim.input.EntityListInput;
 import com.jaamsim.input.EnumInput;
@@ -258,8 +258,8 @@ public class MovingEntity extends LogisticsEntity {
 		if (!Tester.equalCheckTolerance(distanceTraveledOnCurrentRouteSegment, ((RouteSegment) headRoute).getLength())) {	
 			traveling = false;
 			while(!this.isReadyToResumeTraveling()){
-				waitUntil();
-			} waitUntilEnded();
+				waitUntil(null, null);
+			} //waitUntilEnded();
 			this.resumeTravel();
 		}
 		

@@ -222,8 +222,8 @@ public class Loader extends BulkHandlingLinkedEntity {
 			zInfeed = this.getCurrentInfeedList().getFirstEntityList().get(0).getOrientation().z;
 			zOutfeed = this.getCurrentOutfeedList().getFirstEntityList().get(0).getOrientation().z ;
 			
-			minZ = Tester.min(zInfeed,zOutfeed)+this.getOrientationInput().z +1.5707;
-			maxZ = Tester.max(zInfeed,zOutfeed)+this.getOrientationInput().z +1.047 ;
+			minZ = Tester_Rolos.min(zInfeed,zOutfeed)+this.getOrientationInput().z +1.5707;
+			maxZ = Tester_Rolos.max(zInfeed,zOutfeed)+this.getOrientationInput().z +1.047 ;
 			
 			if(lastOrientation.z<minZ || lastOrientation.z>maxZ){
 				lastOrientation.z=minZ;

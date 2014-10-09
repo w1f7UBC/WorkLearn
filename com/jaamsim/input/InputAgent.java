@@ -87,7 +87,7 @@ public class InputAgent {
 		setReportDirectory(null);
 	}
 
-	private static String getReportDirectory() {
+	public static String getReportDirectory() {
 		if (reportDir != null)
 			return reportDir.getPath() + File.separator;
 
@@ -1042,6 +1042,9 @@ public class InputAgent {
 		numErrors++;
 		String msg = String.format(fmt, args);
 		InputAgent.logMessage(inpErrPrefix, msg);
+	}
+	public static void processEntity_Keyword_Value(Entity ent, Input<?> in, String value){
+		processEntity_Keyword_Value(ent, in.getKeyword(), value);
 	}
 
 	/**
