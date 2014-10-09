@@ -135,8 +135,8 @@ public class WorldView extends Entity {
 		}
 	}
 	
-	public void scheduleQuery(InventoryQuery q){
-		q.executeArea(true, new DefinedShapeAttributes());
+	public void scheduleQuery(InventoryQuery query){
+		query.execute();
 	}
 
 }

@@ -28,6 +28,10 @@ public class DefinedShapeAttributes
     	thick = thickness;
     	alpha = opacity;
     }
+    //initialize with specific color
+    public DefinedShapeAttributes(Color4d color){
+    	colorRGB = new Color((float)color.r, (float)color.g, (float)color.b);
+    }
 
     //initialize with default settings
     public DefinedShapeAttributes(){

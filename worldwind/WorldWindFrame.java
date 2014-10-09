@@ -74,17 +74,14 @@ public class WorldWindFrame extends ApplicationTemplate
                 	if (e!=null && QueryFrame.HostFrame!=null){
                 		if(e.getButton()==3){
                 	        //if cursor mode is set to 1 and WorldWind actually returns a position
-                			if (position!=null && QueryFrame.getMode()!=0){
+                			if (position!=null){
                 				Query query = QueryFrame.getQueryObject();
                 				if (query!=null){
                 					String lat = position.latitude.toString();
                 					lat=lat.substring(0, lat.length()-1);
                 					String lon = position.longitude.toString();
                 					lon=lon.substring(0, lon.length()-1);
-                					String name = query.getName()+"("+lat+","+lon+")";
-                					ResultSet resultset=query.execute(name, lat, lon, true, true, new DefinedShapeAttributes(),QueryFrame.getMode(),QueryFrame.getSliderValue());
-                					query.printResultContent(name, resultset, true);
-
+                					query.execute(lat, lon);
                 				}
                 				position=null;
                 			}

@@ -1,7 +1,10 @@
 package worldwind;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 
 public class LayerManager {
 	//using a 32bit (64bit backwards compatible) pgsql2shp.exe to do the conversion
@@ -71,8 +74,7 @@ public class LayerManager {
 			String line;
 			while ((line = br.readLine()) != null) {
 				System.out.println(line);
-			}
-			*/
+			}*/
 			process.waitFor();
 			if(destination.exists())
 				return destination;
