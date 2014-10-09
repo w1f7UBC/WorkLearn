@@ -23,7 +23,6 @@ import javax.swing.JSlider;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.TitledBorder;
 
-
 import com.sandwell.JavaSimulation3D.GUIFrame;
 
 import DataBase.Query;

@@ -98,8 +98,8 @@ public class GUIFrame extends JFrame implements EventTimeListener, EventErrorLis
 	static private AtomicBoolean shuttingDown;
 
 	private JMenu fileMenu;
-	private JMenu viewMenu;
-	private JMenu windowMenu;
+	public JMenu viewMenu;
+	public JMenu windowMenu;
 	private JMenu windowList;
 	private JMenu optionMenu;
 	private JMenu helpMenu;
@@ -127,8 +127,6 @@ public class GUIFrame extends JFrame implements EventTimeListener, EventErrorLis
 	JButton toolButtonXYPlane;
 	JButton toolButtonUndo;
 	JButton toolButtonRedo;
-	JButton toolButtonNone; 	 	
-	JButton toolButtonPoint;
 
 	private int lastValue = -1;
 	private JProgressBar progressBar;
@@ -142,11 +140,11 @@ public class GUIFrame extends JFrame implements EventTimeListener, EventErrorLis
 	public static int COL1_WIDTH;
 	public static int COL2_WIDTH;
 	public static int COL3_WIDTH;
-	public static int COL4_WIDTH; 
 	public static int COL1_START;
 	public static int COL2_START;
 	public static int COL3_START;
-	public static int COL4_START; 
+	public static int COL4_WIDTH;
+	public static int COL4_START;
 	public static int HALF_TOP;
 	public static int HALF_BOTTOM;
 	public static int TOP_START;
@@ -212,7 +210,7 @@ public class GUIFrame extends JFrame implements EventTimeListener, EventErrorLis
 		return instance;
 	}
 
-	public static final RateLimiter getRateLimiter() {
+	public static RateLimiter getRateLimiter() {
 		return rateLimiter;
 	}
 
@@ -492,6 +490,7 @@ public class GUIFrame extends JFrame implements EventTimeListener, EventErrorLis
 				InputAgent.apply(sim, new KeywordIndex("ShowObjectSelector", arg, null));
 				InputAgent.apply(sim, new KeywordIndex("ShowInputEditor", arg, null));
 				InputAgent.apply(sim, new KeywordIndex("ShowOutputViewer", arg, null));
+				InputAgent.apply(sim,new KeywordIndex("ShowWorldController",arg,null));
 			}
 		} );
 		viewMenu.add( showBasicToolsMenuItem );
@@ -512,6 +511,8 @@ public class GUIFrame extends JFrame implements EventTimeListener, EventErrorLis
 				InputAgent.apply(sim, new KeywordIndex("ShowOutputViewer", arg, null));
 				InputAgent.apply(sim, new KeywordIndex("ShowPropertyViewer", arg, null));
 				InputAgent.apply(sim, new KeywordIndex("ShowLogViewer", arg, null));
+				InputAgent.apply(sim, new KeywordIndex("ShowWorldController", arg, null));
+				
 			}
 		} );
 		viewMenu.add( closeAllToolsMenuItem );
@@ -599,17 +600,19 @@ public class GUIFrame extends JFrame implements EventTimeListener, EventErrorLis
 			}
 		} );
 		viewMenu.add( logMenuItem );
-		// 9) "World Controller" menu item 	 	
-			JMenuItem worldControllerItem = new JMenuItem( "WorldView Controller" ); 	 	
-			worldControllerItem.setMnemonic( 'W' ); 	 	
-			worldControllerItem.addActionListener( new ActionListener() { 	 	
-			 	 	
-				@Override 	 	
-				public void actionPerformed( ActionEvent event ) { 	 	
-					InputAgent.processEntity_Keyword_Value(Simulation.getInstance(), "ShowWorldController", "TRUE"); 	 	
-				} 	 	
-			} ); 	 	
-					viewMenu.add( worldControllerItem ); 
+		// 9) "World Controller" menu item
+		JMenuItem worldControllerItem = new JMenuItem( "WorldView Controller" );
+		worldControllerItem.setMnemonic( 'W' );
+		worldControllerItem.addActionListener( new ActionListener() {
+
+			@Override
+			public void actionPerformed( ActionEvent event ) {
+				ArrayList<String> arg = new ArrayList<String>(1);
+				arg.add("TRUE");
+				InputAgent.apply(Simulation.getInstance(), new KeywordIndex("ShowWorldController", arg, null));
+			}
+		} );
+		viewMenu.add( worldControllerItem );
 	}
 
 	/**
@@ -980,14 +983,14 @@ public class GUIFrame extends JFrame implements EventTimeListener, EventErrorLis
 			}
 			this.addSeparator();
 			this.add(new ViewDefiner());
-			JMenuItem WorldViewer = new JMenuItem("Show WorldViewer"); 	 	
-							WorldViewer.addActionListener( new ActionListener() { 	 	
-								@Override 	 	
-								public void actionPerformed( ActionEvent event ) { 	 	
-									WorldWindFrame.setViewVisible(true); 	 	
-								} 	 	
-							} ); 	 	
-							this.add(WorldViewer); 
+			JMenuItem WorldViewer = new JMenuItem("Show WorldViewer");
+			WorldViewer.addActionListener( new ActionListener() {
+				@Override
+				public void actionPerformed( ActionEvent event ) {
+					WorldWindFrame.setViewVisible(true);
+				}
+			} );
+			this.add(WorldViewer);
 		}
 
 		@Override
@@ -1459,23 +1462,19 @@ public class GUIFrame extends JFrame implements EventTimeListener, EventErrorLis
 		saveConfigurationMenuItem.setEnabled(bool);
 	}
 
-	/**
-	 * Sets variables used to determine the position and size of various
-	 * windows based on the size of the computer display being used.
-	 */
 	private static void calcWindowDefaults() {
 		Dimension guiSize = GUIFrame.instance().getSize();
 		Rectangle winSize = GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds();
 
-		COL1_WIDTH = 220;
-		COL2_WIDTH = Math.min(520, (winSize.width - COL1_WIDTH) / 2);
-		COL3_WIDTH = Math.min(420, winSize.width - COL1_WIDTH - COL2_WIDTH);
+		COL1_WIDTH = 180;
+		COL2_WIDTH = ((winSize.width - COL1_WIDTH)*6/10*6/10);
+		COL3_WIDTH = ((winSize.width - COL1_WIDTH)*4/10*6/10);
 		COL4_WIDTH = winSize.width - COL1_WIDTH - COL2_WIDTH - COL3_WIDTH;
 		
 		COL1_START = 0;
 		COL2_START = COL1_START + COL1_WIDTH;
 		COL3_START = COL2_START + COL2_WIDTH;
-		COL4_START = COL3_START + COL3_WIDTH; 
+		COL4_START = COL3_START + COL3_WIDTH;
 
 		HALF_TOP = (winSize.height - guiSize.height) / 2;
 		HALF_BOTTOM = (winSize.height - guiSize.height - HALF_TOP);
@@ -1558,7 +1557,7 @@ public class GUIFrame extends JFrame implements EventTimeListener, EventErrorLis
 		// If not running in batch mode, create the splash screen
 		JWindow splashScreen = null;
 		if (!batch) {
-			URL splashImage = GUIFrame.class.getResource("/resources/images/splashscreen.png");
+		/*	URL splashImage = GUIFrame.class.getResource("/resources/images/splashscreen.png");
 			ImageIcon imageIcon = new ImageIcon(splashImage);
 			Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
 			int splashX = (screen.width - imageIcon.getIconWidth()) / 2;
@@ -1576,7 +1575,7 @@ public class GUIFrame extends JFrame implements EventTimeListener, EventErrorLis
 			splashScreen.setVisible(true);
 
 			// Begin initializing the rendering system
-			RenderManager.initialize(SAFE_GRAPHICS);
+		*/	RenderManager.initialize(SAFE_GRAPHICS);
 		}
 
 		// create a graphic simulation
@@ -1650,13 +1649,13 @@ public class GUIFrame extends JFrame implements EventTimeListener, EventErrorLis
 
 		// Wait to allow the renderer time to finish initialisation
 		try { Thread.sleep(1000); } catch (InterruptedException e) {}
-
+/*
 		// Hide the splash screen
 		if (splashScreen != null) {
 			splashScreen.dispose();
 			splashScreen = null;
 		}
-
+*/
 		// Bring the Control Panel to the front (along with any open Tools)
 		gui.toFront();
 
