@@ -1,3 +1,5 @@
 /CostPerEnergyUnit.class
 /CostPerMassUnit.class
 /CostPerVolumeUnit.class
+/CostPerMassPerDistUnit.class
+/CostPerVolumePerDistUnit.class
