@@ -1,10 +1,13 @@
-package com.jaamsim.input;
+package worldwind;
 
 import java.util.ArrayList;
 
 import DataBase.Query;
 import DataBase.InventoryQuery;
 
+import com.jaamsim.input.Input;
+import com.jaamsim.input.InputAgent;
+import com.jaamsim.input.KeywordIndex;
 import com.jaamsim.math.Vec3d;
 import com.jaamsim.units.DimensionlessUnit;
 import com.jaamsim.units.TimeUnit;
@@ -12,13 +15,13 @@ import com.sandwell.JavaSimulation.DoubleVector;
 import com.sandwell.JavaSimulation.InputErrorException;
 import com.sandwell.JavaSimulation.StringInput;
 
-public class WorldWindQueryInput extends Input {
+public class WorldWindInputQuery extends Input {
 
 
 	private double time;
 	private Query query;
 	
-	public WorldWindQueryInput(String key, String cat) {
+	public WorldWindInputQuery(String key, String cat) {
 		super(key, cat, null);
 	}
 	

@@ -19,6 +19,7 @@ WorldView	 	JavaClass { worldwind.WorldView }		Palette { 'Graphics Objects' } 	D
 
 Define Database { InventoryDatabase }
 Define InventoryQuery { InventoryQueryObject }
+InventoryQueryObject TargetDatabase { InventoryDatabase }
 Define ExcelInput{ ExcelInput1 }
 Define ExcelTest{ ExcelTest1 }
 "ExcelTest1 targetexcel{ExcelInput1}

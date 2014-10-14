@@ -48,7 +48,6 @@ import com.sandwell.JavaSimulation.Entity;
 import com.sandwell.JavaSimulation.InputErrorException;
 import com.sandwell.JavaSimulation.IntegerInput;
 import com.sandwell.JavaSimulation.StringInput;
-import com.sandwell.JavaSimulation.StringListInput;
 import com.sandwell.JavaSimulation3D.GUIFrame;
 
 public class Query extends Entity {
@@ -59,16 +58,22 @@ public class Query extends Entity {
 		resultFrames = new ArrayList<JFrame>();
 	}
 	@Keyword(description = "target databaseobject of the query")
-	private  StringInput targetDB;
+	private DatabaseInput database;
 	
 	@Keyword(description = "target table within database to query off of")
-	private StringInput table;
+	private DatabaseInput table;
+	
+	@Keyword(description = "The column name that specifies the specific row to be returned")
+	private DatabaseInput column;
+	
+	@Keyword(description = "The operator that specifies the row and column comparison")
+	private DatabaseInput operator;
+	
+	@Keyword(description = "The row identifier that specifies the specific row to be returned")
+	private DatabaseInputList row;
 	
 	@Keyword(description = "Statement that will be used should execute(boolean draw) should be called")
 	private StringInput statement;
-	
-	@Keyword(description = "The column name and row identifier that specifies the specific row to be returned")
-	private StringListInput row;
 	
 	@Keyword(description = "Determines which type of query to use, point specific queries only eg. uses latitude and longitude")
 	private IntegerInput mode;
@@ -107,14 +112,21 @@ public class Query extends Entity {
 	private StringInput longitudeColumn;
 	
 	{
-		targetDB = new StringInput("TargetDatabase","Query Properties", "InventoryDatabase");
-		this.addInput(targetDB);
+		database = new DatabaseInput("TargetDatabase","Query Properties", "None");
+		this.addInput(database);
 		
-		table = new StringInput("TargetTable", "Query Properties", "");
+		table = new DatabaseInput("TargetTable", "Query Properties", "None");
 		this.addInput(table);
 		
-		ArrayList<String> input=new ArrayList<String>();
-		row = new StringListInput("TargetRow", "Query Properties", input);
+		column = new DatabaseInput("TargetCollumn", "Query Properties", "None");
+		this.addInput(column);
+
+		operator = new DatabaseInput("TargetOperator", "Query Properties", "=");
+		this.addInput(operator);
+		
+		ArrayList<String> input = new ArrayList<String>();
+		input.add("None");
+		row = new DatabaseInputList("TargetRow", "Query Properties", input);
 		this.addInput(row);
 		
 		statement = new StringInput("Statement", "Query Properties", "");
@@ -157,13 +169,20 @@ public class Query extends Entity {
 		this.addInput(longitudeColumn);
 	}
 	
-	private Database database=Database.getDatabase(targetDB.getValue());
+	private Database targetDatabase;
     
 	@Override
 	public void updateForInput(Input<?> in) {
 		super.updateForInput(in);
-		if(in==targetDB){
-			database=Database.getDatabase(targetDB.getValue());
+		if(in==database){
+			targetDatabase=Database.getDatabase(database.getValue());
+			table.updateValues(getResultSet("SELECT table_name FROM information_schema.tables WHERE table_schema='public' ORDER BY table_name"));
+		}
+		if(in==table){
+			column.updateValues(getResultSet("SELECT column_name FROM information_schema.columns WHERE table_name='" + table.getValue()+"' ORDER BY column_name"));
+		}
+		if(in==column){
+			row.updateValues(getResultSet("SELECT " + column.getValue() +" FROM " + table.getValue() + " ORDER BY " + column.getValue()));
 		}
 		if(in==radius){
 			QueryFrame.setSliderValue(radius.getValue());
@@ -181,50 +200,51 @@ public class Query extends Entity {
 
 	public Query(){
 		getAll().add(this);
+		database.updateValues(Database.getAll());
+		ArrayList<String> operators = new ArrayList<String>();
+		operators.add("=");
+		operators.add("<");
+		operators.add(">");
+		operator.updateValues(operators);
 	}
 
 	@Override
 	public void validate() {
 		super.validate();
 		// Confirm that prototype entity has been specified
-		if( targetDB.getValue() == null ) {
-			throw new InputErrorException( "The keyword targetDB must be set." );
+		if( database.getValue() == null ) {
+			throw new InputErrorException( "The keyword database must be set." );
 		}
 	}
 	
 	public String execute(){
 		String targetStatement = statement.getValue();
 		String targetTable = table.getValue();
+		String targetColumn = column.getValue();
+		String targetOperator = operator.getValue();
 		ArrayList<String> targetRow = row.getValue();
 		String executeStatement = "";
 		String executeName = "";
-		if (targetTable.isEmpty() && targetRow.size()!=0){
-			System.out.println("TargetRow only works when TargetTable is set");
-			return null;
-		}
-		else if ((!targetStatement.isEmpty() && !targetTable.isEmpty()) || (targetStatement.isEmpty() && targetTable.isEmpty())){
+		if ((!targetStatement.isEmpty() && !targetTable.equals("None")) || (targetStatement.isEmpty() && targetTable.equals("None"))){
 			System.out.println("Statement and TargetTable are mutually exclusive but are (or not) set, please use one only");
 			return null;
 		} 
-		else if (!targetTable.isEmpty() && targetRow.size()!=0 && targetRow.size()<2){
-			System.out.println("TargetRow must contain 2 or more inputs (first always being the column name, with following being accepted rows).");
-			return null;	
-		}
 		if (!targetStatement.isEmpty()){
 			executeStatement= targetStatement;
 			executeName= targetStatement;
 		}
-		else if (!targetTable.isEmpty()){
-			if (targetRow.size()!=0){
-				Iterator<String> iterator = targetRow.iterator();
-				String collumn = iterator.next();
-				String value = iterator.next();
-				executeStatement= "SELECT * FROM " + targetTable + " WHERE " + collumn + "=" + value;
-				executeName=targetTable + "_" + collumn + "_" + value;
-				while (iterator.hasNext()){
-					value = iterator.next();
-					executeStatement+= " OR " + collumn + "=" + value;
-					executeName+= value;
+		else if (!targetTable.equals("None")){
+			if (!targetColumn.equals("None")){
+				if(!targetRow.get(0).equals("None")){
+					Iterator<String> iterator = targetRow.iterator();
+					String value = iterator.next();
+					executeStatement= "SELECT * FROM " + targetTable + " WHERE " + targetColumn + targetOperator + value;
+					executeName=targetTable + "_" + targetColumn + "_" + value;
+					while (iterator.hasNext()){
+						value = iterator.next();
+						executeStatement+= " OR " + targetColumn + targetOperator + value;
+						executeName+= value;
+					}
 				}
 			}
 			else{
@@ -236,7 +256,7 @@ public class Query extends Entity {
 		executeName=executeName.replaceAll("[^a-zA-Z0-9\\.\\-]", "_");
 		if (getDraw()==true && WorldWindFrame.AppFrame != null){
 			//System.out.println(executeStatement);
-			File file = database.getLayermanager().sql2shp(executeName, executeStatement);
+			File file =getLayerManager().sql2shp(executeName, executeStatement);
 			if (file!=null){
 				Thread thread=new WorldWindFrame.WorkerThread(file, WorldWindFrame.AppFrame, getZoom(), getSecondaryColor());
 				thread.start();
@@ -265,7 +285,7 @@ public class Query extends Entity {
 		if(modes==0){
 			return null;
 		}
-		if (targetTable.isEmpty()){
+		if (targetTable.equals("None")){
 			System.out.println("Table must be specified for selection mode to work");
 			return null;
 		}
@@ -283,7 +303,7 @@ public class Query extends Entity {
 		//System.out.println("TargetTable= "+ targetTable + System.lineSeparator() + "Draw= " + getDraw() + System.lineSeparator()+ "Zoom= "+zoom+ System.lineSeparator() +executeStatement);
 		if (getDraw()==true && WorldWindFrame.AppFrame != null){
 			File file=null;
-			file = database.getLayermanager().sql2shp(executeName, executeStatement);			
+			file = getLayerManager().sql2shp(executeName, executeStatement);			
 			if (file!=null){
 				if(modes==2){
 					LatLon position = new LatLon(Angle.fromDegrees(Double.parseDouble(latitude)), Angle.fromDegrees(Double.parseDouble(longitude)));
@@ -332,7 +352,7 @@ public class Query extends Entity {
 		// System.out.println(statements);
 		String executeName=executeStatement.replaceAll("[^a-zA-Z0-9\\.\\-]", "_");
 		if (getDraw()==true && WorldWindFrame.AppFrame != null){
-			File file = database.getLayermanager().sql2shp(executeName, executeStatement);
+			File file = getLayerManager().sql2shp(executeName, executeStatement);
 			if (file!=null){
 				Thread thread=new WorldWindFrame.WorkerThread(file, WorldWindFrame.AppFrame, getZoom(), getPrimaryColor());
 				thread.start();
@@ -397,7 +417,7 @@ public class Query extends Entity {
 
 	public ResultSet getResultSet(String statements){
 		try {
-			Statement st = database.getConnection().createStatement();
+			Statement st = targetDatabase.getConnection().createStatement();
 			ResultSet resultset = st.executeQuery(statements);
 			return resultset;
 		} catch (SQLException e) {
@@ -505,7 +525,7 @@ public class Query extends Entity {
 				   dataBasePanel.setViewportView(content);
 				   dataBaseFrame.add(dataBasePanel);
 	               dataBaseFrame.setLocation(GUIFrame.COL2_START, GUIFrame.LOWER_START);
-	               dataBaseFrame.setSize(GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds().width-GUIFrame.COL2_START, GUIFrame.VIEW_HEIGHT);
+	               dataBaseFrame.setSize(GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds().width-GUIFrame.COL2_START, GUIFrame.LOWER_HEIGHT);
 				   dataBaseFrame.setIconImage(GUIFrame.getWindowIcon());
 				   dataBaseFrame.setAutoRequestFocus(false);
 				   dataBaseFrame.setVisible(true);
@@ -522,7 +542,7 @@ public class Query extends Entity {
 	}
 
 	public LayerManager getLayerManager(){
-		return database.getLayermanager();
+		return targetDatabase.getLayermanager();
 	}
 	
 	public static ArrayList<JFrame> getResultFrames(){
