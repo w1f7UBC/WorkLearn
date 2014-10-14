@@ -22,7 +22,13 @@ import com.jaamsim.input.Input;
 import com.jaamsim.input.IntegerListInput;
 import com.jaamsim.input.Keyword;
 
+
 import com.jaamsim.math.Vec3d;
+
+
+import com.jaamsim.input.ValueListInput;
+
+
 
 import com.sandwell.JavaSimulation.Entity;
 
@@ -32,19 +38,30 @@ public class WorldView extends Entity {
 
 	@Keyword(description = "Sets location of camera for WorldWindFrame")
 	private WorldWindCameraInput camera;
+	
 	@Keyword(description = "A Boolean indicating whether the WorldView should show a window")
 	private BooleanInput showWindow;
+	
 	@Keyword(description = "Shows query in the WorldWindFrame")
 	private WorldWindQueryInput query;
+	
 	@Keyword(description = "The size of the window in pixels (width, height).")
 	private final IntegerListInput windowSize;
+	
 	@Keyword(description = "The position of the upper left corner of the window in pixels measured" +
             "from the top left corner of the screen.")
 	private final IntegerListInput windowPosition;
 	
+	@Keyword(description = "Sets initial location of camera for WorldWindFrame")
+	private ValueListInput initialCamera;
+	
 	{
 		camera = new WorldWindCameraInput("CameraLocation", "WorldWind");
 		this.addInput(camera);
+		DoubleVector vector = new DoubleVector();
+		vector.add(0.0);
+		initialCamera = new ValueListInput("InitialCamera", "WorldWind", new DoubleVector());
+		this.addInput(initialCamera);
 		showWindow = new BooleanInput("ShowWindow", "WorldWind", false);
 		this.addInput(showWindow);
 		query = new WorldWindQueryInput("QueryLocation", "WorldWind");
@@ -76,6 +93,20 @@ public class WorldView extends Entity {
 	}
 
     public void goTo(double lat, double lon, double zoom, double heading, double pitch){
+    	BasicOrbitView orbitView;
+    	orbitView = (BasicOrbitView) WorldWindFrame.AppFrame.getWwd().getView();
+    	Angle newHeading = Angle.fromDegrees(heading);
+    	Angle newPitch = Angle.fromDegrees(pitch);    	
+		if(heading == Double.NEGATIVE_INFINITY){
+			newHeading = orbitView.getHeading();
+		}
+		if(pitch == Double.NEGATIVE_INFINITY){
+			newPitch = orbitView.getPitch();
+		}
+    	orbitView.addPanToAnimator(Position.fromDegrees(lat, lon), newHeading, newPitch, zoom);
+    }
+
+    public void initGoTo(double lat, double lon, double zoom, double heading, double pitch){
     	//WorldWindFrame.AppFrame.getWwd().getView().goTo(Position.fromDegrees(lat, lon), zoom);
     	BasicOrbitView orbitView;
     	orbitView = (BasicOrbitView) WorldWindFrame.AppFrame.getWwd().getView();
@@ -87,42 +118,16 @@ public class WorldView extends Entity {
 		if(pitch == -1.0){
 			newPitch = orbitView.getPitch();
 		}
-    	orbitView.addPanToAnimator(Position.fromDegrees(lat, lon), newHeading, newPitch, zoom);
+    	orbitView.setCenterPosition(Position.fromDegrees(lat, lon));
+    	orbitView.setZoom(zoom);
+    	orbitView.setHeading(newHeading);
+    	orbitView.setPitch(newPitch);
     }
 
     @Override
     public void startUp() {
-//<<<<<<< HEAD
-//    	Set<Double> set = cameraInputMap.keySet();
-//    	Iterator<Double> iterator = set.iterator();
-//    	while (iterator.hasNext()){
-//    		double time = iterator.next();
-//    		double[] location = cameraInputMap.get(time);
-//    		
-//    		BasicOrbitView orbitView;
-//        	orbitView = (BasicOrbitView) WorldWindFrame.AppFrame.getWwd().getView();
-//       
-//        	
-//    		//System.out.println("lat " + location[0] +"long "+ location[1] + "zoom " + location[2] + "header " + newHeading + "pitch " + newPitch);
-//    		this.scheduleProcess(time, 3, new ReflectionTarget(this, "goTo", location[0], location[1], location[2], location[3], location[4]));
-//    		
-//=======
-//    	Set<Double> cameraSet = cameraInputMap.keySet();
-//    	Set<Double> querySet = queryInputMap.keySet();
-//    	Iterator<Double> cameraIterator = cameraSet.iterator();
-//    	Iterator<Double> queryIterator = querySet.iterator();
-//    	while (cameraIterator.hasNext()){
-//    		double time = cameraIterator.next();
-//    		Vec3d location = cameraInputMap.get(time);
-//    		//System.out.println(time + " " + location);
-//    		this.scheduleProcess(time, 3, new ReflectionTarget(this, "goTo", location.x, location.y, location.z));
-//    	}
-//    	while (queryIterator.hasNext()){
-//    		double time = queryIterator.next();
-//    		Query q = queryInputMap.get(time);
-//    		this.scheduleProcess(time, 3, new ReflectionTarget(this, "scheduleQuery", q));
-//>>>>>>> refs/remotes/origin/master
-
+    	
+    	
 		Set<Double> cameraSet = cameraInputMap.keySet();
 		Set<Double> querySet = queryInputMap.keySet();
 		Iterator<Double> cameraIterator = cameraSet.iterator();
@@ -165,10 +170,14 @@ public class WorldView extends Entity {
 		if(in==windowPosition){
 			WorldWindFrame.setWorldWindLocation(windowPosition.getValue().get(0), windowPosition.getValue().get(1));
 		}
+		if(in==initialCamera){
+			DoubleVector initLocation = initialCamera.getValue();
+	    	initGoTo(initLocation.get(0), initLocation.get(1), initLocation.get(2), initLocation.get(3), initLocation.get(4));
+		}
 	}
 	
-	public void scheduleQuery(InventoryQuery q){
-		q.executeArea(true, new DefinedShapeAttributes());
+	public void scheduleQuery(InventoryQuery query){
+		query.execute();
 	}
 
 }

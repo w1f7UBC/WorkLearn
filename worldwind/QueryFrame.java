@@ -10,32 +10,34 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 import javax.swing.BorderFactory;
-import javax.swing.ButtonGroup;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JList;
 import javax.swing.JPanel;
-import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JSlider;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.TitledBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 
 import com.sandwell.JavaSimulation3D.GUIFrame;
 
 import DataBase.Query;
-
 import gov.nasa.worldwindx.examples.FlatWorldPanel;
 import gov.nasa.worldwindx.examples.LayerPanel;
 
 public class QueryFrame extends JPanel {
 	public static JFrame HostFrame=null;
 	private static JList<String> querySelector;
-	private static int mode=0;
+	private static JButton execute;
 	private static JSlider slider;
-	private static int sliderValue=10;
+	private static JComboBox<String> comboBox;
+    
 	private QueryFrame() {
 		super(new BorderLayout(0, 0));
 		if (WorldWindFrame.AppFrame==null){
@@ -62,9 +64,25 @@ public class QueryFrame extends JPanel {
         JPanel selectorPanel=new JPanel(new BorderLayout());
         final DefaultListModel<String> selection=new DefaultListModel<String>();
         querySelector=new JList<String>(selection);
+        querySelector.addListSelectionListener(new ListSelectionListener() { 
+			@Override
+			public void valueChanged(ListSelectionEvent e) {
+				if (e.getValueIsAdjusting()==false){
+					if (querySelector.getSelectedValue()==null || querySelector.getSelectedValue().equals("None")){
+						comboBox.setEnabled(false);
+						execute.setEnabled(false);
+					}
+					else{
+						comboBox.setEnabled(true);
+						execute.setEnabled(true);
+					}
+				}
+			}
+        });
         JScrollPane listScroller = new JScrollPane(querySelector);
-        JPanel buttonPanel = new JPanel(new GridLayout(0, 1, 0, 0));
 
+        JPanel buttonPanel = new JPanel(new GridLayout(0, 1, 0, 0));
+        
         JButton refresh = new JButton("Refresh Queriables");
         refresh.addMouseListener(new MouseAdapter() {
             @Override
@@ -91,23 +109,18 @@ public class QueryFrame extends JPanel {
         });
         buttonPanel.add(refresh);
 
-        JButton queryArea = new JButton("Plot queriables if exist");
-        queryArea.addMouseListener(new MouseAdapter() {
+        execute = new JButton("Execute Query");
+        execute.addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
             	if (querySelector.getSelectedValue()!=null){
-            		if (querySelector.getSelectedValue()!="none"){
-            			getQueryObject().executeArea(true, new DefinedShapeAttributes());
-            		}
+            		getQueryObject().execute();
             	}
             }
         });
-        buttonPanel.add(queryArea);
-       
-        	
-        JPanel comboBoxPanel = new JPanel(new GridLayout(0, 2, 0, 0));
-        
-        
+        execute.setEnabled(false);
+        buttonPanel.add(execute);
+
         slider = new JSlider(JSlider.HORIZONTAL, 0, 50, 25);
         slider.setMinorTickSpacing(2);
         slider.setMajorTickSpacing(10);
@@ -115,36 +128,53 @@ public class QueryFrame extends JPanel {
         slider.setPaintLabels(true);
         slider.setLabelTable(slider.createStandardLabels(10));
         slider.setVisible(false);
+        slider.addChangeListener(new ChangeListener(){
+        	@Override
+        	public void stateChanged(ChangeEvent e) {
+        		Iterator<Query> iterator = Query.getAll().iterator();
+           		while(iterator.hasNext()){
+           			Query target=iterator.next();
+           			target.setRadius(slider.getValue());
+           		}
+        	}
+        });
        
-     
         /*
          * DROP DOWN
          */
-         String[] menu_options = {"None","Point","Radius(km)","Closest Point"};
-         JComboBox comboBox = new JComboBox();   
-         
-         int count = 0;
-         for(int i = 0; i < menu_options.length; i++)
-        	   comboBox.addItem(menu_options[count++]);
-         comboBox.addActionListener(new ActionListener() {
-        	   public void actionPerformed(ActionEvent e) {        	     
-        	       setMode(((JComboBox)e.getSource()).getSelectedIndex());  
-        	       if(((JComboBox)e.getSource()).getSelectedIndex()==2)
-        	    	   slider.setVisible(true);
-        	       else
-        	    	   slider.setVisible(false);
-        	   }
-        	 });
-         comboBoxPanel.add(comboBox);
-         comboBoxPanel.add(slider);
-         
+        JPanel comboBoxPanel = new JPanel(new GridLayout(0, 2, 0, 0));
+        String[] menu_options = {"None","Point","Radius(km)"};
+        comboBox = new JComboBox<String>();     
+        int count = 0;
+        for(int i = 0; i < menu_options.length; i++){
+       	   comboBox.addItem(menu_options[count++]);
+        }
+        comboBox.addActionListener(new ActionListener() {
+        	@Override
+        	public void actionPerformed(ActionEvent e) {        	     
+        		setMode(((JComboBox<?>)e.getSource()).getSelectedIndex());  
+        		if(((JComboBox<?>)e.getSource()).getSelectedIndex()==0){
+        			getQueryObject().setMode(0);
+        			slider.setVisible(false);
+        		}
+        		if(((JComboBox<?>)e.getSource()).getSelectedIndex()==1){
+        			getQueryObject().setMode(1);
+        			slider.setVisible(false);
+        		}
+        		if(((JComboBox<?>)e.getSource()).getSelectedIndex()==2){
+      	       		slider.setVisible(true);
+      	       		getQueryObject().setMode(2);
+      	       	}
+       	 	}
+        });
+        comboBox.setEnabled(false);
+        comboBoxPanel.add(comboBox);
+        comboBoxPanel.add(slider);
         selectorPanel.add(listScroller, BorderLayout.CENTER);
         selectorPanel.add(buttonPanel, BorderLayout.WEST);
         selectorPanel.add(comboBoxPanel, BorderLayout.SOUTH);
         selectorPanel.setBorder(new CompoundBorder(BorderFactory.createEmptyBorder(5, 9, 9, 9), new TitledBorder("Query Selector")));
         selectorPanel.setToolTipText("Set query target");
-  
-  
         return selectorPanel;
     }
 	
@@ -152,17 +182,8 @@ public class QueryFrame extends JPanel {
 		slider.setValue(value);
 	}
 	
-	public static int getSliderValue()
-	{
-		return slider.getValue();
-	}
-	
-	public static void setMode(int setMode){
-		mode=setMode;
-	}
-	
-	public static int getMode(){
-		return mode;
+	public static void setMode(int mode){
+		comboBox.setSelectedIndex(mode);
 	}
 
 	public static Query getQueryObject(){

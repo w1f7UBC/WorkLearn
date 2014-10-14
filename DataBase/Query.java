@@ -2,7 +2,6 @@ package DataBase;
 
 import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.LatLon;
-import gov.nasa.worldwind.layers.Layer;
 import gov.nasa.worldwind.layers.RenderableLayer;
 import gov.nasa.worldwind.render.BasicShapeAttributes;
 import gov.nasa.worldwind.render.Material;
@@ -31,21 +30,31 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 
-
 import worldwind.DefinedShapeAttributes;
 import worldwind.LayerManager;
+import worldwind.QueryFrame;
 import worldwind.WorldWindFrame;
 import worldwind.WorldWindFrame.WorkerThread;
 
 import com.ROLOS.ROLOSEntity;
 import com.ROLOS.Input.InputAgent_Rolos;
 import com.ROLOS.Utils.HandyUtils;
+import com.jaamsim.input.BooleanInput;
+import com.jaamsim.input.ColourInput;
 import com.jaamsim.input.Input;
 import com.jaamsim.input.InputAgent;
 import com.jaamsim.input.InputErrorException;
+import com.jaamsim.input.IntegerInput;
 import com.jaamsim.input.Keyword;
+import com.jaamsim.input.StringListInput;
+
 import com.jaamsim.input.StringInput;
+
+import com.jaamsim.input.ValueInput;
+
+
 import com.sandwell.JavaSimulation.Entity;
+
 
 import com.sandwell.JavaSimulation3D.GUIFrame;
 
@@ -63,14 +72,41 @@ public class Query extends Entity {
 	@Keyword(description = "target table within database to query off of")
 	private StringInput table;
 	
-	@Keyword(description = "target table within database that describes the queriable area")
-	private StringInput areaTable;
-	
 	@Keyword(description = "Statement that will be used should execute(boolean draw) should be called")
 	private StringInput statement;
 	
-	@Keyword(description = "The column name where shapefile appear")
-	private StringInput shapefileColumn;
+	@Keyword(description = "The column name and row identifier that specifies the specific row to be returned")
+	private StringListInput row;
+	
+	@Keyword(description = "Determines which type of query to use, point specific queries only eg. uses latitude and longitude")
+	private IntegerInput mode;
+	
+	@Keyword(description = "Used in specific mode to determine radius/size of query")
+	private IntegerInput radius;
+	
+	@Keyword(description = "Determines draw mode, true=draw, false=dont draw")
+	private BooleanInput draw;
+	
+	@Keyword(description = "Determines what happens after a shape is drawn, true=zoom to, false=do nothing")
+	private BooleanInput zoom;
+	
+	@Keyword(description = "Determines whether to print result set or not, true=print, false=do nothing")
+	private BooleanInput print;
+	
+	@Keyword(description = "Determines the print orientation, true=print vertical, false=print horizontal")
+	private BooleanInput printOrientation;
+	
+	@Keyword(description = "Determines the color of the primary objects")
+	private ColourInput primaryColor;
+	
+	@Keyword(description = "Determines the color of the secondary objects")
+	private ColourInput secondaryColor;
+	
+	@Keyword(description = "Determines the thickness of the lines used to draw objects")
+	private IntegerInput thickness;
+	
+	@Keyword(description = "Determines the opacity of the objects")
+	private ValueInput opacity;
 	
 	@Keyword(description = "The column name where latitude information is recoreded")
 	private StringInput latitudeColumn;
@@ -81,15 +117,46 @@ public class Query extends Entity {
 	{
 		targetDB = new StringInput("TargetDatabase","Query Properties", "InventoryDatabase");
 		this.addInput(targetDB);
+		
 		table = new StringInput("TargetTable", "Query Properties", "");
 		this.addInput(table);
-		areaTable = new StringInput("AreaTable", "Query Properties", "");
-		this.addInput(areaTable);
+		
+		ArrayList<String> input=new ArrayList<String>();
+		row = new StringListInput("TargetRow", "Query Properties", input);
+		this.addInput(row);
+		
 		statement = new StringInput("Statement", "Query Properties", "");
 		this.addInput(statement);
 		
-		shapefileColumn = new StringInput("NameColumn", "Query Properties", "");
-		this.addInput(shapefileColumn);
+		mode = new IntegerInput("Mode", "Query Properties", 0);
+		this.addInput(mode);
+		
+		radius = new IntegerInput("Radius", "Query Properties", 25);
+		this.addInput(radius);
+		
+		draw = new BooleanInput("Draw", "Display Properties", true);
+		this.addInput(draw);
+		
+		zoom = new BooleanInput("Zoom", "Display Properties", true);
+		this.addInput(zoom);
+		
+		primaryColor = new ColourInput("PrimaryColor", "Display Properties", ColourInput.BLUE);
+		this.addInput(primaryColor);
+		
+		secondaryColor = new ColourInput("SecondaryColor", "Display Properties", ColourInput.RED);
+		this.addInput(secondaryColor);
+		
+		thickness = new IntegerInput("Thickness", "Display Properties", 3);
+		this.addInput(thickness);
+		
+		opacity = new ValueInput("Opacity", "Display Properties", 0.03);
+		this.addInput(opacity);
+		
+		print = new BooleanInput("Print results", "Display Properties", true);
+		this.addInput(print);
+		
+		printOrientation = new BooleanInput("Print orientation", "Display Properties", true);
+		this.addInput(printOrientation);
 		
 		latitudeColumn = new StringInput("LatitudeColumn", "Query Properties", "latitude");
 		this.addInput(latitudeColumn);
@@ -97,14 +164,20 @@ public class Query extends Entity {
 		longitudeColumn = new StringInput("LongitudeColumn", "Query Properties", "longitude");
 		this.addInput(longitudeColumn);
 	}
+	
 	private Database database=Database.getDatabase(targetDB.getValue());
-	
-	
-    @Override
+    
+	@Override
 	public void updateForInput(Input<?> in) {
 		super.updateForInput(in);
 		if(in==targetDB){
 			database=Database.getDatabase(targetDB.getValue());
+		}
+		if(in==radius){
+			QueryFrame.setSliderValue(radius.getValue());
+		}
+		if(in==mode){
+			QueryFrame.setMode(mode.getValue());
 		}
 	}
 
@@ -127,9 +200,11 @@ public class Query extends Entity {
 		}
 	}
 
+
 	//change the default statement in this object
 	public void setStatement(String statements){
 		InputAgent_Rolos.processEntity_Keyword_Value(this, statement, statements);
+
 		return;
 	}
 
@@ -138,11 +213,53 @@ public class Query extends Entity {
 		return;
 	}
 
-	public ResultSet execute(Boolean draw, Boolean zoom, DefinedShapeAttributes attributes){
-		if (draw==true){
-			File file = database.getLayermanager().sql2shp("Statement", statement.getValue());
+	public String execute(){
+		String targetStatement = statement.getValue();
+		String targetTable = table.getValue();
+		ArrayList<String> targetRow = row.getValue();
+		String executeStatement = "";
+		String executeName = "";
+		if (targetTable.isEmpty() && targetRow.size()!=0){
+			System.out.println("TargetRow only works when TargetTable is set");
+			return null;
+		}
+		else if ((!targetStatement.isEmpty() && !targetTable.isEmpty()) || (targetStatement.isEmpty() && targetTable.isEmpty())){
+			System.out.println("Statement and TargetTable are mutually exclusive but are (or not) set, please use one only");
+			return null;
+		} 
+		else if (!targetTable.isEmpty() && targetRow.size()!=0 && targetRow.size()<2){
+			System.out.println("TargetRow must contain 2 or more inputs (first always being the column name, with following being accepted rows).");
+			return null;	
+		}
+		if (!targetStatement.isEmpty()){
+			executeStatement= targetStatement;
+			executeName= targetStatement;
+		}
+		else if (!targetTable.isEmpty()){
+			if (targetRow.size()!=0){
+				Iterator<String> iterator = targetRow.iterator();
+				String collumn = iterator.next();
+				String value = iterator.next();
+				executeStatement= "SELECT * FROM " + targetTable + " WHERE " + collumn + "=" + value;
+				executeName=targetTable + "_" + collumn + "_" + value;
+				while (iterator.hasNext()){
+					value = iterator.next();
+					executeStatement+= " OR " + collumn + "=" + value;
+					executeName+= value;
+				}
+			}
+			else{
+				executeStatement= "SELECT * FROM " + targetTable;
+				executeName= targetTable;
+			}
+		}
+		//System.out.println("TargetTable= "+ targetTable + System.lineSeparator() + "Draw= " + getDraw() + System.lineSeparator()+ "Zoom= "+zoom+ System.lineSeparator() +executeStatement);
+		executeName=executeName.replaceAll("[^a-zA-Z0-9\\.\\-]", "_");
+		if (getDraw()==true && WorldWindFrame.AppFrame != null){
+			//System.out.println(executeStatement);
+			File file = database.getLayermanager().sql2shp(executeName, executeStatement);
 			if (file!=null){
-				Thread thread=new WorldWindFrame.WorkerThread(file, WorldWindFrame.AppFrame, zoom, attributes);
+				Thread thread=new WorldWindFrame.WorkerThread(file, WorldWindFrame.AppFrame, getZoom(), getSecondaryColor());
 				thread.start();
 				try {
 					thread.join();
@@ -152,22 +269,93 @@ public class Query extends Entity {
 				}
 			}
 		}
-		return getResultSet(statement.getValue());
+		if (getPrint()==true){
+			printResultContent(executeName, getResultSet(executeStatement), getPrintOrientation());
+		}
+		return executeName;
 	}
-		
-	public ResultSet execute(String layerName, ArrayList<? extends ROLOSEntity> drawableEntities, Boolean draw, Boolean zoom, DefinedShapeAttributes attributes){
+
+	public String execute(String latitude, String longitude){
+		String targetTable=table.getValue();
+		Integer modes=mode.getValue();
+		Integer radiuses=null;
+		String executeStatement = "";
+		String executeName = table.getValue()+"("+latitude+","+longitude+")mode" + mode;
+		String geomColumn="";
+		Renderable currentShape=null;
+		if(modes==0){
+			return null;
+		}
+		if (targetTable.isEmpty()){
+			System.out.println("Table must be specified for selection mode to work");
+			return null;
+		}
+		//closest point
+		if(modes==1){
+			geomColumn=findGeomColumn();
+			executeStatement="SELECT * FROM "+ targetTable + " ORDER BY "+ targetTable +"."+geomColumn+" <->  ST_GeomFromText('POINT("+longitude+" "+latitude+")', st_srid("+geomColumn+")) LIMIT 1";
+		}
+		//radius search
+		else if(modes==2){	
+			geomColumn=findGeomColumn();
+			radiuses = radius.getValue();
+			executeStatement="SELECT DISTINCT * FROM " + targetTable + " WHERE st_distance(ST_Transform("+targetTable+"."+geomColumn+",26986), ST_Transform(ST_GeomFromText('POINT("+longitude+" "+latitude+")', st_srid("+geomColumn+")),26986))<"+radiuses*1000;	
+		}
+		//System.out.println("TargetTable= "+ targetTable + System.lineSeparator() + "Draw= " + getDraw() + System.lineSeparator()+ "Zoom= "+zoom+ System.lineSeparator() +executeStatement);
+		if (getDraw()==true && WorldWindFrame.AppFrame != null){
+			File file=null;
+			file = database.getLayermanager().sql2shp(executeName, executeStatement);			
+			if (file!=null){
+				if(modes==2){
+					LatLon position = new LatLon(Angle.fromDegrees(Double.parseDouble(latitude)), Angle.fromDegrees(Double.parseDouble(longitude)));
+					Object circle= new SurfaceCircle(position, radiuses*1000);
+					currentShape = (Renderable) circle;
+					SurfaceShape shape = (SurfaceShape) currentShape;
+					ShapeAttributes attr = new BasicShapeAttributes();
+					attr.setDrawOutline(false);
+					Color color = new Color((float)secondaryColor.getValue().r, (float)secondaryColor.getValue().g, (float)secondaryColor.getValue().b);
+					attr.setInteriorMaterial(new Material(color));
+					attr.setInteriorOpacity(0.2f);
+					attr.setDrawInterior(true);
+					shape.setAttributes(attr);
+					RenderableLayer layer = new RenderableLayer();
+					layer.setName(executeName+".shp");
+					layer.removeAllRenderables();
+					layer.addRenderable(currentShape);
+					layer.setPickEnabled(false);
+					WorldWindFrame.AppFrame.addShapefileLayer(layer);
+					WorldWindFrame.AppFrame.getWwjPanel().getWwd().redraw();
+				}
+				WorkerThread thread =new WorldWindFrame.WorkerThread(file, WorldWindFrame.AppFrame, getZoom(), getPrimaryColor());
+				thread.start();
+				try {
+					thread.join();	
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
+		if (getPrint()==true){
+			printResultContent(executeName, getResultSet(executeStatement), getPrintOrientation());
+		}
+		return executeName;
+	}
+	
+	public String execute(ArrayList<? extends ROLOSEntity> drawableEntities){
 		if (drawableEntities.size()==0){
 			return null;
 		}
-		String statements="SELECT * FROM " + table.getValue() + " WHERE " + shapefileColumn.getValue() +"= '" + drawableEntities.get(0).getName() +"'";
+		String executeStatement="SELECT * FROM " + table.getValue() + " WHERE " + row.getValue() +"= '" + drawableEntities.get(0).getName() +"'";
 		for(int x=1; x<drawableEntities.size(); x++){
-			statements+=" or " + shapefileColumn.getValue() +"= '" + drawableEntities.get(x).getName() + "'";
+			executeStatement+=" or " + row.getValue() +"= '" + drawableEntities.get(x).getName() + "'";
 		}
 		// System.out.println(statements);
-		if (draw==true && WorldWindFrame.AppFrame != null){
-			File file = database.getLayermanager().sql2shp(layerName, statements);
+		String executeName=executeStatement.replaceAll("[^a-zA-Z0-9\\.\\-]", "_");
+		if (getDraw()==true && WorldWindFrame.AppFrame != null){
+			File file = database.getLayermanager().sql2shp(executeName, executeStatement);
 			if (file!=null){
-				Thread thread=new WorldWindFrame.WorkerThread(file, WorldWindFrame.AppFrame, zoom, attributes);
+				Thread thread=new WorldWindFrame.WorkerThread(file, WorldWindFrame.AppFrame, getZoom(), getPrimaryColor());
 				thread.start();
 				try {
 					thread.join();
@@ -177,64 +365,12 @@ public class Query extends Entity {
 				}
 			}
 		}
-		return getResultSet(statements);
+		if (getPrint()==true){
+			printResultContent(executeName, getResultSet(executeStatement), getPrintOrientation());
+		}
+		return executeName;
 	}
 
-	public ResultSet execute(String name, String latitude, String longitude, Boolean draw, Boolean zoom, DefinedShapeAttributes attributes,int mode,int radius){
-		String statements="";
-		Renderable currentShape=null;
-		String geomColumn=findGeomColumn();
-		 /*
-		 *  RADIUS SEARCH
-		 */
-		if(mode==2){			 
-			 statements="SELECT DISTINCT * FROM " + areaTable.getValue() + " WHERE st_distance(ST_Transform("+areaTable.getValue()+"."+geomColumn+",26986), ST_Transform(ST_GeomFromText('POINT("+longitude+" "+latitude+")', st_srid("+geomColumn+")),26986))<"+radius*1000;	
-			 System.out.println(statements);
-		}
-		/*
-		 *  CLOSEST POINT
-		 */
-		else if(mode==3){
-			statements="SELECT * FROM "+ areaTable.getValue() + " ORDER BY "+ areaTable.getValue() +"."+geomColumn+" <->  ST_GeomFromText('POINT("+longitude+" "+latitude+")', st_srid("+geomColumn+")) LIMIT 1";
-			
-			}
-		
-		if (draw==true){
-			File file=null;
-			file = database.getLayermanager().sql2shp(name, statements);			
-			if (file!=null){
-				if(mode==2)
-					 drawCircleOnWorldWind(name,latitude,longitude,currentShape,radius);
-				WorkerThread thread =new WorldWindFrame.WorkerThread(file, WorldWindFrame.AppFrame, zoom, attributes);
-				thread.start();
-				try {
-					thread.join();
-					
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
-		}
-		return getResultSet(statements);
-	}
-
-	public void executeArea(Boolean zoom, DefinedShapeAttributes attributes){
-		String statements="SELECT * FROM " + areaTable;
-		//System.out.println(statements);
-		File file = database.getLayermanager().sql2shp(areaTable.getValue(), statements);
-		if (file!=null){
-			Thread thread=new WorldWindFrame.WorkerThread(file, WorldWindFrame.AppFrame, zoom, attributes);
-			thread.start();
-			try {
-				thread.join();
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-	}
-	
 	/**
 	 * updates position based on lat longs passed on in the shapefile database. Will draw the entity if its WVShow is set to true.
 	 * @param entitiesList list of entities to update
@@ -244,20 +380,18 @@ public class Query extends Entity {
 		if (entitiesList.size()==0){
 			return null;
 		}
-		
-		String statements="SELECT " + shapefileColumn.getValue()+ ", "+ latitudeColumn.getValue() + ", " + longitudeColumn.getValue() +" FROM " + 
-				table.getValue() + " WHERE " + shapefileColumn.getValue() +"= '" + entitiesList.get(0).getName() +"'";
+		String statements="SELECT " + row.getValue()+ ", "+ latitudeColumn.getValue() + ", " + longitudeColumn.getValue() +" FROM " + 
+				table.getValue() + " WHERE " + row.getValue() +"= '" + entitiesList.get(0).getName() +"'";
 		for(int x=1; x<entitiesList.size(); x++){
-			statements+=" or " + shapefileColumn.getValue() +"= '" + entitiesList.get(x).getName() + "'";
+			statements+=" or " + row.getValue() +"= '" + entitiesList.get(x).getName() + "'";
 		}
 		// System.out.println(statements);
 		ResultSet tempResultSet = this.getResultSet(statements);
-		
 		//map of entitieslist to pass on the entity
 		ArrayList<String> entitiesNames = new ArrayList<String>();
-		for(ROLOSEntity each: entitiesList)
+		for(ROLOSEntity each: entitiesList){
 			entitiesNames.add(each.getName());
-		
+		}
 		try {
 			if (tempResultSet!=null){
 				while(tempResultSet.next()){
@@ -292,45 +426,27 @@ public class Query extends Entity {
 		}
 		return null;
     }
-
-
-	private String getSRID(ResultSet resultset)
-	{	
-		String keyName="";
-		if(resultset !=null){
+	
+	private String findGeomColumn(){   
+		String targetTable = table.getValue(); 
+		String statements="SELECT column_name, data_type FROM information_schema.columns WHERE table_name ='"+targetTable+"'";
+		ResultSet resultset= getResultSet(statements);
 		try {
-			ResultSetMetaData metaData = resultset.getMetaData();
-			keyName = metaData.getColumnName(1);
+			if (resultset!=null){
+				 ResultSetMetaData metaData =resultset.getMetaData();
+				 while(resultset.next()){
+					for(int i=1;i<=metaData.getColumnCount();i++){	
+						//System.out.println(metaData.getColumnName(i)+" "+resultset.getObject(i));
+						if(resultset.getObject(i).toString().equals("USER-DEFINED")){
+							return resultset.getObject(i-1).toString();
+						}
+					}
+				 }	
+			}
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		}
-		return keyName;
-	}
-	private String findGeomColumn()
-	{   String statements="SELECT column_name, data_type FROM information_schema.columns WHERE table_name ='"+areaTable.getValue()+"'";
-		ResultSet resultset= getResultSet(statements);
-		String type="";
-		try {
-		if (resultset!=null){
-			 ResultSetMetaData metaData =resultset.getMetaData();
-			 while(resultset.next()){
-				for(int i=1;i<=metaData.getColumnCount();i++)
-				 {	
-					type= metaData.getColumnTypeName(i);
-					//System.out.println(metaData.getColumnName(i)+" "+resultset.getObject(i));
-					if(resultset.getObject(i).toString().equals("USER-DEFINED"))
-						return resultset.getObject(i-1).toString();
-				 }
-			 }
-			
-		}
-	
-	} catch (SQLException e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
-	}
 		return "";
 	}
 	
@@ -352,8 +468,7 @@ public class Query extends Entity {
 					//Makes key column
 					for (int key = 1; key <= keyCount; key++){
 						String keyName = metaData.getColumnName(key);
-					
-						Vector keyVector = new Vector<Object>();
+						Vector<Object> keyVector = new Vector<Object>();
 						keyVector.add(keyName);
 						data.add(keyVector);
 					}
@@ -364,11 +479,9 @@ public class Query extends Entity {
 							//finds respective rows and adds values to them
 							Object keyValue = resultset.getObject(key);
 							data.get(key-1).add(keyValue);
-					}
-					
+						}
 					}
 					displayResultContent(name, new JTable(new DefaultTableModel(data, columnName)));
-
 				}
 			} catch (SQLException e) {
 				System.out.println(e);
@@ -401,10 +514,8 @@ public class Query extends Entity {
 				System.out.println(e);
 				return;
 			}
-		}
-		
+		}	
 	}
-
 
 	public void displayResultContent(final String name, final JTable content){
 		 EventQueue.invokeLater(new Runnable() {
@@ -443,7 +554,6 @@ public class Query extends Entity {
 		Iterator<JFrame> iterator =  resultFrames.iterator();
 		while (iterator.hasNext()){
 			JFrame target = iterator.next();
-			WorldWindFrame.AppFrame.removeShapefileLayer(target.getTitle()+"circle.shp");
 			WorldWindFrame.AppFrame.removeShapefileLayer(target.getTitle()+".shp");
 			target.setVisible(false);
 			target.dispose();
@@ -456,7 +566,6 @@ public class Query extends Entity {
 		while (iterator.hasNext()){
 			JFrame target = iterator.next();
 			if (target.getName()==name){
-				WorldWindFrame.AppFrame.removeShapefileLayer(target.getTitle()+"circle.shp");
 				WorldWindFrame.AppFrame.removeShapefileLayer(target.getTitle()+".shp");
 				target.setVisible(false);
 				target.dispose();
@@ -465,28 +574,39 @@ public class Query extends Entity {
 		}
 		return false;
 	}
-	private void drawCircleOnWorldWind(String name,String latitude,String longitude,Renderable currentShape,int radius)
-	{
-		 LatLon position = new LatLon(Angle.fromDegrees(Double.parseDouble(latitude)), Angle.fromDegrees(Double.parseDouble(longitude)));
-		 Object circle= new SurfaceCircle(position, radius*1000);
-		 currentShape = (Renderable) circle;
-		 SurfaceShape shape = (SurfaceShape) currentShape;
-         ShapeAttributes attr = new BasicShapeAttributes();
-        
-         attr.setDrawOutline(false);
-         attr.setInteriorMaterial(new Material(Color.red));
-         attr.setInteriorOpacity(0.2f);
-         attr.setDrawInterior(true);
-         
-         shape.setAttributes(attr);
-         
-         RenderableLayer layer = new RenderableLayer();
-         layer.setName(name+".shp");
-         layer.removeAllRenderables();
-         layer.addRenderable(currentShape);
-         layer.setPickEnabled(false);
-         WorldWindFrame.AppFrame.addShapefileLayer(layer);
-         WorldWindFrame.AppFrame.getWwjPanel().getWwd().redraw();
+	
+	public DefinedShapeAttributes getPrimaryColor(){
+		return new DefinedShapeAttributes(primaryColor.getValue(), thickness.getValue(), opacity.getValue());
+	}
+	
+	public DefinedShapeAttributes getSecondaryColor(){
+		return new DefinedShapeAttributes(secondaryColor.getValue(), thickness.getValue(), opacity.getValue());
+	}
+	
+	public Boolean getDraw(){
+		return draw.getValue();
+	}
+	
+	public Boolean getZoom(){
+		return zoom.getValue();
+	}
+	
+	public Boolean getPrint(){
+		return print.getValue();
+	}
+	
+	public Boolean getPrintOrientation(){
+		return printOrientation.getValue();
+	}
+	
+
+	
+	public void setMode(int modes){
+		InputAgent.processEntity_Keyword_Value(this, mode, Integer.toString(modes));
+	}
+	
+	public void setRadius(int radiuses){
+		InputAgent.processEntity_Keyword_Value(this, radius, Integer.toString(radiuses));
 	}
 }
 

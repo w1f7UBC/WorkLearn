@@ -81,6 +81,7 @@
 /KeyedVec3dInput.class
 /Keyword.class
 /KeywordIndex.class
+<<<<<<< HEAD
 /ListInput.class
 /OneOrTwoKeyInput.class
 /Output.class
@@ -103,3 +104,10 @@
 /ValueListInput.class
 /Vec3dInput.class
 /Vec3dListInput.class
+=======
+/WorldWindCameraInput.class
+/WorldWindQueryInput.class
+/WorldWindWindowSize.class
+/WorldWindInitialCamera.class
+/WorldWindInitialCamera$WorldWindCameraInput.class
+>>>>>>> refs/remotes/origin/master

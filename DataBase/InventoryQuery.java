@@ -29,7 +29,27 @@ public  class InventoryQuery extends Query {
 	}
 	
 	@Override
-	public ResultSet execute(String name, String latitude, String longitude, Boolean draw, Boolean zoom, DefinedShapeAttributes attributes,int mode,int radius){
+	public String execute(){
+		String statements="SELECT * FROM " + this.areaTable;
+		File file = getLayerManager().sql2shp(this.areaTable.getValue(), statements);
+		if (getDraw()==true){
+			if (file!=null){
+				Thread thread=new WorldWindFrame.WorkerThread(file, WorldWindFrame.AppFrame, getZoom(), getSecondaryColor());
+				thread.start();
+				try {
+					thread.join();
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
+		return statements;
+	}
+	
+	@Override
+	public String execute(String latitude, String longitude){
+		String executeName = "fmu_1km "+"("+latitude+","+longitude+")";
 		//System.out.println(latitude + " " + longitude);
 		//for the shape generator/loader in LayerManager class to create the shape show on map
 		//for querying the actual data that is represented in the selected/generated area
@@ -41,16 +61,18 @@ public  class InventoryQuery extends Query {
 				+ " FROM ab_yc02, ab_03 WHERE primspec=stid2 AND giskey IN(SELECT CAST(gis_key AS CHAR(30)) FROM fmu_1km"
 				+ " WHERE st_contains(fmu_1km.geom, ST_GeomFromText('POINT("+longitude+" "+latitude+")', 4269))=true)"
 				+ " ORDER BY stid2, ABS(si2-si_1) ASC";
-		ResultSet resultset=getResultSet(statements);
-		if (draw==true){
+		if (getPrint()==true){
+			printResultContent(executeName, getResultSet(statements), getPrintOrientation());
+		}
+		if (getDraw()==true){
 			String toDraw = "\"SELECT geom FROM fmu_1km"
 					+ " WHERE gis_key=("
 					+ "SELECT gis_key"
 					+ " FROM fmu_1km"
 					+ " WHERE st_contains(fmu_1km.geom, ST_GeomFromText('POINT("+longitude+" "+latitude+")', 4269))=true);\"";
-			File file = getLayerManager().sql2shp(name, toDraw);
+			File file = getLayerManager().sql2shp(executeName, toDraw);
 			if (file!=null){
-				Thread thread=new WorldWindFrame.WorkerThread(file, WorldWindFrame.AppFrame, zoom, attributes);
+				Thread thread=new WorldWindFrame.WorkerThread(file, WorldWindFrame.AppFrame, getZoom(), getPrimaryColor());
 				thread.start();
 				try {
 					thread.join();
@@ -60,24 +82,7 @@ public  class InventoryQuery extends Query {
 				}
 			}
 		}
-		return resultset;
-	}
-
-	@Override
-
-	public void executeArea(Boolean zoom, DefinedShapeAttributes attributes){
-		String statements="SELECT * FROM " + this.areaTable;
-		File file = getLayerManager().sql2shp(this.areaTable.getValue(), statements);
-		if (file!=null){
-			Thread thread=new WorldWindFrame.WorkerThread(file, WorldWindFrame.AppFrame, zoom, attributes);
-			thread.start();
-			try {
-				thread.join();
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
+		return executeName;
 	}
 
 	@Override
