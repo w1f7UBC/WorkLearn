@@ -28,8 +28,6 @@ import com.jaamsim.math.Vec3d;
 
 import com.jaamsim.input.ValueListInput;
 
-
-
 import com.sandwell.JavaSimulation.Entity;
 
 import com.sandwell.JavaSimulation3D.GUIFrame;
@@ -37,13 +35,13 @@ import com.sandwell.JavaSimulation3D.GUIFrame;
 public class WorldView extends Entity {
 
 	@Keyword(description = "Sets location of camera for WorldWindFrame")
-	private WorldWindCameraInput camera;
+	private WorldWindInputCamera camera;
 	
 	@Keyword(description = "A Boolean indicating whether the WorldView should show a window")
 	private BooleanInput showWindow;
 	
 	@Keyword(description = "Shows query in the WorldWindFrame")
-	private WorldWindQueryInput query;
+	private WorldWindInputQuery query;
 	
 	@Keyword(description = "The size of the window in pixels (width, height).")
 	private final IntegerListInput windowSize;
@@ -56,7 +54,7 @@ public class WorldView extends Entity {
 	private ValueListInput initialCamera;
 	
 	{
-		camera = new WorldWindCameraInput("CameraLocation", "WorldWind");
+		camera = new WorldWindInputCamera("CameraLocation", "WorldWind");
 		this.addInput(camera);
 		DoubleVector vector = new DoubleVector();
 		vector.add(0.0);
@@ -64,7 +62,7 @@ public class WorldView extends Entity {
 		this.addInput(initialCamera);
 		showWindow = new BooleanInput("ShowWindow", "WorldWind", false);
 		this.addInput(showWindow);
-		query = new WorldWindQueryInput("QueryLocation", "WorldWind");
+		query = new WorldWindInputQuery("QueryLocation", "WorldWind");
 		this.addInput(query);
 		
 		IntegerVector defSize = new IntegerVector(2);

@@ -8,14 +8,15 @@ import java.sql.SQLException;
 import java.util.Vector;
 
 
+
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
+
 
 
 import com.jaamsim.input.StringInput;
 
 
-import worldwind.DefinedShapeAttributes;
 import worldwind.WorldWindFrame;
 
 public  class InventoryQuery extends Query {

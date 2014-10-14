@@ -55,6 +55,10 @@ ViscosityUnit       JavaClass { com.jaamsim.units.ViscosityUnit       } Palette 
 AreaUnit            JavaClass { com.jaamsim.units.AreaUnit            } Palette { Units } DragAndDrop { FALSE }
 DimensionlessUnit   JavaClass { com.jaamsim.units.DimensionlessUnit   } Palette { Units } DragAndDrop { FALSE }
 RateUnit            JavaClass { com.jaamsim.units.RateUnit            } Palette { Units } DragAndDrop { FALSE }
+<<<<<<< HEAD
+=======
+
+>>>>>>> refs/remotes/origin/master
 CostPerMassPerDistUnit     JavaClass { com.ROLOS.Units.CostPerMassPerDistUnit          } Palette { Units } DragAndDrop { FALSE }
 CostPerMassUnit             JavaClass { com.ROLOS.Units.CostPerMassUnit          } Palette { Units } DragAndDrop { FALSE }
 CostPerVolumePerDistUnit   JavaClass { com.ROLOS.Units.CostPerVolumePerDistUnit          } Palette { Units } DragAndDrop { FALSE }

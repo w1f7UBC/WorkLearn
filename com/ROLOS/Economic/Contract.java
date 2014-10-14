@@ -331,9 +331,11 @@ public class Contract extends ROLOSEntity {
 			if(routesList.get(0).getShapeFileQuery() != null){
 				String layerName = routesList.get(0).getName()+this.getName();
 				SimulationManager.getRemoveablebleWorldWindLayers().add(layerName+".shp");
+
 				//routesList.get(0).getShapeFileQuery().execute(layerName, routesList, true, false, 
 				//	new DefinedShapeAttributes(tempColor, tempWidth, this.getProduct().getOpacity()));
 			}
+
 		}
 
 	}
