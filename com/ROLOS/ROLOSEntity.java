@@ -165,7 +165,7 @@ public class ROLOSEntity extends DisplayEntity  {
 		//TODO delete old shapes/layers
 		if (in ==wvShow && wvShow.getValue()==true){
 			if (wvPositionInput !=null && this.getDisplayModelList()!=null){
-				System.out.println("got in here");
+				//System.out.println("got in here");
 				DisplayModel target = getDisplayModelList().get(0);
 				if (target.getClass().isAssignableFrom(ColladaModel.class)){
 					System.out.println("got in here1");
@@ -175,7 +175,7 @@ public class ROLOSEntity extends DisplayEntity  {
 					thread.start();
 				}
 				else if (target.getClass().isAssignableFrom(ImageModel.class)){
-					System.out.println("got in here2");
+					//System.out.println("got in here2");
 					ImageModel imageTarget = (ImageModel) target;
 					IconLayer layer = new IconLayer();
 		            layer.setPickEnabled(true);

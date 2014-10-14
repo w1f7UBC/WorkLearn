@@ -1,20 +1,25 @@
-package com.jaamsim.input;
+package worldwind;
 
 import java.util.ArrayList;
 
 import com.jaamsim.datatypes.DoubleVector;
+import com.jaamsim.input.Input;
+import com.jaamsim.input.InputAgent;
+import com.jaamsim.input.InputErrorException;
+import com.jaamsim.input.KeywordIndex;
 import com.jaamsim.math.Vec3d;
 import com.jaamsim.units.DimensionlessUnit;
 import com.jaamsim.units.TimeUnit;
 
 
-public class WorldWindCameraInput extends Input<Vec3d> {
+
+public class WorldWindInputCamera extends Input<Vec3d> {
 	
 	//private Vec3d location;
 	private DoubleVector location;
 	private double time;
 	
-	public WorldWindCameraInput(String key, String cat) {
+	public WorldWindInputCamera(String key, String cat) {
 		super(key, cat, null);
 	}
 	
