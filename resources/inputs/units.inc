@@ -55,15 +55,12 @@ ViscosityUnit       JavaClass { com.jaamsim.units.ViscosityUnit       } Palette 
 AreaUnit            JavaClass { com.jaamsim.units.AreaUnit            } Palette { Units } DragAndDrop { FALSE }
 DimensionlessUnit   JavaClass { com.jaamsim.units.DimensionlessUnit   } Palette { Units } DragAndDrop { FALSE }
 RateUnit            JavaClass { com.jaamsim.units.RateUnit            } Palette { Units } DragAndDrop { FALSE }
-<<<<<<< HEAD
-=======
 
->>>>>>> refs/remotes/origin/master
-CostPerMassPerDistUnit     JavaClass { com.ROLOS.Units.CostPerMassPerDistUnit          } Palette { Units } DragAndDrop { FALSE }
-CostPerMassUnit             JavaClass { com.ROLOS.Units.CostPerMassUnit          } Palette { Units } DragAndDrop { FALSE }
-CostPerVolumePerDistUnit   JavaClass { com.ROLOS.Units.CostPerVolumePerDistUnit          } Palette { Units } DragAndDrop { FALSE }
-CostPerVolumeUnit           JavaClass { com.ROLOS.Units.CostPerVolumeUnit          } Palette { Units } DragAndDrop { FALSE }
-CostPerEnergyUnit           JavaClass { com.ROLOS.Units.CostPerEnergyUnit          } Palette { Units } DragAndDrop { FALSE }
+CostPerMassPerDistUnit     JavaClass { com.AROMA.Units.CostPerMassPerDistUnit          } Palette { Units } DragAndDrop { FALSE }
+CostPerMassUnit             JavaClass { com.AROMA.Units.CostPerMassUnit          } Palette { Units } DragAndDrop { FALSE }
+CostPerVolumePerDistUnit   JavaClass { com.AROMA.Units.CostPerVolumePerDistUnit          } Palette { Units } DragAndDrop { FALSE }
+CostPerVolumeUnit           JavaClass { com.AROMA.Units.CostPerVolumeUnit          } Palette { Units } DragAndDrop { FALSE }
+CostPerEnergyUnit           JavaClass { com.AROMA.Units.CostPerEnergyUnit          } Palette { Units } DragAndDrop { FALSE }
 
 TimeUnit                Description { 'Unit of time. Default = seconds (s).' }
 DistanceUnit            Description { 'Unit of length. Default = meters (m).' }

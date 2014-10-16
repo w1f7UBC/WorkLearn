@@ -36,9 +36,9 @@ import worldwind.QueryFrame;
 import worldwind.WorldWindFrame;
 import worldwind.WorldWindFrame.WorkerThread;
 
-import com.ROLOS.ROLOSEntity;
-import com.ROLOS.Input.InputAgent_Rolos;
-import com.ROLOS.Utils.HandyUtils;
+import com.AROMA.AROMAEntity;
+import com.AROMA.Input.InputAgent_Rolos;
+import com.AROMA.Utils.HandyUtils;
 import com.jaamsim.input.BooleanInput;
 import com.jaamsim.input.ColourInput;
 import com.jaamsim.input.Input;
@@ -47,14 +47,11 @@ import com.jaamsim.input.InputErrorException;
 import com.jaamsim.input.IntegerInput;
 import com.jaamsim.input.Keyword;
 import com.jaamsim.input.StringListInput;
-
 import com.jaamsim.input.StringInput;
-
 import com.jaamsim.input.ValueInput;
 
 
 import com.sandwell.JavaSimulation.Entity;
-
 import com.sandwell.JavaSimulation3D.GUIFrame;
 
 
@@ -362,7 +359,7 @@ public class Query extends Entity {
 		return executeName;
 	}
 	
-	public String execute(ArrayList<? extends ROLOSEntity> drawableEntities){
+	public String execute(ArrayList<? extends AROMAEntity> drawableEntities){
 		if (drawableEntities.size()==0){
 			return null;
 		}
@@ -396,7 +393,7 @@ public class Query extends Entity {
 	 * @param entitiesList list of entities to update
 	 * @return 
 	 */
-	public ResultSet updatePosition(ArrayList<? extends ROLOSEntity> entitiesList){
+	public ResultSet updatePosition(ArrayList<? extends AROMAEntity> entitiesList){
 		if (entitiesList.size()==0){
 			return null;
 		}
@@ -409,13 +406,13 @@ public class Query extends Entity {
 		ResultSet tempResultSet = this.getResultSet(statements);
 		//map of entitieslist to pass on the entity
 		ArrayList<String> entitiesNames = new ArrayList<String>();
-		for(ROLOSEntity each: entitiesList){
+		for(AROMAEntity each: entitiesList){
 			entitiesNames.add(each.getName());
 		}
 		try {
 			if (tempResultSet!=null){
 				while(tempResultSet.next()){
-					ROLOSEntity tempEntity=null;
+					AROMAEntity tempEntity=null;
 					if(entitiesNames.contains(tempResultSet.getObject(1).toString())){
 						int index = entitiesNames.indexOf(tempResultSet.getObject(1).toString());
 						tempEntity = entitiesList.get(index);
