@@ -1,6 +1,8 @@
 
 package DataBase;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.File;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -9,12 +11,19 @@ import java.util.Vector;
 
 
 
+
+import javax.swing.JButton;
+import javax.swing.JFileChooser;
+import javax.swing.JMenuBar;
 import javax.swing.JTable;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
 
 
 
+
 import com.jaamsim.input.StringInput;
+
 
 
 import worldwind.WorldWindFrame;
@@ -137,7 +146,7 @@ public  class InventoryQuery extends Query {
 		    	}
 			    data.add(vector);
 		    }
-		    displayResultContent(name, new JTable(new DefaultTableModel(data, columnNames)));
+		    displayResultContent(name, new JTable(new DefaultTableModel(data, columnNames)), resultset);
 		}catch (SQLException e) {
 			e.printStackTrace();
 			return;

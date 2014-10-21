@@ -51,3 +51,8 @@
 /AROMAEntity$DescendingPriotityComparator.class
 /AROMAEntity$PriorityComparator.class
 /AROMAEntity.class
+/AROMAGraph.class
+/AROMAGraph$Binding.class
+/AROMAGraph$ProcessGraphTarget.class
+/AROMAGraphModel$Binding.class
+/AROMAGraphModel.class

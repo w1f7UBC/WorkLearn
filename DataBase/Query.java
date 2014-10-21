@@ -13,9 +13,15 @@ import gov.nasa.worldwind.render.SurfaceShape;
 import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.GraphicsEnvironment;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -25,7 +31,11 @@ import java.util.Iterator;
 import java.util.Locale;
 import java.util.Vector;
 
+import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JMenuBar;
+import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
@@ -46,7 +56,6 @@ import com.jaamsim.input.InputAgent;
 import com.jaamsim.input.InputErrorException;
 import com.jaamsim.input.IntegerInput;
 import com.jaamsim.input.Keyword;
-import com.jaamsim.input.StringListInput;
 import com.jaamsim.input.StringInput;
 import com.jaamsim.input.ValueInput;
 
@@ -468,7 +477,7 @@ public class Query extends Entity {
 	}
 	
 	public void printResultContent(String name, ResultSet resultset, boolean verticalOrientation){
-		//If vertical orientation
+				//If vertical orientation
 		if(verticalOrientation == true){
 			try{
 				if (resultset!=null){
@@ -498,7 +507,7 @@ public class Query extends Entity {
 							data.get(key-1).add(keyValue);
 						}
 					}
-					displayResultContent(name, new JTable(new DefaultTableModel(data, columnName)));
+					displayResultContent(name, new JTable(new DefaultTableModel(data, columnName)), resultset);
 				}
 			} catch (SQLException e) {
 				System.out.println(e);
@@ -525,7 +534,7 @@ public class Query extends Entity {
 				    	}
 				    	data.add(vector);
 				    }
-				    displayResultContent(name, new JTable(new DefaultTableModel(data, columnNames)));
+				    displayResultContent(name, new JTable(new DefaultTableModel(data, columnNames)), resultset);
 				}
 			} catch (SQLException e) {
 				System.out.println(e);
@@ -534,7 +543,7 @@ public class Query extends Entity {
 		}	
 	}
 
-	public void displayResultContent(final String name, final JTable content){
+	public void displayResultContent(final String name, final JTable content, final ResultSet resultSet){
 		 EventQueue.invokeLater(new Runnable() {
 			   @Override
 			   public void run() {
@@ -555,8 +564,78 @@ public class Query extends Entity {
 				   });
 				   dataBaseFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 				   resultFrames.add(dataBaseFrame);
+				   JMenuBar menuBar = new JMenuBar();
+					JButton save = new JButton( "Save" );
+					save.addActionListener( new ActionListener(){
+						@Override
+						public void actionPerformed(ActionEvent e) {
+							// TODO Auto-generated method stub
+							final JFileChooser chooser = new JFileChooser();
+						//	FileNameExtensionFilter filter = new FileNameExtensionFilter("CSV", ".CSV");
+							//chooser.setFileFilter(filter);
+							chooser.setSelectedFile(new File(name+".csv"));
+							int returnVal = chooser.showSaveDialog(dataBaseFrame);
+							if (returnVal == JFileChooser.APPROVE_OPTION) {
+								File file = chooser.getSelectedFile();
+								String filePath = file.getPath();
+								// Confirm overwrite if file already exists
+								File temp = new File(filePath);
+								if (temp.exists()) {
+									int userOption = JOptionPane.showConfirmDialog( null,
+											file.getName() + " already exists.\n" +
+											"Do you wish to replace it?", "Confirm Save As",
+											JOptionPane.YES_NO_OPTION,
+											JOptionPane.WARNING_MESSAGE );
+
+									if (userOption == JOptionPane.NO_OPTION) {
+										return;
+									}
+								}
+								resultSet2CSV(content, filePath);
+							}
+						}
+					});
+					menuBar.add(save);
+					dataBaseFrame.setJMenuBar(menuBar);
 			   }
 		});
+	}
+	
+	public void resultSet2CSV(JTable content, String location){
+		BufferedWriter writer;
+		try {
+			writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(location), "utf-8"));
+			int colCount = content.getColumnCount();
+			int rowCount = content.getRowCount();
+			System.out.println(colCount + " "+ rowCount);
+			StringBuffer reader = new StringBuffer();
+			for(int x=0;x<colCount;x++){
+				reader.append(content.getColumnName(x));
+				//System.out.print(content.getColumnName(x));
+				if (x!=colCount){
+					reader.append(", ");
+				}
+			}
+			//System.out.println("");
+			writer.write(reader.toString()+ "\r\n");
+			for(int y=0;y<rowCount;y++){
+				reader = new StringBuffer();
+				for(int x=0;x<colCount;x++){
+					reader.append(content.getValueAt(y,x));
+					//System.out.print(content.getValueAt(y,x));
+					if (x!=colCount){
+						reader.append(", ");
+					}
+				}
+				writer.write(reader.toString()+ "\r\n");
+				//System.out.println("");
+			}
+			 writer.flush();
+			 writer.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	public LayerManager getLayerManager(){
@@ -615,8 +694,6 @@ public class Query extends Entity {
 	public Boolean getPrintOrientation(){
 		return printOrientation.getValue();
 	}
-	
-
 	
 	public void setMode(int modes){
 		InputAgent.processEntity_Keyword_Value(this, mode, Integer.toString(modes));
