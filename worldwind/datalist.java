@@ -1,31 +1,54 @@
 package worldwind;
-import java.util.HashMap;
-import java.util.SortedMap;
+
+import java.util.Comparator;
+import java.util.Map.Entry;
 import java.util.TreeMap;
 
-
 public class datalist {
-	private HashMap<?, ?> objects;
+	private TreeMap<Double[], Object[] > structure;
 	
-	private class data{
-		private SortedMap<Double, Double> scores;
-		private Map<Object, Object> objects;
-	}
 	public datalist(){
-		scores=new TreeMap<Double, Double>();
-		objects=new HashMap<Object, Object>();
+		structure=new TreeMap<Double[], Object[]>(new scoreCompare());
 	}
 	
 	public void add(Object entity, Object movingEntity, Double gScore, Double fScore){
-		
+		Double[] scores = {gScore, fScore};
+		Object[] objects = {entity, movingEntity};
+		structure.put(scores, objects);
 	}
 	
 	public void remove(Object entity, Object movingEntity){
-		
+		Object[] objects = {entity, movingEntity};
+		if (structure.containsValue(objects)){
+			for (Entry<Double[], Object[]> target : structure.entrySet()){
+				if (target.getValue().equals(objects));
+					structure.remove(target);
+			}
+		}
 	}
 	
-	public Boolean contain(Object entity, Object movingEntity){
-		return true;
+	public Double[] getKey(Object entity, Object movingEntity){
+		Object[] objects = {entity, movingEntity};
+		if (structure.containsValue(objects)){
+			for (Entry<Double[], Object[]> target : structure.entrySet()){
+				if (target.getValue().equals(objects));
+					return target.getKey();
+			}
+		}
+		return null;
+	}
+	
+	public TreeMap<Double[], Object[]> getMap(){
+		return structure;
+	}
+}
+
+class scoreCompare implements Comparator<Double[]>{
+
+	@Override
+	public int compare(Double[] o1, Double[] o2) {
+		// TODO Auto-generated method stub
+		return 0;
 	}
 	
 }
