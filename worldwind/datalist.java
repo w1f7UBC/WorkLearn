@@ -64,6 +64,10 @@ public class datalist {
 		}
 	}
 	
+	public TreeMap<Double[], Object[]> getMap(){
+		return structure;
+	}
+	
 	public static void main(String args[]){
 		System.out.println("TEST");
 		datalist list= new datalist();
@@ -109,6 +113,8 @@ public class datalist {
 		
 		System.out.println("Get value for key 1, 1 (different object) " + list.getValue(aaa, aaa)[0] + list.getValue(aaa, aaa)[1]);
 		//System.out.println("Get value for key 1, 2 (different object) " + list.getValue(aaa, bbb)[0] + list.getValue(aaa, bbb)[1]);
+		
+		System.out.println("Print first key " + list.getMap().firstEntry().getKey()[0] + list.getMap().firstEntry().getKey()[1] + list.getMap().firstEntry().getValue()[0] + list.getMap().firstEntry().getValue()[1]);
 	}
 }
 
