@@ -507,7 +507,7 @@ public class Query extends Entity {
 							data.get(key-1).add(keyValue);
 						}
 					}
-					displayResultContent(name, new JTable(new DefaultTableModel(data, columnName)), resultset);
+					displayResultContent(name, new JTable(new DefaultTableModel(data, columnName)));
 				}
 			} catch (SQLException e) {
 				System.out.println(e);
@@ -534,7 +534,7 @@ public class Query extends Entity {
 				    	}
 				    	data.add(vector);
 				    }
-				    displayResultContent(name, new JTable(new DefaultTableModel(data, columnNames)), resultset);
+				    displayResultContent(name, new JTable(new DefaultTableModel(data, columnNames)));
 				}
 			} catch (SQLException e) {
 				System.out.println(e);
@@ -543,7 +543,7 @@ public class Query extends Entity {
 		}	
 	}
 
-	public void displayResultContent(final String name, final JTable content, final ResultSet resultSet){
+	public void displayResultContent(final String name, final JTable content){
 		 EventQueue.invokeLater(new Runnable() {
 			   @Override
 			   public void run() {
@@ -571,8 +571,6 @@ public class Query extends Entity {
 						public void actionPerformed(ActionEvent e) {
 							// TODO Auto-generated method stub
 							final JFileChooser chooser = new JFileChooser();
-						//	FileNameExtensionFilter filter = new FileNameExtensionFilter("CSV", ".CSV");
-							//chooser.setFileFilter(filter);
 							chooser.setSelectedFile(new File(name+".csv"));
 							int returnVal = chooser.showSaveDialog(dataBaseFrame);
 							if (returnVal == JFileChooser.APPROVE_OPTION) {
@@ -586,12 +584,11 @@ public class Query extends Entity {
 											"Do you wish to replace it?", "Confirm Save As",
 											JOptionPane.YES_NO_OPTION,
 											JOptionPane.WARNING_MESSAGE );
-
 									if (userOption == JOptionPane.NO_OPTION) {
 										return;
 									}
 								}
-								resultSet2CSV(content, filePath);
+								jTable2CSV(content, filePath);
 							}
 						}
 					});
@@ -601,13 +598,13 @@ public class Query extends Entity {
 		});
 	}
 	
-	public void resultSet2CSV(JTable content, String location){
+	public void jTable2CSV(JTable content, String location){
 		BufferedWriter writer;
 		try {
 			writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(location), "utf-8"));
 			int colCount = content.getColumnCount();
 			int rowCount = content.getRowCount();
-			System.out.println(colCount + " "+ rowCount);
+			//System.out.println(colCount + " "+ rowCount);
 			StringBuffer reader = new StringBuffer();
 			for(int x=0;x<colCount;x++){
 				reader.append(content.getColumnName(x));

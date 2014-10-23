@@ -146,7 +146,7 @@ public  class InventoryQuery extends Query {
 		    	}
 			    data.add(vector);
 		    }
-		    displayResultContent(name, new JTable(new DefaultTableModel(data, columnNames)), resultset);
+		    displayResultContent(name, new JTable(new DefaultTableModel(data, columnNames)));
 		}catch (SQLException e) {
 			e.printStackTrace();
 			return;
