@@ -1,3 +1,5 @@
+package com.AROMA.DisplayModel;
+
 /*
  * JaamSim Discrete Event Simulation
  * Copyright (C) 2013 Ausenco Engineering Canada Inc.
@@ -12,11 +14,12 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package com.jaamsim.DisplayModels;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import com.jaamsim.DisplayModels.DisplayModel;
+import com.jaamsim.DisplayModels.TextModel;
 import com.jaamsim.controllers.RenderManager;
 import com.jaamsim.datatypes.DoubleVector;
 import com.jaamsim.input.ColourInput;
@@ -41,7 +44,7 @@ import com.jaamsim.units.Unit;
 import com.sandwell.JavaSimulation.Entity;
 import com.sandwell.JavaSimulation3D.Graph;
 
-public class GraphModel extends DisplayModel {
+public class BarGraphModel extends DisplayModel {
 
 	@Keyword(description = "The text height for the graph title.",
 	         example = "Graph1 TitleTextHeight { 0.05 }")
@@ -282,6 +285,7 @@ public class GraphModel extends DisplayModel {
 			try {
 				graphObservee = (Graph)observee;
 				if (graphObservee != null) {
+
 					pickingID = graphObservee.getEntityNumber();
 				}
 			} catch (ClassCastException e) {
@@ -379,21 +383,21 @@ public class GraphModel extends DisplayModel {
 			// Draw the primary series
 			ArrayList<Graph.SeriesInfo> primarySeries = graphObservee.getPrimarySeries();
 			for (int i = 0; i < primarySeries.size(); ++i) {
-				drawSeries(primarySeries.get(i), yMin, yMax, simTime, out);
+				drawSeries(primarySeries.get(i), yMin, yMax, simTime, out,0.0);
 			}
 
 			// Draw the secondary series
 			ArrayList<Graph.SeriesInfo> secondarySeries = graphObservee.getSecondarySeries();
 			for (int i = 0; i < secondarySeries.size(); ++i) {
-				drawSeries(secondarySeries.get(i), secYMin, secYMax, simTime, out);
+				drawSeries(secondarySeries.get(i), secYMin, secYMax, simTime, out, 0.1);
 			}
 		}
 
-		private void drawSeries(Graph.SeriesInfo series, double yMinimum, double yMaximum, double simTime, ArrayList<RenderProxy> out) {
-
+		private void drawSeries(Graph.SeriesInfo series, double yMinimum, double yMaximum, double simTime, ArrayList<RenderProxy> out,double margin) {
+		
 			if (series.numPoints < 2)
 				return; // Nothing to display yet
-
+	
 			double yRange = yMaximum - yMinimum;  // yRange can be either the primary or secondary range
 
 			double[] yVals = new double[series.numPoints];
@@ -407,18 +411,48 @@ public class GraphModel extends DisplayModel {
 
 				yVals[i] = MathUtils.bound((series.yValues[i] - yMinimum) / yRange, 0, 1) - 0.5;
 			}
-
+			List<Vec4d> recHeadVerts=null;
 			ArrayList<Vec4d> seriesPoints = new ArrayList<Vec4d>((series.numPoints-1)*2);
 			for (int i = 0; i < series.numPoints - 1; i++) {
+
+				
 				seriesPoints.add(new Vec4d(xVals[i  ], yVals[i  ], zBump, 1.0d));
 				seriesPoints.add(new Vec4d(xVals[i+1], yVals[i+1], zBump, 1.0d));
+				
+				recHeadVerts=new ArrayList<Vec4d>(4);
+				double xPos = graphOrigin.x - yAxisTitleGap.getValue()*xScaleFactor - yAxisTitleHeight/2  +margin;
+				double originy = graphOrigin.y - xAxisTickSize - xAxisLabelGap.getValue() - labelHeight/2;
+
+				//Positive and negative bar values.
+				if(yVals[i] <0){
+					recHeadVerts.add(new Vec4d(xPos, 0.0, zBump, 1.0d));
+					recHeadVerts.add(new Vec4d(xPos, yVals[i], zBump, 1.0d));
+					recHeadVerts.add(new Vec4d(xPos+0.1, yVals[i], zBump, 1.0d));
+					recHeadVerts.add(new Vec4d(xPos+0.1, 0.0, zBump, 1.0d));
+				}
+				else
+				{
+					recHeadVerts.add(new Vec4d(xPos, 0.0, zBump, 1.0d));
+					recHeadVerts.add(new Vec4d(xPos+0.1, 0.0, zBump, 1.0d));
+					recHeadVerts.add(new Vec4d(xPos+0.1, yVals[i], zBump, 1.0d));
+					recHeadVerts.add(new Vec4d(xPos, yVals[i], zBump, 1.0d));
+				}
 			}
+			
+			
+			
 			// Transform from graph area to world space
 			for (int i = 0; i < seriesPoints.size(); ++i) {
 				seriesPoints.get(i).mult4(graphToWorldTrans, seriesPoints.get(i));
 				
 			}
-			out.add(new LineProxy(seriesPoints, series.lineColour, series.lineWidth, getVisibilityInfo(), pickingID));
+			for(int i=0;i<recHeadVerts.size();++i)
+			{
+				recHeadVerts.get(i).mult4(graphToWorldTrans, recHeadVerts.get(i));
+			}
+			out.add(new PolygonProxy(recHeadVerts,Transform.ident,DisplayModel.ONES,series.lineColour,false, series.lineWidth, getVisibilityInfo(), pickingID));
+			
+		//	out.add(new LineProxy(seriesPoints, series.lineColour, series.lineWidth, getVisibilityInfo(), pickingID));
 		}
 
 		private void drawGraphTitle(ArrayList<RenderProxy> out) {
