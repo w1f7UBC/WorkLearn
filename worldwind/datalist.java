@@ -78,7 +78,6 @@ public class datalist {
 		double e = 5;
 		
 		double aaa = 1;
-		double bbb = 2;
 		
 		String aa = "a";
 		String bb = "b";
@@ -91,10 +90,15 @@ public class datalist {
 		list.add(bb, bb, b, b);
 		list.add(ee, ee, e, e);
 		list.add(dd, dd, d, d);
-		
+		list.add(aa, aa, a, a);
+		list.add(aa, bb, a, c);
+		list.add(aa, bb, a, c);
+		list.add(aa, bb, a, b);
 		list.printMap();
 		System.out.println("Does list contain c, c " + list.contains(cc, cc));
 		System.out.println(" ");
+		
+		System.out.println("Removing c, c");
 		list.remove(cc, cc);
 		
 		list.printMap();
@@ -122,13 +126,25 @@ class scoreCompare implements Comparator<Double[]>{
 
 	@Override
 	public int compare(Double[] o1, Double[] o2) {
-		// TODO Auto-generated method stub
-		if (o1[0]<o2[0]){
+		int gComparison = Double.compare(o1[0], o2[0]);
+		//System.out.println("Compare value " + o1[0] + " " + o2[0] + " comparison is " + gComparison);
+		if (gComparison<0){
 			return -1;
 		}
-		else if(o1[0]>o2[0]){
+		else if (gComparison>0){
 			return 1;
 		}
-		return 0;
+		else {
+			int fComparison = Double.compare(o2[1], o2[1]);
+			if (fComparison<0){ 
+				return -1;
+			}
+			else if (fComparison>0){
+				return 1;
+			}
+			else {
+				return 0;
+			}
+		}
 	}	
 }
