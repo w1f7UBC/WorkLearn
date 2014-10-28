@@ -12,7 +12,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package com.sandwell.JavaSimulation3D;
+package com.AROMA;
 
 import java.util.ArrayList;
 
@@ -32,8 +32,9 @@ import com.jaamsim.math.Color4d;
 import com.jaamsim.ui.FrameBox;
 import com.jaamsim.units.Unit;
 import com.jaamsim.units.UserSpecifiedUnit;
+import com.sandwell.JavaSimulation3D.DisplayEntity;
 
-public abstract class GraphBasics extends DisplayEntity {
+public abstract class AROMAGraphBasics extends DisplayEntity {
 
 	/**
 	 * A struct containing all the information pertaining to a specific series
@@ -180,17 +181,14 @@ public abstract class GraphBasics extends DisplayEntity {
 
 		xAxisStart = new ValueInput("XAxisStart", "X-Axis", -60.0d);
 		xAxisStart.setUnitType(UserSpecifiedUnit.class);
-		xAxisStart.setValidRange(Double.NEGATIVE_INFINITY, 1.0e-6);
 		this.addInput(xAxisStart);
 
 		xAxisEnd = new ValueInput("XAxisEnd", "X-Axis", 0.0d);
 		xAxisEnd.setUnitType(UserSpecifiedUnit.class);
-		xAxisEnd.setValidRange(0.0, Double.POSITIVE_INFINITY);
 		this.addInput(xAxisEnd);
 
 		xAxisInterval = new ValueInput("XAxisInterval", "X-Axis", 10.0d);
 		xAxisInterval.setUnitType(UserSpecifiedUnit.class);
-		xAxisInterval.setValidRange(1.0e-6, Double.POSITIVE_INFINITY);
 		this.addInput(xAxisInterval);
 
 		xAxisLabelFormat = new FormatInput("XAxisLabelFormat", "X-Axis", "%.0fs");
@@ -273,7 +271,7 @@ public abstract class GraphBasics extends DisplayEntity {
 		this.addInput(secondaryYAxisLabelFormat);
 	}
 
-	public GraphBasics() {
+	public AROMAGraphBasics() {
 
 		primarySeries = new ArrayList<SeriesInfo>();
 		secondarySeries = new ArrayList<SeriesInfo>();
