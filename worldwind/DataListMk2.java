@@ -83,6 +83,16 @@ public class DataListMk2 {
 		return null;
 	}
 	
+	public Double[] getKey(Object entity, Object movingEntity){
+		Object[] object = {entity, movingEntity};
+		for (int x=0; x<objects.size(); x++){
+			if (Arrays.equals(objects.get(x), object)){
+				return scores.get(x);
+			}
+		}
+		return null;
+	}
+	
 	public Double[] getScoresIndex(int index){
 		return scores.get(index);
 	}
@@ -90,6 +100,11 @@ public class DataListMk2 {
 	public Object[] getObjectsIndex(int index){
 		return objects.get(index);
 	}
+	
+	public boolean isEmpty(){
+		return scores.isEmpty();
+	}
+	
 	
 	public void printMap(){
 		for (int x=0; x<scores.size(); x++){

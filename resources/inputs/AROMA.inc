@@ -69,5 +69,5 @@ EntitySink                  JavaClass { com.AROMA.Logistics.EntitySink          
 SankyInfo                  JavaClass { com.AROMA.Logistics.SankeyInfo                       } Palette { 'AROMA' } DragAndDrop 	{ FALSE 	}
 
 Define ReportAgent { Report }
-"Define SimulationManager { PlanningManager }
+Define SimulationManager { PlanningManager }
 Define RouteManager { TransportationManager }
