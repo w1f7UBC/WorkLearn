@@ -2,9 +2,12 @@ package com.AROMA.DMAgents;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.PriorityQueue;
 
+import javafx.util.Pair;
+import worldwind.datalist;
 import DataBase.Database;
 
 import com.AROMA.Logistics.BulkMaterial;
@@ -29,6 +32,7 @@ import com.sandwell.JavaSimulation3D.DisplayEntity;
 import com.jaamsim.input.BooleanInput;
 import com.jaamsim.input.EntityInput;
 import com.jaamsim.input.Keyword;
+import com.jaamsim.math.Vec3d;
 
 public class RouteManager extends DisplayEntity {
 	
@@ -71,6 +75,7 @@ public class RouteManager extends DisplayEntity {
 	private static HashMapList<String, Route> routesList;
 	// list of routes that won't allow movingEntity
 	private static HashMapList<MovingEntity, String> unResolvedRoutesList;
+
 	
 	public RouteManager() {
 		routesList = new HashMapList<String, Route>();
@@ -168,7 +173,8 @@ public class RouteManager extends DisplayEntity {
 		if (tempRoute != null)
 				return tempRoute;
 		else
-			return computeDijkstraPath(origin, destination, movingEntity, bulkMaterial, routingRule,transshipmentAllowed, weightCap, tabuList);
+			return computeAStarPath(origin, destination, movingEntity, bulkMaterial, routingRule,transshipmentAllowed, weightCap, tabuList);
+			//return computeDijkstraPath(origin, destination, movingEntity, bulkMaterial, routingRule,transshipmentAllowed, weightCap, tabuList);
 	}
 
 	// ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -332,6 +338,216 @@ public class RouteManager extends DisplayEntity {
 		return null;
 	}
 	
+	
+	public static <T extends DiscreteHandlingLinkedEntity> Route computeAStarPath(T origin, T destination, MovingEntity movingEntity, BulkMaterial bulkMaterial, Route_Type routingRule,
+			boolean transshipmentAllowed, double weightCap, ArrayList<T> tabuList) {
+		//System.out.println("In computeAStarPath");
+		datalist closedset = new datalist();
+		//ArrayList<Object[]> closedset = new ArrayList<Object[]>();
+		datalist openset = new datalist();
+		HashMap<Object[], Object[]> camefrom = new HashMap<Object[], Object[]>();
+		
+		Vec3d originPos = origin.getPosition();
+		Vec3d destinationPos = destination.getPosition();
+		double heuristicCost = computeHeuristic(originPos, destinationPos);
+		double gScoreStart = 0.0;
+		double fScoreStart = gScoreStart + heuristicCost;
+		System.out.println("Original entity and moving entity: " + origin + " and  " + movingEntity);
+		openset.add(origin, movingEntity, gScoreStart, fScoreStart);
+		
+		while(!openset.getMap().isEmpty()){
+			System.out.println("Opening new node in wavefront....");
+			Object[] current = openset.getMap().firstEntry().getValue();
+			
+			DiscreteHandlingLinkedEntity currentEntity = (DiscreteHandlingLinkedEntity) current[0];
+			MovingEntity currentME = (MovingEntity) current[1];
+			Double[] currentScores = openset.getMap().firstKey();
+			System.out.println("Current open entity is " + currentEntity + " and " + currentME);
+			
+			if (currentEntity == destination){
+				System.out.println(currentEntity + "is the destination");
+				Object[] reconstructedpath = reconstructAStarPath(origin, movingEntity, destination, currentME, camefrom);
+				return setAStarRoute(origin, destination, movingEntity, currentScores[1], reconstructedpath, routingRule);
+			} //is destination end
+			
+			
+			if (currentEntity instanceof Transshipment && !transshipmentAllowed){
+				System.out.println(current[0] + " is invalid as a transshipment");
+				openset.remove(currentEntity, currentME);
+				closedset.add(currentEntity, currentME, 0.0, 0.0);
+				continue;
+			} // is invalid end
+			
+			if (closedset.contains(currentEntity, currentME)){
+				System.out.println(current[0] + " is invalid because its in closed set");
+				openset.remove(currentEntity, currentME);
+				continue;
+			} // is invalid end
+			
+			
+			if ((currentEntity instanceof RouteSegment && ((RouteSegment) currentEntity).getTransportMode() == currentME.getTransportMode()) ||  
+					currentEntity instanceof Facility && !(currentEntity instanceof Transshipment)|| 
+					(currentEntity instanceof RouteEntity && ((RouteEntity) currentEntity).getTransportMode() == currentME.getTransportMode())) {
+				
+				
+				System.out.println(currentEntity + " is a routesegment");
+				openset.remove(currentEntity, currentME);
+				//closedset.add(currentEntity, currentME, 0.0, 0.0);
+				closedset.add(currentEntity, currentME, 0.0, 0.0);
+				System.out.println(currentEntity + " and " + currentME + " was removed from the wavefront and added to closedset");
+				//get all neighbor nodes of the route
+				for(LinkedEntity neighborEntity : currentEntity.getNextLinkedEntityList()){
+					//if neighbor is in closed set
+					System.out.println("Neighbor entity name: " + neighborEntity);
+					Object[] neighborObject = {neighborEntity, currentME};
+					//if (closedset.contains(neighborEntity, currentME)){
+
+					if(closedset.contains(neighborEntity, currentME)){
+						System.out.println(neighborEntity + " and " + currentME + " is already in closed set");
+					}
+					else{ // if it does not contain neighborObject
+					
+						Double weight = null;
+						Double tentativeGScore;
+						if(routingRule == Route_Type.FASTEST)
+							weight =  ((DiscreteHandlingLinkedEntity) neighborEntity).getTravelTime((MovingEntity) currentME);
+						else if (routingRule == Route_Type.SHORTEST)
+							weight = ((DiscreteHandlingLinkedEntity) neighborEntity).getLength();
+						// leastcost is calculated based on per unit of material transportationcost
+						else if (routingRule == Route_Type.LEASTCOST)
+							weight = ((DiscreteHandlingLinkedEntity) neighborEntity).getTravelTime((MovingEntity) currentME)*
+							movingEntity.getTransportationCost(bulkMaterial);
+					
+						tentativeGScore = currentScores[0] + weight;
+
+						//if the openset contains neighbor entity and moving entity already or if it contains one with a higher gscore then...
+						if(!(closedset.contains(neighborEntity, currentME)) && (!openset.contains(neighborEntity, currentME) || 
+								!(closedset.contains(neighborEntity, currentME)) && tentativeGScore < openset.getKey(neighborEntity, currentME)[0])){
+							camefrom.put(neighborObject, current);
+							double gscoreNeighbor = tentativeGScore;
+							double fscoreNeighbor = gscoreNeighbor + computeHeuristic(neighborEntity.getPosition(), destination.getPosition());
+
+							//add neighbor to openset if its not in there
+							if (!openset.contains(neighborEntity, currentME)){
+								System.out.println(neighborEntity + " and " + currentME+ " has been added to the wavefront through routes 1");
+								openset.add(neighborEntity, currentME, gscoreNeighbor, fscoreNeighbor);
+							}
+							else{
+								//replace openset neighborentity with better heuristic if it is already in there
+								System.out.println(neighborEntity + "and " + currentME + " has been replaced in the openset through routes 2");
+								openset.remove(neighborEntity, currentME);
+								openset.add(neighborEntity, currentME, gscoreNeighbor, fscoreNeighbor);
+							}
+						}
+					}
+				}
+				
+			} // route end
+			
+			if (currentEntity instanceof Transshipment){
+				System.out.println(currentEntity + " is transshipment");
+				openset.remove(currentEntity, currentME);
+				closedset.add(currentEntity, currentME, 0.0, 0.0);
+				System.out.println(currentEntity + " and " + currentME + " have been added to the wavefront through transshipment");
+				//LinkedEntity currentEntity = (LinkedEntity) current[0];
+				
+				//for neighbors 
+				for(LinkedEntity neighborEntity : currentEntity.getNextLinkedEntityList()){
+					for (MovingEntity currentMovingEntity: ((Facility)current[0]).getTransportationManager().getTransporters()){
+						Object[] neighborObject = {neighborEntity, currentMovingEntity};
+
+						if (currentMovingEntity.getAcceptingBulkMaterialList().contains(bulkMaterial)){
+							
+							if (closedset.contains(neighborEntity, currentMovingEntity)){
+								System.out.println(neighborEntity + " and " + currentMovingEntity + " is already in the closed set");
+								continue;
+							}
+							else{
+							Double weight = null;
+							Double tentativeGScore;
+							if(routingRule == Route_Type.FASTEST)
+								weight =  ((DiscreteHandlingLinkedEntity) neighborEntity).getTravelTime((MovingEntity) currentMovingEntity);
+							else if (routingRule == Route_Type.SHORTEST)
+								weight = ((DiscreteHandlingLinkedEntity) neighborEntity).getLength();
+							// leastcost is calculated based on per unit of material transportationcost
+							else if (routingRule == Route_Type.LEASTCOST)
+								weight = ((DiscreteHandlingLinkedEntity) neighborEntity).getTravelTime((MovingEntity) currentMovingEntity)*
+									movingEntity.getTransportationCost(bulkMaterial);
+							
+							tentativeGScore = currentScores[0] + weight;
+							
+							//if the openset contains neighbor entity and moving entity already or if it contains one with a higher gscore then...
+							if(!closedset.contains(neighborEntity, currentMovingEntity) && (!openset.contains(neighborEntity, currentME) || 
+									!closedset.contains(neighborEntity, currentMovingEntity) && tentativeGScore < openset.getKey(neighborEntity, currentME)[0])){
+								camefrom.put(neighborObject, current);
+								double gscoreNeighbor = tentativeGScore;
+								double fscoreNeighbor = gscoreNeighbor + computeHeuristic(neighborEntity.getPosition(), destination.getPosition());
+								//add neighbor to openset if its not in there
+								if (!openset.contains(neighborEntity, currentMovingEntity)){
+									openset.add(neighborEntity, currentMovingEntity, gscoreNeighbor, fscoreNeighbor);
+									System.out.println(neighborEntity + " and " + currentMovingEntity + " are being added to openset");
+								}
+								else{
+									//replace openset neighborentity with better heuristic if it is already in there
+									openset.remove(neighborEntity, currentMovingEntity);
+									openset.add(neighborEntity, currentMovingEntity, gscoreNeighbor, fscoreNeighbor);
+									System.out.println(neighborEntity + " and " + currentMovingEntity + " are being added to openset");
+								}
+							}
+							
+							
+						}
+						}
+					}
+					
+				}
+			}
+			
+			else{
+				System.out.println(currentEntity + "Must not have been allowed for some reason. Removed from front");
+				openset.remove(currentEntity, currentME);
+			}
+		
+		} // while openset empty end
+		return null;
+	}
+		
+		
+	public static <T extends DiscreteHandlingLinkedEntity> Object[] reconstructAStarPath(T origin, MovingEntity originMovingEntity, T destination, MovingEntity destinationMovingEntity, HashMap<Object[], Object[]> camefrom){
+		System.out.println("We are in reconstructAStarPath");
+		Object[] originObjectPair = {origin, originMovingEntity};
+		Object[] destinationObjectPair = {destination, destinationMovingEntity};
+		
+		ArrayList<DiscreteHandlingLinkedEntity> path = new ArrayList<>();
+		ArrayList<MovingEntity> movingEntitylist = new ArrayList<>();
+		
+		Object[] currentEntity = destinationObjectPair;
+		System.out.println("currentEntity is : " + currentEntity[0] +" and "+ currentEntity[1]);
+		
+		while (camefrom.containsKey(currentEntity)){
+			System.out.println("we are in hashmap : " + camefrom.get(currentEntity));
+			System.out.println("we are in: " + currentEntity[0] + currentEntity[1]);
+			path.add((DiscreteHandlingLinkedEntity) currentEntity[0]);
+			if(!movingEntitylist.contains(currentEntity[1])){
+				movingEntitylist.add((MovingEntity) currentEntity[1]);
+			}
+			currentEntity = camefrom.get(currentEntity);
+		}
+		
+		path.add(origin);
+		if(!movingEntitylist.contains(originMovingEntity))
+			movingEntitylist.add(originMovingEntity);
+		
+		Object[] endSets = {path, movingEntitylist};
+		return endSets;
+	}
+	
+	public static double computeHeuristic(Vec3d from, Vec3d to){
+		
+		double distance = Math.pow(from.x-to.x,2)+Math.pow(from.y-to.y,2)+Math.pow(from.z-to.z,2);
+		return Math.sqrt(distance);
+	}
+	
 	public static <T extends DiscreteHandlingLinkedEntity> String getRouteName(T origin,
 			T destination, MovingEntity movingEntity){
 		return origin.getName() + "-" + destination.getName() + "-" + movingEntity.getName();
@@ -366,6 +582,17 @@ public class RouteManager extends DisplayEntity {
 		return returnRoute;
 	}
 	
+
+	
+//	private static <T extends DiscreteHandlingLinkedEntity> Route setAStarRoute(T origin,
+//			T destination, MovingEntity movingEntityOrigin, MovingEntity movingEntityDestination, Route_Type routingRule) {
+//		LinkedList<DiscreteHandlingLinkedEntity> reversePath = new LinkedList<>();
+//		ArrayList<DiscreteHandlingLinkedEntity> path = new ArrayList<>();
+//		
+//		
+//		return tempRoute;
+//	}
+//	
 	private static <T extends DiscreteHandlingLinkedEntity> Route setRoute(T origin,
 			T destination, MovingEntity movingEntity, DijkstraComparator dijkstraComparator, Route_Type routingRule) {
 
@@ -397,6 +624,16 @@ public class RouteManager extends DisplayEntity {
 		
 		return tempRoute;
 
+	}
+	
+	private static <T extends DiscreteHandlingLinkedEntity> Route setAStarRoute(T origin, T destination, MovingEntity movingEntity, Double weight, Object[] routeData, Route_Type routingRule){
+		Route tempRoute = new Route(origin, destination, weight, movingEntity, routingRule);
+		
+		String tempKey = getRouteName(origin, destination, movingEntity);tempRoute.setRoute((ArrayList<? extends DiscreteHandlingLinkedEntity>) routeData[1]);
+		routesList.add(tempKey, tempRoute);
+		RouteManager.printRouteReport(origin, destination, tempRoute, null);
+		
+		return tempRoute;
 	}
 	
 	/**
@@ -463,3 +700,4 @@ public class RouteManager extends DisplayEntity {
 	}
 
 }
+
