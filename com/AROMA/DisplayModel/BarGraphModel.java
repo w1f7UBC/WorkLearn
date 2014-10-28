@@ -1,3 +1,5 @@
+package com.AROMA.DisplayModel;
+
 /*
  * JaamSim Discrete Event Simulation
  * Copyright (C) 2013 Ausenco Engineering Canada Inc.
@@ -12,11 +14,12 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package com.jaamsim.DisplayModels;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import com.jaamsim.DisplayModels.DisplayModel;
+import com.jaamsim.DisplayModels.TextModel;
 import com.jaamsim.controllers.RenderManager;
 import com.jaamsim.datatypes.DoubleVector;
 import com.jaamsim.input.ColourInput;
@@ -41,99 +44,99 @@ import com.jaamsim.units.Unit;
 import com.sandwell.JavaSimulation.Entity;
 import com.sandwell.JavaSimulation3D.Graph;
 
-public class GraphModel extends DisplayModel {
+public class BarGraphModel extends DisplayModel {
 
 	@Keyword(description = "The text height for the graph title.",
-	         example = "Graph1 TitleTextHeight { 0.05 }")
+			example = "Graph1 TitleTextHeight { 0.05 }")
 	private final ValueInput titleTextHeight;
 
 	@Keyword(description = "The text height for the x-axis title.\n" +
 			"Expressed as a fraction of the total graph height.",
-	         example = "Graph1 XAxisTitleTextHeight { 0.05 }")
+			example = "Graph1 XAxisTitleTextHeight { 0.05 }")
 	private final ValueInput xAxisTitleTextHeight;
 
 	@Keyword(description = "The text height for the y-axis title.\n" +
 			"Expressed as a fraction of the total graph height.",
-	         example = "Graph1 YAxisTitleTextHeight { 0.05 }")
+			example = "Graph1 YAxisTitleTextHeight { 0.05 }")
 	private final ValueInput yAxisTitleTextHeight;
 
 	@Keyword(description = "The text height for both x- and y-axis labels.\n" +
 			"Expressed as a fraction of the total graph height.",
-	         example = "Graph1 LabelTextHeight { 0.025 }")
+			example = "Graph1 LabelTextHeight { 0.025 }")
 	private final ValueInput labelTextHeight;
 
 	@Keyword(description = "The gap between the title and top of the graph.\n" +
 			"Expressed as a fraction of the total graph height.",
-	         example = "Graph1 TitleGap { 0.025 }")
+			example = "Graph1 TitleGap { 0.025 }")
 	private final ValueInput titleGap;
 
 	@Keyword(description = "The gap between the x-axis labels and the x-axis.\n" +
 			"Expressed as a fraction of the total graph height.",
-	         example = "Graph1 XAxisLabelGap { 0.025 }")
+			example = "Graph1 XAxisLabelGap { 0.025 }")
 	private final ValueInput xAxisLabelGap;
 
 	@Keyword(description = "The gap between the x-axis title and the x-axis labels.\n" +
 			"Expressed as a fraction of the total graph height.",
-	         example = "Graph1 xAxisTitleGap { 0.025 }")
+			example = "Graph1 xAxisTitleGap { 0.025 }")
 	private final ValueInput xAxisTitleGap;
 
 	@Keyword(description = "The gap between the y-axis and its labels.\n" +
 			"Expressed as a fraction of the total graph height.",
-	         example = "Graph1 YAxisLabelGap { 0.025 }")
+			example = "Graph1 YAxisLabelGap { 0.025 }")
 	private final ValueInput yAxisLabelGap;
 
 	@Keyword(description = "The gap between the y-axis title and the y-axis labels.\n" +
 			"Expressed as a fraction of the total graph height.",
-	         example = "Graph1 yAxisTitleGap { 0.025 }")
+			example = "Graph1 yAxisTitleGap { 0.025 }")
 	private final ValueInput yAxisTitleGap;
 
 	@Keyword(description = "The margin between the top of the graph and the top of the graph object.\n" +
 			"Expressed as a fraction of the total graph height." +
-	                "side of the graph.",
-	         example = "Graph1 TopMargin { 0.10 }")
+			"side of the graph.",
+			example = "Graph1 TopMargin { 0.10 }")
 	private final ValueInput topMargin;
 
 	@Keyword(description = "The margin between the bottom of the graph and the bottom of the graph object.\n" +
-	                "Expressed as a fraction of the total graph height.",
-             example = "Graph1 BottomMargin { 0.10 }")
+			"Expressed as a fraction of the total graph height.",
+			example = "Graph1 BottomMargin { 0.10 }")
 	private final ValueInput bottomMargin;
 
 	@Keyword(description = "The margin between the left side of the graph and the left side of the graph object.\n" +
-	                "Expressed as a fraction of the total graph height.",
-	         example = "Graph1 LeftMargin { 0.20 }")
+			"Expressed as a fraction of the total graph height.",
+			example = "Graph1 LeftMargin { 0.20 }")
 	private final ValueInput leftMargin;
 
 	@Keyword(description = "The margin between the right side of the graph and the right side of the graph object.\n" +
-	                "Expressed as a fraction of the total graph height.",
-	         example = "Graph1 RightMargin { 0.20 }")
+			"Expressed as a fraction of the total graph height.",
+			example = "Graph1 RightMargin { 0.20 }")
 	private final ValueInput rightMargin;
 
 	@Keyword(description = "The text model to be used for the graph title.\n" +
 			"Determines the font, color, and style (bold, italics) for the text.",
-	         example = "Graph1 TitleTextModel { TextModelDefault }")
+			example = "Graph1 TitleTextModel { TextModelDefault }")
 	protected final EntityInput<TextModel> titleTextModel;
 
 	@Keyword(description = "The text model to be used for the axis titles (x-axis, y-axis, and secondary y-axis).\n" +
 			"Determines the font, color, and style (bold, italics) for the text.",
-	         example = "Graph1 AxisTitleTextModel { TextModelDefault }")
+			example = "Graph1 AxisTitleTextModel { TextModelDefault }")
 	protected final EntityInput<TextModel> axisTitleTextModel;
 
 	@Keyword(description = "The text model to be used for the numbers next to the tick marks on each axis" +
 			" (x-axis, y-axis, and secondary y-axis).\n" +
 			"Determines the font, color, and style (bold, italics) for the text.",
-	         example = "Graph1 LabelTextModel { TextModelDefault }")
+			example = "Graph1 LabelTextModel { TextModelDefault }")
 	protected final EntityInput<TextModel> labelTextModel;
 
 	@Keyword(description = "The color of the graph background, defined by a color keyword or an RGB value.",
-	         example = "Graph1 GraphColor { floralwhite }")
+			example = "Graph1 GraphColor { floralwhite }")
 	private final ColourInput graphColor;
 
 	@Keyword(description = "The color for the outer pane background, defined using a color keyword or an RGB value.",
-	         example = "Graph1 BackgroundColor { floralwhite }")
+			example = "Graph1 BackgroundColor { floralwhite }")
 	private final ColourInput backgroundColor;
 
 	@Keyword(description = "The color of the graph border, defined using a color keyword or an RGB value.",
-	         example = "Graph1 BorderColor { red }")
+			example = "Graph1 BorderColor { red }")
 	private final ColourInput borderColor;
 
 	{
@@ -282,6 +285,7 @@ public class GraphModel extends DisplayModel {
 			try {
 				graphObservee = (Graph)observee;
 				if (graphObservee != null) {
+
 					pickingID = graphObservee.getEntityNumber();
 				}
 			} catch (ClassCastException e) {
@@ -379,18 +383,17 @@ public class GraphModel extends DisplayModel {
 			// Draw the primary series
 			ArrayList<Graph.SeriesInfo> primarySeries = graphObservee.getPrimarySeries();
 			for (int i = 0; i < primarySeries.size(); ++i) {
-				drawSeries(primarySeries.get(i), yMin, yMax, simTime, out);
+				drawSeries(primarySeries.get(i), yMin, yMax, simTime, out,0.0,"PrimarySeries");
 			}
 
 			// Draw the secondary series
 			ArrayList<Graph.SeriesInfo> secondarySeries = graphObservee.getSecondarySeries();
 			for (int i = 0; i < secondarySeries.size(); ++i) {
-				drawSeries(secondarySeries.get(i), secYMin, secYMax, simTime, out);
+				drawSeries(secondarySeries.get(i), secYMin, secYMax, simTime, out, 0.15,"SecondarySeries");
 			}
 		}
 
-		private void drawSeries(Graph.SeriesInfo series, double yMinimum, double yMaximum, double simTime, ArrayList<RenderProxy> out) {
-
+		private void drawSeries(Graph.SeriesInfo series, double yMinimum, double yMaximum, double simTime, ArrayList<RenderProxy> out,double margin,String text) {
 			if (series.numPoints < 2)
 				return; // Nothing to display yet
 
@@ -407,20 +410,60 @@ public class GraphModel extends DisplayModel {
 
 				yVals[i] = MathUtils.bound((series.yValues[i] - yMinimum) / yRange, 0, 1) - 0.5;
 			}
-
+			List<Vec4d> recHeadVerts=null;
 			ArrayList<Vec4d> seriesPoints = new ArrayList<Vec4d>((series.numPoints-1)*2);
 			for (int i = 0; i < series.numPoints - 1; i++) {
+
 				seriesPoints.add(new Vec4d(xVals[i  ], yVals[i  ], zBump, 1.0d));
 				seriesPoints.add(new Vec4d(xVals[i+1], yVals[i+1], zBump, 1.0d));
+
+				recHeadVerts=new ArrayList<Vec4d>(4);
+				double xPos =  graphOrigin.x - yAxisTitleGap.getValue()*xScaleFactor - yAxisTitleHeight/2  +margin;
+				createBarLabels(out,xPos,text);
+				//Positive and negative bar values.
+				if(yVals[i] <0){
+					recHeadVerts.add(new Vec4d(xPos, 0.0, zBump, 1.0d));
+					recHeadVerts.add(new Vec4d(xPos, yVals[i], zBump, 1.0d));
+					recHeadVerts.add(new Vec4d(xPos+0.1, yVals[i], zBump, 1.0d));
+					recHeadVerts.add(new Vec4d(xPos+0.1, 0.0, zBump, 1.0d));
+				}
+				else
+				{
+					recHeadVerts.add(new Vec4d(xPos, 0.0, zBump, 1.0d));
+					recHeadVerts.add(new Vec4d(xPos+0.1, 0.0, zBump, 1.0d));
+					recHeadVerts.add(new Vec4d(xPos+0.1, yVals[i], zBump, 1.0d));
+					recHeadVerts.add(new Vec4d(xPos, yVals[i], zBump, 1.0d));
+				}
 			}
+
 			// Transform from graph area to world space
 			for (int i = 0; i < seriesPoints.size(); ++i) {
 				seriesPoints.get(i).mult4(graphToWorldTrans, seriesPoints.get(i));
-				
-			}
-			out.add(new LineProxy(seriesPoints, series.lineColour, series.lineWidth, getVisibilityInfo(), pickingID));
-		}
 
+			}
+			for(int i=0;i<recHeadVerts.size();++i)
+			{
+				recHeadVerts.get(i).mult4(graphToWorldTrans, recHeadVerts.get(i));
+			}
+			
+			out.add(new PolygonProxy(recHeadVerts,Transform.ident,DisplayModel.ONES,series.lineColour,false, series.lineWidth, getVisibilityInfo(), pickingID));
+
+			}
+		private void createBarLabels(ArrayList<RenderProxy> out,double x,String graphName)
+		{
+
+			String text=graphName;
+			double xPos = x+ 0.1;
+			double yPos = graphOrigin.y - xAxisTickSize - xAxisLabelGap.getValue() - labelHeight/2;
+
+			Mat4d labelTrans = new Mat4d();
+			labelTrans.setTranslate3(new Vec3d(xPos, yPos, zBump));
+			labelTrans.mult4(objectTransComp, labelTrans);
+			labelTrans.scaleCols3(xScaleVec);
+
+			out.add(new StringProxy(text, labelFontKey, labelFontColor, labelTrans, labelHeight, getVisibilityInfo(), pickingID));
+
+		}
 		private void drawGraphTitle(ArrayList<RenderProxy> out) {
 
 			String titleText = graphObservee.getTitle();
@@ -451,39 +494,7 @@ public class GraphModel extends DisplayModel {
 			String xAxisFormat = graphObservee.getXAxisLabelFormat();
 			ArrayList<Vec4d> tickPoints = new ArrayList<Vec4d>();
 
-			double xAxisFactor = 1.0;
-			if( graphObservee.getXAxisUnit() != null )
-				xAxisFactor = graphObservee.getXAxisUnit().getConversionFactorToSI();
 
-			for (int i = 0; xMin + i*xAxisInterval <= xMax; ++i) {
-
-				double x = (xMin + i * xAxisInterval);
-				String text;
-				if( timeTrace && x == 0 ) {
-					text = "Now";
-				} else {
-					text = String.format( xAxisFormat, x/xAxisFactor);
-				}
-
-				double xPos = graphOrigin.x + ( i * xAxisInterval * graphSize.x)/xRange;
-				double yPos = graphOrigin.y - xAxisTickSize - xAxisLabelGap.getValue() - labelHeight/2;
-
-				Mat4d labelTrans = new Mat4d();
-				labelTrans.setTranslate3(new Vec3d(xPos, yPos, zBump));
-				labelTrans.mult4(objectTransComp, labelTrans);
-				labelTrans.scaleCols3(xScaleVec);
-
-				out.add(new StringProxy(text, labelFontKey, labelFontColor, labelTrans, labelHeight, getVisibilityInfo(), pickingID));
-
-				// Prepare the tick marks
-				Vec4d tickPointA = new Vec4d(xPos, graphOrigin.y, zBump, 1.0d);
-				Vec4d tickPointB = new Vec4d(xPos, graphOrigin.y - xAxisTickSize, zBump, 1.0d);
-				tickPointA.mult4(objectTransComp, tickPointA);
-				tickPointB.mult4(objectTransComp, tickPointB);
-				tickPoints.add(tickPointA);
-				tickPoints.add(tickPointB);
-			}
-			
 			out.add(new LineProxy(tickPoints, labelFontColor, 1, getVisibilityInfo(), pickingID));
 
 			// X-Axis Title
@@ -499,7 +510,7 @@ public class GraphModel extends DisplayModel {
 			out.add(new StringProxy(xAxisTitle, axisTitleFontKey, axisTitleFontColor, xtitleTrans,
 					xAxisTitleTextHeight.getValue(), getVisibilityInfo(), pickingID));
 		}
-
+		
 		private void drawYAxis(ArrayList<RenderProxy> out) {
 
 			String yAxisLabelFormat = graphObservee.getYAxisLabelFormat();

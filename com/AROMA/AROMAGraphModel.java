@@ -12,11 +12,13 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package com.jaamsim.DisplayModels;
+package com.AROMA;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import com.jaamsim.DisplayModels.DisplayModel;
+import com.jaamsim.DisplayModels.TextModel;
 import com.jaamsim.controllers.RenderManager;
 import com.jaamsim.datatypes.DoubleVector;
 import com.jaamsim.input.ColourInput;
@@ -41,7 +43,7 @@ import com.jaamsim.units.Unit;
 import com.sandwell.JavaSimulation.Entity;
 import com.sandwell.JavaSimulation3D.Graph;
 
-public class GraphModel extends DisplayModel {
+public class AROMAGraphModel extends DisplayModel {
 
 	@Keyword(description = "The text height for the graph title.",
 	         example = "Graph1 TitleTextHeight { 0.05 }")
@@ -218,7 +220,7 @@ public class GraphModel extends DisplayModel {
 
 	@Override
 	public boolean canDisplayEntity(Entity ent) {
-		return ent instanceof Graph;
+		return ent instanceof AROMAGraph;
 	}
 
 	private class Binding extends DisplayModelBinding {
@@ -228,7 +230,7 @@ public class GraphModel extends DisplayModel {
 		protected Vec3d graphOrigin; // bottom left position of the graph area,
 		protected Vec3d graphCenter; // Center point of the graph area
 
-		private Graph graphObservee;
+		private AROMAGraph graphObservee;
 
 		private List<Vec4d> graphRectPoints = null;
 		private Mat4d graphAreaTrans = null;
@@ -280,7 +282,7 @@ public class GraphModel extends DisplayModel {
 			graphCenter = new Vec3d();
 
 			try {
-				graphObservee = (Graph)observee;
+				graphObservee = (AROMAGraph)observee;
 				if (graphObservee != null) {
 					pickingID = graphObservee.getEntityNumber();
 				}
@@ -379,32 +381,29 @@ public class GraphModel extends DisplayModel {
 			// Draw the primary series
 			ArrayList<Graph.SeriesInfo> primarySeries = graphObservee.getPrimarySeries();
 			for (int i = 0; i < primarySeries.size(); ++i) {
-				drawSeries(primarySeries.get(i), yMin, yMax, simTime, out);
+				drawSeries(primarySeries.get(i), yMin, yMax, xMin, xMax, simTime, out);
 			}
 
 			// Draw the secondary series
 			ArrayList<Graph.SeriesInfo> secondarySeries = graphObservee.getSecondarySeries();
 			for (int i = 0; i < secondarySeries.size(); ++i) {
-				drawSeries(secondarySeries.get(i), secYMin, secYMax, simTime, out);
+			//	drawSeries(secondarySeries.get(i), secYMin, secYMax, secXMin, secXMax, simTime, out);
 			}
 		}
 
-		private void drawSeries(Graph.SeriesInfo series, double yMinimum, double yMaximum, double simTime, ArrayList<RenderProxy> out) {
+		private void drawSeries(Graph.SeriesInfo series, double yMinimum, double yMaximum, double xMinimum, double xMaximum, double simTime, ArrayList<RenderProxy> out) {
 
 			if (series.numPoints < 2)
 				return; // Nothing to display yet
 
 			double yRange = yMaximum - yMinimum;  // yRange can be either the primary or secondary range
-
+			double xRange = xMaximum - xMinimum;
+			
 			double[] yVals = new double[series.numPoints];
 			double[] xVals = new double[series.numPoints];
 
 			for (int i = 0; i < series.numPoints; i++) {
-				if( timeTrace )
-					xVals[i] = MathUtils.bound((series.xValues[i] - simTime - xMin) / xRange, 0, 1) - 0.5;
-				else
-					xVals[i] = MathUtils.bound((series.xValues[i] - xMin) / xRange, 0, 1) - 0.5;
-
+				xVals[i] = MathUtils.bound((series.xValues[i] - xMinimum) / xRange, 0, 1) - 0.5;
 				yVals[i] = MathUtils.bound((series.yValues[i] - yMinimum) / yRange, 0, 1) - 0.5;
 			}
 
@@ -413,11 +412,12 @@ public class GraphModel extends DisplayModel {
 				seriesPoints.add(new Vec4d(xVals[i  ], yVals[i  ], zBump, 1.0d));
 				seriesPoints.add(new Vec4d(xVals[i+1], yVals[i+1], zBump, 1.0d));
 			}
+
 			// Transform from graph area to world space
 			for (int i = 0; i < seriesPoints.size(); ++i) {
 				seriesPoints.get(i).mult4(graphToWorldTrans, seriesPoints.get(i));
-				
 			}
+
 			out.add(new LineProxy(seriesPoints, series.lineColour, series.lineWidth, getVisibilityInfo(), pickingID));
 		}
 
@@ -483,7 +483,7 @@ public class GraphModel extends DisplayModel {
 				tickPoints.add(tickPointA);
 				tickPoints.add(tickPointB);
 			}
-			
+
 			out.add(new LineProxy(tickPoints, labelFontColor, 1, getVisibilityInfo(), pickingID));
 
 			// X-Axis Title
