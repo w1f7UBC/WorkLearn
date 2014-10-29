@@ -43,7 +43,6 @@ public abstract class AROMAGraphBasics extends DisplayEntity {
 		public double[] yValues;
 		public double[] xValues;
 		public int numPoints; // number of points to be graphed
-		public OutputHandle out;
 		public OutputHandle outX; // The source of the data for the series
 		public OutputHandle outY;
 		public double lineWidth;
@@ -189,9 +188,10 @@ public abstract class AROMAGraphBasics extends DisplayEntity {
 
 		xAxisInterval = new ValueInput("XAxisInterval", "X-Axis", 10.0d);
 		xAxisInterval.setUnitType(UserSpecifiedUnit.class);
+		xAxisInterval.setValidRange(1.0e-10, Double.POSITIVE_INFINITY);
 		this.addInput(xAxisInterval);
 
-		xAxisLabelFormat = new FormatInput("XAxisLabelFormat", "X-Axis", "%.0fs");
+		xAxisLabelFormat = new FormatInput("XAxisLabelFormat", "X-Axis", "%.2f");
 		this.addInput(xAxisLabelFormat);
 
 		DoubleVector defXLines = new DoubleVector();

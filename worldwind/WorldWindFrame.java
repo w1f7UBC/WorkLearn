@@ -497,6 +497,9 @@ public class WorldWindFrame extends ApplicationTemplate
     	if (AppFrame==null && visibility==true){
     		initialize();
     	}
+    	if (AppFrame==null && visibility==false){
+    		return;
+    	}
     	java.awt.EventQueue.invokeLater(new Runnable()
         {
             @Override

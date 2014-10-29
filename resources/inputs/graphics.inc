@@ -1,34 +1,25 @@
 Define ObjectType {
                     ArrowModel
                     GraphModel
-		    BarGraphModel
-                    ScreenPointsModel
+		    		ScreenPointsModel
                     TextModel
                     ImageModel
                     ColladaModel
                     DisplayModel
-                    AROMAGraphTester
-                    AROMAGraphModel
                     }
 
 ArrowModel             JavaClass { com.jaamsim.DisplayModels.ArrowModel               } Palette { 'Display Models' }    DragAndDrop { FALSE }
 GraphModel             JavaClass { com.jaamsim.DisplayModels.GraphModel               } Palette { 'Display Models' }    DragAndDrop { FALSE }
-BarGraphModel          JavaClass { com.AROMA.DisplayModel.BarGraphModel               } Palette { 'Display Models' }    DragAndDrop { FALSE }
 ScreenPointsModel      JavaClass { com.jaamsim.DisplayModels.ScreenPointsModel        } Palette { 'Display Models' }    DragAndDrop { FALSE }
 TextModel              JavaClass { com.jaamsim.DisplayModels.TextModel                } Palette { 'Display Models' }    DragAndDrop { FALSE }
 ImageModel             JavaClass { com.jaamsim.DisplayModels.ImageModel               } Palette { 'Display Models' }    DragAndDrop { FALSE }
 ColladaModel           JavaClass { com.jaamsim.DisplayModels.ColladaModel             } Palette { 'Display Models' }    DragAndDrop { FALSE }
 DisplayModel           JavaClass { com.sandwell.JavaSimulation3D.DisplayModelCompat   } Palette { 'Display Models' }    DragAndDrop { FALSE }
-AROMAGraphTester	   JavaClass { com.AROMA.AROMAGraphTester						  } Palette { 'AROMA' } DragAndDrop { TRUE }
-AROMAGraphModel		   JavaClass { com.AROMA.AROMAGraphModel						  } Palette { 'AROMA' } DragAndDrop { FALSE }
 
 Define ArrowModel          { ArrowModelDefault          }
 Define GraphModel          { GraphModelDefault          }
-Define BarGraphModel       { BarGraphModelDefault       }
 Define ScreenPointsModel   { ScreenPointsModelDefault   }
 Define TextModel           { TextModelDefault           }
-Define AROMAGraphModel	   { AROMAGraphModelDefault			}
-
 
 Define ObjectType {
                     View
@@ -42,7 +33,6 @@ Define ObjectType {
                     Arrow
                     Graph
                     VideoRecorder
-                    AROMAGraph
                     }
 
 View                  JavaClass { com.jaamsim.ui.View                                } Palette { 'Graphics Objects' }                                           DragAndDrop { FALSE }
@@ -56,7 +46,6 @@ BillboardText         JavaClass { com.sandwell.JavaSimulation3D.BillboardText   
 Arrow                 JavaClass { com.sandwell.JavaSimulation3D.Arrow                } Palette { 'Graphics Objects' } DefaultDisplayModel { ArrowModelDefault        }
 Graph                 JavaClass { com.sandwell.JavaSimulation3D.Graph                } Palette { 'Graphics Objects' } DefaultDisplayModel { GraphModelDefault        }
 VideoRecorder         JavaClass { com.jaamsim.ui.VideoRecorderEntity                 } Palette { 'Graphics Objects' }    DragAndDrop { FALSE }
-AROMAGraph			  JavaClass { com.AROMA.AROMAGraph								 } Palette { 'AROMA' } DefaultDisplayModel { AROMAGraphModelDefault }
 
 View          Description { 'Display window showing view of the 3D model universe.' }
 Region        Description { 'Local coordinate system.' }
