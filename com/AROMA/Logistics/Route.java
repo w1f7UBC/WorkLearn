@@ -120,7 +120,7 @@ public class Route {
 			for (DiscreteHandlingLinkedEntity each: routeSegmentsList){
 				if(each instanceof Transshipment && each != routeSegmentsList.getFirst() && each != routeSegmentsList.getLast()){
 					unitCost += each.getTravelCost(movingEntitiesList.get(index));
-					index++;
+					//index++;
 				}
 				else if(each instanceof Facility)
 					continue;

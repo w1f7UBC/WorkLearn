@@ -205,8 +205,12 @@ public class FacilityTransportationManager extends FacilityManager {
 	 */
 	public TwoLinkedLists<MovingEntity> getTransportersList(){
 		return transportationCapacityList;
+	
 	}
 	
+	public ArrayList<MovingEntity> getTransporters(){
+		return transportersList.getValue();
+	}
 	/**
 	 * 
 	 * @return least cost per unit transporter that has remaining capacity for transporting bulkMaterial o.w. null

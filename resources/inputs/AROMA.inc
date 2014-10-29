@@ -84,4 +84,5 @@ Define RouteManager 		{ TransportationManager 	}
 Define ObjectType {
 					AROMAGraph
 				}
+				
 AROMAGraph			  			JavaClass { com.AROMA.AROMAGraph							} Palette { 'AROMA' } DefaultDisplayModel 	{ AROMAGraphModelDefault 				}
