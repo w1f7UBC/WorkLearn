@@ -43,8 +43,6 @@ public abstract class GraphBasics extends DisplayEntity {
 		public double[] xValues;
 		public int numPoints; // number of points to be graphed
 		public OutputHandle out;
-		public OutputHandle outX; // The source of the data for the series
-		public OutputHandle outY;
 		public double lineWidth;
 		public Color4d lineColour;
 	}

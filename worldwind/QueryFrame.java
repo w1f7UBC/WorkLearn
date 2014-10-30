@@ -210,6 +210,9 @@ public class QueryFrame extends JPanel {
     	if (HostFrame==null && visibility==true){
     		QueryFrame.initialize();
     	}
+    	if (HostFrame==null&& visibility==false){
+    		return;
+    	}
     	java.awt.EventQueue.invokeLater(new Runnable()
         {
             @Override

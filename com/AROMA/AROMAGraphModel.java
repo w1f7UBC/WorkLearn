@@ -41,7 +41,6 @@ import com.jaamsim.render.TessFontKey;
 import com.jaamsim.units.DimensionlessUnit;
 import com.jaamsim.units.Unit;
 import com.sandwell.JavaSimulation.Entity;
-import com.sandwell.JavaSimulation3D.Graph;
 
 public class AROMAGraphModel extends DisplayModel {
 
@@ -379,19 +378,19 @@ public class AROMAGraphModel extends DisplayModel {
 			drawYLines(out);
 
 			// Draw the primary series
-			ArrayList<Graph.SeriesInfo> primarySeries = graphObservee.getPrimarySeries();
+			ArrayList<AROMAGraph.SeriesInfo> primarySeries = graphObservee.getPrimarySeries();
 			for (int i = 0; i < primarySeries.size(); ++i) {
 				drawSeries(primarySeries.get(i), yMin, yMax, xMin, xMax, simTime, out);
 			}
 
 			// Draw the secondary series
-			ArrayList<Graph.SeriesInfo> secondarySeries = graphObservee.getSecondarySeries();
+			ArrayList<AROMAGraph.SeriesInfo> secondarySeries = graphObservee.getSecondarySeries();
 			for (int i = 0; i < secondarySeries.size(); ++i) {
 			//	drawSeries(secondarySeries.get(i), secYMin, secYMax, secXMin, secXMax, simTime, out);
 			}
 		}
 
-		private void drawSeries(Graph.SeriesInfo series, double yMinimum, double yMaximum, double xMinimum, double xMaximum, double simTime, ArrayList<RenderProxy> out) {
+		private void drawSeries(AROMAGraph.SeriesInfo series, double yMinimum, double yMaximum, double xMinimum, double xMaximum, double simTime, ArrayList<RenderProxy> out) {
 
 			if (series.numPoints < 2)
 				return; // Nothing to display yet
@@ -403,8 +402,8 @@ public class AROMAGraphModel extends DisplayModel {
 			double[] xVals = new double[series.numPoints];
 
 			for (int i = 0; i < series.numPoints; i++) {
-				xVals[i] = MathUtils.bound((series.xValues[i] - xMinimum) / xRange, 0, 1) - 0.5;
-				yVals[i] = MathUtils.bound((series.yValues[i] - yMinimum) / yRange, 0, 1) - 0.5;
+				xVals[i] = MathUtils.bound((series.xValues[i] - xMinimum) / xRange, xMinimum, xMaximum) - 0.5;
+				yVals[i] = MathUtils.bound((series.yValues[i] - yMinimum) / yRange, yMinimum, yMaximum) - 0.5;
 			}
 
 			ArrayList<Vec4d> seriesPoints = new ArrayList<Vec4d>((series.numPoints-1)*2);
@@ -456,15 +455,8 @@ public class AROMAGraphModel extends DisplayModel {
 				xAxisFactor = graphObservee.getXAxisUnit().getConversionFactorToSI();
 
 			for (int i = 0; xMin + i*xAxisInterval <= xMax; ++i) {
-
 				double x = (xMin + i * xAxisInterval);
-				String text;
-				if( timeTrace && x == 0 ) {
-					text = "Now";
-				} else {
-					text = String.format( xAxisFormat, x/xAxisFactor);
-				}
-
+				String text = String.format( xAxisFormat, x/xAxisFactor);
 				double xPos = graphOrigin.x + ( i * xAxisInterval * graphSize.x)/xRange;
 				double yPos = graphOrigin.y - xAxisTickSize - xAxisLabelGap.getValue() - labelHeight/2;
 

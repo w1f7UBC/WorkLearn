@@ -31,9 +31,8 @@ import com.jaamsim.input.ValueListInput;
 import com.jaamsim.math.Color4d;
 import com.jaamsim.units.DimensionlessUnit;
 import com.jaamsim.units.Unit;
-import com.sandwell.JavaSimulation3D.GraphBasics;
 
-public class AROMAGraph extends GraphBasics {
+public class AROMAGraph extends AROMAGraphBasics {
 
 	// Key Inputs category
 
@@ -362,9 +361,9 @@ public class AROMAGraph extends GraphBasics {
 			processGraph(info);
 		}
 
-		double xLength = xAxisEnd.getValue() - xAxisStart.getValue();
-		double xInterval = xLength / (numberOfPoints.getValue() - 1);
-		scheduleProcess(xInterval, 7, processGraph);
+		//double xLength = xAxisEnd.getValue() - xAxisStart.getValue();
+		//double xInterval = xLength / (numberOfPoints.getValue() - 1);
+		scheduleProcess(1, 7, processGraph);
 	}
 
 	/**
