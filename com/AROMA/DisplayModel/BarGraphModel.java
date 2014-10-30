@@ -411,34 +411,31 @@ public class BarGraphModel extends DisplayModel {
 				yVals[i] = MathUtils.bound((series.yValues[i] - yMinimum) / yRange, 0, 1) - 0.5;
 			}
 			List<Vec4d> recHeadVerts=null;
-			ArrayList<Vec4d> seriesPoints = new ArrayList<Vec4d>((series.numPoints-1)*2);
+			
 			for (int i = 0; i < series.numPoints - 1; i++) {
-
-				seriesPoints.add(new Vec4d(xVals[i  ], yVals[i  ], zBump, 1.0d));
-				seriesPoints.add(new Vec4d(xVals[i+1], yVals[i+1], zBump, 1.0d));
 
 				recHeadVerts=new ArrayList<Vec4d>(4);
 				double xPos =  graphOrigin.x - yAxisTitleGap.getValue()*xScaleFactor - yAxisTitleHeight/2  + (index*0.15);
 				
-				createBarLabels(out,xPos, Double.toString(yVals[i]));
+				createBarLabels(out,xPos, "bar");
 				
 				//Positive and negative bar values.
-				if(yVals[i] <0){
-					recHeadVerts.add(new Vec4d(xPos, 0.0, zBump, 1.0d));
+				/*if(yVals[i] <0){
+					recHeadVerts.add(new Vec4d(xPos, -0.5, zBump, 1.0d));
 					recHeadVerts.add(new Vec4d(xPos, yVals[i], zBump, 1.0d));
 					recHeadVerts.add(new Vec4d(xPos+0.1, yVals[i], zBump, 1.0d));
-					recHeadVerts.add(new Vec4d(xPos+0.1, 0.0, zBump, 1.0d));
+					recHeadVerts.add(new Vec4d(xPos+0.1, -0.5, zBump, 1.0d));
 				}
 				else
-				{
-					recHeadVerts.add(new Vec4d(xPos, 0.0, zBump, 1.0d));
-					recHeadVerts.add(new Vec4d(xPos+0.1, 0.0, zBump, 1.0d));
+				{ */  
+					recHeadVerts.add(new Vec4d(xPos, -0.5, zBump, 1.0d));
+					recHeadVerts.add(new Vec4d(xPos+0.1, -0.5, zBump, 1.0d));
 					recHeadVerts.add(new Vec4d(xPos+0.1, yVals[i], zBump, 1.0d));
 					recHeadVerts.add(new Vec4d(xPos, yVals[i], zBump, 1.0d));
-				}
+				//}
 			}
 			//INJA
-			if(graphObservee.getYAxisStart() >=0 )
+			//if(graphObservee.getYAxisStart() >=0 )
 		
 			for(int i=0;i<recHeadVerts.size();++i)
 			{
