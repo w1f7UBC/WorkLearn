@@ -213,7 +213,6 @@ public class RouteManager extends DisplayEntity {
 				0.0d);
 		PriorityQueue<T> vertexQueue = new PriorityQueue<>(5,dijkstraComparator);
 		vertexQueue.add(origin);
-
 		while (!vertexQueue.isEmpty()) {
 			T u = vertexQueue.poll();
 			double weightThroughU;
@@ -265,6 +264,7 @@ public class RouteManager extends DisplayEntity {
 				} 
 
 				if (each.equals(destination)) {
+					
 						if (weightThroughU < destinationWeight && weightThroughU < weightCap) {
 							destinationWeight = weightThroughU;
 							vertexQueue.remove(each);
@@ -361,7 +361,6 @@ public class RouteManager extends DisplayEntity {
 		double fScoreStart = gScoreStart + heuristicCost;
 		//System.out.println("Original entity and moving entity: " + origin + " and  " + movingEntity);
 		openset.add(origin, movingEntity, gScoreStart, fScoreStart);
-		
 		while(!openset.isEmpty()){
 			//System.out.println("Opening new node in wavefront....");
 			Object[] current = openset.getObjectsIndex(0);
@@ -370,11 +369,10 @@ public class RouteManager extends DisplayEntity {
 			MovingEntity currentME = (MovingEntity) current[1];
 			Double[] currentScores = openset.getScoresIndex(0);
 			//System.out.println("Current open entity is " + currentEntity + " and " + currentME);
-			
 			if (currentEntity == destination){
 			//	System.out.println(currentEntity + "is the destination");
 				Object[] reconstructedpath = reconstructAStarPath(origin, movingEntity, destination, currentME, camefrom);
-				
+
 				ArrayList<DiscreteHandlingLinkedEntity> arrayList = (ArrayList<DiscreteHandlingLinkedEntity>) reconstructedpath[0];
 				ArrayList<DiscreteHandlingLinkedEntity> path = arrayList;
 				return setAStarRoute(origin, destination, movingEntity, currentScores[1], path, routingRule);
@@ -428,7 +426,7 @@ public class RouteManager extends DisplayEntity {
 							weight = ((DiscreteHandlingLinkedEntity) neighborEntity).getTravelTime((MovingEntity) currentME)*
 							movingEntity.getTransportationCost(bulkMaterial);
 					
-						tentativeGScore = currentScores[0] + weight;
+						tentativeGScore = currentScores[0] + weight*100000;
 						//if the openset contains neighbor entity and moving entity already or if it contains one with a higher gscore then...
 						if(!(closedset.contains(neighborEntity, currentME)) && (!openset.contains(neighborEntity, currentME) || 
 								!(closedset.contains(neighborEntity, currentME)) && tentativeGScore < openset.getKey(neighborEntity, currentME)[0])){
@@ -438,7 +436,9 @@ public class RouteManager extends DisplayEntity {
 							//camefrom2.put(neighborObjectString, currentString);
 							double gscoreNeighbor = tentativeGScore;
 							double fscoreNeighbor = gscoreNeighbor + computeHeuristic(neighborEntity.getPosition(), destination.getPosition());
-
+							//System.out.println(neighborEntity + "neighbor gScore " + gscoreNeighbor);
+							//System.out.println("neighbor fScore " + fscoreNeighbor);
+							//System.out.println(computeHeuristic(neighborEntity.getPosition(), destination.getPosition()));
 							//add neighbor to openset if its not in there
 							if (!openset.contains(neighborEntity, currentME)){
 						//		System.out.println(neighborEntity + " and " + currentME+ " has been added to the wavefront through routes 1");
@@ -486,7 +486,7 @@ public class RouteManager extends DisplayEntity {
 								weight = ((DiscreteHandlingLinkedEntity) neighborEntity).getTravelTime((MovingEntity) currentMovingEntity)*
 									movingEntity.getTransportationCost(bulkMaterial);
 							
-							tentativeGScore = currentScores[0] + weight;
+							tentativeGScore = currentScores[0] + weight*100000;
 							
 							//if the openset contains neighbor entity and moving entity already or if it contains one with a higher gscore then...
 							if(!closedset.contains(neighborEntity, currentMovingEntity) && (!openset.contains(neighborEntity, currentME) || 
@@ -497,6 +497,10 @@ public class RouteManager extends DisplayEntity {
 								//camefrom2.put(neighborObjectString, currentString);
 								double gscoreNeighbor = tentativeGScore;
 								double fscoreNeighbor = gscoreNeighbor + computeHeuristic(neighborEntity.getPosition(), destination.getPosition());
+								//System.out.println(neighborEntity + "neighbor gScore " + gscoreNeighbor);
+								//System.out.println("neighbor fScore " + fscoreNeighbor);
+								//System.out.println(computeHeuristic(neighborEntity.getPosition(), destination.getPosition()));
+								
 								//add neighbor to openset if its not in there
 								if (!openset.contains(neighborEntity, currentMovingEntity)){
 									openset.add(neighborEntity, currentMovingEntity, gscoreNeighbor, fscoreNeighbor);
@@ -555,9 +559,9 @@ public class RouteManager extends DisplayEntity {
 		
 		if(!movingEntitylist.contains(originMovingEntity))
 			movingEntitylist.add(originMovingEntity);
-		for (MovingEntity m : movingEntitylist){
-			//System.out.println("Moving Entity " + m);
-		}
+//		for (MovingEntity m : movingEntitylist){
+//			//System.out.println("ssdg" + origin + destination + m);
+//		}
 		
 		
 		Object[] endSets = {path, movingEntitylist};
@@ -568,7 +572,7 @@ public class RouteManager extends DisplayEntity {
 	public static double computeHeuristic(Vec3d from, Vec3d to){
 		
 		double distance = Math.pow(from.x-to.x,2)+Math.pow(from.y-to.y,2)+Math.pow(from.z-to.z,2);
-		return Math.sqrt(distance);
+		return (Math.sqrt(distance))/100000;
 	}
 	
 	public static <T extends DiscreteHandlingLinkedEntity> String getRouteName(T origin,
