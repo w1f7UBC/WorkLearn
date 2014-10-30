@@ -2,7 +2,6 @@ package worldwind;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 
 public class DataListMk3 {
 	ArrayList<Object[]> key;
