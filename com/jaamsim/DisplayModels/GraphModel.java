@@ -413,6 +413,7 @@ public class GraphModel extends DisplayModel {
 				seriesPoints.add(new Vec4d(xVals[i  ], yVals[i  ], zBump, 1.0d));
 				seriesPoints.add(new Vec4d(xVals[i+1], yVals[i+1], zBump, 1.0d));
 			}
+			
 			// Transform from graph area to world space
 			for (int i = 0; i < seriesPoints.size(); ++i) {
 				seriesPoints.get(i).mult4(graphToWorldTrans, seriesPoints.get(i));
