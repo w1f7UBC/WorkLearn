@@ -383,17 +383,17 @@ public class BarGraphModel extends DisplayModel {
 			// Draw the primary series
 			ArrayList<Graph.SeriesInfo> primarySeries = graphObservee.getPrimarySeries();
 			for (int i = 0; i < primarySeries.size(); ++i) {
-				drawSeries(primarySeries.get(i), yMin, yMax, simTime, out,0.0,"PrimarySeries");
+				drawSeries(primarySeries.get(i),i, yMin, yMax, simTime, out,0.0,"PrimarySeries");
 			}
 
 			// Draw the secondary series
 			ArrayList<Graph.SeriesInfo> secondarySeries = graphObservee.getSecondarySeries();
 			for (int i = 0; i < secondarySeries.size(); ++i) {
-				drawSeries(secondarySeries.get(i), secYMin, secYMax, simTime, out, 0.15,"SecondarySeries");
+				drawSeries(secondarySeries.get(i),i, secYMin, secYMax, simTime, out, 0.15,"SecondarySeries");
 			}
 		}
 
-		private void drawSeries(Graph.SeriesInfo series, double yMinimum, double yMaximum, double simTime, ArrayList<RenderProxy> out,double margin,String text) {
+		private void drawSeries(Graph.SeriesInfo series,int index, double yMinimum, double yMaximum, double simTime, ArrayList<RenderProxy> out,double margin,String text) {
 			if (series.numPoints < 2)
 				return; // Nothing to display yet
 
@@ -418,8 +418,10 @@ public class BarGraphModel extends DisplayModel {
 				seriesPoints.add(new Vec4d(xVals[i+1], yVals[i+1], zBump, 1.0d));
 
 				recHeadVerts=new ArrayList<Vec4d>(4);
-				double xPos =  graphOrigin.x - yAxisTitleGap.getValue()*xScaleFactor - yAxisTitleHeight/2  +margin;
-				createBarLabels(out,xPos,text);
+				double xPos =  graphOrigin.x - yAxisTitleGap.getValue()*xScaleFactor - yAxisTitleHeight/2  + (index*0.15);
+				
+				createBarLabels(out,xPos, Double.toString(yVals[i]));
+				
 				//Positive and negative bar values.
 				if(yVals[i] <0){
 					recHeadVerts.add(new Vec4d(xPos, 0.0, zBump, 1.0d));
@@ -435,12 +437,9 @@ public class BarGraphModel extends DisplayModel {
 					recHeadVerts.add(new Vec4d(xPos, yVals[i], zBump, 1.0d));
 				}
 			}
-
-			// Transform from graph area to world space
-			for (int i = 0; i < seriesPoints.size(); ++i) {
-				seriesPoints.get(i).mult4(graphToWorldTrans, seriesPoints.get(i));
-
-			}
+			//INJA
+			if(graphObservee.getYAxisStart() >=0 )
+		
 			for(int i=0;i<recHeadVerts.size();++i)
 			{
 				recHeadVerts.get(i).mult4(graphToWorldTrans, recHeadVerts.get(i));
