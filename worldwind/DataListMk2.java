@@ -13,7 +13,7 @@ public class DataListMk2 {
 	}
 	
 	public void add(Object entity, Object movingEntity, Double gScore, Double fScore){
-		Double[] score = {fScore, gScore};
+		Double[] score = {gScore, fScore};
 		Object[] object = {entity, movingEntity};
 		if (scores.isEmpty() && objects.isEmpty()){
 			scores.add(score);
@@ -21,7 +21,7 @@ public class DataListMk2 {
 		}
 		else {
 			for(int x=0; x<scores.size(); x++){
-				int fCompare = Double.compare(fScore, scores.get(x)[0]);
+				int fCompare = Double.compare(fScore, scores.get(x)[1]);
 				if (fCompare>0){
 					continue;
 				}
@@ -31,7 +31,7 @@ public class DataListMk2 {
 					return;
 				}
 				else {
-					int gCompare = Double.compare(gScore, scores.get(x)[1]);
+					int gCompare = Double.compare(gScore, scores.get(x)[0]);
 					if (gCompare>0){
 						continue;
 					}
@@ -73,7 +73,7 @@ public class DataListMk2 {
 	}
 	
 	public Object[] getValue(double gScore, double fScore){
-		Double[] score = {fScore, gScore};
+		Double[] score = {gScore, fScore};
 		for (int x=0; x<scores.size(); x++){
 			if (Arrays.equals(scores.get(x), score)){
 				return objects.get(x);
