@@ -58,6 +58,7 @@ public class DataListMk2 {
 			if (Arrays.equals(objects.get(x), object)){
 				scores.remove(x);
 				objects.remove(x);
+				return;
 			}
 		}
 	}
