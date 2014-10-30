@@ -168,7 +168,7 @@ public class AROMAEntity extends DisplayEntity  {
 				//System.out.println("got in here");
 				DisplayModel target = getDisplayModelList().get(0);
 				if (target.getClass().isAssignableFrom(ColladaModel.class)){
-					System.out.println("got in here1");
+					//System.out.println("got in here1");
 					ColladaModel colladaTarget = (ColladaModel) target;
 					File uri = new File(colladaTarget.getColladaFile());
 					Thread thread = new WorldWindFrame.ColladaThread(uri, wvPositionInput.getValue(),  wvSizeInput.getValue(), target.getVisibilityInfo(), true);

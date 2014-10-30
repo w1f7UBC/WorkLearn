@@ -406,12 +406,12 @@ public class Query extends Entity {
 		if (entitiesList.size()==0){
 			return null;
 		}
-		String statements="SELECT " + row.getValue()+ ", "+ latitudeColumn.getValue() + ", " + longitudeColumn.getValue() +" FROM " + 
-				table.getValue() + " WHERE " + row.getValue() +"= '" + entitiesList.get(0).getName() +"'";
+		String statements="SELECT " + column.getValue()+ ", "+ latitudeColumn.getValue() + ", " + longitudeColumn.getValue() +" FROM " + 
+				table.getValue() + " WHERE " + column.getValue() +"= '" + entitiesList.get(0).getName() +"'";
 		for(int x=1; x<entitiesList.size(); x++){
-			statements+=" or " + row.getValue() +"= '" + entitiesList.get(x).getName() + "'";
+			statements+=" or " + column.getValue() +"= '" + entitiesList.get(x).getName() + "'";
 		}
-		// System.out.println(statements);
+		 //System.out.println(statements);
 		ResultSet tempResultSet = this.getResultSet(statements);
 		//map of entitieslist to pass on the entity
 		ArrayList<String> entitiesNames = new ArrayList<String>();

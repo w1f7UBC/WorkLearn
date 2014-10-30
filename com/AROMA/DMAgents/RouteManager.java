@@ -2,17 +2,12 @@ package com.AROMA.DMAgents;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.PriorityQueue;
 
-import javafx.util.Pair;
 import worldwind.DataListMk2;
 import worldwind.DataListMk3;
-import worldwind.datalist;
+
 import DataBase.Database;
 
 import com.AROMA.Logistics.BulkMaterial;
@@ -22,7 +17,6 @@ import com.AROMA.Logistics.ExitBlock;
 import com.AROMA.Logistics.Facility;
 import com.AROMA.Logistics.LinkedEntity;
 import com.AROMA.Logistics.LoadingBay;
-import com.AROMA.Logistics.LogisticsEntity;
 import com.AROMA.Logistics.MovingEntity;
 import com.AROMA.Logistics.ReportAgent;
 import com.AROMA.Logistics.Route;
@@ -32,11 +26,14 @@ import com.AROMA.Logistics.Transshipment;
 import com.AROMA.Logistics.DiscreteHandlingLinkedEntity.DijkstraComparator;
 import com.AROMA.Utils.HandyUtils;
 import com.AROMA.Utils.HashMapList;
+
 import com.sandwell.JavaSimulation.FileEntity;
 import com.sandwell.JavaSimulation3D.DisplayEntity;
+
 import com.jaamsim.input.BooleanInput;
 import com.jaamsim.input.EntityInput;
 import com.jaamsim.input.Keyword;
+
 import com.jaamsim.math.Vec3d;
 
 public class RouteManager extends DisplayEntity {
