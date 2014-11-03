@@ -105,7 +105,6 @@ public class DataListMk2 {
 		return scores.isEmpty();
 	}
 	
-	
 	public void printMap(){
 		for (int x=0; x<scores.size(); x++){
 			System.out.println(scores.get(x)[0] + " " + scores.get(x)[1] + " " + objects.get(x)[0] + " " + objects.get(x)[1]);
@@ -113,6 +112,7 @@ public class DataListMk2 {
 	}
 	
 	public static void main(String args[]){
+		long startTime = System.nanoTime();
 		System.out.println("TEST");
 		DataListMk2 list= new DataListMk2();
 		double a = 1;
@@ -164,5 +164,8 @@ public class DataListMk2 {
 		System.out.println("Get value for key 1, 2 (different object) " + list.getValue(aaa, bbb)[0] + list.getValue(aaa, bbb)[1]);
 		
 		System.out.println("Print first key " + list.getScoresIndex(0)[0] + list.getScoresIndex(0)[1] + list.getObjectsIndex(0)[0] + list.getObjectsIndex(0)[1]);
+		long endTime   = System.nanoTime();
+		long totalTime = endTime - startTime;
+		System.out.println("Runtime= "+totalTime + " nanoseconds");
 	}
 }

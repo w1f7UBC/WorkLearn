@@ -74,6 +74,9 @@ public class Query extends Entity {
 	@Keyword(description = "target databaseobject of the query")
 	private DatabaseInput database;
 	
+	@Keyword(description = "turn on/off automatic querybuilding")
+	private BooleanInput queryBuild;
+	
 	@Keyword(description = "target table within database to query off of")
 	private DatabaseInput table;
 	
@@ -128,6 +131,9 @@ public class Query extends Entity {
 	{
 		database = new DatabaseInput("TargetDatabase","Query Properties", "None");
 		this.addInput(database);
+	
+		queryBuild = new BooleanInput("AutoQueryBuilding", "Query Properties", false);
+		this.addInput(queryBuild);
 		
 		table = new DatabaseInput("TargetTable", "Query Properties", "None");
 		this.addInput(table);
@@ -190,19 +196,31 @@ public class Query extends Entity {
 		super.updateForInput(in);
 		if(in==database){
 			targetDatabase=Database.getDatabase(database.getValue());
-			table.updateValues(getResultSet("SELECT table_name FROM information_schema.tables WHERE table_schema='public' ORDER BY table_name"));
+		}
+		if(in==queryBuild){
+			if (queryBuild.getValue()==true){
+				table.updateValues(getResultSet("SELECT table_name FROM information_schema.tables WHERE table_schema='public' ORDER BY table_name"));
+			}
 		}
 		if(in==table){
-			column.updateValues(getResultSet("SELECT column_name FROM information_schema.columns WHERE table_name='" + table.getValue()+"' ORDER BY column_name"));
+			if (queryBuild.getValue()==true){
+				column.updateValues(getResultSet("SELECT column_name FROM information_schema.columns WHERE table_name='" + table.getValue()+"' ORDER BY column_name"));
+			}
 		}
 		if(in==column){
-			row.updateValues(getResultSet("SELECT " + column.getValue() +" FROM " + table.getValue() + " ORDER BY " + column.getValue()));
+			if (queryBuild.getValue()==true){
+				row.updateValues(getResultSet("SELECT " + column.getValue() +" FROM " + table.getValue() + " ORDER BY " + column.getValue()));
+			}
 		}
 		if(in==radius){
-			QueryFrame.setSliderValue(radius.getValue());
+			if (queryBuild.getValue()==true){
+				QueryFrame.setSliderValue(radius.getValue());
+			}
 		}
 		if(in==mode){
-			QueryFrame.setMode(mode.getValue());
+			if (queryBuild.getValue()==true){
+				QueryFrame.setMode(mode.getValue());
+			}
 		}
 	}
 
