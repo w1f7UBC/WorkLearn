@@ -50,24 +50,25 @@ public class FacilityGeneralManager extends FacilityManager {
 		
 		// populate the feedstock and output material list and facility's capacities for each output material based on 
 		// main product's capacity level
-		for (ArrayList<ProcessingRoute> eachProcessingRouteList : this.getFacility().getOperationsManager().getProcessingRoutesListOutfeed().getValues()) {
+	/*	for (ArrayList<ProcessingRoute> eachProcessingRouteList : this.getFacility().getOperationsManager().getProcessingRoutesListOutfeed().getValues()) {
 			for (ProcessingRoute tempProcessingRoute: eachProcessingRouteList) {
 				for (LogisticsEntity each : tempProcessingRoute.getProcessor()
 						.getHandlingEntityTypeList()) {
 					this.getFacility().addToStocksList((BulkMaterial) each,0,
 							tempProcessingRoute.getCapacityRatio((BulkMaterial) each,
 											tempProcessingRoute.getProcessor().getPrimaryProduct())
-									* tempProcessingRoute.getProcessor().getPrimaryProductCapacity());
+									* tempProcessingRoute.getProcessor().getMaxRate((BulkMaterial) each));
 				}
 				for (BulkMaterial each : tempProcessingRoute.getProcessor()
 						.getOutfeedEntityTypeList()) {
 					this.getFacility().addToStocksList(each,0,tempProcessingRoute.getCapacityRatio(each,
 									tempProcessingRoute.getProcessor().getPrimaryProduct())
-									* tempProcessingRoute.getProcessor().getPrimaryProductCapacity());
+									* tempProcessingRoute.getProcessor().getOutfeedRate(each));
+					eachProcessingRouteList.removeAll(this.getFacility().getOperationsManager().getMutuallyExclusiveProcesses(tempProcessingRoute.getProcessor()));
 				}
 			}
 		}	
-		
+		*/
 	}
 	
 	public static ArrayList<? extends FacilityGeneralManager> getAll() {

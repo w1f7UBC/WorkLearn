@@ -78,6 +78,30 @@ public class SankeyInfo extends Entity {
 		return tempAmount;
 	}
 	
+	@Output(name = "TargetThroughput", 
+			description = "The target production capacity of tracedproduct during the current period.", 
+			unitType = UserSpecifiedUnit.class)
+	public double getTargetThroughput(double simTime) {
+		double tempAmount = 0.0d;
+		for (Entity eachFacility : facilityGroup.getValue().getList()) {
+			tempAmount += ((Facility) eachFacility).getStockList().getValueFor(
+					tracedProduct.getValue(), 2);
+		}
+		return tempAmount;
+	}
+	
+	@Output(name = "TargetThroughput", 
+			description = "The target production capacity of tracedproduct during the current period.", 
+			unitType = UserSpecifiedUnit.class)
+	public double getTargetDemand(double simTime) {
+		double tempAmount = 0.0d;
+		for (Entity eachFacility : facilityGroup.getValue().getList()) {
+			tempAmount += ((Facility) eachFacility).getStockList().getValueFor(
+					tracedProduct.getValue(), 1);
+		}
+		return tempAmount;
+	}
+	
 	@Output(name = "SatisfiedDemand", 
 			description = "The total demand of tracedproduct satisfied during the current period.", 
 			unitType = UserSpecifiedUnit.class)

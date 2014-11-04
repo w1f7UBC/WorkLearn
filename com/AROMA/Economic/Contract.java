@@ -328,9 +328,10 @@ public class Contract extends AROMAEntity {
 			}
 			if(routesList.get(0).getShapeFileQuery() != null){
 				String layerName = routesList.get(0).getName()+this.getName();
-				SimulationManager.getRemoveablebleWorldWindLayers().add(layerName+".shp");
+				SimulationManager.getRemoveablebleWorldWindLayers().add(
+						routesList.get(0).getShapeFileQuery().execute(routesList, true, false, false, tempColor, tempWidth, this.getProduct().getOpacity())+".shp");
 				
-				routesList.get(0).getShapeFileQuery().execute(routesList, true, false, false, tempColor, tempWidth, this.getProduct().getOpacity());	
+				
 			}
 		}
 	}

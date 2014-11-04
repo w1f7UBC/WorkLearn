@@ -407,14 +407,14 @@ public class Query extends Entity {
 		return executeName;
 	}
 	
-	public void execute(ArrayList<DiscreteHandlingLinkedEntity> routesList, boolean draws, boolean zooms, boolean prints, Color4d primaryColors, int widths, double opacities) {
+	public String execute(ArrayList<DiscreteHandlingLinkedEntity> routesList, boolean draws, boolean zooms, boolean prints, Color4d primaryColors, int widths, double opacities) {
 		setDraw(draws);
 		setZoom(zooms);
 		setPrint(prints);
 		setPrimaryColor(primaryColors);
 		setThickness(widths);
 		setOpacity(opacities);
-		execute(routesList);
+		return execute(routesList);
 	}
 	
 	public String execute(ArrayList<? extends AROMAEntity> drawableEntities){

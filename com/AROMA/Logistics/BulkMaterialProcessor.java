@@ -58,12 +58,7 @@ public class BulkMaterialProcessor extends BulkHandlingLinkedEntity {
 			"Facilities may produce multiple products. the list provided here are material types that can be produced.", 
 			example = "Sawmill-1 PrimaryProduct { Lumber }")
 	private final EntityInput<BulkMaterial> primaryProduct;
-	
-	@Keyword(description = "Maximum production (feedstock handling) capacity for the productionDrivingMaterial. production per hour."
-			+ "capacities for all other products (feedstock and end products) will be set proportional to the main process of the facility.", 
-		example = "Temiscaming ProductionCapacity { 300 kt/h }")
-	private final ValueInput mainProductCapacity;
-	
+
 	@Keyword(description = "TimeSeries of production levels for the productionDrivingMaterial. Units of time series should be in"
 			+ "flow unit (Mass or volume flow unit) meaning throughputs are t/h or m3/h.", 
 			example = "Temiscaming Throughput { WoodChipeProductionSchedule }")
@@ -88,9 +83,6 @@ public class BulkMaterialProcessor extends BulkHandlingLinkedEntity {
 		
 		primaryProduct = new EntityInput<>(BulkMaterial.class, "PrimaryProduct", "Key Inputs", null);
 		this.addInput(primaryProduct);
-		
-		mainProductCapacity = new ValueInput("ProductionCapacity", "Key Inputs", Double.POSITIVE_INFINITY);
-		this.addInput(mainProductCapacity);
 		
 		mainProductThroughput = new EntityInput<>(TimeSeries.class, "Throughput", "Key Inputs", null);
 		this.addInput(mainProductThroughput);
@@ -299,10 +291,6 @@ public class BulkMaterialProcessor extends BulkHandlingLinkedEntity {
 		return primaryProduct.getValue();
 	}
 
-	public Double getPrimaryProductCapacity(){
-		return mainProductCapacity.getValue();
-	}
-
 	/**
 	 * Attention!! Production level should be defined in exact planning periods.
 	 * e.g. if planning is 1 year production levels for end of each year should be defined 
@@ -379,13 +367,5 @@ public class BulkMaterialProcessor extends BulkHandlingLinkedEntity {
 				outfeedRateByEntityType.setUnitType(RateUnit.class);
 		}
 
-		if(in == primaryProduct){
-			if(primaryProduct.getValue().getEntityUnit() == MassUnit.class){
-				mainProductCapacity.setUnitType(MassFlowUnit.class);
-			}
-			else{
-				mainProductCapacity.setUnitType(VolumeFlowUnit.class);
-			}
-		}
 	}
 }
