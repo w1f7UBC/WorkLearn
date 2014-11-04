@@ -176,10 +176,10 @@ public class Query extends Entity {
 		opacity = new ValueInput("Opacity", "Display Properties", 0.03);
 		this.addInput(opacity);
 		
-		print = new BooleanInput("Print results", "Display Properties", true);
+		print = new BooleanInput("Printresults", "Display Properties", true);
 		this.addInput(print);
 		
-		printOrientation = new BooleanInput("Print orientation", "Display Properties", true);
+		printOrientation = new BooleanInput("Printorientation", "Display Properties", true);
 		this.addInput(printOrientation);
 		
 		latitudeColumn = new StringInput("LatitudeColumn", "Query Properties", "latitude");
@@ -300,7 +300,7 @@ public class Query extends Entity {
 		//System.out.println("TargetTable= "+ targetTable + System.lineSeparator() + "Draw= " + getDraw() + System.lineSeparator()+ "Zoom= "+zoom+ System.lineSeparator() +executeStatement);
 		executeName=executeName.replaceAll("[^a-zA-Z0-9\\.\\-]", "_");
 		if (getDraw()==true && WorldWindFrame.AppFrame != null){
-			System.out.println(executeStatement);
+			//System.out.println(executeStatement);
 			File file =getLayerManager().sql2shp(executeName, executeStatement);
 			if (file!=null){
 				Thread thread=new WorldWindFrame.WorkerThread(file, WorldWindFrame.AppFrame, getZoom(), getSecondaryColor());
@@ -390,11 +390,11 @@ public class Query extends Entity {
 		if (drawableEntities.size()==0){
 			return null;
 		}
-		String executeStatement="SELECT * FROM " + table.getValue() + " WHERE " + row.getValue() +"= '" + drawableEntities.get(0).getName() +"'";
+		String executeStatement="SELECT * FROM " + table.getValue() + " WHERE " + column.getValue() +"= '" + drawableEntities.get(0).getName() +"'";
 		for(int x=1; x<drawableEntities.size(); x++){
 			executeStatement+=" or " + row.getValue() +"= '" + drawableEntities.get(x).getName() + "'";
 		}
-		 System.out.println(executeStatement);
+		// System.out.println(executeStatement);
 		String executeName=executeStatement.replaceAll("[^a-zA-Z0-9\\.\\-]", "_");
 		if (getDraw()==true && WorldWindFrame.AppFrame != null){
 			File file = getLayerManager().sql2shp(executeName, executeStatement);
