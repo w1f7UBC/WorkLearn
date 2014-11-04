@@ -1,7 +1,6 @@
 Define ObjectType {
                     ArrowModel
                     GraphModel
-		    BarGraphModel
 		    		ScreenPointsModel
                     TextModel
                     ImageModel
@@ -11,7 +10,7 @@ Define ObjectType {
 
 ArrowModel             JavaClass { com.jaamsim.DisplayModels.ArrowModel               } Palette { 'Display Models' }    DragAndDrop { FALSE }
 GraphModel             JavaClass { com.jaamsim.DisplayModels.GraphModel               } Palette { 'Display Models' }    DragAndDrop { FALSE }
-BarGraphModel	       JavaClass { com.AROMA.DisplayModel.BarGraphModel               } Palette { 'Display Models' }    DragAndDrop { FALSE }
+
 ScreenPointsModel      JavaClass { com.jaamsim.DisplayModels.ScreenPointsModel        } Palette { 'Display Models' }    DragAndDrop { FALSE }
 TextModel              JavaClass { com.jaamsim.DisplayModels.TextModel                } Palette { 'Display Models' }    DragAndDrop { FALSE }
 ImageModel             JavaClass { com.jaamsim.DisplayModels.ImageModel               } Palette { 'Display Models' }    DragAndDrop { FALSE }
@@ -20,7 +19,6 @@ DisplayModel           JavaClass { com.sandwell.JavaSimulation3D.DisplayModelCom
 
 Define ArrowModel          { ArrowModelDefault          }
 Define GraphModel          { GraphModelDefault          }
-Define BarGraphModel 	   { BarGraphModelDefault       }
 Define ScreenPointsModel   { ScreenPointsModelDefault   }
 Define TextModel           { TextModelDefault           }
 

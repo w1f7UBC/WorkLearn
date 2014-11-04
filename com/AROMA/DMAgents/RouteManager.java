@@ -175,8 +175,8 @@ public class RouteManager extends DisplayEntity {
 		if (tempRoute != null)
 				return tempRoute;
 		else
-			return computeAStarPath(origin, destination, movingEntity, bulkMaterial, routingRule,transshipmentAllowed, weightCap, tabuList);
-			//return computeDijkstraPath(origin, destination, movingEntity, bulkMaterial, routingRule,transshipmentAllowed, weightCap, tabuList);
+			//return computeAStarPath(origin, destination, movingEntity, bulkMaterial, routingRule,transshipmentAllowed, weightCap, tabuList);
+			return computeDijkstraPath(origin, destination, movingEntity, bulkMaterial, routingRule,transshipmentAllowed, weightCap, tabuList);
 	}
 
 	// ////////////////////////////////////////////////////////////////////////////////////////////////////

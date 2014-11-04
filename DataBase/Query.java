@@ -300,7 +300,7 @@ public class Query extends Entity {
 		//System.out.println("TargetTable= "+ targetTable + System.lineSeparator() + "Draw= " + getDraw() + System.lineSeparator()+ "Zoom= "+zoom+ System.lineSeparator() +executeStatement);
 		executeName=executeName.replaceAll("[^a-zA-Z0-9\\.\\-]", "_");
 		if (getDraw()==true && WorldWindFrame.AppFrame != null){
-			//System.out.println(executeStatement);
+			System.out.println(executeStatement);
 			File file =getLayerManager().sql2shp(executeName, executeStatement);
 			if (file!=null){
 				Thread thread=new WorldWindFrame.WorkerThread(file, WorldWindFrame.AppFrame, getZoom(), getSecondaryColor());
@@ -394,7 +394,7 @@ public class Query extends Entity {
 		for(int x=1; x<drawableEntities.size(); x++){
 			executeStatement+=" or " + row.getValue() +"= '" + drawableEntities.get(x).getName() + "'";
 		}
-		// System.out.println(statements);
+		 System.out.println(executeStatement);
 		String executeName=executeStatement.replaceAll("[^a-zA-Z0-9\\.\\-]", "_");
 		if (getDraw()==true && WorldWindFrame.AppFrame != null){
 			File file = getLayerManager().sql2shp(executeName, executeStatement);
@@ -429,7 +429,7 @@ public class Query extends Entity {
 		for(int x=1; x<entitiesList.size(); x++){
 			statements+=" or " + column.getValue() +"= '" + entitiesList.get(x).getName() + "'";
 		}
-		 //System.out.println(statements);
+		 System.out.println(statements);
 		ResultSet tempResultSet = this.getResultSet(statements);
 		//map of entitieslist to pass on the entity
 		ArrayList<String> entitiesNames = new ArrayList<String>();

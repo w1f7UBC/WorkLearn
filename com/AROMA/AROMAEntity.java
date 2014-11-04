@@ -18,8 +18,10 @@ import DataBase.Query;
 
 
 
+
 import com.sandwell.JavaSimulation.Entity;
 import com.AROMA.Logistics.Facility;
+import com.AROMA.Logistics.RouteEntity;
 import com.AROMA.Utils.HashMapList;
 import com.jaamsim.DisplayModels.ColladaModel;
 import com.jaamsim.DisplayModels.DisplayModel;
@@ -197,7 +199,7 @@ public class AROMAEntity extends DisplayEntity  {
 	public void validate() {
 		super.validate();
 	}
-	/*
+	
 	@Override
 	public void earlyInit() {
 		super.earlyInit();
@@ -211,7 +213,7 @@ public class AROMAEntity extends DisplayEntity  {
 					ArrayList<Vec3d> positionList = new ArrayList<Vec3d>();
 					ArrayList<Vec3d> scaleList = new ArrayList<Vec3d>();
 					ArrayList<VisibilityInfo> visList = new ArrayList<VisibilityInfo>();
-					for (ROLOSEntity eachEntity : wvDisplayModelGroups
+					for (AROMAEntity eachEntity : wvDisplayModelGroups
 							.get(eachDisplaymodel)) {
 						positionList.add(eachEntity.getWVPositionInput());
 						scaleList.add(eachEntity.getWVSizeInput());
@@ -232,7 +234,7 @@ public class AROMAEntity extends DisplayEntity  {
 			drawnColladas = true;
 		}
 	}
-	*/
+	
 	public void addToWVDisplayModelList(){
 		for(DisplayModel each: this.getDisplayModelList())
 			wvDisplayModelGroups.add(each, this);
