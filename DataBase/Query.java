@@ -48,6 +48,7 @@ import worldwind.WorldWindFrame.WorkerThread;
 
 import com.AROMA.AROMAEntity;
 import com.AROMA.Input.InputAgent_Rolos;
+import com.AROMA.Logistics.DiscreteHandlingLinkedEntity;
 import com.AROMA.Utils.HandyUtils;
 import com.jaamsim.input.BooleanInput;
 import com.jaamsim.input.ColourInput;
@@ -191,7 +192,15 @@ public class Query extends Entity {
 	}
 	
 	private Database targetDatabase;
-    
+	private boolean drawVar=draw.getValue();
+	private boolean zoomVar=zoom.getValue();
+	private boolean printVar=print.getValue();
+	private boolean orientVar=printOrientation.getValue();
+	private Color4d priColVar=primaryColor.getValue();
+	private Color4d secColVar=secondaryColor.getValue();
+	private int thickVar=thickness.getValue();
+	private double opacityVar=opacity.getValue();
+	
 	@Override
 	public void updateForInput(Input<?> in) {
 		super.updateForInput(in);
@@ -223,6 +232,30 @@ public class Query extends Entity {
 				QueryFrame.setMode(mode.getValue());
 			}
 		}
+		if(in==draw){
+			drawVar=draw.getValue();
+		}
+		if(in==zoom){
+			zoomVar=zoom.getValue();
+		}
+		if(in==print){
+			printVar=print.getValue();
+		}
+		if(in==printOrientation){
+			orientVar=printOrientation.getValue();
+		}
+		if(in==primaryColor){
+			priColVar=primaryColor.getValue();
+		}
+		if(in==secondaryColor){
+			secColVar=secondaryColor.getValue();
+		}
+		if(in==thickness){
+			thickVar=thickness.getValue();
+		}
+		if(in==opacity){
+			opacityVar=opacity.getValue();
+		}
 	}
 
 	public static ArrayList<Query> getAll() {
@@ -248,19 +281,6 @@ public class Query extends Entity {
 		if( database.getValue() == null ) {
 			throw new InputErrorException( "The keyword database must be set." );
 		}
-	}
-
-
-	//change the default statement in this object
-	public void setStatement(String statements){
-		InputAgent_Rolos.processEntity_Keyword_Value(this, statement, statements);
-
-		return;
-	}
-
-	public void setTable(String tables){
-		InputAgent_Rolos.processEntity_Keyword_Value(this, table, tables);
-		return;
 	}
 
 	public String execute(){
@@ -385,6 +405,16 @@ public class Query extends Entity {
 			printResultContent(executeName, getResultSet(executeStatement), getPrintOrientation());
 		}
 		return executeName;
+	}
+	
+	public void execute(ArrayList<DiscreteHandlingLinkedEntity> routesList, boolean draws, boolean zooms, boolean prints, Color4d primaryColors, int widths, double opacities) {
+		setDraw(draws);
+		setZoom(zooms);
+		setPrint(prints);
+		setPrimaryColor(primaryColors);
+		setThickness(widths);
+		setOpacity(opacities);
+		execute(routesList);
 	}
 	
 	public String execute(ArrayList<? extends AROMAEntity> drawableEntities){
@@ -688,27 +718,27 @@ public class Query extends Entity {
 	}
 	
 	public DefinedShapeAttributes getPrimaryColor(){
-		return new DefinedShapeAttributes(primaryColor.getValue(), thickness.getValue(), opacity.getValue());
+		return new DefinedShapeAttributes(priColVar, thickVar, opacityVar);
 	}
 	
 	public DefinedShapeAttributes getSecondaryColor(){
-		return new DefinedShapeAttributes(secondaryColor.getValue(), thickness.getValue(), opacity.getValue());
+		return new DefinedShapeAttributes(secColVar, thickVar, opacityVar);
 	}
 	
 	public Boolean getDraw(){
-		return draw.getValue();
+		return drawVar;
 	}
 	
 	public Boolean getZoom(){
-		return zoom.getValue();
+		return zoomVar;
 	}
 	
 	public Boolean getPrint(){
-		return print.getValue();
+		return printVar;
 	}
 	
 	public Boolean getPrintOrientation(){
-		return printOrientation.getValue();
+		return orientVar;
 	}
 	
 	public void setMode(int modes){
@@ -719,34 +749,53 @@ public class Query extends Entity {
 		InputAgent.processEntity_Keyword_Value(this, radius, Integer.toString(radiuses));
 	}
 	
+	public void setDraw(boolean draws){
+		drawVar=draws;
+	}
+	
 	public void setPrint(boolean prints){
-		print.setValueString(String.valueOf(prints));
-		//InputAgent.processEntity_Keyword_Value(this, print, String.valueOf(prints));
+		printVar=prints;
 	}
 	
 	public void setZoom(boolean zooms){
-		zoom.setValueString(String.valueOf(zooms));
-		//InputAgent.processEntity_Keyword_Value(this, zoom, String.valueOf(zooms));
+		zoomVar=zooms;
 	}
 	
 	public void setOpacity(double opacities){
-		opacity.setValueString(String.valueOf(opacities));
-		//InputAgent.processEntity_Keyword_Value(this, opacity, String.valueOf(opacities));
+		opacityVar=opacities;
 	}
 	
 	public void setThickness(int thicknesses){
-		thickness.setValueString(String.valueOf(thicknesses));
-		//InputAgent.processEntity_Keyword_Value(this, thickness, String.valueOf(thicknesses));
+		thickVar=thicknesses;
 	}
 	
 	public void setPrimaryColor(Color4d colors){
-		primaryColor.setValueString(colors.toString());
-		//InputAgent.processEntity_Keyword_Value(this, primaryColor, colors.toString());
+		priColVar=colors;
 	}
 	
 	public void setSecondaryColor(Color4d colors){
-		secondaryColor.setValueString(colors.toString());
-		//InputAgent.processEntity_Keyword_Value(this, secondaryColor, colors.toString());
+		secColVar=colors;
+	}
+	
+	//change the default statement in this object
+	public void setStatement(String statements){
+		InputAgent_Rolos.processEntity_Keyword_Value(this, statement, statements);
+	}
+
+	public void setTable(String tables){
+		InputAgent_Rolos.processEntity_Keyword_Value(this, table, tables);
+	}
+	
+	public void setColumn(String columns){
+		InputAgent_Rolos.processEntity_Keyword_Value(this, column, columns);
+	}
+	
+	public void setOperator(String operators){
+		InputAgent_Rolos.processEntity_Keyword_Value(this, operator, operators);
+	}
+	
+	public void setRow(String rows){
+		InputAgent_Rolos.processEntity_Keyword_Value(this, row, rows);
 	}
 }
 
