@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import worldwind.DefinedShapeAttributes;
 import worldwind.WorldWindFrame;
+import DataBase.Query;
 
 import com.AROMA.AROMAEntity;
 import com.AROMA.DMAgents.SimulationManager;
@@ -329,12 +330,17 @@ public class Contract extends AROMAEntity {
 				String layerName = routesList.get(0).getName()+this.getName();
 				SimulationManager.getRemoveablebleWorldWindLayers().add(layerName+".shp");
 
+				Query target = routesList.get(0).getShapeFileQuery();
+				target.setOpacity(this.getProduct().getOpacity());
+				target.setThickness(tempWidth);
+				target.setPrimaryColor(tempColor);
+				target.setZoom(false);
+				target.setPrint(false);
+				target.execute(routesList);
 				
-				routesList.get(0).getShapeFileQuery().execute(routesList);
-				
-				/*routesList.get(0).getShapeFileQuery().execute(layerName, routesList, true, false, 
-					new DefinedShapeAttributes(tempColor, tempWidth, this.getProduct().getOpacity()));
-					*/
+				//routesList.get(0).getShapeFileQuery().execute(layerName, routesList, true, false, 
+					//new DefinedShapeAttributes(tempColor, tempWidth, this.getProduct().getOpacity()));
+					
 			}
 
 		}

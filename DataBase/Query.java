@@ -60,6 +60,7 @@ import com.jaamsim.input.StringInput;
 import com.jaamsim.input.ValueInput;
 
 
+import com.jaamsim.math.Color4d;
 import com.sandwell.JavaSimulation.Entity;
 import com.sandwell.JavaSimulation3D.GUIFrame;
 
@@ -716,6 +717,36 @@ public class Query extends Entity {
 	
 	public void setRadius(int radiuses){
 		InputAgent.processEntity_Keyword_Value(this, radius, Integer.toString(radiuses));
+	}
+	
+	public void setPrint(boolean prints){
+		print.setValueString(String.valueOf(prints));
+		//InputAgent.processEntity_Keyword_Value(this, print, String.valueOf(prints));
+	}
+	
+	public void setZoom(boolean zooms){
+		zoom.setValueString(String.valueOf(zooms));
+		//InputAgent.processEntity_Keyword_Value(this, zoom, String.valueOf(zooms));
+	}
+	
+	public void setOpacity(double opacities){
+		opacity.setValueString(String.valueOf(opacities));
+		//InputAgent.processEntity_Keyword_Value(this, opacity, String.valueOf(opacities));
+	}
+	
+	public void setThickness(int thicknesses){
+		thickness.setValueString(String.valueOf(thicknesses));
+		//InputAgent.processEntity_Keyword_Value(this, thickness, String.valueOf(thicknesses));
+	}
+	
+	public void setPrimaryColor(Color4d colors){
+		primaryColor.setValueString(colors.toString());
+		//InputAgent.processEntity_Keyword_Value(this, primaryColor, colors.toString());
+	}
+	
+	public void setSecondaryColor(Color4d colors){
+		secondaryColor.setValueString(colors.toString());
+		//InputAgent.processEntity_Keyword_Value(this, secondaryColor, colors.toString());
 	}
 }
 
