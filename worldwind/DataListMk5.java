@@ -6,15 +6,19 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class DataListMk5 {
-	HashMap<Object[], Double[]> structure;
+	HashMap<ArrayList<Object>, ArrayList<Double>> structure;
 	
 	public DataListMk5(){
-		structure = new HashMap<Object[], Double[]>();
+		structure = new HashMap<ArrayList<Object>, ArrayList<Double>>();
 	}
 	
 	public void add(Object entity, Object movingEntity, Double gScore, Double fScore){
-		Double[] score = {gScore, fScore};
-		Object[] object = {entity, movingEntity};
+		ArrayList<Double> score = new ArrayList<Double>(); 
+		score.add(gScore);
+		score.add(fScore);
+		ArrayList<Object> object = new ArrayList<Object>(); 
+		object.add(entity);
+		object.add(movingEntity);
 		structure.put(object, score);
 	}
 	
@@ -29,10 +33,12 @@ public class DataListMk5 {
 	}
 	
 	public Object[] getValue(double gScore, double fScore){
-		Double[] score = {gScore, fScore};
-		for (Map.Entry<Object[], Double[]> e : structure.entrySet()) {
-		   if (Arrays.equals(e.getValue(), score)){
-			   return e.getKey();
+		ArrayList<Double> score = new ArrayList<Double>(); 
+		score.add(gScore);
+		score.add(fScore);
+		for (Map.Entry<ArrayList<Object>, ArrayList<Double>> e : structure.entrySet()) {
+		   if (e.getValue().equals(score)){
+			   return e.getKey().toArray();
 		   }
 		}
 		return null;
@@ -46,8 +52,8 @@ public class DataListMk5 {
 	
 	public Double[] getScoresIndex(int index){
 		Double[] score = {Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY};
-		for (Map.Entry<Object[], Double[]> e : structure.entrySet()) {
-			Double[] temp = e.getValue();
+		for (Map.Entry<ArrayList<Object>, ArrayList<Double>> e : structure.entrySet()) {
+			Double[] temp = (Double[]) e.getValue().toArray();
 			if (temp[1] < score[1]){
 			   score = temp;
 		   }
@@ -63,16 +69,16 @@ public class DataListMk5 {
 	public Object[] getObjectsIndex(int index){
 		Double[] score = {Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY};
 		Object[] object = null;
-		for (Map.Entry<Object[], Double[]> e : structure.entrySet()) {
-			Double[] temp = e.getValue();
+		for (Map.Entry<ArrayList<Object>, ArrayList<Double>> e : structure.entrySet()) {
+			Double[] temp = (Double[]) e.getValue().toArray();
 			if (temp[1] < score[1]){
 			   score = temp;
-			   object = e.getKey();
+			   object = e.getKey().toArray();
 		   }
 			else if (temp[1] == score[1]){
 				if(temp[0] < temp[1]){
 					score=temp;
-					object = e.getKey();
+					object = e.getKey().toArray();
 				}
 			}
 		}
@@ -84,9 +90,9 @@ public class DataListMk5 {
 	}
 	
 	public void printMap(){
-		for (Map.Entry<Object[], Double[]> e : structure.entrySet()) {
-			Double[] scores=e.getValue();
-			Object[] objects=e.getKey();
+		for (Map.Entry<ArrayList<Object>, ArrayList<Double>> e : structure.entrySet()) {
+			Double[] scores=(Double[]) e.getValue().toArray();
+			Object[] objects=e.getKey().toArray();
 			System.out.println(scores[0] + " " + scores[1] + " " + objects[0] + " " + objects[1]);
 		}
 	}
@@ -111,6 +117,7 @@ public class DataListMk5 {
 		String cc = "c";
 		String dd = "d";
 		String ee = "e";
+		String ff = "a";
 		
 		list.add(ee, ee, e, e);
 		list.add(aa, aa, a, a);
