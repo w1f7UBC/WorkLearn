@@ -7,7 +7,7 @@ import java.util.PriorityQueue;
 
 import worldwind.DataListMk2;
 import worldwind.DataListMk3;
-
+import worldwind.DataListMk5;
 import DataBase.Database;
 
 import com.AROMA.Logistics.BulkMaterial;
@@ -26,14 +26,11 @@ import com.AROMA.Logistics.Transshipment;
 import com.AROMA.Logistics.DiscreteHandlingLinkedEntity.DijkstraComparator;
 import com.AROMA.Utils.HandyUtils;
 import com.AROMA.Utils.HashMapList;
-
 import com.sandwell.JavaSimulation.FileEntity;
 import com.sandwell.JavaSimulation3D.DisplayEntity;
-
 import com.jaamsim.input.BooleanInput;
 import com.jaamsim.input.EntityInput;
 import com.jaamsim.input.Keyword;
-
 import com.jaamsim.math.Vec3d;
 
 public class RouteManager extends DisplayEntity {
@@ -352,8 +349,8 @@ public class RouteManager extends DisplayEntity {
 		int getc=0;
 		
 		System.out.println("In AStar");
-		DataListMk2 closedset = new DataListMk2();
-		DataListMk2 openset = new DataListMk2();
+		DataListMk5 closedset = new DataListMk5();
+		DataListMk5 openset = new DataListMk5();
 		DataListMk3 camefrom = new DataListMk3();
 		
 		Vec3d originPos = origin.getPosition();
