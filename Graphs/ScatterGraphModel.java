@@ -12,7 +12,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package com.AROMA;
+package Graphs;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,7 +42,7 @@ import com.jaamsim.units.DimensionlessUnit;
 import com.jaamsim.units.Unit;
 import com.sandwell.JavaSimulation.Entity;
 
-public class AROMAGraphModel extends DisplayModel {
+public class ScatterGraphModel extends DisplayModel {
 
 	@Keyword(description = "The text height for the graph title.",
 	         example = "Graph1 TitleTextHeight { 0.05 }")
@@ -219,7 +219,7 @@ public class AROMAGraphModel extends DisplayModel {
 
 	@Override
 	public boolean canDisplayEntity(Entity ent) {
-		return ent instanceof AROMAGraph;
+		return ent instanceof ScatterGraph;
 	}
 
 	private class Binding extends DisplayModelBinding {
@@ -229,7 +229,7 @@ public class AROMAGraphModel extends DisplayModel {
 		protected Vec3d graphOrigin; // bottom left position of the graph area,
 		protected Vec3d graphCenter; // Center point of the graph area
 
-		private AROMAGraph graphObservee;
+		private ScatterGraph graphObservee;
 
 		private List<Vec4d> graphRectPoints = null;
 		private Mat4d graphAreaTrans = null;
@@ -281,7 +281,7 @@ public class AROMAGraphModel extends DisplayModel {
 			graphCenter = new Vec3d();
 
 			try {
-				graphObservee = (AROMAGraph)observee;
+				graphObservee = (ScatterGraph)observee;
 				if (graphObservee != null) {
 					pickingID = graphObservee.getEntityNumber();
 				}
@@ -378,19 +378,19 @@ public class AROMAGraphModel extends DisplayModel {
 			drawYLines(out);
 
 			// Draw the primary series
-			ArrayList<AROMAGraph.SeriesInfo> primarySeries = graphObservee.getPrimarySeries();
+			ArrayList<ScatterGraph.SeriesInfo> primarySeries = graphObservee.getPrimarySeries();
 			for (int i = 0; i < primarySeries.size(); ++i) {
 				drawSeries(primarySeries.get(i), yMin, yMax, xMin, xMax, simTime, out);
 			}
 
 			// Draw the secondary series
-			ArrayList<AROMAGraph.SeriesInfo> secondarySeries = graphObservee.getSecondarySeries();
+			ArrayList<ScatterGraph.SeriesInfo> secondarySeries = graphObservee.getSecondarySeries();
 			for (int i = 0; i < secondarySeries.size(); ++i) {
 			//	drawSeries(secondarySeries.get(i), secYMin, secYMax, secXMin, secXMax, simTime, out);
 			}
 		}
 
-		private void drawSeries(AROMAGraph.SeriesInfo series, double yMinimum, double yMaximum, double xMinimum, double xMaximum, double simTime, ArrayList<RenderProxy> out) {
+		private void drawSeries(ScatterGraph.SeriesInfo series, double yMinimum, double yMaximum, double xMinimum, double xMaximum, double simTime, ArrayList<RenderProxy> out) {
 
 			if (series.numPoints < 2)
 				return; // Nothing to display yet

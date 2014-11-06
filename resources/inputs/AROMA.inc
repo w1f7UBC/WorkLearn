@@ -32,10 +32,7 @@ Define ObjectType {
                     TimeSeries
                     Delay
                     SankyInfo
-                    XYGraph
-                    BarGraphModel
-		    AROMAGraphTester
-                    AROMAGraphModel          
+                    XYGraph       
                   }
                   
 Group                       	JavaClass { com.sandwell.JavaSimulation.Group               } Palette { 'AROMA' } DragAndDrop 	{ FALSE }
@@ -70,21 +67,8 @@ LoadingBay                  	JavaClass { com.AROMA.Logistics.LoadingBay         
 Delay                       	JavaClass { com.AROMA.Logistics.Delay                       } Palette { 'AROMA' } DragAndDrop	{ FALSE }
 EntitySource                	JavaClass { com.AROMA.Logistics.EntitySource                } Palette { 'AROMA' } DragAndDrop 	{ FALSE }
 EntitySink                  	JavaClass { com.AROMA.Logistics.EntitySink                  } Palette { 'AROMA' } DragAndDrop 	{ FALSE }
-SankyInfo                  	JavaClass { com.AROMA.Logistics.SankeyInfo                  } Palette { 'AROMA' } DragAndDrop 	{ FALSE }
-AROMAGraphTester	   	JavaClass { com.AROMA.AROMAGraphTester						} Palette { 'AROMA' } DragAndDrop 	{ TRUE  }
-AROMAGraphModel		   	JavaClass { com.AROMA.AROMAGraphModel						} Palette { 'AROMA' } DragAndDrop 	{ FALSE }
-BarGraphModel          		JavaClass { com.AROMA.DisplayModel.BarGraphModel            } Palette { 'AROMA' } DragAndDrop 	{ FALSE }  
+SankyInfo                  		JavaClass { com.AROMA.Logistics.SankeyInfo                  } Palette { 'AROMA' } DragAndDrop 	{ FALSE }
 
-Define AROMAGraphModel	   	{ AROMAGraphModelDefault	}
-Define BarGraphModel       	{ BarGraphModelDefault     	}
-Define ReportAgent 	 	{ Report 			}
+Define ReportAgent 	 		{ Report 			}
 Define SimulationManager	{ PlanningManager 		}
 Define RouteManager 		{ TransportationManager 	}
-
-Define ObjectType {
-			AROMAGraph
-			AROMABarGraph
-		   }
-				
-AROMAGraph			  			JavaClass { com.AROMA.AROMAGraph							} Palette { 'AROMA' } DefaultDisplayModel 	{ AROMAGraphModelDefault 				}
-AROMABarGraph						JavaClass { com.AROMA.AROMABarGraph							} Palette { 'AROMA' } DefaultDisplayModel 	{ BarGraphModelDefault     				}

@@ -1,4 +1,4 @@
-package com.AROMA.DisplayModel;
+package Graphs;
 
 /*
  * JaamSim Discrete Event Simulation
@@ -18,7 +18,6 @@ package com.AROMA.DisplayModel;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.AROMA.AROMABarGraph;
 import com.jaamsim.DisplayModels.DisplayModel;
 import com.jaamsim.DisplayModels.TextModel;
 import com.jaamsim.controllers.RenderManager;
@@ -222,7 +221,7 @@ public class BarGraphModel extends DisplayModel {
 
 	@Override
 	public boolean canDisplayEntity(Entity ent) {
-		return ent instanceof AROMABarGraph;
+		return ent instanceof BarGraph;
 	}
 
 	private class Binding extends DisplayModelBinding {
@@ -232,7 +231,7 @@ public class BarGraphModel extends DisplayModel {
 		protected Vec3d graphOrigin; // bottom left position of the graph area,
 		protected Vec3d graphCenter; // Center point of the graph area
 
-		private AROMABarGraph graphObservee;
+		private BarGraph graphObservee;
 
 		private List<Vec4d> graphRectPoints = null;
 		private Mat4d graphAreaTrans = null;
@@ -284,7 +283,7 @@ public class BarGraphModel extends DisplayModel {
 			graphCenter = new Vec3d();
 
 			try {
-				graphObservee = (AROMABarGraph)observee;
+				graphObservee = (BarGraph)observee;
 				if (graphObservee != null) {
 
 					pickingID = graphObservee.getEntityNumber();
@@ -382,19 +381,19 @@ public class BarGraphModel extends DisplayModel {
 			drawYLines(out);
 
 			// Draw the primary series
-			ArrayList<AROMABarGraph.SeriesInfo> primarySeries = graphObservee.getPrimarySeries();
+			ArrayList<BarGraph.SeriesInfo> primarySeries = graphObservee.getPrimarySeries();
 			for (int i = 0; i < primarySeries.size(); ++i) {
 				drawSeries(primarySeries.get(i),i, yMin, yMax, simTime, out,0.0);
 			}
 
 			// Draw the secondary series
-			ArrayList<AROMABarGraph.SeriesInfo> secondarySeries = graphObservee.getSecondarySeries();
+			ArrayList<BarGraph.SeriesInfo> secondarySeries = graphObservee.getSecondarySeries();
 			for (int i = 0; i < secondarySeries.size(); ++i) {
 				drawSeries(secondarySeries.get(i),i, secYMin, secYMax, simTime, out, 0.15);
 			}
 		}
 
-		private void drawSeries(AROMABarGraph.SeriesInfo series,int index, double yMinimum, double yMaximum, double simTime, ArrayList<RenderProxy> out,double margin) {
+		private void drawSeries(BarGraph.SeriesInfo series,int index, double yMinimum, double yMaximum, double simTime, ArrayList<RenderProxy> out,double margin) {
 			if (series.numPoints < 2)
 				return; // Nothing to display yet
 

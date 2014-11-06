@@ -1,19 +1,4 @@
-/*
- * JaamSim Discrete Event Simulation
- * Copyright (C) 2009-2012 Ausenco Engineering Canada Inc.
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- */
-package com.AROMA;
-
+package Graphs;
 
 import java.util.ArrayList;
 
@@ -27,12 +12,16 @@ import com.jaamsim.input.IntegerInput;
 import com.jaamsim.input.Keyword;
 import com.jaamsim.input.OutputHandle;
 import com.jaamsim.input.OutputListInput;
+
+import com.jaamsim.input.StringListInput;
 import com.jaamsim.input.ValueListInput;
 import com.jaamsim.math.Color4d;
 import com.jaamsim.units.DimensionlessUnit;
+import com.jaamsim.units.TimeUnit;
 import com.jaamsim.units.Unit;
 
-public class AROMAGraph extends AROMAGraphBasics {
+
+public class BarGraph extends BarGraphBasics  {
 
 	// Key Inputs category
 
@@ -44,20 +33,20 @@ public class AROMAGraph extends AROMAGraphBasics {
 	@Keyword(description = "One or more sources of data to be graphed on the primary y-axis.\n" +
 			"Each source is graphed as a separate line and is specified by an Entity and its Output.",
      example = "Graph1 DataSource { { Entity1 Output1 } { Entity2 Output2 } }")
-	protected final OutputListInput<Double> dataSourceX;
+	protected final OutputListInput<Double> dataSource;
 
-	@Keyword(description = "One or more sources of data to be graphed on the primary y-axis.\n" +
-			"Each source is graphed as a separate line and is specified by an Entity and its Output.",
-     example = "Graph1 DataSource { { Entity1 Output1 } { Entity2 Output2 } }")
-	protected final OutputListInput<Double> dataSourceY;
-	
 	@Keyword(description = "A list of colors for the line series to be displayed.\n" +
 			"Each color can be specified by either a color keyword or an RGB value.\n" +
 			"For multiple lines, each color must be enclosed in braces.\n" +
 			"If only one color is provided, it is used for all the lines.",
 	         example = "Graph1 LineColors { { red } { green } }")
 	protected final ColorListInput lineColorsList;
-
+	
+	@Keyword(description = "A list of names for the bar series to be displayed.\n", 
+	         example = "Graph1 BarNames { { 'bar1' } { 'bar2'} }")
+	protected final StringListInput barNamesList;
+	
+	
 	@Keyword(description = "A list of line widths (in pixels) for the line series to be displayed.\n" +
 			"If only one line width is provided, it is used for all the lines.",
 	         example = "Graph1 LineWidths { 2 1 }")
@@ -74,7 +63,11 @@ public class AROMAGraph extends AROMAGraphBasics {
 			"If only one color is provided, it is used for all the lines.",
 	         example = "Graph1 SecondaryLineColors { { red } { green } }")
 	protected final ColorListInput secondaryLineColorsList;
-
+	
+	@Keyword(description = "A list of names for the bar series to be displayed.\n", 
+	         example = "Graph1 BarNames { { 'bar1' } { 'bar2'} }")
+	protected final StringListInput secondaryBarNamesList;
+	
 	@Keyword(description = "A list of line widths (in pixels) for the seconardy line series to be displayed.\n" +
 			"If only one line width is provided, it is used for all the lines.",
 	         example = "Graph1 SecondaryLineWidths { 2 1 }")
@@ -87,11 +80,8 @@ public class AROMAGraph extends AROMAGraphBasics {
 		numberOfPoints.setValidRange(0, Integer.MAX_VALUE);
 		this.addInput(numberOfPoints);
 
-		dataSourceX = new OutputListInput<Double>(Double.class, "DataSourceX", "Key Inputs", null);
-		this.addInput(dataSourceX);
-		
-		dataSourceY = new OutputListInput<Double>(Double.class, "DataSourceY", "Key Inputs", null);
-		this.addInput(dataSourceY);
+		dataSource = new OutputListInput<Double>(Double.class, "DataSource", "Key Inputs", null);
+		this.addInput(dataSource);
 
 		ArrayList<Color4d> defLineColor = new ArrayList<Color4d>(0);
 		defLineColor.add(ColourInput.getColorWithName("red"));
@@ -99,7 +89,13 @@ public class AROMAGraph extends AROMAGraphBasics {
 		lineColorsList.setValidCountRange(1, Integer.MAX_VALUE);
 		this.addInput(lineColorsList);
 		this.addSynonym(lineColorsList, "LineColors");
-
+		
+		ArrayList<String> defBarName=new ArrayList<String>();
+		defBarName.add("Default Name");
+		barNamesList=new StringListInput("BarNames", "Key Inputs", defBarName);
+		this.addInput(barNamesList);
+		this.addSynonym(barNamesList, "BarNames");
+		
 		DoubleVector defLineWidths = new DoubleVector(1);
 		defLineWidths.add(1.0);
 		lineWidths = new ValueListInput("LineWidths", "Key Inputs", defLineWidths);
@@ -116,7 +112,13 @@ public class AROMAGraph extends AROMAGraphBasics {
 		secondaryLineColorsList.setValidCountRange(1, Integer.MAX_VALUE);
 		this.addInput(secondaryLineColorsList);
 		this.addSynonym(secondaryLineColorsList, "SecondaryLineColors");
-
+		
+		ArrayList<String> defSecondaryBarName=new ArrayList<String>();
+		defBarName.add("Default Name");
+		secondaryBarNamesList=new StringListInput("BarNames", "Key Inputs", defSecondaryBarName);
+		this.addInput(secondaryBarNamesList);
+		this.addSynonym(secondaryBarNamesList, "BarNames");
+		
 		DoubleVector defSecondaryLineWidths = new DoubleVector(1);
 		defSecondaryLineWidths.add(1.0);
 		secondaryLineWidths = new ValueListInput("SecondaryLineWidths", "Key Inputs", defSecondaryLineWidths);
@@ -125,31 +127,18 @@ public class AROMAGraph extends AROMAGraphBasics {
 		this.addInput(secondaryLineWidths);
 	}
 
-	public AROMAGraph() {
+	public BarGraph() {
 
 		timeTrace = true;
-		// this.setXAxisUnit(TimeUnit.class);
+		this.setXAxisUnit(TimeUnit.class);
 	}
 
 	@Override
 	public void updateForInput( Input<?> in ) {
 		super.updateForInput( in );
 
-		if (in == dataSourceX) {
-			ArrayList<OutputHandle> outs = dataSourceX.getValue();
-			if (outs.isEmpty())
-				return;
-			Class<? extends Unit> temp = outs.get(0).getUnitType();
-			for (int i=1; i<outs.size(); i++) {
-				if( outs.get(i).getUnitType() != temp )
-					throw new InputErrorException("All inputs for keyword DataSource must have the same unit type./n" +
-							"The unit type for the first source is %s", temp);
-			}
-			this.setXAxisUnit(temp);
-		}
-
-		if (in == dataSourceY) {
-			ArrayList<OutputHandle> outs = dataSourceY.getValue();
+		if (in == dataSource) {
+			ArrayList<OutputHandle> outs = dataSource.getValue();
 			if (outs.isEmpty())
 				return;
 			Class<? extends Unit> temp = outs.get(0).getUnitType();
@@ -160,7 +149,7 @@ public class AROMAGraph extends AROMAGraphBasics {
 			}
 			this.setYAxisUnit(temp);
 		}
-		
+
 		if (in == secondaryDataSource) {
 			ArrayList<OutputHandle> outs = secondaryDataSource.getValue();
 			showSecondaryYAxis = ! outs.isEmpty();
@@ -181,7 +170,15 @@ public class AROMAGraph extends AROMAGraphBasics {
 				info.lineColour = getLineColor(i, lineColorsList.getValue());
 			}
 		}
-
+		if(in==barNamesList)
+		{
+			for(int i=0;i<primarySeries.size(); ++i)
+			{
+				SeriesInfo info =primarySeries.get(i);
+				info.barName= barNamesList.getValue().get(i);
+			}
+		}
+		
 		if (in == lineWidths) {
 			for (int i = 0; i < primarySeries.size(); ++ i) {
 				SeriesInfo info = primarySeries.get(i);
@@ -195,7 +192,14 @@ public class AROMAGraph extends AROMAGraphBasics {
 				info.lineColour = getLineColor(i, secondaryLineColorsList.getValue());
 			}
 		}
-
+		if(in==secondaryBarNamesList)
+		{
+			for(int i=0;i<secondarySeries.size(); ++i)
+			{
+				SeriesInfo info =secondarySeries.get(i);
+				info.barName= secondaryBarNamesList.getValue().get(i);
+			}
+		}
 		if (in == secondaryLineWidths) {
 			for (int i = 0; i < secondarySeries.size(); ++ i) {
 				SeriesInfo info = secondarySeries.get(i);
@@ -210,18 +214,21 @@ public class AROMAGraph extends AROMAGraphBasics {
 		super.validate();
 
 		if (lineColorsList.getValue().size() > 1)
-			Input.validateIndexedLists(dataSourceX, lineColorsList);
-			Input.validateIndexedLists(dataSourceY, lineColorsList);
-
+			Input.validateIndexedLists(dataSource, lineColorsList);
+		
 		if (secondaryLineColorsList.getValue().size() > 1)
 			Input.validateIndexedLists(secondaryDataSource, secondaryLineColorsList);
 
 		if (lineWidths.getValue().size() > 1)
-			Input.validateIndexedLists(dataSourceX, lineWidths);
-			Input.validateIndexedLists(dataSourceY, lineWidths);
+			Input.validateIndexedLists(dataSource, lineWidths);
 
 		if (secondaryLineWidths.getValue().size() > 1)
 			Input.validateIndexedLists(secondaryDataSource, secondaryLineWidths);
+	
+		if(barNamesList.getValue().size()>1)
+			Input.validateIndexedLists(dataSource, barNamesList);
+		if(secondaryBarNamesList.getValue().size()>1)
+			Input.validateIndexedLists(secondaryDataSource, secondaryBarNamesList);
 	}
 
 	@Override
@@ -232,21 +239,20 @@ public class AROMAGraph extends AROMAGraphBasics {
 		secondarySeries.clear();
 
 		// Populate the primary series data structures
-		populateSeriesInfo(primarySeries, dataSourceX, dataSourceY);
-		//populateSeriesInfo(secondarySeries, secondaryDataSource);
+		populateSeriesInfo(primarySeries, dataSource);
+		populateSeriesInfo(secondarySeries, secondaryDataSource);
 	}
 
-	private void populateSeriesInfo(ArrayList<SeriesInfo> infos, OutputListInput<Double> dataX, OutputListInput<Double> dataY) {
-		ArrayList<OutputHandle> outsX = dataX.getValue();
-		ArrayList<OutputHandle> outsY = dataY.getValue();
-		if( outsX == null || outsY == null )
+	private void populateSeriesInfo(ArrayList<SeriesInfo> infos, OutputListInput<Double> data) {
+		ArrayList<OutputHandle> outs = data.getValue();
+		if( outs == null )
 			return;
-		for (int outInd = 0; outInd < outsX.size(); ++outInd) {
+		for (int outInd = 0; outInd < outs.size(); ++outInd) {
 			SeriesInfo info = new SeriesInfo();
-			info.outX = outsX.get(outInd);
-			info.outY = outsY.get(outInd);
-			info.xValues = new double[numberOfPoints.getValue()];
+			info.out = outs.get(outInd);
 			info.yValues = new double[numberOfPoints.getValue()];
+			info.xValues = new double[numberOfPoints.getValue()];
+
 			infos.add(info);
 		}
 	}
@@ -259,12 +265,14 @@ public class AROMAGraph extends AROMAGraphBasics {
 		for (int i = 0; i < primarySeries.size(); ++ i) {
 			SeriesInfo info = primarySeries.get(i);
 			info.lineColour = getLineColor(i, lineColorsList.getValue());
+			info.barName= barNamesList.getValue().get(i);
 			info.lineWidth = getLineWidth(i, lineWidths.getValue());
 		}
 
 		for (int i = 0; i < secondarySeries.size(); ++i) {
 			SeriesInfo info = secondarySeries.get(i);
 			info.lineColour = getLineColor(i, secondaryLineColorsList.getValue());
+			info.barName= secondaryBarNamesList.getValue().get(i);
 			info.lineWidth = getLineWidth(i, secondaryLineWidths.getValue());
 		}
 
@@ -310,8 +318,8 @@ public class AROMAGraph extends AROMAGraphBasics {
 		for( int i = 0; i * xInterval < xAxisEnd.getValue(); i++ ) {
 			double t = i * xInterval;
 			info.numPoints++;
-			info.xValues[info.numPoints] = this.getCurrentValue(t, info)[0];
-			info.yValues[info.numPoints] = this.getCurrentValue(t, info)[1];
+			info.xValues[info.numPoints] = t;
+			info.yValues[info.numPoints] = this.getCurrentValue(t, info);
 		}
 	}
 
@@ -321,9 +329,9 @@ public class AROMAGraph extends AROMAGraphBasics {
 	protected void extraProcessing() {}
 
 	private static class ProcessGraphTarget extends ProcessTarget {
-		final AROMAGraph graph;
+		final BarGraph graph;
 
-		ProcessGraphTarget(AROMAGraph graph) {
+		ProcessGraphTarget(BarGraph graph) {
 			this.graph = graph;
 		}
 
@@ -361,9 +369,9 @@ public class AROMAGraph extends AROMAGraphBasics {
 			processGraph(info);
 		}
 
-		//double xLength = xAxisEnd.getValue() - xAxisStart.getValue();
-		//double xInterval = xLength / (numberOfPoints.getValue() - 1);
-		scheduleProcess(1, 7, processGraph);
+		double xLength = xAxisEnd.getValue() - xAxisStart.getValue();
+		double xInterval = xLength / (numberOfPoints.getValue() - 1);
+		scheduleProcess(xInterval, 7, processGraph);
 	}
 
 	/**
@@ -373,22 +381,22 @@ public class AROMAGraph extends AROMAGraphBasics {
 	public void processGraph(SeriesInfo info) {
 
 		// Entity has been removed
-		if(info.outX == null || info.outY == null) {
+		if(info.out == null) {
 			return;
 		}
 
-		double t = getSimTime();// + xAxisEnd.getValue();
-		double[] presentValue = this.getCurrentValue(t, info);
-		if (info.numPoints < info.yValues.length || info.numPoints < info.xValues.length) {
-			info.xValues[info.numPoints] = presentValue[0];
-			info.yValues[info.numPoints] = presentValue[1];
+		double t = getSimTime() + xAxisEnd.getValue();
+		double presentValue = this.getCurrentValue(t, info);
+		if (info.numPoints < info.yValues.length) {
+			info.xValues[info.numPoints] = t;
+			info.yValues[info.numPoints] = presentValue;
 			info.numPoints++;
 		}
 		else {
 			System.arraycopy(info.xValues, 1, info.xValues, 0, info.xValues.length - 1);
 			System.arraycopy(info.yValues, 1, info.yValues, 0, info.yValues.length - 1);
-			info.xValues[info.xValues.length - 1] = presentValue[0];
-			info.yValues[info.yValues.length - 1] = presentValue[1];
+			info.xValues[info.xValues.length - 1] = t;
+			info.yValues[info.yValues.length - 1] = presentValue;
 		}
 	}
 
@@ -396,9 +404,8 @@ public class AROMAGraph extends AROMAGraphBasics {
 	 * Return the current value for the series
 	 * @return double
 	 */
-	protected double[] getCurrentValue(double simTime, SeriesInfo info) {
-		double[] target = {info.outX.getValueAsDouble(simTime, 0.0), info.outY.getValueAsDouble(simTime, 0.0)};
-		return target;
+	protected double getCurrentValue(double simTime, SeriesInfo info) {
+		return info.out.getValueAsDouble(simTime, 0.0);
 	}
 
 	public ArrayList<SeriesInfo> getPrimarySeries() {

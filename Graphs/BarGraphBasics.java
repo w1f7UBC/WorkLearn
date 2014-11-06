@@ -1,18 +1,4 @@
-/*
- * JaamSim Discrete Event Simulation
- * Copyright (C) 2009-2013 Ausenco Engineering Canada Inc.
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- */
-package com.AROMA;
+package Graphs;
 
 import java.util.ArrayList;
 
@@ -34,7 +20,8 @@ import com.jaamsim.units.Unit;
 import com.jaamsim.units.UserSpecifiedUnit;
 import com.sandwell.JavaSimulation3D.DisplayEntity;
 
-public abstract class AROMAGraphBasics extends DisplayEntity {
+
+public abstract class BarGraphBasics extends DisplayEntity {
 
 	/**
 	 * A struct containing all the information pertaining to a specific series
@@ -43,10 +30,10 @@ public abstract class AROMAGraphBasics extends DisplayEntity {
 		public double[] yValues;
 		public double[] xValues;
 		public int numPoints; // number of points to be graphed
-		public OutputHandle outX; // The source of the data for the series
-		public OutputHandle outY;
+		public OutputHandle out;
 		public double lineWidth;
 		public Color4d lineColour;
+		public String barName;
 	}
 
 	protected final ArrayList<SeriesInfo> primarySeries;
@@ -180,18 +167,20 @@ public abstract class AROMAGraphBasics extends DisplayEntity {
 
 		xAxisStart = new ValueInput("XAxisStart", "X-Axis", -60.0d);
 		xAxisStart.setUnitType(UserSpecifiedUnit.class);
+		xAxisStart.setValidRange(Double.NEGATIVE_INFINITY, 1.0e-6);
 		this.addInput(xAxisStart);
 
 		xAxisEnd = new ValueInput("XAxisEnd", "X-Axis", 0.0d);
 		xAxisEnd.setUnitType(UserSpecifiedUnit.class);
+		xAxisEnd.setValidRange(0.0, Double.POSITIVE_INFINITY);
 		this.addInput(xAxisEnd);
 
 		xAxisInterval = new ValueInput("XAxisInterval", "X-Axis", 10.0d);
 		xAxisInterval.setUnitType(UserSpecifiedUnit.class);
-		xAxisInterval.setValidRange(1.0e-10, Double.POSITIVE_INFINITY);
+		xAxisInterval.setValidRange(1.0e-6, Double.POSITIVE_INFINITY);
 		this.addInput(xAxisInterval);
 
-		xAxisLabelFormat = new FormatInput("XAxisLabelFormat", "X-Axis", "%.2f");
+		xAxisLabelFormat = new FormatInput("XAxisLabelFormat", "X-Axis", "%.0fs");
 		this.addInput(xAxisLabelFormat);
 
 		DoubleVector defXLines = new DoubleVector();
@@ -271,7 +260,7 @@ public abstract class AROMAGraphBasics extends DisplayEntity {
 		this.addInput(secondaryYAxisLabelFormat);
 	}
 
-	public AROMAGraphBasics() {
+	public BarGraphBasics() {
 
 		primarySeries = new ArrayList<SeriesInfo>();
 		secondarySeries = new ArrayList<SeriesInfo>();
