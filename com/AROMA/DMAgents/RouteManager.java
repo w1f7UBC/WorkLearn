@@ -173,8 +173,8 @@ public class RouteManager extends DisplayEntity {
 		if (tempRoute != null)
 				return tempRoute;
 		else
-			//return computeAStarPath(origin, destination, movingEntity, bulkMaterial, routingRule,transshipmentAllowed, weightCap, tabuList);
-			return computeDijkstraPath(origin, destination, movingEntity, bulkMaterial, routingRule,transshipmentAllowed, weightCap, tabuList);
+			return computeAStarPath(origin, destination, movingEntity, bulkMaterial, routingRule,transshipmentAllowed, weightCap, tabuList);
+			//return computeDijkstraPath(origin, destination, movingEntity, bulkMaterial, routingRule,transshipmentAllowed, weightCap, tabuList);
 	}
 
 	// ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -366,6 +366,7 @@ public class RouteManager extends DisplayEntity {
 			openedEntities++;
 			getc+=2;
 			Object[] current = openset.getObjectsIndex(0);
+			System.out.println("object " + current[0] + current[1]);
 			DiscreteHandlingLinkedEntity currentEntity = (DiscreteHandlingLinkedEntity) current[0];
 			MovingEntity currentME = (MovingEntity) current[1];
 			Double[] currentScores = openset.getScoresIndex(0);
