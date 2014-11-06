@@ -60,6 +60,22 @@ public class DataListMk5 {
 		return score;
 	}
 	
+	public Object[] getObjectsIndex(int index){
+		Double[] score = {Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY};
+		for (Map.Entry<Object[], Double[]> e : structure.entrySet()) {
+			Double[] temp = e.getValue();
+			if (temp[1] < score[1]){
+			   score = temp;
+		   }
+			else if (temp[1] == score[1]){
+				if(temp[0] < temp[1]){
+					score=temp;
+				}
+			}
+		}
+		return structure.get(score);
+	}
+	
 	public boolean isEmpty(){
 		return structure.isEmpty();
 	}
