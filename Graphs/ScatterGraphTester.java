@@ -1,4 +1,4 @@
-package com.AROMA;
+package Graphs;
 
 import com.jaamsim.input.Input;
 import com.jaamsim.input.Keyword;
@@ -8,7 +8,7 @@ import com.jaamsim.input.ValueInput;
 import com.jaamsim.units.UserSpecifiedUnit;
 import com.sandwell.JavaSimulation.Entity;
 
-public class AROMAGraphTester extends Entity {
+public class ScatterGraphTester extends Entity {
 	@Keyword(description = "The number of data points that can be displayed on the graph.\n" +
 			" This parameter determines the resolution of the graph.",
 	         example = "Graph1 NumberOfPoints { 200 }")

@@ -2,112 +2,73 @@ package worldwind;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
-public class DataListMk2 {
-	ArrayList<Double[]> scores;
-	ArrayList<Object[]> objects;
+public class DataListMk5 {
+	HashMap<Object[], Double[]> structure;
 	
-	public DataListMk2(){
-		scores=new ArrayList<Double[]>();
-		objects=new ArrayList<Object[]>();
+	public DataListMk5(){
+		structure = new HashMap<Object[], Double[]>();
 	}
 	
 	public void add(Object entity, Object movingEntity, Double gScore, Double fScore){
 		Double[] score = {gScore, fScore};
 		Object[] object = {entity, movingEntity};
-		if (scores.isEmpty() && objects.isEmpty()){
-			scores.add(score);
-			objects.add(object);
-		}
-		else {
-			for(int x=0; x<scores.size(); x++){
-				int fCompare = Double.compare(fScore, scores.get(x)[1]);
-				if (fCompare>0){
-					continue;
-				}
-				else if (fCompare<0){
-					scores.add(x, score);
-					objects.add(x, object);
-					return;
-				}
-				else {
-					int gCompare = Double.compare(gScore, scores.get(x)[0]);
-					if (gCompare>0){
-						continue;
-					}
-					if (gCompare<0){
-						scores.add(x, score);
-						objects.add(x, object);
-						return;
-					}
-					else{
-						scores.add(x, score);
-						objects.add(x, object);
-						return;
-					}
-				}
-			}
-			scores.add(score);
-			objects.add(object);
-		}
+		structure.put(object, score);
 	}
 	
 	public void remove(Object entity, Object movingEntity){
 		Object[] object = {entity, movingEntity};
-		for (int x=0; x<objects.size(); x++){
-			if (Arrays.equals(objects.get(x), object)){
-				scores.remove(x);
-				objects.remove(x);
-				return;
-			}
-		}
+		structure.remove(object);
 	}
 	
 	public Boolean contains(Object entity, Object movingEntity){
 		Object[] object = {entity, movingEntity};
-		for (int x=0; x<objects.size(); x++){
-			if (Arrays.equals(objects.get(x), object)){
-				return true;
-			}
-		}
-		return false;
+		return structure.containsKey(object);
 	}
 	
 	public Object[] getValue(double gScore, double fScore){
 		Double[] score = {gScore, fScore};
-		for (int x=0; x<scores.size(); x++){
-			if (Arrays.equals(scores.get(x), score)){
-				return objects.get(x);
-			}
+		for (Map.Entry<Object[], Double[]> e : structure.entrySet()) {
+		   if (Arrays.equals(e.getValue(), score)){
+			   return e.getKey();
+		   }
 		}
 		return null;
 	}
 	
 	public Double[] getKey(Object entity, Object movingEntity){
 		Object[] object = {entity, movingEntity};
-		for (int x=0; x<objects.size(); x++){
-			if (Arrays.equals(objects.get(x), object)){
-				return scores.get(x);
-			}
-		}
+		structure.get(object);
 		return null;
 	}
 	
 	public Double[] getScoresIndex(int index){
-		return scores.get(index);
-	}
-	
-	public Object[] getObjectsIndex(int index){
-		return objects.get(index);
+		Double[] score = {Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY};
+		for (Map.Entry<Object[], Double[]> e : structure.entrySet()) {
+			Double[] temp = e.getValue();
+			if (temp[1] < score[1]){
+			   score = temp;
+		   }
+			else if (temp[1] == score[1]){
+				if(temp[0] < temp[1]){
+					score=temp;
+				}
+			}
+		}
+		return score;
 	}
 	
 	public boolean isEmpty(){
-		return scores.isEmpty();
+		return structure.isEmpty();
 	}
 	
 	public void printMap(){
-		for (int x=0; x<scores.size(); x++){
-			System.out.println(scores.get(x)[0] + " " + scores.get(x)[1] + " " + objects.get(x)[0] + " " + objects.get(x)[1]);
+		for (Map.Entry<Object[], Double[]> e : structure.entrySet()) {
+			Double[] scores=e.getValue();
+			Object[] objects=e.getKey();
+			System.out.println(scores[0] + " " + scores[1] + " " + objects[0] + " " + objects[1]);
 		}
 	}
 	
@@ -120,6 +81,7 @@ public class DataListMk2 {
 		double c = 3;
 		double d = 4;
 		double e = 5;
+		double f = 6;
 		
 		double aaa = 1;
 		double bbb = 2;
@@ -130,6 +92,7 @@ public class DataListMk2 {
 		String dd = "d";
 		String ee = "e";
 		
+		list.add(ee, ee, e, e);
 		list.add(aa, aa, a, a);
 		list.add(cc, cc, c, c);
 		list.add(bb, bb, b, b);
@@ -139,6 +102,8 @@ public class DataListMk2 {
 		list.add(aa, bb, a, c);
 		list.add(aa, bb, a, c);
 		list.add(aa, bb, a, b);
+		list.add(ee, ee, a, e);
+		list.add(ee, ee, f, e);
 		list.printMap();
 		System.out.println("Does list contain c, c " + list.contains(cc, cc));
 		System.out.println(" ");

@@ -120,7 +120,7 @@ public class WorldView extends Entity {
     	orbitView.setHeading(newHeading);
     	orbitView.setPitch(newPitch);
     }
-
+/*
     @Override
     public void startUp() {
     	
@@ -141,7 +141,7 @@ public class WorldView extends Entity {
 			this.scheduleProcess(time, 3, new ReflectionTarget(this, "scheduleQuery", q));
 		}
     }
-
+*/
 	@Override
 	public void updateForInput(Input<?> in) {
 		super.updateForInput(in);

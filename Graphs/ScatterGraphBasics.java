@@ -12,7 +12,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package com.AROMA;
+package Graphs;
 
 import java.util.ArrayList;
 
@@ -34,7 +34,7 @@ import com.jaamsim.units.Unit;
 import com.jaamsim.units.UserSpecifiedUnit;
 import com.sandwell.JavaSimulation3D.DisplayEntity;
 
-public abstract class AROMAGraphBasics extends DisplayEntity {
+public abstract class ScatterGraphBasics extends DisplayEntity {
 
 	/**
 	 * A struct containing all the information pertaining to a specific series
@@ -271,7 +271,7 @@ public abstract class AROMAGraphBasics extends DisplayEntity {
 		this.addInput(secondaryYAxisLabelFormat);
 	}
 
-	public AROMAGraphBasics() {
+	public ScatterGraphBasics() {
 
 		primarySeries = new ArrayList<SeriesInfo>();
 		secondarySeries = new ArrayList<SeriesInfo>();

@@ -48,6 +48,7 @@ import worldwind.WorldWindFrame.WorkerThread;
 
 import com.AROMA.AROMAEntity;
 import com.AROMA.Input.InputAgent_Rolos;
+import com.AROMA.Logistics.DiscreteHandlingLinkedEntity;
 import com.AROMA.Utils.HandyUtils;
 import com.jaamsim.input.BooleanInput;
 import com.jaamsim.input.ColourInput;
@@ -60,6 +61,7 @@ import com.jaamsim.input.StringInput;
 import com.jaamsim.input.ValueInput;
 
 
+import com.jaamsim.math.Color4d;
 import com.sandwell.JavaSimulation.Entity;
 import com.sandwell.JavaSimulation3D.GUIFrame;
 
@@ -73,6 +75,9 @@ public class Query extends Entity {
 	}
 	@Keyword(description = "target databaseobject of the query")
 	private DatabaseInput database;
+	
+	@Keyword(description = "turn on/off automatic querybuilding")
+	private BooleanInput queryBuild;
 	
 	@Keyword(description = "target table within database to query off of")
 	private DatabaseInput table;
@@ -128,6 +133,9 @@ public class Query extends Entity {
 	{
 		database = new DatabaseInput("TargetDatabase","Query Properties", "None");
 		this.addInput(database);
+	
+		queryBuild = new BooleanInput("AutoQueryBuilding", "Query Properties", false);
+		this.addInput(queryBuild);
 		
 		table = new DatabaseInput("TargetTable", "Query Properties", "None");
 		this.addInput(table);
@@ -170,10 +178,10 @@ public class Query extends Entity {
 		opacity = new ValueInput("Opacity", "Display Properties", 0.03);
 		this.addInput(opacity);
 		
-		print = new BooleanInput("Print results", "Display Properties", true);
+		print = new BooleanInput("Printresults", "Display Properties", true);
 		this.addInput(print);
 		
-		printOrientation = new BooleanInput("Print orientation", "Display Properties", true);
+		printOrientation = new BooleanInput("Printorientation", "Display Properties", true);
 		this.addInput(printOrientation);
 		
 		latitudeColumn = new StringInput("LatitudeColumn", "Query Properties", "latitude");
@@ -184,25 +192,69 @@ public class Query extends Entity {
 	}
 	
 	private Database targetDatabase;
-    
+	private boolean drawVar=draw.getValue();
+	private boolean zoomVar=zoom.getValue();
+	private boolean printVar=print.getValue();
+	private boolean orientVar=printOrientation.getValue();
+	private Color4d priColVar=primaryColor.getValue();
+	private Color4d secColVar=secondaryColor.getValue();
+	private int thickVar=thickness.getValue();
+	private double opacityVar=opacity.getValue();
+	
 	@Override
 	public void updateForInput(Input<?> in) {
 		super.updateForInput(in);
 		if(in==database){
 			targetDatabase=Database.getDatabase(database.getValue());
-			table.updateValues(getResultSet("SELECT table_name FROM information_schema.tables WHERE table_schema='public' ORDER BY table_name"));
+		}
+		if(in==queryBuild){
+			if (queryBuild.getValue()==true){
+				table.updateValues(getResultSet("SELECT table_name FROM information_schema.tables WHERE table_schema='public' ORDER BY table_name"));
+			}
 		}
 		if(in==table){
-			column.updateValues(getResultSet("SELECT column_name FROM information_schema.columns WHERE table_name='" + table.getValue()+"' ORDER BY column_name"));
+			if (queryBuild.getValue()==true){
+				column.updateValues(getResultSet("SELECT column_name FROM information_schema.columns WHERE table_name='" + table.getValue()+"' ORDER BY column_name"));
+			}
 		}
 		if(in==column){
-			row.updateValues(getResultSet("SELECT " + column.getValue() +" FROM " + table.getValue() + " ORDER BY " + column.getValue()));
+			if (queryBuild.getValue()==true){
+				row.updateValues(getResultSet("SELECT " + column.getValue() +" FROM " + table.getValue() + " ORDER BY " + column.getValue()));
+			}
 		}
 		if(in==radius){
-			QueryFrame.setSliderValue(radius.getValue());
+			if (queryBuild.getValue()==true){
+				QueryFrame.setSliderValue(radius.getValue());
+			}
 		}
 		if(in==mode){
-			QueryFrame.setMode(mode.getValue());
+			if (queryBuild.getValue()==true){
+				QueryFrame.setMode(mode.getValue());
+			}
+		}
+		if(in==draw){
+			drawVar=draw.getValue();
+		}
+		if(in==zoom){
+			zoomVar=zoom.getValue();
+		}
+		if(in==print){
+			printVar=print.getValue();
+		}
+		if(in==printOrientation){
+			orientVar=printOrientation.getValue();
+		}
+		if(in==primaryColor){
+			priColVar=primaryColor.getValue();
+		}
+		if(in==secondaryColor){
+			secColVar=secondaryColor.getValue();
+		}
+		if(in==thickness){
+			thickVar=thickness.getValue();
+		}
+		if(in==opacity){
+			opacityVar=opacity.getValue();
 		}
 	}
 
@@ -229,19 +281,6 @@ public class Query extends Entity {
 		if( database.getValue() == null ) {
 			throw new InputErrorException( "The keyword database must be set." );
 		}
-	}
-
-
-	//change the default statement in this object
-	public void setStatement(String statements){
-		InputAgent_Rolos.processEntity_Keyword_Value(this, statement, statements);
-
-		return;
-	}
-
-	public void setTable(String tables){
-		InputAgent_Rolos.processEntity_Keyword_Value(this, table, tables);
-		return;
 	}
 
 	public String execute(){
@@ -368,15 +407,25 @@ public class Query extends Entity {
 		return executeName;
 	}
 	
+	public String execute(ArrayList<DiscreteHandlingLinkedEntity> routesList, boolean draws, boolean zooms, boolean prints, Color4d primaryColors, int widths, double opacities) {
+		setDraw(draws);
+		setZoom(zooms);
+		setPrint(prints);
+		setPrimaryColor(primaryColors);
+		setThickness(widths);
+		setOpacity(opacities);
+		return execute(routesList);
+	}
+	
 	public String execute(ArrayList<? extends AROMAEntity> drawableEntities){
 		if (drawableEntities.size()==0){
 			return null;
 		}
-		String executeStatement="SELECT * FROM " + table.getValue() + " WHERE " + row.getValue() +"= '" + drawableEntities.get(0).getName() +"'";
+		String executeStatement="SELECT * FROM " + table.getValue() + " WHERE " + column.getValue() +"= '" + drawableEntities.get(0).getName() +"'";
 		for(int x=1; x<drawableEntities.size(); x++){
 			executeStatement+=" or " + row.getValue() +"= '" + drawableEntities.get(x).getName() + "'";
 		}
-		// System.out.println(statements);
+		// System.out.println(executeStatement);
 		String executeName=executeStatement.replaceAll("[^a-zA-Z0-9\\.\\-]", "_");
 		if (getDraw()==true && WorldWindFrame.AppFrame != null){
 			File file = getLayerManager().sql2shp(executeName, executeStatement);
@@ -411,7 +460,7 @@ public class Query extends Entity {
 		for(int x=1; x<entitiesList.size(); x++){
 			statements+=" or " + column.getValue() +"= '" + entitiesList.get(x).getName() + "'";
 		}
-		 //System.out.println(statements);
+		 System.out.println(statements);
 		ResultSet tempResultSet = this.getResultSet(statements);
 		//map of entitieslist to pass on the entity
 		ArrayList<String> entitiesNames = new ArrayList<String>();
@@ -669,27 +718,27 @@ public class Query extends Entity {
 	}
 	
 	public DefinedShapeAttributes getPrimaryColor(){
-		return new DefinedShapeAttributes(primaryColor.getValue(), thickness.getValue(), opacity.getValue());
+		return new DefinedShapeAttributes(priColVar, thickVar, opacityVar);
 	}
 	
 	public DefinedShapeAttributes getSecondaryColor(){
-		return new DefinedShapeAttributes(secondaryColor.getValue(), thickness.getValue(), opacity.getValue());
+		return new DefinedShapeAttributes(secColVar, thickVar, opacityVar);
 	}
 	
 	public Boolean getDraw(){
-		return draw.getValue();
+		return drawVar;
 	}
 	
 	public Boolean getZoom(){
-		return zoom.getValue();
+		return zoomVar;
 	}
 	
 	public Boolean getPrint(){
-		return print.getValue();
+		return printVar;
 	}
 	
 	public Boolean getPrintOrientation(){
-		return printOrientation.getValue();
+		return orientVar;
 	}
 	
 	public void setMode(int modes){
@@ -698,6 +747,55 @@ public class Query extends Entity {
 	
 	public void setRadius(int radiuses){
 		InputAgent.processEntity_Keyword_Value(this, radius, Integer.toString(radiuses));
+	}
+	
+	public void setDraw(boolean draws){
+		drawVar=draws;
+	}
+	
+	public void setPrint(boolean prints){
+		printVar=prints;
+	}
+	
+	public void setZoom(boolean zooms){
+		zoomVar=zooms;
+	}
+	
+	public void setOpacity(double opacities){
+		opacityVar=opacities;
+	}
+	
+	public void setThickness(int thicknesses){
+		thickVar=thicknesses;
+	}
+	
+	public void setPrimaryColor(Color4d colors){
+		priColVar=colors;
+	}
+	
+	public void setSecondaryColor(Color4d colors){
+		secColVar=colors;
+	}
+	
+	//change the default statement in this object
+	public void setStatement(String statements){
+		InputAgent_Rolos.processEntity_Keyword_Value(this, statement, statements);
+	}
+
+	public void setTable(String tables){
+		InputAgent_Rolos.processEntity_Keyword_Value(this, table, tables);
+	}
+	
+	public void setColumn(String columns){
+		InputAgent_Rolos.processEntity_Keyword_Value(this, column, columns);
+	}
+	
+	public void setOperator(String operators){
+		InputAgent_Rolos.processEntity_Keyword_Value(this, operator, operators);
+	}
+	
+	public void setRow(String rows){
+		InputAgent_Rolos.processEntity_Keyword_Value(this, row, rows);
 	}
 }
 
