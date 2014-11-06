@@ -392,6 +392,7 @@ public class RouteManager extends DisplayEntity {
 //			} // is invalid end
 			
 			else if (closedset.contains(currentEntity, currentME)){
+				System.out.println("in Closedset");
 				openset.remove(currentEntity, currentME);
 				iterationCount+=2;
 				containsC ++;
@@ -400,13 +401,16 @@ public class RouteManager extends DisplayEntity {
 			else if ((currentEntity instanceof RouteSegment && ((RouteSegment) currentEntity).getTransportMode() == currentME.getTransportMode()) || 
 					(currentEntity instanceof RouteEntity && ((RouteEntity) currentEntity).getTransportMode() == currentME.getTransportMode()) ||  
 					currentEntity instanceof Facility && !(currentEntity instanceof Transshipment)) {
-
+				System.out.println("in route segment");
 				openset.remove(currentEntity, currentME);
 				closedset.add(currentEntity, currentME, 0.0, 0.0);
 				iterationCount += 3;
 				containsC++;
 				removeC++;
 				addC++;
+				
+				Object[] current1 = openset.getObjectsIndex(0);
+				System.out.println("object after remove " + current1[0] + current1[1]);
 				
 				for(LinkedEntity neighborEntity : currentEntity.getNextLinkedEntityList()){
 	
@@ -473,6 +477,7 @@ public class RouteManager extends DisplayEntity {
 			} // route end
 			
 			else if (currentEntity instanceof Transshipment && transshipmentAllowed){
+				System.out.println("in Closedset");
 				openset.remove(currentEntity, currentME);
 				closedset.add(currentEntity, currentME, 0.0, 0.0);
 				iterationCount+=3;
@@ -541,6 +546,7 @@ public class RouteManager extends DisplayEntity {
 				}
 			}
 			else{
+				System.out.println("in else");
 			//	Must not have been allowed for some reason. Removed from front
 				openset.remove(currentEntity, currentME);
 				containsC++;
