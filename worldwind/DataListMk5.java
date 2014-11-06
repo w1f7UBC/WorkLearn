@@ -1,7 +1,6 @@
 package worldwind;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -51,38 +50,44 @@ public class DataListMk5 {
 	}
 	
 	public Double[] getScoresIndex(int index){
-		Double[] score = {Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY};
+		ArrayList<Double> score = new ArrayList<Double>();
+		score.add(Double.POSITIVE_INFINITY);
+		score.add(Double.POSITIVE_INFINITY);
 		for (Map.Entry<ArrayList<Object>, ArrayList<Double>> e : structure.entrySet()) {
-			Double[] temp = (Double[]) e.getValue().toArray();
-			if (temp[1] < score[1]){
+			ArrayList<Double> temp = e.getValue();
+			if (temp.get(1) < score.get(1)){
 			   score = temp;
 		   }
-			else if (temp[1] == score[1]){
-				if(temp[0] < temp[1]){
-					score=temp;
+			else if (temp.get(1) == score.get(1)){
+				if(temp.get(0) < score.get(0)){
+					score = temp;
 				}
 			}
 		}
-		return score;
+		Double[] target= {score.get(0), score.get(1)};
+		return target;
 	}
 	
 	public Object[] getObjectsIndex(int index){
-		Double[] score = {Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY};
-		Object[] object = null;
+		ArrayList<Double> score = new ArrayList<Double>();
+		score.add(Double.POSITIVE_INFINITY);
+		score.add(Double.POSITIVE_INFINITY);
+		ArrayList<Object> object = null;
 		for (Map.Entry<ArrayList<Object>, ArrayList<Double>> e : structure.entrySet()) {
-			Double[] temp = (Double[]) e.getValue().toArray();
-			if (temp[1] < score[1]){
+			ArrayList<Double> temp = e.getValue();
+			if (temp.get(1) < score.get(1)){
 			   score = temp;
-			   object = e.getKey().toArray();
+			   object = e.getKey();
 		   }
-			else if (temp[1] == score[1]){
-				if(temp[0] < temp[1]){
-					score=temp;
-					object = e.getKey().toArray();
+			else if (temp.get(1) == score.get(1)){
+				if(temp.get(0) < temp.get(0)){
+					score = temp;
+					object = e.getKey();
 				}
 			}
 		}
-		return object;
+		Object[] target = {object.get(0), object.get(1)};
+		return target;
 	}
 	
 	public boolean isEmpty(){
@@ -91,9 +96,9 @@ public class DataListMk5 {
 	
 	public void printMap(){
 		for (Map.Entry<ArrayList<Object>, ArrayList<Double>> e : structure.entrySet()) {
-			Double[] scores=(Double[]) e.getValue().toArray();
-			Object[] objects=e.getKey().toArray();
-			System.out.println(scores[0] + " " + scores[1] + " " + objects[0] + " " + objects[1]);
+			ArrayList<Double> scores=e.getValue();
+			ArrayList<Object> objects=e.getKey();
+			System.out.println(scores.get(0) + " " + scores.get(1) + " " + objects.get(0) + " " + objects.get(1));
 		}
 	}
 	
