@@ -62,18 +62,21 @@ public class DataListMk5 {
 	
 	public Object[] getObjectsIndex(int index){
 		Double[] score = {Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY};
+		Object[] object = null;
 		for (Map.Entry<Object[], Double[]> e : structure.entrySet()) {
 			Double[] temp = e.getValue();
 			if (temp[1] < score[1]){
 			   score = temp;
+			   object = e.getKey();
 		   }
 			else if (temp[1] == score[1]){
 				if(temp[0] < temp[1]){
 					score=temp;
+					object = e.getKey();
 				}
 			}
 		}
-		return structure.get(score);
+		return object;
 	}
 	
 	public boolean isEmpty(){
@@ -92,6 +95,7 @@ public class DataListMk5 {
 		long startTime = System.nanoTime();
 		System.out.println("TEST");
 		DataListMk2 list= new DataListMk2();
+		System.out.println("Is List empty? " + list.isEmpty());
 		double a = 1;
 		double b = 2;
 		double c = 3;
@@ -110,6 +114,10 @@ public class DataListMk5 {
 		
 		list.add(ee, ee, e, e);
 		list.add(aa, aa, a, a);
+		System.out.println("Removing ee, ee and aa, aa");
+		list.remove(ee, ee);
+		list.remove(aa, aa);
+		System.out.println("Is List empty? " + list.isEmpty());
 		list.add(cc, cc, c, c);
 		list.add(bb, bb, b, b);
 		list.add(ee, ee, e, e);
@@ -123,6 +131,7 @@ public class DataListMk5 {
 		list.printMap();
 		System.out.println("Does list contain c, c " + list.contains(cc, cc));
 		System.out.println(" ");
+		System.out.println("Is List empty? " + list.isEmpty());
 		
 		System.out.println("Removing c, c");
 		list.remove(cc, cc);
