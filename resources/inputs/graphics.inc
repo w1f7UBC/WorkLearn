@@ -1,7 +1,8 @@
 Define ObjectType {
                     ArrowModel
                     GraphModel
-		    		ScreenPointsModel
+		    BarGraphModel
+		    ScreenPointsModel
                     TextModel
                     ImageModel
                     ColladaModel
@@ -10,6 +11,7 @@ Define ObjectType {
 
 ArrowModel             JavaClass { com.jaamsim.DisplayModels.ArrowModel               } Palette { 'Display Models' }    DragAndDrop { FALSE }
 GraphModel             JavaClass { com.jaamsim.DisplayModels.GraphModel               } Palette { 'Display Models' }    DragAndDrop { FALSE }
+BarGraphModel	       JavaClass { com.AROMA.DisplayModel.BarGraphModel               } Palette { 'Display Models' }    DragAndDrop { FALSE }
 
 ScreenPointsModel      JavaClass { com.jaamsim.DisplayModels.ScreenPointsModel        } Palette { 'Display Models' }    DragAndDrop { FALSE }
 TextModel              JavaClass { com.jaamsim.DisplayModels.TextModel                } Palette { 'Display Models' }    DragAndDrop { FALSE }
@@ -19,6 +21,7 @@ DisplayModel           JavaClass { com.sandwell.JavaSimulation3D.DisplayModelCom
 
 Define ArrowModel          { ArrowModelDefault          }
 Define GraphModel          { GraphModelDefault          }
+Define BarGraphModel       { BarGraphModelDefault       }
 Define ScreenPointsModel   { ScreenPointsModelDefault   }
 Define TextModel           { TextModelDefault           }
 
@@ -33,6 +36,7 @@ Define ObjectType {
                     BillboardText
                     Arrow
                     Graph
+		    AROMABarGraph
                     VideoRecorder
                     }
 
@@ -46,6 +50,8 @@ OverlayClock          JavaClass { com.sandwell.JavaSimulation3D.OverlayClock    
 BillboardText         JavaClass { com.sandwell.JavaSimulation3D.BillboardText        } Palette { 'Graphics Objects' } DefaultDisplayModel { TextModelDefault         }
 Arrow                 JavaClass { com.sandwell.JavaSimulation3D.Arrow                } Palette { 'Graphics Objects' } DefaultDisplayModel { ArrowModelDefault        }
 Graph                 JavaClass { com.sandwell.JavaSimulation3D.Graph                } Palette { 'Graphics Objects' } DefaultDisplayModel { GraphModelDefault        }
+AROMABarGraph 	      JavaClass { com.AROMA.AROMABarGraph                	     } Palette { 'Graphics Objects' } DefaultDisplayModel { BarGraphModelDefault        }
+
 VideoRecorder         JavaClass { com.jaamsim.ui.VideoRecorderEntity                 } Palette { 'Graphics Objects' }    DragAndDrop { FALSE }
 
 View          Description { 'Display window showing view of the 3D model universe.' }
