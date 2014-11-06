@@ -146,7 +146,7 @@ public class Route {
 			for (DiscreteHandlingLinkedEntity each: routeSegmentsList){
 				if(each instanceof Transshipment){
 					tempTime += each.getTravelTime(movingEntitiesList.get(index));
-					index++;
+					//index++;
 				}
 				else if(each instanceof Facility)
 					continue;
