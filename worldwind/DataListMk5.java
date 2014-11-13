@@ -1,6 +1,5 @@
 package worldwind;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -52,37 +51,55 @@ public class DataListMk5 {
 	}
 	
 	public Double[] getScoresIndex(int index){
-		Pair score = new Pair(Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY);
+		if (structure.isEmpty()){
+			return null;
+		}
+		Pair score = new Pair(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
+		Boolean changed = false;
 		for (Map.Entry<Pair, Pair> e : structure.entrySet()) {
 			Pair target = e.getValue();
 			if ((Double)target.getB() < (Double)score.getB()){
 			   score = target;
+			   changed = true;
 		   }
 			else if ((Double)target.getB() == (Double)score.getB()){
 				if((Double)target.getA() < (Double)score.getA()){
 					score = target;
+					changed = true;
 				}
 			}
+		}
+		if (changed == false){
+			return null;
 		}
 		Double[] targetValue= {(Double)score.getA(), (Double)score.getB()};
 		return targetValue;
 	}
 	
 	public Object[] getObjectsIndex(int index){
-		Pair score = new Pair(Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY);
+		if (structure.isEmpty()){
+			return null;
+		}
+		Pair score = new Pair(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
 		Pair object = null;
+		Boolean changed = false;
 		for (Map.Entry<Pair, Pair> e : structure.entrySet()) {
 			Pair target = e.getValue();
 			if ((Double)target.getB() < (Double)score.getB()){
 			   score = target;
 			   object = e.getKey();
+			   changed = true;
 		   }
 			else if ((Double)target.getB() == (Double)score.getB()){
 				if((Double)target.getA() < (Double)score.getA()){
 					score = target;
 					object = e.getKey();
+					changed = true;
 				}
 			}
+		}
+		if (changed == false){
+			return null;
 		}
 		Object[] target = {object.getA(), object.getB()};
 		return target;
@@ -117,16 +134,15 @@ public class DataListMk5 {
 			return b;
 		}
 		
-		 @Override
-		    public int hashCode() {
-		        return a.hashCode() ^ b.hashCode();
-		    }
+		@Override
+		public int hashCode() {
+			return a.hashCode() ^ b.hashCode();
+		}
 
-		    @Override
-		    public boolean equals(Object obj) {
-		        return (obj instanceof Pair) && ((Pair) obj).a.equals(a)
-		                                       && ((Pair) obj).b.equals(b);
-		    }
+		@Override
+		public boolean equals(Object obj) {
+			return (obj instanceof Pair) && ((Pair) obj).a.equals(a) && ((Pair) obj).b.equals(b);
+		}
 	}
 	
 	public static void main(String args[]){
