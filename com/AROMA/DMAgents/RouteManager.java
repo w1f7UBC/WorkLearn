@@ -341,12 +341,6 @@ public class RouteManager extends DisplayEntity {
 	
 	public static <T extends DiscreteHandlingLinkedEntity> Route computeAStarPath(T origin, T destination, MovingEntity movingEntity, BulkMaterial bulkMaterial, Route_Type routingRule,
 			boolean transshipmentAllowed, double weightCap, ArrayList<T> tabuList) {
-		int openedEntities = 0;
-		int iterationCount =0;
-		int containsC = 0;
-		int removeC=0;
-		int addC =0;
-		int getc=0;
 		
 		System.out.println("In AStar");
 		DataListMk5 closedset = new DataListMk5();
@@ -360,70 +354,51 @@ public class RouteManager extends DisplayEntity {
 		double fScoreStart = gScoreStart + heuristicCost;
 
 		openset.add(origin, movingEntity, gScoreStart, fScoreStart);
-		addC++;
-		
+
 		while(!openset.isEmpty()){
-			openedEntities++;
-			getc+=2;
+
 			Object[] current = openset.getObjectsIndex(0);
-			System.out.println("object " + current[0] + current[1]);
+			System.out.println("Current Object " + current[0] + " " + current[1]);
 			DiscreteHandlingLinkedEntity currentEntity = (DiscreteHandlingLinkedEntity) current[0];
 			MovingEntity currentME = (MovingEntity) current[1];
 			Double[] currentScores = openset.getScoresIndex(0);
 
 			if (currentEntity == destination){
-				System.out.println("Opened Entities: " + openedEntities);
-				System.out.println("Iterations: " + iterationCount);
-				System.out.println("Contains: " + containsC);
-				System.out.println("Remove: " + removeC);
-				System.out.println("Add: " + addC);
-				System.out.println("Get: " + getc);
-
+				System.out.println("We have reached the destination. Please remain seated.");
 				Object[] reconstructedpath = reconstructAStarPath(origin, movingEntity, destination, currentME, camefrom);
 				ArrayList<DiscreteHandlingLinkedEntity> arrayList = (ArrayList<DiscreteHandlingLinkedEntity>) reconstructedpath[0];
 				ArrayList<DiscreteHandlingLinkedEntity> path = arrayList;
 				return setAStarRoute(origin, destination, movingEntity, currentScores[1], path, routingRule);
 			} //is destination end
 			
-//			if (currentEntity instanceof Transshipment && !transshipmentAllowed){
-//				openset.remove(currentEntity, currentME);
-//				closedset.add(currentEntity, currentME, 0.0, 0.0);
-//				continue;
-//			} // is invalid end
+			if (currentEntity instanceof Transshipment && !transshipmentAllowed){
+				openset.remove(currentEntity, currentME);
+				closedset.add(currentEntity, currentME, 0.0, 0.0);
+				continue;
+			} // is invalid end
 			
 			else if (closedset.contains(currentEntity, currentME)){
-				System.out.println("in Closedset");
+				//System.out.println("in Closedset");
 				openset.remove(currentEntity, currentME);
-				iterationCount+=2;
-				containsC ++;
+
 			} // is invalid end
 			
 			else if ((currentEntity instanceof RouteSegment && ((RouteSegment) currentEntity).getTransportMode() == currentME.getTransportMode()) || 
 					(currentEntity instanceof RouteEntity && ((RouteEntity) currentEntity).getTransportMode() == currentME.getTransportMode()) ||  
 					currentEntity instanceof Facility && !(currentEntity instanceof Transshipment)) {
-				System.out.println("in route segment");
+				System.out.println("In route segment");
 				openset.remove(currentEntity, currentME);
 				closedset.add(currentEntity, currentME, 0.0, 0.0);
-				iterationCount += 3;
-				containsC++;
-				removeC++;
-				addC++;
-				
-				Object[] current1 = openset.getObjectsIndex(0);
-				System.out.println("object after remove " + current1[0] + current1[1]);
 				
 				for(LinkedEntity neighborEntity : currentEntity.getNextLinkedEntityList()){
-	
 					Object[] neighborObject = {neighborEntity, currentME};
-
+					System.out.println("Neighbor object " + neighborObject[0] + " " + neighborObject[1]);
 					if(closedset.contains(neighborEntity, currentME)){
-						iterationCount+=1;
-						containsC++;
+						System.out.println("Closed set contains neighbor");
 						continue;
 					}
 					else{ // if it does not contain neighborObject
-						iterationCount+=1;
-						containsC++;
+						System.out.println("Closed set does not contains neighbor");
 						Double weight = null;
 						Double tentativeGScore;
 						if(routingRule == Route_Type.FASTEST)
@@ -440,20 +415,12 @@ public class RouteManager extends DisplayEntity {
 						if (tentativeGScore < weightCap*10000){
 							
 							if(!openset.contains(neighborEntity, currentME)){
-								iterationCount+=3;
-								containsC++;
-								addC+=2;
 								camefrom.add(neighborEntity, currentME, currentEntity, currentME);
 								double gscoreNeighbor = tentativeGScore;
 								double fscoreNeighbor = gscoreNeighbor + computeHeuristic(neighborEntity.getPosition(), destination.getPosition());
 								openset.add(neighborEntity, currentME, gscoreNeighbor, fscoreNeighbor);
 							}
 							else if(tentativeGScore < openset.getKey(neighborEntity, currentME)[0]){
-								getc++;
-								iterationCount+=5;
-								containsC++;
-								addC+=2;
-								removeC++;
 								camefrom.add(neighborEntity, currentME, currentEntity, currentME);
 								double gscoreNeighbor = tentativeGScore;
 								double fscoreNeighbor = gscoreNeighbor + computeHeuristic(neighborEntity.getPosition(), destination.getPosition());
@@ -461,15 +428,10 @@ public class RouteManager extends DisplayEntity {
 								openset.add(neighborEntity, currentME, gscoreNeighbor, fscoreNeighbor);
 							}
 							else{
-								getc++;
-								containsC++;
-								iterationCount+=2;
 							}
 						}
 						else{
 							closedset.add(neighborEntity, currentME, 0.0, 0.0);
-							addC++;
-							iterationCount++;
 						}
 					}
 				}
@@ -477,27 +439,22 @@ public class RouteManager extends DisplayEntity {
 			} // route end
 			
 			else if (currentEntity instanceof Transshipment && transshipmentAllowed){
-				System.out.println("in Closedset");
+				System.out.println("In transshipment");
 				openset.remove(currentEntity, currentME);
 				closedset.add(currentEntity, currentME, 0.0, 0.0);
-				iterationCount+=3;
-				containsC++;
-				addC++;
-				removeC++;
 				//for neighbors 
 				for(LinkedEntity neighborEntity : currentEntity.getNextLinkedEntityList()){
 					for (MovingEntity currentMovingEntity: ((Facility)current[0]).getTransportationManager().getTransporters()){
 						Object[] neighborObject = {neighborEntity, currentMovingEntity};
 						if (currentMovingEntity.getAcceptingBulkMaterialList().contains(bulkMaterial)){
 							
+							System.out.println("Neighbor object " + neighborObject[0] + " " + neighborObject[1]);
 							if (closedset.contains(neighborEntity, currentMovingEntity)){
-								iterationCount+=1;
-								containsC++;
+								System.out.println("Neighbor object in closed set");
 								continue;
 							}
 							else{
-								containsC++;
-								iterationCount+=1;
+								System.out.println("Neighbor object not in closed set");
 								Double weight = null;
 								Double tentativeGScore;
 								if(routingRule == Route_Type.FASTEST)
@@ -514,20 +471,12 @@ public class RouteManager extends DisplayEntity {
 								if (tentativeGScore < weightCap){
 									//if the openset contains neighbor entity and moving entity already or if it contains one with a higher gscore then...
 									if(!openset.contains(neighborEntity, currentME)){
-										containsC++;
-										addC+=2;
-										iterationCount+=3;
 										camefrom.add(neighborEntity, currentMovingEntity, currentEntity, currentME);
 										double gscoreNeighbor = tentativeGScore;
 										double fscoreNeighbor = gscoreNeighbor + computeHeuristic(neighborEntity.getPosition(), destination.getPosition());
 										openset.add(neighborEntity, currentMovingEntity, gscoreNeighbor, fscoreNeighbor);
 									}
 									else if(tentativeGScore < openset.getKey(neighborEntity, currentME)[0]){
-										getc++;
-										containsC++;
-										removeC++;
-										addC+=2;
-										iterationCount+=5;
 										camefrom.add(neighborEntity, currentMovingEntity, currentEntity, currentME);
 										double gscoreNeighbor = tentativeGScore;
 										double fscoreNeighbor = gscoreNeighbor + computeHeuristic(neighborEntity.getPosition(), destination.getPosition());
@@ -536,8 +485,6 @@ public class RouteManager extends DisplayEntity {
 									}
 								}
 								else{
-									addC++;
-									iterationCount+=1;
 									closedset.add(neighborEntity, currentME, 0.0, 0.0);
 								}
 						}
@@ -547,11 +494,9 @@ public class RouteManager extends DisplayEntity {
 			}
 			else{
 				System.out.println("in else");
-			//	Must not have been allowed for some reason. Removed from front
+				//Must not have been allowed for some reason. Removed from front
 				openset.remove(currentEntity, currentME);
-				containsC++;
-				removeC++;
-				iterationCount+=2;
+
 			}
 		} // while openset empty end
 		return null;

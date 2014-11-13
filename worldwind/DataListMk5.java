@@ -52,7 +52,7 @@ public class DataListMk5 {
 	}
 	
 	public Double[] getScoresIndex(int index){
-		Pair score = new Pair(Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY);
+		Pair score = new Pair(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
 		for (Map.Entry<Pair, Pair> e : structure.entrySet()) {
 			Pair target = e.getValue();
 			if ((Double)target.getB() < (Double)score.getB()){
@@ -69,7 +69,7 @@ public class DataListMk5 {
 	}
 	
 	public Object[] getObjectsIndex(int index){
-		Pair score = new Pair(Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY);
+		Pair score = new Pair(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
 		Pair object = null;
 		for (Map.Entry<Pair, Pair> e : structure.entrySet()) {
 			Pair target = e.getValue();
@@ -78,10 +78,11 @@ public class DataListMk5 {
 			   object = e.getKey();
 		   }
 			else if ((Double)target.getB() == (Double)score.getB()){
-				if((Double)target.getA() < (Double)score.getA()){
+				if((Double)target.getA() > (Double)score.getA()){
 					score = target;
 					object = e.getKey();
 				}
+			
 			}
 		}
 		Object[] target = {object.getA(), object.getB()};
