@@ -26,32 +26,35 @@ public class DataListMk5 {
 		return structure.containsKey(object);
 	}
 	
-	public Object[] getValue(double gScore, double fScore){
+	//public Object[] getValue(double gScore, double fScore){
+	public Pair getValue(double gScore, double fScore){
 		Pair score = new Pair(gScore, fScore);
 		for (Map.Entry<Pair, Pair> e : structure.entrySet()) {
 			Pair target = e.getKey();
 			if (target.equals(score)){
-			   Object[] targetValue = {target.getA(), target.getB()};
-			   return targetValue;
+			   //Object[] targetValue = {target.getA(), target.getB()};
+			   //return targetValue;
+			   return target;
 		   }
 		}
 		return null;
 	}
 	
-	public Double[] getKey(Object entity, Object movingEntity){
+	//public Double[] getKey(Object entity, Object movingEntity){
+	public Pair getKey(Object entity, Object movingEntity){
 		Pair object = new Pair(entity, movingEntity);
 		Pair target = structure.get(object);
 		if (target==null){
 			return null;	
 		}
 		else {
-			Double[] targetValue = {(Double)target.getA(), (Double)target.getB()};
-			return targetValue;
+			//Double[] targetValue = {(Double)target.getA(), (Double)target.getB()};
+			return target;
 		}
 	}
 	
-	public Double[] getScoresIndex(int index){
-
+	//public Double[] getScoresIndex(int index){
+	public Pair getScoresIndex(int index){
 		if (structure.isEmpty()){
 			return null;
 		}
@@ -74,12 +77,13 @@ public class DataListMk5 {
 		if (changed == false){
 			return null;
 		}
-		Double[] targetValue= {(Double)score.getA(), (Double)score.getB()};
-		return targetValue;
+//		Double[] targetValue= {(Double)score.getA(), (Double)score.getB()};
+//		return targetValue;
+		return score;
 	}
 	
-	public Object[] getObjectsIndex(int index){
-
+	//public Object[] getObjectsIndex(int index){
+	public Pair getObjectsIndex(int index){
 		if (structure.isEmpty()){
 			return null;
 		}
@@ -105,8 +109,9 @@ public class DataListMk5 {
 		if (changed == false){
 			return null;
 		}
-		Object[] target = {object.getA(), object.getB()};
-		return target;
+		//Object[] target = {object.getA(), object.getB()};
+		//return target;
+		return object;
 	}
 	
 	public boolean isEmpty(){
@@ -121,20 +126,20 @@ public class DataListMk5 {
 		}
 	}
 	
-	private class Pair {
-		private Object a;
-		private Object b;
+	public class Pair {
+		public Object a;
+		public Object b;
 		
-		private Pair(Object a, Object b){
+		public Pair(Object a, Object b){
 			this.a=a;
 			this.b=b;
 		}
 		
-		private Object getA(){
+		public Object getA(){
 			return a;
 		}
 		
-		private Object getB(){
+		public Object getB(){
 			return b;
 		}
 		
