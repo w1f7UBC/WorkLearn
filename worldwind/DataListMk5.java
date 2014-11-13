@@ -5,88 +5,86 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class DataListMk5 {
-	HashMap<ArrayList<Object>, ArrayList<Double>> structure;
+	HashMap<Pair, Pair> structure;
 	
 	public DataListMk5(){
-		structure = new HashMap<ArrayList<Object>, ArrayList<Double>>();
+		structure = new HashMap<Pair, Pair>();
 	}
 	
 	public void add(Object entity, Object movingEntity, Double gScore, Double fScore){
-		ArrayList<Double> score = new ArrayList<Double>(); 
-		score.add(gScore);
-		score.add(fScore);
-		ArrayList<Object> object = new ArrayList<Object>(); 
-		object.add(entity);
-		object.add(movingEntity);
+		Pair score = new Pair(gScore, fScore);
+		Pair object = new Pair(entity, movingEntity);
 		structure.put(object, score);
 	}
 	
 	public void remove(Object entity, Object movingEntity){
-		Object[] object = {entity, movingEntity};
+		Pair object = new Pair(entity, movingEntity);
 		structure.remove(object);
 	}
 	
 	public Boolean contains(Object entity, Object movingEntity){
-		Object[] object = {entity, movingEntity};
+		Pair object = new Pair(entity, movingEntity);
 		return structure.containsKey(object);
 	}
 	
 	public Object[] getValue(double gScore, double fScore){
-		ArrayList<Double> score = new ArrayList<Double>(); 
-		score.add(gScore);
-		score.add(fScore);
-		for (Map.Entry<ArrayList<Object>, ArrayList<Double>> e : structure.entrySet()) {
-		   if (e.getValue().equals(score)){
-			   return e.getKey().toArray();
+		Pair score = new Pair(gScore, fScore);
+		for (Map.Entry<Pair, Pair> e : structure.entrySet()) {
+			Pair target = e.getKey();
+			if (target.equals(score)){
+			   Object[] targetValue = {target.getA(), target.getB()};
+			   return targetValue;
 		   }
 		}
 		return null;
 	}
 	
 	public Double[] getKey(Object entity, Object movingEntity){
-		Object[] object = {entity, movingEntity};
-		structure.get(object);
-		return null;
+		Pair object = new Pair(entity, movingEntity);
+		Pair target = structure.get(object);
+		if (target==null){
+			return null;	
+		}
+		else {
+			Double[] targetValue = {(Double)target.getA(), (Double)target.getB()};
+			return targetValue;
+		}
 	}
 	
 	public Double[] getScoresIndex(int index){
-		ArrayList<Double> score = new ArrayList<Double>();
-		score.add(Double.POSITIVE_INFINITY);
-		score.add(Double.POSITIVE_INFINITY);
-		for (Map.Entry<ArrayList<Object>, ArrayList<Double>> e : structure.entrySet()) {
-			ArrayList<Double> temp = e.getValue();
-			if (temp.get(1) < score.get(1)){
-			   score = temp;
+		Pair score = new Pair(Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY);
+		for (Map.Entry<Pair, Pair> e : structure.entrySet()) {
+			Pair target = e.getValue();
+			if ((Double)target.getB() < (Double)score.getB()){
+			   score = target;
 		   }
-			else if (temp.get(1) == score.get(1)){
-				if(temp.get(0) < score.get(0)){
-					score = temp;
+			else if ((Double)target.getB() == (Double)score.getB()){
+				if((Double)target.getA() < (Double)score.getA()){
+					score = target;
 				}
 			}
 		}
-		Double[] target= {score.get(0), score.get(1)};
-		return target;
+		Double[] targetValue= {(Double)score.getA(), (Double)score.getB()};
+		return targetValue;
 	}
 	
 	public Object[] getObjectsIndex(int index){
-		ArrayList<Double> score = new ArrayList<Double>();
-		score.add(Double.POSITIVE_INFINITY);
-		score.add(Double.POSITIVE_INFINITY);
-		ArrayList<Object> object = null;
-		for (Map.Entry<ArrayList<Object>, ArrayList<Double>> e : structure.entrySet()) {
-			ArrayList<Double> temp = e.getValue();
-			if (temp.get(1) < score.get(1)){
-			   score = temp;
+		Pair score = new Pair(Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY);
+		Pair object = null;
+		for (Map.Entry<Pair, Pair> e : structure.entrySet()) {
+			Pair target = e.getValue();
+			if ((Double)target.getB() < (Double)score.getB()){
+			   score = target;
 			   object = e.getKey();
 		   }
-			else if (temp.get(1) == score.get(1)){
-				if(temp.get(0) < temp.get(0)){
-					score = temp;
+			else if ((Double)target.getB() == (Double)score.getB()){
+				if((Double)target.getA() < (Double)score.getA()){
+					score = target;
 					object = e.getKey();
 				}
 			}
 		}
-		Object[] target = {object.get(0), object.get(1)};
+		Object[] target = {object.getA(), object.getB()};
 		return target;
 	}
 	
@@ -95,11 +93,40 @@ public class DataListMk5 {
 	}
 	
 	public void printMap(){
-		for (Map.Entry<ArrayList<Object>, ArrayList<Double>> e : structure.entrySet()) {
-			ArrayList<Double> scores=e.getValue();
-			ArrayList<Object> objects=e.getKey();
-			System.out.println(scores.get(0) + " " + scores.get(1) + " " + objects.get(0) + " " + objects.get(1));
+		for (Map.Entry<Pair, Pair> e : structure.entrySet()) {
+			Pair scores=e.getValue();
+			Pair objects=e.getKey();
+			System.out.println(scores.getA() + " " + scores.getB() + " " + objects.getA() + " " + objects.getB());
 		}
+	}
+	
+	private class Pair {
+		private Object a;
+		private Object b;
+		
+		private Pair(Object a, Object b){
+			this.a=a;
+			this.b=b;
+		}
+		
+		private Object getA(){
+			return a;
+		}
+		
+		private Object getB(){
+			return b;
+		}
+		
+		 @Override
+		    public int hashCode() {
+		        return a.hashCode() ^ b.hashCode();
+		    }
+
+		    @Override
+		    public boolean equals(Object obj) {
+		        return (obj instanceof Pair) && ((Pair) obj).a.equals(a)
+		                                       && ((Pair) obj).b.equals(b);
+		    }
 	}
 	
 	public static void main(String args[]){
