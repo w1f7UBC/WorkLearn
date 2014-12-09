@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.PriorityQueue;
 
-import javafx.util.Pair;
+//import javafx.util.Pair;
 import worldwind.DataListMk2;
 import worldwind.DataListMk3;
 import worldwind.DataListMk5;
@@ -348,7 +348,9 @@ public class RouteManager extends DisplayEntity {
 	
 	public static <T extends DiscreteHandlingLinkedEntity> Route computeAStarPath(T origin, T destination, MovingEntity movingEntity, BulkMaterial bulkMaterial, Route_Type routingRule,
 			boolean transshipmentAllowed, double weightCap, ArrayList<T> tabuList) {
-		System.out.println("In computeAStarPath: " + origin + " to " + destination);
+		
+		//commented out for now
+		//System.out.println("In computeAStarPath: " + origin + " to " + destination);
 		DataListMk5 closedset = new DataListMk5();
 		DataListMk5 openset = new DataListMk5();
 		DataListMk3 camefrom = new DataListMk3();
