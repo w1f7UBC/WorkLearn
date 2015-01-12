@@ -86,7 +86,7 @@ public class WorldView extends Entity {
 
 
 	public WorldView(){
-		WorldWindFrame.initialize();
+	//	WorldWindFrame.initialize();
 	}
 
     public void goTo(double lat, double lon, double zoom, double heading, double pitch){

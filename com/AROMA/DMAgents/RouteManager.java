@@ -179,8 +179,8 @@ public class RouteManager extends DisplayEntity {
 		if (tempRoute != null)
 				return tempRoute;
 
-			return computeAStarPath(origin, destination, movingEntity, bulkMaterial, routingRule,transshipmentAllowed, weightCap, tabuList);
-			//return computeDijkstraPath(origin, destination, movingEntity, bulkMaterial, routingRule,transshipmentAllowed, weightCap, tabuList);
+			//return computeAStarPath(origin, destination, movingEntity, bulkMaterial, routingRule,transshipmentAllowed, weightCap, tabuList);
+			return computeDijkstraPath(origin, destination, movingEntity, bulkMaterial, routingRule,transshipmentAllowed, weightCap, tabuList);
 	}
 
 	// ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -202,7 +202,7 @@ public class RouteManager extends DisplayEntity {
 	public static <T extends DiscreteHandlingLinkedEntity> Route computeDijkstraPath(
 			T origin, T destination, MovingEntity movingEntity, BulkMaterial bulkMaterial, Route_Type routingRule,
 			boolean transshipmentAllowed, double weightCap, ArrayList<T> tabuList) {
-		System.out.println("In Dijstra. : " + origin + " to " + destination);
+		// System.out.println("In Dijstra. : " + origin + " to " + destination);
 		double destinationWeight = Double.POSITIVE_INFINITY;
 		double weightThroughTransshipment = Double.POSITIVE_INFINITY;
 		Route routeThroughTransshipment = null;
@@ -341,7 +341,7 @@ public class RouteManager extends DisplayEntity {
 		
 		unResolvedRoutesList.add(movingEntity, tempKey);
 		RouteManager.printRouteReport(origin, destination, null, movingEntity);
-		System.out.println("No route found");
+		// System.out.println("No route found");
 		return null;
 	}
 	
@@ -382,7 +382,7 @@ public class RouteManager extends DisplayEntity {
 				
 					ArrayList<DiscreteHandlingLinkedEntity> arrayList = (ArrayList<DiscreteHandlingLinkedEntity>) reconstructedpath[0];
 					ArrayList<DiscreteHandlingLinkedEntity> path = arrayList;
-					System.out.println(path);
+				//	System.out.println(path);
 					return setAStarRoute(origin, destination, movingEntity, (Double)currentScores.getB(), path, routingRule);
 				} //is destination end
 				
@@ -654,7 +654,7 @@ public class RouteManager extends DisplayEntity {
 		// remove dijkstraComparator in all route segments after setting up the
 		// route
 		removeDijkstraComparator(path,dijkstraComparator);
-		System.out.println(path);
+		// System.out.println(path);
 		return tempRoute;
 
 	}
