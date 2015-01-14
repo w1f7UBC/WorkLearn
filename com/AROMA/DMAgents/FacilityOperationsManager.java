@@ -415,6 +415,11 @@ public class FacilityOperationsManager extends FacilityManager {
 		if(tempProcessor != null){
 			for(BulkMaterial eachOutfeed: tempProcessor.getOutfeedEntityTypeList()){
 				//TODO sets the realized throughput to the minimum of throughput or realized amount... assuming the first processor returned
+				
+				//resolves infinity*0=NaN issue when input amount is infinity but processor's outfeed rate is zero 
+				if(Tester.equalCheckTolerance(tempProcessor.getConverstionRate(eachOutfeed, infeedMaterial), 0.0d)){
+					return;
+				}
 				this.getFacility().setStocksList(eachOutfeed, 13, 
 						Tester.min(this.getFacility().getStockList().getValueFor(eachOutfeed, 2),
 								amount*tempProcessor.getConverstionRate(eachOutfeed, infeedMaterial)+this.getFacility().getStockList().getValueFor(eachOutfeed, 13)));

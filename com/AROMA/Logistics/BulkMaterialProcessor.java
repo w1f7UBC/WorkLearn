@@ -267,7 +267,7 @@ public class BulkMaterialProcessor extends BulkHandlingLinkedEntity {
 		else
 			denominator = this.getOutfeedRate(denominatorMaterial);
 		
-		return numerator/denominator;
+		return Tester.lessOrEqualCheckTolerance(denominator, 0.0d)? 0.0d : numerator / denominator;
 	}
 	
 	public ProcessingRoute getProcessingRoute(){

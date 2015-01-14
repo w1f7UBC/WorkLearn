@@ -98,7 +98,7 @@ public class ProcessingRoute extends LogisticsEntity {
 			
 	/**
 	 * 
-	 * @return (bulkMaterial handling rate/ baseBulkMateral's handling rate)
+	 * @return TODO zero if denominator is zero (bulkMaterial handling rate/ baseBulkMateral's handling rate) o.w.
 	 */
 	public double getCapacityRatio(BulkMaterial bulkMaterial, BulkMaterial baseBulkMaterial){
 		double numerator, denominator;
@@ -112,7 +112,7 @@ public class ProcessingRoute extends LogisticsEntity {
 		else
 			denominator = processor.getOutfeedRate(baseBulkMaterial);
 		
-		return numerator / denominator;
+		return Tester.lessOrEqualCheckTolerance(denominator, 0.0d)? 0.0d : numerator / denominator;
 	}
 	
 	public ArrayList<Stockpile> getInfeedPiles() {
