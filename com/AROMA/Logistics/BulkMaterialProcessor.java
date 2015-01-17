@@ -300,6 +300,8 @@ public class BulkMaterialProcessor extends BulkHandlingLinkedEntity {
 	 * starting time one after the start time until the end time.
 	 */
 	public double getThroughput(double startTime, double endTime){
+		if(mainProductThroughput.getValue()== null )
+				return  this.getFacility().getStockList().getValueFor(this.getPrimaryProduct(), 1);
 		if(Tester.greaterCheckTimeStep(endTime, mainProductThroughput.getValue().getMaxTimeValue()))
 			throw new ErrorException("the production time series defined for %s in facility %s includes production levels until"
 					+ "%f. Try was made to check production level until %f!", 

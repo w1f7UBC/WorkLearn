@@ -179,9 +179,9 @@ public class EntitySource extends BulkHandlingLinkedEntity {
 			return Double.POSITIVE_INFINITY;
 		}
 		
-		if(Tester.greaterCheckTimeStep(endTime, throughput.getValue().getMaxTimeValue())){
+	/*	if(Tester.greaterCheckTimeStep(endTime, throughput.getValue().getMaxTimeValue())){
 			
-		}		
+		}		*/
 		
 		nextTime = throughput.getValue().getNextChangeTimeAfterHours(currentTime);
 		while(Tester.lessCheckTimeStep(currentTime, endTime/3600.0d)){
