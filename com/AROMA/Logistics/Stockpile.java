@@ -75,7 +75,7 @@ public class Stockpile extends BulkMaterialStorage {
 				if(eachRoute.getStockpile() == this)
 					eachRoute.incrementConnectedSegmentsCount(-1);	
 			}
-			for(ProcessingRoute eachRoute: this.getFacility().getOperationsManager().getProcessingRoutesListOutfeed().getValues().get(0)){
+			for(ProcessingRoute eachRoute: this.getFacility().getOperationsManager().getProcessingRoutesListOutfeed().get((BulkMaterial) entityToAdd.getProtoTypeEntity())){
 				if(eachRoute.getOutfeedPiles().contains(this))
 					eachRoute.incrementConnectedSegmentsCount(-1);	
 			}
@@ -119,7 +119,7 @@ public class Stockpile extends BulkMaterialStorage {
 			}
 			
 			// TODO assuming only one processing route!
-			for(ProcessingRoute eachRoute: this.getFacility().getOperationsManager().getProcessingRoutesListOutfeed().getValues().get(0)){
+			for(ProcessingRoute eachRoute: this.getFacility().getOperationsManager().getProcessingRoutesListOutfeed().get((BulkMaterial) entityToRemove)){
 				if(eachRoute.getInfeedPiles().contains(this))
 					eachRoute.incrementConnectedSegmentsCount(-1);	
 			}

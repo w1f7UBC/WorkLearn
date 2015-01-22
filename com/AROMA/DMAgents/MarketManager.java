@@ -10,6 +10,7 @@ import com.AROMA.Logistics.ProcessingRoute;
 import com.AROMA.Utils.HashMapList;
 import com.AROMA.Utils.PriorityQueue;
 import com.jaamsim.basicsim.ReflectionTarget;
+import com.sandwell.JavaSimulation.Entity;
 
 
 public class MarketManager extends AROMAEntity {
@@ -23,6 +24,7 @@ public class MarketManager extends AROMAEntity {
 	}
 	
 	public MarketManager() {
+		
 		marketsList = new PriorityQueue<>(new AscendingPriotityComparator<Market>(AROMAEntity.class,"getInternalPriority"));
 		marketsMap = new HashMapList<BulkMaterial, Market> (1);
 	}

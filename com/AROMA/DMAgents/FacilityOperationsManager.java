@@ -106,20 +106,51 @@ public class FacilityOperationsManager extends FacilityManager {
 	
 	/**
 	 * TODO assumes only one processor has infeedMaterial
-	 * @param infeedMaterial
+	 * @param infeed if true will start from bulkMaterial as infeed of a chain of processors, if false will consider bulkMaterial as the outfeed of a series of processors
 	 * @return the chain of processing routes that receive infeed material processes to outfeed and all the way to the last outfeed.
 	 * (e.g. log to chips- chips to pulp- pulp to paper) 
 	 */
-	public LinkedList<ProcessingRoute> getChainProcessingRoutes(BulkMaterial infeedMaterial){
+	public LinkedList<ProcessingRoute> getChainProcessingRoutes(BulkMaterial bulkMaterial, boolean infeed){
 		LinkedList<ProcessingRoute> processingRouteList = new LinkedList<ProcessingRoute> ();
-		BulkMaterial tempInfeed = infeedMaterial;
-		ProcessingRoute tempProcessingRoute = this.getFacility().getOperationsManager().getProcessingRoutesListInfeed().get(tempInfeed).isEmpty()? null: this.getFacility().getOperationsManager().getProcessingRoutesListInfeed().get(tempInfeed).get(0);
+		if (infeed) {
+			BulkMaterial tempInfeed = bulkMaterial;
+			ProcessingRoute tempProcessingRoute = this.getFacility()
+					.getOperationsManager().getProcessingRoutesListInfeed()
+					.get(tempInfeed).isEmpty() ? null : this.getFacility()
+					.getOperationsManager().getProcessingRoutesListInfeed()
+					.get(tempInfeed).get(0);
 
-		while(tempProcessingRoute != null){
-			processingRouteList.addLast(tempProcessingRoute);
-			tempInfeed = tempProcessingRoute.getProcessor().getPrimaryProduct();
-			// TODO assumes only one processing route is handling infeed!
-			tempProcessingRoute = this.getFacility().getOperationsManager().getProcessingRoutesListInfeed().get(tempInfeed).isEmpty()? null: this.getFacility().getOperationsManager().getProcessingRoutesListInfeed().get(tempInfeed).get(0);			
+			while (tempProcessingRoute != null) {
+				processingRouteList.addLast(tempProcessingRoute);
+				// This is using primary product because forward looking is used to set prices only and primary products
+				// price matters. TODO this should really loop over all the possible outfeeds
+				tempInfeed = tempProcessingRoute.getProcessor()
+						.getPrimaryProduct();
+				// TODO assumes only one processing route is handling infeed!
+				tempProcessingRoute = this.getFacility().getOperationsManager()
+						.getProcessingRoutesListInfeed().get(tempInfeed)
+						.isEmpty() ? null : this.getFacility()
+						.getOperationsManager().getProcessingRoutesListInfeed()
+						.get(tempInfeed).get(0);
+			}
+		} else {
+			BulkMaterial tempOutfeed = bulkMaterial;
+			ProcessingRoute tempProcessingRoute = this.getFacility()
+					.getOperationsManager().getProcessingRoutesListOutfeed()
+					.get(tempOutfeed).isEmpty() ? null : this.getFacility()
+					.getOperationsManager().getProcessingRoutesListOutfeed()
+					.get(tempOutfeed).get(0);
+
+			while (tempProcessingRoute != null) {
+				processingRouteList.addFirst(tempProcessingRoute);
+				// TODO assumes processing route has only one handling infeed!
+				tempOutfeed = tempProcessingRoute.getInfeedMaterial().get(0);
+				tempProcessingRoute = this.getFacility().getOperationsManager()
+						.getProcessingRoutesListOutfeed().get(tempOutfeed)
+						.isEmpty() ? null : this.getFacility()
+						.getOperationsManager().getProcessingRoutesListOutfeed()
+						.get(tempOutfeed).get(0);
+			}
 		}
 		
 		return processingRouteList;
@@ -465,10 +496,14 @@ public class FacilityOperationsManager extends FacilityManager {
 	 * plans production for all processing routes. It should be run after resetplannedstocks method.
 	 */
 	public void planProduction(){
-		for (BulkMaterial eachProcessingRouteList: processingRoutesListOutfeed.getKeys()) {
-			for (ProcessingRoute processingRoute: processingRoutesListOutfeed.get(eachProcessingRouteList)) {
-				if (processingRoute.getLastPlannedTime() != this.getSimTime()) {
-					this.planProduction(processingRoute,
+		for (BulkMaterial eachOutfeed: processingRoutesListOutfeed.getKeys()) {
+			// if there is a throughput file defined for this outfeed, plan production for the whole chain based on the throuhput schedule of the last outfeed in the chain
+			// TODO check to see if this actually adds throughput and target demand for the processors that outfeed multiple processing routes
+			for (ProcessingRoute processingRoute: processingRoutesListOutfeed.get(eachOutfeed)) {
+				if (processingRoute.getProcessor().throughputIsDefined()) {
+					LinkedList<ProcessingRoute> tempList = this.getChainProcessingRoutes(eachOutfeed,false);
+					while(!tempList.isEmpty())
+						this.planProduction(tempList.pollLast(),
 							SimulationManager.getPreviousPlanningTime(),SimulationManager.getNextPlanningTime());
 				}
 			}
@@ -502,7 +537,7 @@ public class FacilityOperationsManager extends FacilityManager {
 				//set purchase price 0
 				this.getFacility().setStocksList(eachMaterial, 10, 0.0d);
 			}
-			processingRoute.setLastPlannedTime(this.getSimTime());
+			
 		}else{
 			
 			//TODO assumes infeeds for mutually exclusive processes are completely different
@@ -525,7 +560,7 @@ public class FacilityOperationsManager extends FacilityManager {
 					//set sell price 0
 					this.getFacility().setStocksList(eachMaterial, 10, 0.0d);
 				}
-				eachProcessor.setLastPlannedTime(this.getSimTime());
+				
 			}
 		}
 		

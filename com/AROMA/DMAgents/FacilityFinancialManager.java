@@ -67,7 +67,7 @@ public class FacilityFinancialManager extends FacilityManager {
 	 */
 	public void setFeedstockBreakevenPrice(BulkMaterial infeedMaterial){
 		BulkMaterial tempInfeed, chainOutfeed;
-		LinkedList<ProcessingRoute> processingRouteList = this.getFacility().getOperationsManager().getChainProcessingRoutes(infeedMaterial);
+		LinkedList<ProcessingRoute> processingRouteList = this.getFacility().getOperationsManager().getChainProcessingRoutes(infeedMaterial,true);
 		ProcessingRoute tempProcessingRoute = processingRouteList.pollLast();
 		chainOutfeed = tempProcessingRoute.getProcessor().getPrimaryProduct();
 

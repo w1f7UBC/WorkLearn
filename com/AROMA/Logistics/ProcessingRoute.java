@@ -16,7 +16,6 @@ public class ProcessingRoute extends LogisticsEntity {
 	private ArrayList<Stockpile> outfeedPiles;
 	private ArrayList<BulkMaterial> infeedMaterial;
 	private ArrayList<BulkMaterial> outfeedMaterial;
-	private double lastPlannedTime;
 
 	private boolean active;
 	private BulkMaterialProcessor processor;
@@ -45,7 +44,6 @@ public class ProcessingRoute extends LogisticsEntity {
 		// and that outfeed piles are empty (incremented by one for processor and one for outfeed pile)
 		this.incrementConnectedSegmentsCount(2);
 		
-		lastPlannedTime = -1;
 	}
 	
 	/**
@@ -87,15 +85,7 @@ public class ProcessingRoute extends LogisticsEntity {
 	public boolean isConnected() {
 		return connectedSegmentsCount == infeedPiles.size() + outfeedPiles.size() + 1 ? true : false;
 	}
-	
-	public double getLastPlannedTime(){
-		return lastPlannedTime;
-	}
-	
-	public void setLastPlannedTime(double time){
-		lastPlannedTime = time;
-	}
-			
+				
 	/**
 	 * 
 	 * @return TODO zero if denominator is zero (bulkMaterial handling rate/ baseBulkMateral's handling rate) o.w.

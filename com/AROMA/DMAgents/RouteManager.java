@@ -193,7 +193,7 @@ public class RouteManager extends DisplayEntity {
 	 * origin and destinations and also that it's assumed that caller checks for
 	 * origin and destination's compatibility
 	 * 
-	 * @param movingEntity is always the carrier from the begining of the route (from origin)
+	 * @param movingEntity is always the carrier from the beginning of the route (from origin)
 	 * route is computed that handles movingEntity throughout. if
 	 * null is passed shortest path is calculated
 	 * @param weightCap is the maximum weight that will be considered in dijkstra calculation. e.g. if 

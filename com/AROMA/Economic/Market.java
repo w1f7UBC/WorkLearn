@@ -155,8 +155,9 @@ public class Market extends AROMAEntity {
 		for(Facility eachBuyer: buyersList){
 			eachBuyer.getOperationsManager().satisfyDemandInternally(product.getValue());
 		}
-			
+					
 		ArrayList<MarketOffer> offersList= setOffers();
+		System.out.println("started "+this.getName()+"containing "+offersList.size()+"offers.");
 		//Sort offers higher to lowest
 		Collections.sort(offersList);
 		MarketOffer tempOffer = null;
@@ -167,16 +168,18 @@ public class Market extends AROMAEntity {
 			
 			if(Tester.equalCheckTolerance(tempOffer.getSeller().getStockList().getValueFor(this.getProduct(), 4),tempOffer.getSeller().getStockList().getValueFor(this.getProduct(), 13))){
 				sellersList.remove(tempOffer.getSeller());
-				offersList.remove(0);
+				offersList.remove(tempOffer);
 				continue;
 			} else if(Tester.equalCheckTolerance(tempOffer.getBuyer().getStockList().getValueFor(this.getProduct(), 3),0.0d)){
 				buyersList.remove(tempOffer.getBuyer());
-				offersList.remove(0);
+				offersList.remove(tempOffer);
 				continue;
 			} 
 			
 			if(!clearSupply.getValue() && Tester.lessCheckTolerance(tempOffer.getMarketOfferPrice(),0.0d))
 				break;
+			
+			System.out.println("running "+this.getName());
 			
 			// set offers amount
 			//TODO offer amount is set here to avoid readjusting offer's amount every time a contract is established
@@ -186,11 +189,13 @@ public class Market extends AROMAEntity {
 									//amount seller hasn't sold yet
 									tempOffer.getSeller().getStockList().getValueFor(product.getValue(), 13)-
 									tempOffer.getSeller().getStockList().getValueFor(product.getValue(), 4)));
-					
-			this.establishContracts(offersList.get(0));
+			
+			if(Tester.greaterCheckTolerance(tempOffer.getAmount(), 0.0d))
+				this.establishContracts(tempOffer);
 			
 			//TODO use better implementation to keep offers and only change the changed ones
-			offersList.remove(0);			
+			offersList.remove(tempOffer);	
+			tempOffer.kill();
 		}
 	}
 

@@ -290,6 +290,10 @@ public class BulkMaterialProcessor extends BulkHandlingLinkedEntity {
 	public BulkMaterial getPrimaryProduct(){
 		return primaryProduct.getValue();
 	}
+	
+	public boolean throughputIsDefined(){
+		return mainProductThroughput.getValue()== null ? false : true;
+	}
 
 	/**
 	 * Attention!! Production level should be defined in exact planning periods.
@@ -300,7 +304,7 @@ public class BulkMaterialProcessor extends BulkHandlingLinkedEntity {
 	 * starting time one after the start time until the end time.
 	 */
 	public double getThroughput(double startTime, double endTime){
-		if(mainProductThroughput.getValue()== null )
+		if(!throughputIsDefined())
 				return  this.getFacility().getStockList().getValueFor(this.getPrimaryProduct(), 1);
 		if(Tester.greaterCheckTimeStep(endTime, mainProductThroughput.getValue().getMaxTimeValue()))
 			throw new ErrorException("the production time series defined for %s in facility %s includes production levels until"
