@@ -100,7 +100,7 @@ public class EntitySource extends BulkHandlingLinkedEntity {
 		super.startUp();
 		// TODO make this talk to the generation manager to figure out the
 		// entities to generate
-		this.scheduleProcess(0.0d, 2, new ReflectionTarget(this, "pushSupply",SimulationManager.getPreviousPlanningTime(),this.getSimTime()+SimulationManager.getNextPlanningTime()));
+		this.scheduleProcess(0.0d, 3, new ReflectionTarget(this, "pushSupply",SimulationManager.getPreviousPlanningTime(),this.getSimTime()+SimulationManager.getNextPlanningTime()));
 	}
 
 	// /////////////////////////////////////////////////////////////////////////////
@@ -113,9 +113,9 @@ public class EntitySource extends BulkHandlingLinkedEntity {
 		double amount = this.getThroughput(startTime, endTime);
 		stockpile.getFacility().getOperationsManager().updateRealizedProduction((BulkMaterial) this.getHandlingEntityTypeList().get(0), amount);
 		
-		this.scheduleProcess(SimulationManager.getPreviousPlanningTime(), 2, new ReflectionTarget(this, "generate"));
+		this.scheduleProcess(SimulationManager.getPreviousPlanningTime()-this.getSimTime(), 4, new ReflectionTarget(this, "generate"));
 
-		this.scheduleProcess(SimulationManager.getPlanningHorizon(), 2, new ReflectionTarget(this, "pushSupply",SimulationManager.getPreviousPlanningTime(),SimulationManager.getNextPlanningTime()));
+		this.scheduleProcess(SimulationManager.getPlanningHorizon(), 3, new ReflectionTarget(this, "pushSupply",SimulationManager.getPreviousPlanningTime(),SimulationManager.getNextPlanningTime()));
 
 	}
 	

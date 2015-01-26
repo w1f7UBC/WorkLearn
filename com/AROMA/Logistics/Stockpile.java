@@ -62,6 +62,8 @@ public class Stockpile extends BulkMaterialStorage {
 	@Override
 	public <T1 extends LogisticsEntity> void addToCurrentlyHandlingEntityList(
 			T1 entityToAdd, double amountToAdd) {
+		if(Tester.lessOrEqualCheckTolerance(amountToAdd, 0.0d))
+			return;
 		super.addToCurrentlyHandlingEntityList(entityToAdd, amountToAdd);
 				
 		this.getFacility().addToStocksList((BulkMaterial) entityToAdd.getProtoTypeEntity(), 6, amountToAdd);
@@ -92,7 +94,7 @@ public class Stockpile extends BulkMaterialStorage {
 				if(eachRoute.getStockpile() == this)
 					eachRoute.incrementConnectedSegmentsCount(1);	
 			}
-			for(ProcessingRoute eachRoute: this.getFacility().getOperationsManager().getProcessingRoutesListOutfeed().getValues().get(0)){
+			for(ProcessingRoute eachRoute: this.getFacility().getOperationsManager().getProcessingRoutesListInfeed().get((BulkMaterial) entityToAdd.getProtoTypeEntity())){
 				if(eachRoute.getInfeedPiles().contains(this))
 					eachRoute.incrementConnectedSegmentsCount(1);	
 			}
@@ -107,8 +109,7 @@ public class Stockpile extends BulkMaterialStorage {
 	@Override
 	public <T extends LogisticsEntity> void removeFromCurrentlyHandlingEntityList(T entityToRemove, double amountToRemove) {
 		super.removeFromCurrentlyHandlingEntityList(entityToRemove, amountToRemove);
-		
-		
+				
 		this.getFacility().removeFromStocksList((BulkMaterial) entityToRemove.getProtoTypeEntity(), 6, amountToRemove);
 		
 		if(Tester.lessOrEqualCheckTolerance(this.getCurrentlyHandlingAmount(), minReclaimableAmount.getValue())){
@@ -119,7 +120,7 @@ public class Stockpile extends BulkMaterialStorage {
 			}
 			
 			// TODO assuming only one processing route!
-			for(ProcessingRoute eachRoute: this.getFacility().getOperationsManager().getProcessingRoutesListOutfeed().get((BulkMaterial) entityToRemove)){
+			for(ProcessingRoute eachRoute: this.getFacility().getOperationsManager().getProcessingRoutesListInfeed().get((BulkMaterial) entityToRemove.getProtoTypeEntity())){
 				if(eachRoute.getInfeedPiles().contains(this))
 					eachRoute.incrementConnectedSegmentsCount(-1);	
 			}
@@ -134,7 +135,7 @@ public class Stockpile extends BulkMaterialStorage {
 				if(eachRoute.getStockpile() == this)
 					eachRoute.incrementConnectedSegmentsCount(1);	
 			}
-			for(ProcessingRoute eachRoute: this.getFacility().getOperationsManager().getProcessingRoutesListOutfeed().getValues().get(0)){
+			for(ProcessingRoute eachRoute: this.getFacility().getOperationsManager().getProcessingRoutesListOutfeed().get((BulkMaterial) entityToRemove.getProtoTypeEntity())){
 				if(eachRoute.getOutfeedPiles().contains(this))
 					eachRoute.incrementConnectedSegmentsCount(1);	
 			}

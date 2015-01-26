@@ -1,5 +1,7 @@
 package com.AROMA.Logistics;
 
+import com.sandwell.JavaSimulation.Tester;
+
 
 
 public class BulkCargo extends BulkMaterialStorage {
@@ -24,6 +26,8 @@ public class BulkCargo extends BulkMaterialStorage {
 	@Override
 	public <T1 extends LogisticsEntity> void addToCurrentlyHandlingEntityList(
 			T1 entityToAdd, double amountToAdd) {
+		if(Tester.lessOrEqualCheckTolerance(amountToAdd, 0.0d))
+			return;
 		super.addToCurrentlyHandlingEntityList(entityToAdd, amountToAdd);
 		this.getCurrentTow().getAcceptingBulkMaterialList().add((BulkMaterial) entityToAdd, 1, amountToAdd);
 	}

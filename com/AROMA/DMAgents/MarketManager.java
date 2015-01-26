@@ -41,7 +41,7 @@ public class MarketManager extends AROMAEntity {
 	@Override
 	public void startUp() {
 		super.startUp();
-		this.scheduleProcess(0.0d, 3, new ReflectionTarget(this, "activateMarkets"));
+		this.scheduleProcess(0.0d, 4, new ReflectionTarget(this, "activateMarkets"));
 
 	}
 	
@@ -55,17 +55,15 @@ public class MarketManager extends AROMAEntity {
 	 * is activated. refactor for when there would be multiple markets per product
 	 */
 	public void activateMarkets(){
-		
+
 		for(Market eachMarket: marketsList){
 			eachMarket.populateLists();
 			
 			// TODO figuring out markets one at a time based on material's internal priority
 			eachMarket.runSellersMarket();
-			
-			
 		}
 		
-		// priotiy 2 to activate after reseting planed inputs from last period and planning production for this period by operations manager
+		// priotiy 3 to activate after reseting planed inputs from last period and planning production for this period by operations manager
 		this.scheduleProcess(SimulationManager.getPlanningHorizon(), 4, new ReflectionTarget(this, "activateMarkets"));
 	}
 }

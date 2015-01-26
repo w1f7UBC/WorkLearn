@@ -112,7 +112,10 @@ public class FacilityGeneralManager extends FacilityManager {
 		double totalRemainingSupplyContractsAmount = 
 				this.getFacility().getStockList().getValueFor(contract.getProduct(), 4) -
 				this.getFacility().getStockList().getValueFor(contract.getProduct(), 11);
-		
+		if (Tester.equalCheckTolerance(totalRemainingSupplyContractsAmount, 0.0d)){
+			return 0.0d;
+		}
+			
 		double totalAvailable = this.getFacility().getStockList().getValueFor(contract.getProduct(), 6);
 		double amountToAssign = Tester.min(contract.getUnfulfilledAmount(),totalAvailable * contract.getUnfulfilledAmount()/totalRemainingSupplyContractsAmount);
 		

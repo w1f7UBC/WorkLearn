@@ -8,6 +8,7 @@ import com.AROMA.Utils.ThreeLinkedLists;
 import com.jaamsim.basicsim.ErrorException;
 import com.jaamsim.input.EntityInput;
 import com.jaamsim.input.InputAgent;
+import com.jaamsim.input.InputErrorException;
 import com.jaamsim.input.ValueInput;
 import com.jaamsim.input.ValueListInput;
 import com.jaamsim.input.Vec3dInput;
@@ -325,12 +326,13 @@ public class BulkHandlingLinkedEntity extends LinkedEntity {
 	}
 	
 	public  double getMaxRate(BulkMaterial bulkMaterial) {
-		if (this.checkIfHandles(bulkMaterial)) {
+		BulkMaterial tempBulkMaterial = (BulkMaterial) bulkMaterial.getProtoTypeEntity();
+		if (this.checkIfHandles(tempBulkMaterial)) {
 			if (rateByEntityType.getValue() == null) 
 				return rate.getValue();
-			return rateByEntityType.getValue().get(this.getHandlingEntityTypeList().indexOf(bulkMaterial));
+			return rateByEntityType.getValue().get(this.getHandlingEntityTypeList().indexOf(tempBulkMaterial));
 		}
-		return 0;		
+		throw new InputErrorException("Max rate not defined for %s for %s.",tempBulkMaterial.getName(),this.getName());		
 	}
 	
 	public ThreeLinkedLists<BulkHandlingLinkedEntity, BulkMaterial> getCurrentOutfeedList() {

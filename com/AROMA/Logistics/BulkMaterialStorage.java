@@ -206,6 +206,8 @@ public class BulkMaterialStorage extends BulkHandlingLinkedEntity {
 	 */
 	@Override
 	public <T1 extends LogisticsEntity> void addToCurrentlyHandlingEntityList(T1 entityToAdd, double amountToAdd) {
+		if(Tester.lessOrEqualCheckTolerance(amountToAdd, 0.0d))
+			return;
 		BulkMaterial materialToAdd = (BulkMaterial) entityToAdd;
 		
 		if (!this.getCurrentlyHandlingList().isEmpty() && !(((BulkMaterial) this.getCurrentlyHandlingList().getEntityList().get(0).getProtoTypeEntity()).equals(materialToAdd.getProtoTypeEntity()) || this.getCurrentlyHandlingList().size()>1))

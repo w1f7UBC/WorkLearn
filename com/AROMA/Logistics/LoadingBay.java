@@ -229,7 +229,7 @@ public class LoadingBay extends DiscreteHandlingLinkedEntity {
 				}
 				// ow start loading through loader
 				else {
-					((Loader) activeEquipment).doLoading(contract, tempRoute.getStockpile(),tempBulkCargo,activeEquipment.getMaxRate());
+					((Loader) activeEquipment).doLoading(contract, tempRoute.getStockpile(),tempBulkCargo,activeEquipment.getMaxRate(tempBulkMaterial));
 				}
 				this.getFacility().getOperationsManager().deactivateRoute(tempRoute, tempBulkCargo);
 				
@@ -271,7 +271,7 @@ public class LoadingBay extends DiscreteHandlingLinkedEntity {
 				activeEquipment = this.getFacility().getOperationsManager().activateRoute(tempRoute, tempBulkCargo);
 				
 				// start loading through loader
-				((Loader) activeEquipment).doUnloading(contract, tempBulkCargo, tempRoute.getStockpile(),activeEquipment.getMaxRate());
+				((Loader) activeEquipment).doUnloading(contract, tempBulkCargo, tempRoute.getStockpile(),activeEquipment.getMaxRate(tempBulkMaterial));
 			
 				this.getFacility().getOperationsManager().deactivateRoute(tempRoute, tempBulkCargo);
 				

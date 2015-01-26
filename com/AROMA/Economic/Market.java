@@ -157,7 +157,6 @@ public class Market extends AROMAEntity {
 		}
 					
 		ArrayList<MarketOffer> offersList= setOffers();
-		System.out.println("started "+this.getName()+"containing "+offersList.size()+"offers.");
 		//Sort offers higher to lowest
 		Collections.sort(offersList);
 		MarketOffer tempOffer = null;
@@ -178,9 +177,7 @@ public class Market extends AROMAEntity {
 			
 			if(!clearSupply.getValue() && Tester.lessCheckTolerance(tempOffer.getMarketOfferPrice(),0.0d))
 				break;
-			
-			System.out.println("running "+this.getName());
-			
+					
 			// set offers amount
 			//TODO offer amount is set here to avoid readjusting offer's amount every time a contract is established
 			MovingEntity tempTransporter = tempOffer.getRoute().getMovingEntitiesList().get(0);

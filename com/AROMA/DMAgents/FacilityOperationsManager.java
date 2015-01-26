@@ -82,6 +82,8 @@ public class FacilityOperationsManager extends FacilityManager {
 			this.getFacility().setStocksList(each, 11, 0.0d);
 			this.getFacility().setStocksList(each, 12, 0.0d);
 			this.getFacility().setStocksList(each, 13, 0.0d);
+			this.getFacility().setStocksList(each, 15, 0.0d);
+			this.getFacility().setStocksList(each, 16, 0.0d);
 		}
 		// priotiy 1 to activate before market manager
 		this.scheduleProcess(SimulationManager.getPlanningHorizon(), 1, new ReflectionTarget(this, "resetPlannedStocks"));
@@ -496,6 +498,7 @@ public class FacilityOperationsManager extends FacilityManager {
 	 * plans production for all processing routes. It should be run after resetplannedstocks method.
 	 */
 	public void planProduction(){
+
 		for (BulkMaterial eachOutfeed: processingRoutesListOutfeed.getKeys()) {
 			// if there is a throughput file defined for this outfeed, plan production for the whole chain based on the throuhput schedule of the last outfeed in the chain
 			// TODO check to see if this actually adds throughput and target demand for the processors that outfeed multiple processing routes

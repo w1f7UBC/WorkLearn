@@ -215,8 +215,8 @@ public class Facility extends DiscreteHandlingLinkedEntity {
 	 * <br> <b> 12- </b> fullfilled demand contracts amount
 	 * <br> <b> 13- </b> realized throughput through feedstock supply
 	 * <br> <b> 14- </b> Total amount produced (by processors)
-	 * <br> <b> 15- </b> Total amount received (from suppliers)
-	 * <br> <b> 16- </b> Total amount shipped (to buyers)
+	 * <br> <b> 15- </b> Total amount received in this planning period (from suppliers)
+	 * <br> <b> 16- </b> Total amount shipped in this planning period (to buyers)
 	 */
 	public TwoLinkedLists<BulkMaterial> getStockList(){
 		return stocksList;
@@ -239,8 +239,8 @@ public class Facility extends DiscreteHandlingLinkedEntity {
 	 * <br> <b> 12- </b> fullfilled demand contracts amount
 	 * <br> <b> 13- </b> realized throughput through feedstock supply
 	 * <br> <b> 14- </b> Total amount produced (by processors)
-	 * <br> <b> 15- </b> Total amount received (from suppliers)
-	 * <br> <b> 16- </b> Total amount shipped (to buyers)
+	 * <br> <b> 15- </b> Total amount received in this planning period (from suppliers)
+	 * <br> <b> 16- </b> Total amount shipped in this planning period (to buyers)
 	 */
 	public void setStocksList(BulkMaterial bulkMaterial, int valueListIndex, double amount){
 		stocksList.set(bulkMaterial, valueListIndex, amount);
@@ -265,8 +265,8 @@ public class Facility extends DiscreteHandlingLinkedEntity {
 	 * <br> <b> 12- </b> fullfilled demand contracts amount
 	 * <br> <b> 13- </b> realized throughput through feedstock supply
 	 * <br> <b> 14- </b> Total amount produced (by processors)
-	 * <br> <b> 15- </b> Total amount received (from suppliers)
-	 * <br> <b> 16- </b> Total amount shipped (to buyers)
+	 * <br> <b> 15- </b> Total amount received in this planning period (from suppliers)
+	 * <br> <b> 16- </b> Total amount shipped in this planning period (to buyers)
 	 */
 	public void addToStocksList(BulkMaterial bulkMaterial, int valueListIndex, double amount){
 		// Whether supply contracts have been inactive due to material unavailability

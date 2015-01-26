@@ -194,6 +194,8 @@ public class BulkMaterialProcessor extends BulkHandlingLinkedEntity {
 			for(Stockpile each:infeedPiles){
 				tempMaterial = (BulkMaterial) each.getCurrentlyHandlingList().getEntityList().get(0);
 				tempAmount = each.getCurrentlyHandlingAmount();
+				if(Tester.equalCheckTolerance(this.getMaxRate(tempMaterial),0.0d))
+					continue;
 				dt = Tester.min(dt,tempAmount/this.getMaxRate(tempMaterial)); 
 			}
 			
@@ -201,13 +203,15 @@ public class BulkMaterialProcessor extends BulkHandlingLinkedEntity {
 				tempMaterial = (BulkMaterial) each.getHandlingEntityTypeList().get(0);
 				tempAmount = this.getOutfeedRate(tempMaterial) * dt;
 				tempAmount = Tester.min(tempAmount, each.getRemainingCapacity(tempMaterial));
+				if(Tester.equalCheckTolerance(this.getOutfeedRate(tempMaterial),0.0d))
+					continue;
 				dt = Tester.min(dt,tempAmount / this.getOutfeedRate(tempMaterial));
 			}
 			
 			//remove material from infeed piles
 			for(Stockpile each:infeedPiles){
 				tempMaterial = (BulkMaterial) each.getCurrentlyHandlingList().getEntityList().get(0);
-				each.removeFromCurrentlyHandlingEntityList(tempMaterial, this.getMaxRate() * dt);
+				each.removeFromCurrentlyHandlingEntityList(tempMaterial, this.getMaxRate(tempMaterial) * dt);
 				each.setLastContentUpdateTime(this.getSimTime());
 			}
 			// wait for dt and resistance time
@@ -248,10 +252,11 @@ public class BulkMaterialProcessor extends BulkHandlingLinkedEntity {
 	}
 	
 	public double getOutfeedRate(BulkMaterial bulkMaterial){
-		if(!outfeedEntityTypeList.getValue().contains(bulkMaterial))
-			throw new InputErrorException("%s does not outfeed %s!"	, this.getName(), bulkMaterial.getName());
+		BulkMaterial tempBulkMaterial = (BulkMaterial) bulkMaterial.getProtoTypeEntity();
+		if(!outfeedEntityTypeList.getValue().contains(tempBulkMaterial))
+			throw new InputErrorException("%s does not outfeed %s!"	, this.getName(), tempBulkMaterial.getName());
 		
-		return outfeedRateByEntityType.getValue().get(outfeedEntityTypeList.getValue().indexOf(bulkMaterial));
+		return outfeedRateByEntityType.getValue().get(outfeedEntityTypeList.getValue().indexOf(tempBulkMaterial));
 	}
 	
 	//TODO figure out conversion rates e.g. outfeed/outfeed or outfeed/infeed (may be in different units!)

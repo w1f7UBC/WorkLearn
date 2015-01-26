@@ -139,7 +139,7 @@ public class SimulationManager extends DisplayEntity {
 			}
 			removeableWorldViewLayers.clear();
 		}		
-		this.scheduleProcess(nextPlanningTime, 1, new ReflectionTarget(this, "updatePlanningTimes"));
+		this.scheduleProcess(SimulationManager.getPlanningHorizon(), 1, new ReflectionTarget(this, "updatePlanningTimes"));
 	}
 	
 	public static ArrayList<String> getRemoveablebleWorldWindLayers(){

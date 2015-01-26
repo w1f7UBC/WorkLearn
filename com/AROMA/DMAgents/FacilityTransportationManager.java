@@ -115,7 +115,7 @@ public class FacilityTransportationManager extends FacilityManager {
 			buyerPile.addToCurrentlyHandlingEntityList(contract.getProduct(), assignedAmount);
 				
 			contract.addToFulfilledAmount(assignedAmount);	
-			System.out.println("fulfilled "+contract.getName()+"-Amount:"+assignedAmount);
+		//	System.out.println("fulfilled "+contract.getName()+"-Amount:"+assignedAmount);
 			
 		}
 	}
