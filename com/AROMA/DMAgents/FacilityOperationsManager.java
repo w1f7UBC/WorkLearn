@@ -50,8 +50,8 @@ public class FacilityOperationsManager extends FacilityManager {
 	}
 	
 	public FacilityOperationsManager() {
-		loadingRoutesList = new PriorityQueue<>(new DescendingPriotityComparator<BulkHandlingRoute>(BulkHandlingRoute.class, "getRoutePriority"));
-		unloadingRoutesList = new PriorityQueue<>(new DescendingPriotityComparator<BulkHandlingRoute>(BulkHandlingRoute.class, "getRoutePriority"));
+		loadingRoutesList = new PriorityQueue<>(new DescendingPriorityComparator<BulkHandlingRoute>(BulkHandlingRoute.class, "getRoutePriority"));
+		unloadingRoutesList = new PriorityQueue<>(new DescendingPriorityComparator<BulkHandlingRoute>(BulkHandlingRoute.class, "getRoutePriority"));
 		processingRoutesListOutfeed = new HashMapList<>(1);
 		processingRoutesListInfeed = new HashMapList<>(1);
 		//set last plannedtime so that production planning is done at the beginning of the run

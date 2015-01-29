@@ -142,7 +142,7 @@ public class MovingEntity extends LogisticsEntity {
 		
 		plannedNextRouteSegments = new LinkedList<>();
 		currentlyTowingList = new HashMapList<>(1);
-		acceptingBulkMaterialList = new TwoLinkedLists<>(4, new DescendingPriotityComparator<BulkMaterial>(AROMAEntity.class, "getInternalPriority"),0);
+		acceptingBulkMaterialList = new TwoLinkedLists<>(4, new DescendingPriorityComparator<BulkMaterial>(AROMAEntity.class, "getInternalPriority"),0);
 	}
 	
 	@Override

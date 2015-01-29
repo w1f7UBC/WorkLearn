@@ -146,7 +146,7 @@ public class LogisticsEntity extends ReportableEntity {
 		
 	public LogisticsEntity() {
 		super();
-		currentHandlersList = new TwoLinkedLists<>(1, new DescendingPriotityComparator<LogisticsEntity>(AROMAEntity.class, "getInternalPriority"));
+		currentHandlersList = new TwoLinkedLists<>(1, new DescendingPriorityComparator<LogisticsEntity>(AROMAEntity.class, "getInternalPriority"));
 	}
 	
 	@Override

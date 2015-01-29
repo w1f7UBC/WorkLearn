@@ -392,9 +392,9 @@ public class AROMAEntity extends DisplayEntity  {
 	/**
 	 * keeps queues in ascending format. for descending format use reverseinternalprioritycomparator
 	 */
-	public static class AscendingPriotityComparator<T extends AROMAEntity> extends PriorityComparator implements Comparator<T> {
+	public static class AscendingPriorityComparator<T extends AROMAEntity> extends PriorityComparator implements Comparator<T> {
 		
-		public AscendingPriotityComparator(Class<? extends AROMAEntity> targetClass, String methodName, Object... arguments) {
+		public AscendingPriorityComparator(Class<? extends AROMAEntity> targetClass, String methodName, Object... arguments) {
 			super(targetClass, methodName, arguments);
 		}
 		
@@ -412,9 +412,9 @@ public class AROMAEntity extends DisplayEntity  {
 	/**
 	 * reverse implementation to keep lists in descending format (e.g. queues)
 	 */
-	public static class DescendingPriotityComparator<T extends AROMAEntity> extends PriorityComparator implements Comparator<T>{
+	public static class DescendingPriorityComparator<T extends AROMAEntity> extends PriorityComparator implements Comparator<T>{
 		
-		public DescendingPriotityComparator(Class<? extends AROMAEntity> targetClass, String methodName, Object... arguments) {
+		public DescendingPriorityComparator(Class<? extends AROMAEntity> targetClass, String methodName, Object... arguments) {
 			super(targetClass, methodName, arguments);
 
 		}

@@ -90,9 +90,9 @@ public class Facility extends DiscreteHandlingLinkedEntity {
 		managersInitialized = false;
 		dormant = false;
 		insideFacilityLimits = new HashMapList<String,LogisticsEntity>(5);
-		new TwoLinkedLists<>(4, new DescendingPriotityComparator<BulkMaterial>(AROMAEntity.class, "getInternalPriority"),0);
+		new TwoLinkedLists<>(4, new DescendingPriorityComparator<BulkMaterial>(AROMAEntity.class, "getInternalPriority"),0);
 		
-		stocksList = new TwoLinkedLists<>(17, new DescendingPriotityComparator<BulkMaterial>(AROMAEntity.class, "getInternalPriority"));
+		stocksList = new TwoLinkedLists<>(17, new DescendingPriorityComparator<BulkMaterial>(AROMAEntity.class, "getInternalPriority"));
 		
 		synchronized (allInstances) {
 			allInstances.add(this);

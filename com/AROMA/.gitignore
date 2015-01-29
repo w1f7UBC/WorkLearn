@@ -77,3 +77,5 @@
 /BarGraph.class
 /BarGraphModel$Binding.class
 /BarGraphModel.class
+/AROMAEntity$AscendingPriorityComparator.class
+/AROMAEntity$DescendingPriorityComparator.class
