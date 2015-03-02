@@ -154,15 +154,11 @@ public class FacilityGeneralManager extends FacilityManager {
 
 		}else{
 			demandContractList.add(contract.getProduct(), contract);
-			this.getFacility().removeFromStocksList(contract.getProduct(), 3, contract.getContractAmount());
 			//reserve transportation capacity
 			// TODO amount reserved is converted to amount per time unit for the contract's period meaning that a balanced transportation is assumed overtime
 			this.getFacility().getTransportationManager().getTransportersList().add(contract.getTransporterProtoType(), 1, (contract.getContractAmount()/contract.getContractPeriod())*SimulationManager.getPlanningHorizon());
 			//add to realized production 
 			this.getFacility().getOperationsManager().updateRealizedProduction(contract.getProduct(), contract.getContractAmount());
-			
-			//adjust infeed level for other mutually exclusive processes
-			this.getFacility().getOperationsManager().adjustMutuallyExclusiveProcessesDemands(contract.getProduct(), contract.getContractAmount());
 			
 		}
 		

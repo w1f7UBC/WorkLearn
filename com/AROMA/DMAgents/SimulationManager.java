@@ -23,6 +23,7 @@ import com.jaamsim.input.BooleanInput;
 import com.jaamsim.input.ValueInput;
 import com.jaamsim.units.TimeUnit;
 import com.sandwell.JavaSimulation.FileEntity;
+import com.sandwell.JavaSimulation.Tester;
 import com.jaamsim.input.Keyword;
 import com.jaamsim.math.Color4d;
 import com.sandwell.JavaSimulation3D.DisplayEntity;
@@ -43,6 +44,11 @@ public class SimulationManager extends DisplayEntity {
             "included in a separate report folder.",
      example = "PlanningManager PrintTransportReport { TRUE }")
 	private static final BooleanInput printTransportReport;
+	
+	@Keyword(description = "If TRUE, then statistics for surplus and deficit of all products of all facilities are " +
+            "included in a separate report folder.",
+     example = "PlanningManager printSurplusDeficitReport { TRUE }")
+	private static final BooleanInput printSurplusDeficitReport;
 
 	@Keyword(description = "Simulation time step - defining how refined the process oriented events (such as bulk material processing) works."
 			+ "Default is 1 h.", 
@@ -53,6 +59,7 @@ public class SimulationManager extends DisplayEntity {
 	
 	protected static FileEntity contractsReportFile;      
 	protected static FileEntity transportReportFile;      
+	protected static FileEntity surplusDeficitReportFile;
 	
 	//TODO move to a worldwind class. layers to remove at the begining of the planning time!
 	private static final ArrayList<String> removeableWorldViewLayers;
@@ -68,6 +75,8 @@ public class SimulationManager extends DisplayEntity {
 		
 		printTransportReport = new BooleanInput("PrintTransportReport", "Report", false);
 		
+		printSurplusDeficitReport = new BooleanInput("PrintSurplusDeficitReport", "Report", false);
+		
 		removeableWorldViewLayers = new ArrayList<String>(1);
 
 	}
@@ -77,6 +86,7 @@ public class SimulationManager extends DisplayEntity {
 		this.addInput(timeStep);
 		this.addInput(printContractsReport);
 		this.addInput(printTransportReport);
+		this.addInput(printSurplusDeficitReport);
 	}
 	
 	//TODO import it like report or simulation classes
@@ -118,6 +128,11 @@ public class SimulationManager extends DisplayEntity {
 		if(printTransportReport.getValue()){
 			transportReportFile = ReportAgent.initializeFile(this,".trp");
 			this.printTransportReportHeader();
+		}
+		
+		if(printSurplusDeficitReport.getValue()){
+			surplusDeficitReportFile = ReportAgent.initializeFile(this,".sdr");
+			this.printSurplusDeficitReportHeader();
 		}
 	}
 	
@@ -224,6 +239,53 @@ public class SimulationManager extends DisplayEntity {
 
 		contractsReportFile.newLine();
 		contractsReportFile.flush();	
+	}
+	
+	public static void printSurplusDeficitReportHeader() {
+		surplusDeficitReportFile.putStringTabs("Time", 1);
+		surplusDeficitReportFile.putStringTabs("Facility_Name", 1);		
+		surplusDeficitReportFile.putStringTabs("Product", 1);
+		surplusDeficitReportFile.putStringTabs("Actual_Throughput", 1);
+		surplusDeficitReportFile.putStringTabs("Production_Surplus", 1);
+		surplusDeficitReportFile.putStringTabs("Production_Deficit", 1);
+		surplusDeficitReportFile.putStringTabs("Satisfied_Demand", 1);
+		surplusDeficitReportFile.putStringTabs("Unstaisfied_Demand", 1);
+		
+		surplusDeficitReportFile.newLine();
+		surplusDeficitReportFile.flush();	
+		
+		// Print units
+		surplusDeficitReportFile.putStringTabs("(h)", 4);
+		surplusDeficitReportFile.putStringTabs("(tonne)", 1);
+		surplusDeficitReportFile.putStringTabs("(tonne)", 1);
+		surplusDeficitReportFile.putStringTabs("(tonne)", 1);
+		surplusDeficitReportFile.putStringTabs("(tonne)", 1);
+		
+		surplusDeficitReportFile.newLine();
+		surplusDeficitReportFile.flush();	
+	}
+	
+	public static void printSurplusDeficitReport(Facility facility){
+		if (printSurplusDeficitReport.getValue()) {
+			
+			for (BulkMaterial eachMaterial: facility.getStockList().getEntityList()) {
+				surplusDeficitReportFile.putDoubleWithDecimalsTabs(
+						facility.getSimTime() / 3600,
+						ReportAgent.getReportPrecision(), 1);
+				surplusDeficitReportFile.putStringTabs(facility.getName(), 1);
+				surplusDeficitReportFile.putStringTabs(eachMaterial.getName(), 1);
+				
+				surplusDeficitReportFile.putDoubleWithDecimalsTabs(Tester.min(facility.getStockList().getValueFor(eachMaterial, 2),(facility.getStockList().getValueFor(eachMaterial, 13)))/1000, ReportAgent.getReportPrecision(), 1);
+				surplusDeficitReportFile.putDoubleWithDecimalsTabs((facility.getStockList().getValueFor(eachMaterial, 13)-
+						facility.getStockList().getValueFor(eachMaterial, 4))/1000, ReportAgent.getReportPrecision(), 1);
+				surplusDeficitReportFile.putDoubleWithDecimalsTabs(Tester.max(0.0d,(facility.getStockList().getValueFor(eachMaterial, 2)-facility.getStockList().getValueFor(eachMaterial, 13)))/1000, ReportAgent.getReportPrecision(), 1);
+				surplusDeficitReportFile.putDoubleWithDecimalsTabs((facility.getStockList().getValueFor(eachMaterial, 1)-facility.getStockList().getValueFor(eachMaterial, 3))/1000, ReportAgent.getReportPrecision(), 1);
+				surplusDeficitReportFile.putDoubleWithDecimalsTabs(facility.getStockList().getValueFor(eachMaterial, 3)/1000, ReportAgent.getReportPrecision(), 1);
+				surplusDeficitReportFile.newLine();
+			}
+			surplusDeficitReportFile.flush();
+		}
+
 	}
 	
 	public static void printTransportationCostReport(Route route, BulkMaterial bulkMaterial, double unitCost){

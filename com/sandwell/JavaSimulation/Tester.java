@@ -214,6 +214,16 @@ public class Tester {
 			throw new InputErrorException( "The values must be in the ascending order from " + from + " to " + to + "." );
 		}
 	}
+	
+	public static double max( double... values ) {
+
+		double max = Double.NEGATIVE_INFINITY;
+
+		for( double each : values ) {
+			max = Math.max(max, each);
+		}
+		return max;
+	}
 
 	public static double min( double... values ) {
 

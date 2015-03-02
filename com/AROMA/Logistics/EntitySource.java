@@ -112,7 +112,9 @@ public class EntitySource extends BulkHandlingLinkedEntity {
 		Stockpile stockpile = (Stockpile) this.getOutfeedLinkedEntityList().get(0);
 		double amount = this.getThroughput(startTime, endTime);
 		stockpile.getFacility().getOperationsManager().updateRealizedProduction((BulkMaterial) this.getHandlingEntityTypeList().get(0), amount);
-		
+		stockpile.getFacility().addToStocksList((BulkMaterial) this.getHandlingEntityTypeList().get(0), 2, amount);
+		stockpile.getFacility().addToStocksList((BulkMaterial) this.getHandlingEntityTypeList().get(0), 13, amount);
+				
 		this.scheduleProcess(SimulationManager.getPreviousPlanningTime()-this.getSimTime(), 4, new ReflectionTarget(this, "generate"));
 
 		this.scheduleProcess(SimulationManager.getPlanningHorizon(), 3, new ReflectionTarget(this, "pushSupply",SimulationManager.getPreviousPlanningTime(),SimulationManager.getNextPlanningTime()));

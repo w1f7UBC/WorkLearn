@@ -304,6 +304,7 @@ public class LogisticsEntity extends ReportableEntity {
 				try{
 					((BulkMaterial)this).setInputUnits();
 				}catch (ClassCastException e){}
-		}			
+		}	
+				
 	}
 }
