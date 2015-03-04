@@ -62,9 +62,9 @@ public class DiscreteHandlingLinkedEntity extends LinkedEntity {
 			public int compare(DijkstraComparator o1, DijkstraComparator o2) {
 				return 0;
 			}
-		}, new DescendingPriotityComparator<DiscreteHandlingLinkedEntity>(AROMAEntity.class, "getInternalPriority"));
+		}, new DescendingPriorityComparator<DiscreteHandlingLinkedEntity>(AROMAEntity.class, "getInternalPriority"));
 		//TODO figure out meaning of queued entities for this!
-		queuedEntitiesList = new PriorityQueue<>(new DescendingPriotityComparator<LogisticsEntity>(AROMAEntity.class,"getInternalPriority"));
+		queuedEntitiesList = new PriorityQueue<>(new DescendingPriorityComparator<LogisticsEntity>(AROMAEntity.class,"getInternalPriority"));
 	}
 
 	@Override

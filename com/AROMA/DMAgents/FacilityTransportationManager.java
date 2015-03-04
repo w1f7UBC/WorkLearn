@@ -55,7 +55,7 @@ public class FacilityTransportationManager extends FacilityManager {
 	}
 	
 	public FacilityTransportationManager() {
-		transportationCapacityList = new TwoLinkedLists<>(2, new DescendingPriotityComparator<MovingEntity>(AROMAEntity.class, "getInternalPriority"));
+		transportationCapacityList = new TwoLinkedLists<>(2, new DescendingPriorityComparator<MovingEntity>(AROMAEntity.class, "getInternalPriority"));
 
 		transportersMap = new HashMapList<>(1);
 		unassignedMovingEntityList = new HashMapList<MovingEntity,MovingEntity>(1);

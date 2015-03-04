@@ -25,7 +25,7 @@ public class MarketManager extends AROMAEntity {
 	
 	public MarketManager() {
 		
-		marketsList = new PriorityQueue<>(new AscendingPriotityComparator<Market>(AROMAEntity.class,"getInternalPriority"));
+		marketsList = new PriorityQueue<>(new AscendingPriorityComparator<Market>(AROMAEntity.class,"getInternalPriority"));
 		marketsMap = new HashMapList<BulkMaterial, Market> (1);
 	}
 

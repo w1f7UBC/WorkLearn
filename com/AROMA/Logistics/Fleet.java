@@ -74,7 +74,7 @@ public class Fleet extends LogisticsEntity {
 			allInstances.add(this);
 		}
 		currentFleetList = new ArrayList<>(5);
-		scheduledContracts = new PriorityQueue<>(new DescendingPriotityComparator<Contract>(Contract.class,"getContractPriority",this.getFacility()));
+		scheduledContracts = new PriorityQueue<>(new DescendingPriorityComparator<Contract>(Contract.class,"getContractPriority",this.getFacility()));
 		loadingBayList = new ArrayList<>(1);
 		unloadingBayList = new ArrayList<>(1);
 	}

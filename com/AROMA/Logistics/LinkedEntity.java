@@ -127,12 +127,12 @@ public class LinkedEntity extends LogisticsEntity {
 		}
 		
 		// TODO figure out meaning of entity priority
-		currentlyHandlingList = new TwoLinkedLists<>(2,new DescendingPriotityComparator<LogisticsEntity>(AROMAEntity.class, "getInternalPriority"),0);
+		currentlyHandlingList = new TwoLinkedLists<>(2,new DescendingPriorityComparator<LogisticsEntity>(AROMAEntity.class, "getInternalPriority"),0);
 		entityAmountProcessed = new ArrayList<>(1);
 		
 		originsList = new ArrayList<LinkedEntity>(1);
-		currentOriginList = new ThreeLinkedLists<>(1,new DescendingPriotityComparator<LinkedEntity>(LinkedEntity.class, "getOriginPriority"), new DescendingPriotityComparator<LogisticsEntity>(AROMAEntity.class, "getInternalPriority"));
-		currentDestinationList = new ThreeLinkedLists<>(1,new DescendingPriotityComparator<LinkedEntity>(LinkedEntity.class, "getOriginPriority"), new DescendingPriotityComparator<LogisticsEntity>(AROMAEntity.class, "getInternalPriority"));
+		currentOriginList = new ThreeLinkedLists<>(1,new DescendingPriorityComparator<LinkedEntity>(LinkedEntity.class, "getOriginPriority"), new DescendingPriorityComparator<LogisticsEntity>(AROMAEntity.class, "getInternalPriority"));
+		currentDestinationList = new ThreeLinkedLists<>(1,new DescendingPriorityComparator<LinkedEntity>(LinkedEntity.class, "getOriginPriority"), new DescendingPriorityComparator<LogisticsEntity>(AROMAEntity.class, "getInternalPriority"));
 		prioritizedOriginsList = new ArrayList<>(1);
 		prioritizedDestinationsList = new ArrayList<>(1);				
 

@@ -123,8 +123,8 @@ public class BulkHandlingLinkedEntity extends LinkedEntity {
 		}
 		
 		//TODO figure out meaning of priority for infeed/outfeed and material when multiple entities are handled
-		currentInfeedList = new ThreeLinkedLists<>(1,new DescendingPriotityComparator<BulkHandlingLinkedEntity>(LinkedEntity.class, "getOriginPriority"), new DescendingPriotityComparator<BulkMaterial>(AROMAEntity.class, "getInternalPriority"),0);
-		currentOutfeedList = new ThreeLinkedLists<>(1,new DescendingPriotityComparator<BulkHandlingLinkedEntity>(LinkedEntity.class, "getOriginPriority"), new DescendingPriotityComparator<BulkMaterial>(AROMAEntity.class, "getInternalPriority"),0);
+		currentInfeedList = new ThreeLinkedLists<>(1,new DescendingPriorityComparator<BulkHandlingLinkedEntity>(LinkedEntity.class, "getOriginPriority"), new DescendingPriorityComparator<BulkMaterial>(AROMAEntity.class, "getInternalPriority"),0);
+		currentOutfeedList = new ThreeLinkedLists<>(1,new DescendingPriorityComparator<BulkHandlingLinkedEntity>(LinkedEntity.class, "getOriginPriority"), new DescendingPriorityComparator<BulkMaterial>(AROMAEntity.class, "getInternalPriority"),0);
 	}
 
 	@Override
