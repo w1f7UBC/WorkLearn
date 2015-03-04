@@ -3,6 +3,7 @@ package com.AROMA.Logistics;
 import java.util.ArrayList;
 
 import com.AROMA.DMAgents.SimulationManager;
+import com.jaamsim.basicsim.ErrorException;
 import com.jaamsim.basicsim.ReflectionTarget;
 import com.jaamsim.input.EntityInput;
 import com.jaamsim.input.InputErrorException;
@@ -100,24 +101,24 @@ public class EntitySource extends BulkHandlingLinkedEntity {
 		super.startUp();
 		// TODO make this talk to the generation manager to figure out the
 		// entities to generate
-		this.scheduleProcess(0.0d, 3, new ReflectionTarget(this, "pushSupply",SimulationManager.getPreviousPlanningTime(),this.getSimTime()+SimulationManager.getNextPlanningTime()));
+		this.scheduleProcess(0.0d, 3, new ReflectionTarget(this, "pushSupply"));
 	}
 
 	// /////////////////////////////////////////////////////////////////////////////
 	// MAIN METHODS
 	// /////////////////////////////////////////////////////////////////////////////
-	public void pushSupply(double startTime, double endTime){
+	public void pushSupply(){
 		generatedAmountThisPeriod = 0.0d;
 		
 		Stockpile stockpile = (Stockpile) this.getOutfeedLinkedEntityList().get(0);
-		double amount = this.getThroughput(startTime, endTime);
+		double amount = this.getThroughput(SimulationManager.getLastPlanningTime(),SimulationManager.getNextPlanningTime());
 		stockpile.getFacility().getOperationsManager().updateRealizedProduction((BulkMaterial) this.getHandlingEntityTypeList().get(0), amount);
 		stockpile.getFacility().addToStocksList((BulkMaterial) this.getHandlingEntityTypeList().get(0), 2, amount);
 		stockpile.getFacility().addToStocksList((BulkMaterial) this.getHandlingEntityTypeList().get(0), 13, amount);
 				
-		this.scheduleProcess(SimulationManager.getPreviousPlanningTime()-this.getSimTime(), 4, new ReflectionTarget(this, "generate"));
+		this.scheduleProcess(this.getSimTime(), 4, new ReflectionTarget(this, "generate"));
 
-		this.scheduleProcess(SimulationManager.getPlanningHorizon(), 3, new ReflectionTarget(this, "pushSupply",SimulationManager.getPreviousPlanningTime(),SimulationManager.getNextPlanningTime()));
+		this.scheduleProcess(SimulationManager.getPlanningHorizon(), 3, new ReflectionTarget(this, "pushSupply"));
 
 	}
 	
@@ -173,6 +174,11 @@ public class EntitySource extends BulkHandlingLinkedEntity {
 	 */
 	public double getThroughput(double startTime, double endTime){
 
+		if(Tester.greaterCheckTimeStep(endTime, throughput.getValue().getMaxTimeValue()))
+			throw new ErrorException("the throughput time series defined for %s in facility %s includes production levels until"
+					+ "%f. Try was made to check production level until %f!", 
+					this.getName(), this.getName(), throughput.getValue().getMaxTimeValue(),endTime);
+		
 		double timeSlot, currentTime, nextTime;
 		currentTime = startTime/3600.0d;
 		double tempThroughput = 0.0d;

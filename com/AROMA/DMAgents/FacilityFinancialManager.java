@@ -123,7 +123,7 @@ public class FacilityFinancialManager extends FacilityManager {
 		revenue = (1-this.getFacility().getProfitMargin()) *((expectedPrimaryProductPrice -
 						processingRoute.getProcessor().getVariableCost(processingRoute.getProcessor().getPrimaryProduct()))-
 				//TODO use more generic definition for fixed cost (e.g. adding individual processes fixed costs)
-						this.getFacility().getFixedCost(SimulationManager.getPreviousPlanningTime(), SimulationManager.getNextPlanningTime())/
+						this.getFacility().getFixedCost(SimulationManager.getLastPlanningTime(), SimulationManager.getNextPlanningTime())/
 						this.getFacility().getStockList().getValueFor(processingRoute.getProcessor().getPrimaryProduct(), 2));
 		
 		return revenue;

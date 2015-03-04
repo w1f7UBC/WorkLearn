@@ -55,7 +55,7 @@ public class SimulationManager extends DisplayEntity {
 		example = "Temiscaming TimeStep { 1 d }")
 	private static final ValueInput timeStep;
 	
-	private static double previousPlanningTime, nextPlanningTime;
+	private static double lastPlanningTime, nextPlanningTime;
 	
 	protected static FileEntity contractsReportFile;      
 	protected static FileEntity transportReportFile;      
@@ -144,7 +144,7 @@ public class SimulationManager extends DisplayEntity {
 	}
 	
 	public void updatePlanningTimes(){
-		previousPlanningTime = this.getSimTime();
+		lastPlanningTime = this.getSimTime();
 		nextPlanningTime = this.getSimTime() + SimulationManager.getPlanningHorizon();
 		
 		// remove the removable layers and empty the list
@@ -169,8 +169,8 @@ public class SimulationManager extends DisplayEntity {
 		return timeStep.getValue();
 	}
 	
-	public static double getPreviousPlanningTime(){
-		return previousPlanningTime;
+	public static double getLastPlanningTime(){
+		return lastPlanningTime;
 	}
 	
 	public static double getNextPlanningTime(){

@@ -69,7 +69,7 @@ public class FacilityOperationsManager extends FacilityManager {
 		super.startUp();
 		this.scheduleProcess(0.0d, 1, new ReflectionTarget(this, "resetPlannedStocks"));
 		this.scheduleProcess(0.0d, 2, new ReflectionTarget(this, "planProduction"));
-		this.scheduleProcess(0.0d, 20, new ReflectionTarget(this, "printSurplusDeficitReport"));
+		this.scheduleProcess(0.0d, 8, new ReflectionTarget(this, "printSurplusDeficitReport"));
 		
 	}
 	
@@ -93,7 +93,7 @@ public class FacilityOperationsManager extends FacilityManager {
 	
 	public void printSurplusDeficitReport(){
 		SimulationManager.printSurplusDeficitReport(this.getFacility());
-		this.scheduleProcess(SimulationManager.getPlanningHorizon(), 20, new ReflectionTarget(this, "printSurplusDeficitReport"));
+		this.scheduleProcess(SimulationManager.getPlanningHorizon(), 8, new ReflectionTarget(this, "printSurplusDeficitReport"));
 
 	}
 	
@@ -528,7 +528,7 @@ public class FacilityOperationsManager extends FacilityManager {
 					LinkedList<ProcessingRoute> tempList = this.getChainProcessingRoutes(eachOutfeed,false);
 					while(!tempList.isEmpty())
 						this.planProduction(tempList.pollLast(),
-							SimulationManager.getPreviousPlanningTime(),SimulationManager.getNextPlanningTime());
+							SimulationManager.getLastPlanningTime(),SimulationManager.getNextPlanningTime());
 				}
 			}
 		}
