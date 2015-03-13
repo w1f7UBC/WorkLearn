@@ -16,6 +16,7 @@ public class ProcessingRoute extends LogisticsEntity {
 	private ArrayList<Stockpile> outfeedPiles;
 	private ArrayList<BulkMaterial> infeedMaterial;
 	private ArrayList<BulkMaterial> outfeedMaterial;
+	private double lastPlannedTime;
 
 	private boolean active;
 	private BulkMaterialProcessor processor;
@@ -23,6 +24,7 @@ public class ProcessingRoute extends LogisticsEntity {
 	private int connectedSegmentsCount;
 	
 	public ProcessingRoute(LinkedList<LinkedEntity> list, BulkHandlingLinkedEntity activeEquipment) {
+		lastPlannedTime = -1;
 		infeedPiles = new ArrayList<>(1);
 		outfeedPiles = new ArrayList<>(1);
 		infeedMaterial = new ArrayList<>(1);
@@ -103,6 +105,14 @@ public class ProcessingRoute extends LogisticsEntity {
 			denominator = processor.getOutfeedRate(baseBulkMaterial);
 		
 		return Tester.lessOrEqualCheckTolerance(denominator, 0.0d)? 0.0d : numerator / denominator;
+	}
+	
+	public double getLastPlannedTime(){
+		return lastPlannedTime;
+	}
+	
+	public void setLastPlannedTime(double lastPlannedTime){
+		this.lastPlannedTime = lastPlannedTime;
 	}
 	
 	public ArrayList<Stockpile> getInfeedPiles() {

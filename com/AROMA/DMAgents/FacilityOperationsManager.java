@@ -519,16 +519,17 @@ public class FacilityOperationsManager extends FacilityManager {
 	 * plans production for all processing routes. It should be run after resetplannedstocks method.
 	 */
 	public void planProduction(){
-
+		
 		for (BulkMaterial eachOutfeed: processingRoutesListOutfeed.getKeys()) {
 			// if there is a throughput file defined for this outfeed, plan production for the whole chain based on the throuhput schedule of the last outfeed in the chain
 			// TODO check to see if this actually adds throughput and target demand for the processors that outfeed multiple processing routes
 			for (ProcessingRoute processingRoute: processingRoutesListOutfeed.get(eachOutfeed)) {
-				if (processingRoute.getProcessor().throughputIsDefined()) {
-					LinkedList<ProcessingRoute> tempList = this.getChainProcessingRoutes(eachOutfeed,false);
-					while(!tempList.isEmpty())
-						this.planProduction(tempList.pollLast(),
-							SimulationManager.getLastPlanningTime(),SimulationManager.getNextPlanningTime());
+				// get the forward and backward processing route and plan from the end (usefule if it's a middle product)
+				LinkedList<ProcessingRoute> tempList = this.getChainProcessingRoutes(eachOutfeed,false);
+				tempList.addAll(this.getChainProcessingRoutes(eachOutfeed,true));
+				while(!tempList.isEmpty()){
+					this.planProduction(tempList.pollLast(),
+						SimulationManager.getLastPlanningTime(),SimulationManager.getNextPlanningTime());
 				}
 			}
 		}
@@ -541,9 +542,21 @@ public class FacilityOperationsManager extends FacilityManager {
 	 * processing routes based on the throughput of the production driving product.  
 	 */
 	public void planProduction(ProcessingRoute processingRoute, double startTime, double endTime){
-		// TODO assuming mutually exclusive processing routes have the same throughput capacity
+		// TODO assuming mutually exclusive processing routes use the same throughput schedule
+		if(processingRoute.getLastPlannedTime() == this.getSimTime())
+			return;
+		
 		double throughput = processingRoute.getProcessor().getThroughput(startTime,endTime);
 		double tempAmount;
+		
+		//TODO all logic assumes that mutually exclusive processes have the same outfeed with similar rates
+		for (BulkMaterial eachMaterial : processingRoute.getOutfeedMaterial()) {
+			tempAmount = processingRoute.getCapacityRatio(eachMaterial,
+					processingRoute.getProcessor().getPrimaryProduct()) * throughput;
+			this.getFacility().addToStocksList(eachMaterial, 2, tempAmount);
+			//set purchase price 0
+			this.getFacility().setStocksList(eachMaterial, 10, 0.0d);
+		}
 		if(this.getMutuallyExclusiveProcesses(processingRoute.getProcessor()).isEmpty()){
 			for (BulkMaterial eachMaterial : processingRoute.getInfeedMaterial()) {
 				tempAmount = processingRoute.getCapacityRatio(eachMaterial,
@@ -552,16 +565,8 @@ public class FacilityOperationsManager extends FacilityManager {
 				this.getFacility().addToStocksList(eachMaterial, 3, tempAmount);
 				//set purchase price 0
 				this.getFacility().setStocksList(eachMaterial, 10, 0.0d);
-			}
-			//TODO all logic assumes that mutually exclusive processes have the same outfeed with similar rates
-			for (BulkMaterial eachMaterial : processingRoute.getOutfeedMaterial()) {
-				tempAmount = processingRoute.getCapacityRatio(eachMaterial,
-						processingRoute.getProcessor().getPrimaryProduct()) * throughput;
-				this.getFacility().addToStocksList(eachMaterial, 2, tempAmount);
-				//set purchase price 0
-				this.getFacility().setStocksList(eachMaterial, 10, 0.0d);
-			}
-			
+			}	
+			processingRoute.setLastPlannedTime(this.getSimTime());
 		}else{
 			
 			//TODO assumes infeeds for mutually exclusive processes are completely different
@@ -574,17 +579,8 @@ public class FacilityOperationsManager extends FacilityManager {
 					this.getFacility().addToStocksList(eachMaterial, 3, tempAmount);
 					//set sell price 0
 					this.getFacility().setStocksList(eachMaterial, 10, 0.0d);
-				}
-				//TODO all logic assumes that mutually exclusive processes have the same outfeed with similar throughputs and outfeed (won't allow different 
-				// outputs for different mutually exclusive processes
-				for (BulkMaterial eachMaterial : eachProcessor.getOutfeedMaterial()) {
-					tempAmount = eachProcessor.getCapacityRatio(eachMaterial,
-							eachProcessor.getProcessor().getPrimaryProduct()) * throughput;
-					this.getFacility().setStocksList(eachMaterial, 2, tempAmount);
-					//set sell price 0
-					this.getFacility().setStocksList(eachMaterial, 10, 0.0d);
-				}
-				
+				}	
+				eachProcessor.setLastPlannedTime(this.getSimTime());
 			}
 		}
 		
