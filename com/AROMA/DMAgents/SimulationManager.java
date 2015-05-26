@@ -98,7 +98,7 @@ public class SimulationManager extends DisplayEntity {
 		super.validate();
 		
 		//TODO bad implementation for showing facilities with different color. refactor when overriding shapefile based on input is figured out
-		if(WorldWindFrame.AppFrame != null){
+		if(WorldWindFrame.AppFrame != null && Facility.getAll().get(0).getShapeFileQuery() != null){
 			//Populate colors list
 			HashMapList<Color4d, Facility> colorScheme = new HashMapList<Color4d, Facility>();
 			for(Facility facility: Facility.getAll()){
@@ -114,6 +114,7 @@ public class SimulationManager extends DisplayEntity {
 
 			}
 			Facility.getAll().get(0).getShapeFileQuery().updatePosition(Facility.getAll());
+			
     	}
 	}
 	
