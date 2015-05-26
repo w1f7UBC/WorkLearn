@@ -264,13 +264,13 @@ public class MovingEntity extends LogisticsEntity {
 		
 		traveling = false;
 		headRoute.finishProcessingEntity(this);
-		DiscreteHandlingLinkedEntity retriggeredRoute = headRoute;	
-		if (!traveling && plannedNextRouteSegments != null && !plannedNextRouteSegments.isEmpty()){
+			
+		if (plannedNextRouteSegments != null && !plannedNextRouteSegments.isEmpty()){
 			((DiscreteHandlingLinkedEntity) plannedNextRouteSegments.get(0)).addToQueuedEntityList(this);
 		}
 		
-		if(!retriggeredRoute.isTriggered() && !retriggeredRoute.getQueuedEntitiesList().isEmpty())
-			this.startProcess("startProcessingQueuedEntities");
+		if(!this.getHeadRoute().isTriggered() && !this.getHeadRoute().getQueuedEntitiesList().isEmpty())
+			this.getHeadRoute().startProcess("startProcessingQueuedEntities");
 			
 		travelingProcess = null;
 	}
